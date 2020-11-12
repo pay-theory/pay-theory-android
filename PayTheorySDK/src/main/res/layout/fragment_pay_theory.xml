@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:id="@+id/PayTheoryFragment">
+
+    <com.example.paytheorylibrarysdk.FirstNameEditText
+        android:id="@+id/firstNameEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="First name"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.LastNameEditText
+        android:id="@+id/lastNameEditText"
+
+
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:hint="Last name" />
+
+    <com.example.paytheorylibrarysdk.AddressOneEditText
+        android:id="@+id/addressOneEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Address"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.AddressTwoEditText
+        android:id="@+id/addressTwoEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Address Cont."
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.PhoneNumberEditText
+        android:id="@+id/phoneNumberEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Phone number"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.CountryEditText
+        android:id="@+id/countryEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Country (ex: USA)"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.EmailAddressEditText
+        android:id="@+id/emailAddressEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Email address"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.CityEditText
+        android:id="@+id/cityEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="City"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.ZipEditText
+        android:id="@+id/zipEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Card zipcode"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.StateEditText
+        android:id="@+id/stateEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="State (ex: OH)"
+        android:inputType="text" />
+
+    <!--    <com.example.paytheorylibrarysdk.CustomTagsEditText-->
+    <!--        android:id="@+id/customTagsEditText"-->
+    <!--        android:inputType="text"-->
+    <!--        android:layout_width="375dp"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:layout_marginStart="175dp"-->
+    <!--        android:layout_marginLeft="175dp"-->
+    <!--        android:layout_marginTop="233dp"-->
+    <!--        android:layout_marginEnd="179dp"-->
+    <!--        android:layout_marginRight="179dp"-->
+    <!--        android:layout_marginBottom="479dp"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+    <com.example.paytheorylibrarysdk.CreditCardEditText
+        android:id="@+id/creditCardEditText"
+
+
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+
+        android:digits="1234567890"
+        android:hint="Card number"
+        android:inputType="number" />
+
+    <com.example.paytheorylibrarysdk.CVVEditText
+        android:id="@+id/cvvEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="CVV (ex:123)"
+        android:inputType="text" />
+
+    <!--    <com.example.paytheorylibrarysdk.ExpEditText-->
+    <!--        android:id="@+id/expEditText"-->
+    <!--        android:inputType="text"-->
+    <!--        android:layout_width="375dp"-->
+    <!--        android:layout_height="50dp"-->
+
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <com.example.paytheorylibrarysdk.ExpMonthText
+        android:id="@+id/expirationMonthEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Expiration month (ex: 04)"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.ExpYearText
+        android:id="@+id/expirationYearEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Expiration year (ex: 2024)"
+        android:inputType="text" />
+
+    <com.example.paytheorylibrarysdk.AmountEditText
+        android:id="@+id/amountEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Payment amount"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/responseText"
+
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="Results"
+        android:text="Results:"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="Submit Payment" />
+
+</LinearLayout>
