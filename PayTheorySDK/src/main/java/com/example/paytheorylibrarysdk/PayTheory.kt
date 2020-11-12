@@ -67,15 +67,9 @@ class PayTheory(
 
 
 
-
-
-
-
     /**
      * initPayment() - Method called from PayTheory Object that initializes the transaction
      */
-
-    //During init call api to get finix credentials
     fun initPayment() {
         Log.e(
                 "PTLib", "Init Payment Started: \nContext = $context \nAPI Key = $apiKey" +
@@ -96,33 +90,6 @@ class PayTheory(
         if (validation(this.cardNumber.toString())) {
 
             challenge()
-
-
-//            authentication("12345")
-
-
-//                if (authentication("12345") == ""){
-//                    Log.e("PTLib", "authentication failed")
-//                }
-//                else {
-//                    Log.e("PTLib", "authentication complete $authResult")
-//                }
-//
-
-
-//            if (kms()) {
-//                Log.e("PTLib", "KMS SUCCESS")
-//            }
-//            else {
-//                Log.e("PTLib", "KMS Failed")
-//            }
-//
-//            if (idempotency()) {
-//                Log.e("PTLib", "idempotency SUCCESS")
-//            }
-//            else {
-//                Log.e("PTLib", "idempotency Failed")
-//            }
 
 
 //TODO
@@ -175,8 +142,6 @@ class PayTheory(
      * authentication() - Method called to start authentication
      */
     private fun authentication(nonce: String) {
-
-
         //Call google play services to verify google play is available
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
             Log.e("PT-Lib", "Google Play Service Available.")
@@ -190,8 +155,6 @@ class PayTheory(
                     "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
             )   //TODO - remove api key and hide it
                     .addOnSuccessListener(Activity()) {
-
-
                         // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
                         val response = it.jwsResult
 
@@ -222,10 +185,6 @@ class PayTheory(
             Log.e("PT-Lib", "Update Google Play services.")
 
         }
-        //Create Nonce
-//        val nonce = (java.util.UUID.randomUUID().toString() + idempotency + paymentAmount).toByteArray()
-//        Log.e("PTLib", "Nonce: $nonce")
-
     }
 
     private fun payTheoryIdempotency(nonce: String, attestation: String) {
