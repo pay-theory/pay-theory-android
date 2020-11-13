@@ -1,4 +1,4 @@
-package com.example.paytheorylibrarysdk
+package com.example.paytheorylibrarysdk.paytheory
 
 
 import android.app.Activity
@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Looper
 import android.util.Log
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import com.amazonaws.auth.BasicSessionCredentials
@@ -56,7 +57,8 @@ class PayTheory(
         private val city: String?,
         private val zipCode: String,
         private val state: String?,
-        private val customTags: String?
+        private val customTags: String?,
+        private val resultView: TextView
 ) {
 
 
@@ -66,23 +68,22 @@ class PayTheory(
     private var result = ""
 
 
-
     /**
      * initPayment() - Method called from PayTheory Object that initializes the transaction
      */
     fun initPayment() {
         Log.e(
-                "PTLib", "Init Payment Started: \nContext = $context \nAPI Key = $apiKey" +
-                "\nPayment Amount = $paymentAmount\nCard Number = $cardNumber\nCVV = $cvv " +
-                "\nExpiration Month = $expirationMonth \nExpiration Year = $expirationYear\n" +
-                "First Name = $firstName \nLast Name = $lastName\n" +
-                "Address One = $addressOne\n" +
-                "Address Two = $addressTwo\n" +
-                "Phone Number = $phoneNumber\n" +
-                "Country = $country\n" +
-                "Email Address = $emailAddress\n" +
-                "City = $city\n" +
-                "Zip Code = $zipCode \nState = $state \nCustom Tags = $customTags"
+            "PTLib", "Init Payment Started: \nContext = $context \nAPI Key = $apiKey" +
+                    "\nPayment Amount = $paymentAmount\nCard Number = $cardNumber\nCVV = $cvv " +
+                    "\nExpiration Month = $expirationMonth \nExpiration Year = $expirationYear\n" +
+                    "First Name = $firstName \nLast Name = $lastName\n" +
+                    "Address One = $addressOne\n" +
+                    "Address Two = $addressTwo\n" +
+                    "Phone Number = $phoneNumber\n" +
+                    "Country = $country\n" +
+                    "Email Address = $emailAddress\n" +
+                    "City = $city\n" +
+                    "Zip Code = $zipCode \nState = $state \nCustom Tags = $customTags"
         )
 
 
@@ -108,9 +109,9 @@ class PayTheory(
 
     private fun challenge() {
         val request = Request.Builder()
-                .url("https://dev.tags.api.paytheorystudy.com/challenge")
-                .header("X-API-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-                .build()
+            .url("https://dev.tags.api.paytheorystudy.com/challenge")
+            .header("X-API-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+            .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
@@ -143,7 +144,9 @@ class PayTheory(
      */
     private fun authentication(nonce: String) {
         //Call google play services to verify google play is available
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+        if (GoogleApiAvailability.getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        ) {
             Log.e("PT-Lib", "Google Play Service Available.")
 
 //            var safetyNetResponse = SafetyNet.getClient(context).attest(nonce.toByteArray(), "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo")
@@ -151,34 +154,34 @@ class PayTheory(
 //            Log.e("PTLib", "SafetyNet Response: ${safetyNetResponse.result.jwsResult}")
 
             SafetyNet.getClient(context).attest(
-                    nonce.toByteArray(),
-                    "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
+                nonce.toByteArray(),
+                "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
             )   //TODO - remove api key and hide it
-                    .addOnSuccessListener(Activity()) {
-                        // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
-                        val response = it.jwsResult
+                .addOnSuccessListener(Activity()) {
+                    // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
+                    val response = it.jwsResult
 
-                        Log.e("PTLib", "SafetyNet Response: $response")
+                    Log.e("PTLib", "SafetyNet Response: $response")
 
 //                        Log.e("PTLib", "Attestation Response Status: ${payTheoryAttest(response)}")
-                        //TODO - Send the JWS object back to your server for validation and use using a secure connection.
-                        payTheoryIdempotency(nonce, response)
-                    }
-                    .addOnFailureListener(Activity()) { e ->
-                        // An error occurred while communicating with the service.
-                        if (e is ApiException) {
-                            // An error with the Google Play services API contains some additional details.
-                            val apiException = e as ApiException
-                            Log.e("PTLib", "Api Exception Error: $apiException")
+                    //TODO - Send the JWS object back to your server for validation and use using a secure connection.
+                    payTheoryIdempotency(nonce, response)
+                }
+                .addOnFailureListener(Activity()) { e ->
+                    // An error occurred while communicating with the service.
+                    if (e is ApiException) {
+                        // An error with the Google Play services API contains some additional details.
+                        val apiException = e as ApiException
+                        Log.e("PTLib", "Api Exception Error: $apiException")
 
-                            // You can retrieve the status code using the apiException.statusCode property.
-                        } else {
-                            // A different, unknown type of error occurred.
-                            Log.e("PTLib", "Unknown Error: " + e.message)
-
-                        }
+                        // You can retrieve the status code using the apiException.statusCode property.
+                    } else {
+                        // A different, unknown type of error occurred.
+                        Log.e("PTLib", "Unknown Error: " + e.message)
 
                     }
+
+                }
 
         } else {
             // Prompt user to update Google Play services.
@@ -207,10 +210,10 @@ class PayTheory(
         val body = jsonObject.toString().toRequestBody(mediaType)
 
         val request = Request.Builder()
-                .method("POST", body)
-                .url("https://dev.tags.api.paytheorystudy.com/idempotency")
-                .addHeader("x-api-key", apiKey)
-                .build()
+            .method("POST", body)
+            .url("https://dev.tags.api.paytheorystudy.com/idempotency")
+            .addHeader("x-api-key", apiKey)
+            .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
@@ -230,7 +233,10 @@ class PayTheory(
                         }
                         val jsonData: String? = response.body?.string()
                         val payTheoryIdempotencyJSONResponse = JSONObject(jsonData)
-                        Log.e("PTLib", "payTheoryIdempotencyJSONResponse $payTheoryIdempotencyJSONResponse")
+                        Log.e(
+                            "PTLib",
+                            "payTheoryIdempotencyJSONResponse $payTheoryIdempotencyJSONResponse"
+                        )
                         val signature = payTheoryIdempotencyJSONResponse.getString("signature")
                         val response = payTheoryIdempotencyJSONResponse.getString("response")
                         val credId = payTheoryIdempotencyJSONResponse.getString("credId")
@@ -244,7 +250,8 @@ class PayTheory(
                         Log.e("PTLib", "credArray[0] ${credArray[0]}")
                         Log.e("PTLib", "credArray[0] ${credArray[1]}")
                         Log.e("PTLib", "credArray[0] ${credArray[2]}")
-                        var awsCreds = BasicSessionCredentials(credArray[0], credArray[1], credArray[2])
+                        var awsCreds =
+                            BasicSessionCredentials(credArray[0], credArray[1], credArray[2])
 
                         var kmsClient = AWSKMSClient(awsCreds)
                         var decryptRequest = DecryptRequest()
@@ -253,7 +260,11 @@ class PayTheory(
 
                         decryptRequest.encryptionAlgorithm = "RSAES_OAEP_SHA_256"
                         decryptRequest.keyId = "c731e986-c849-4534-9367-a004f6ca272c"
-                        decryptRequest.withCiphertextBlob(ByteBuffer.wrap(Base64.getDecoder().decode(response)))
+                        decryptRequest.withCiphertextBlob(
+                            ByteBuffer.wrap(
+                                Base64.getDecoder().decode(response)
+                            )
+                        )
 
                         val decryptResponse = kmsClient.decrypt(decryptRequest)
 
@@ -271,7 +282,8 @@ class PayTheory(
                         Log.e("PTLib", "decryptResponse.plaintext $converted")
                         Log.e("PTLib", "decryptResponse $decryptResponse")
 
-                        val signatureBuff3 = (ByteBuffer.wrap(Base64.getDecoder().decode(signature)))
+                        val signatureBuff3 =
+                            (ByteBuffer.wrap(Base64.getDecoder().decode(signature)))
                         val responseBuff3 = (ByteBuffer.wrap(Base64.getDecoder().decode(response)))
 
                         var verifyRequest = VerifyRequest()
@@ -279,7 +291,8 @@ class PayTheory(
                         verifyRequest.keyId = "9c25fd5d-fd5e-4f02-83ce-a981f1824c4f" //hard coded
                         verifyRequest.signature = signatureBuff3 // 64 to bytebuffer
                         verifyRequest.messageType = "RAW"
-                        verifyRequest.message = responseBuff3 //idempotency response // 64 to bytebuffer
+                        verifyRequest.message =
+                            responseBuff3 //idempotency response // 64 to bytebuffer
                         verifyRequest.signingAlgorithm = "ECDSA_SHA_384"
 
                         val verifiedResponse = kmsClient.verify(verifyRequest)
@@ -293,7 +306,17 @@ class PayTheory(
 //                        )
 
                         Looper.prepare()
-                        confirmAlert(amount.toInt(), convenienceFee, cardBrand, cardNumber, context, token, merchant,currency, idempotency)
+                        confirmAlert(
+                            amount.toInt(),
+                            convenienceFee,
+                            cardBrand,
+                            cardNumber,
+                            context,
+                            token,
+                            merchant,
+                            currency,
+                            idempotency
+                        )
                         Looper.loop()
 
 
@@ -386,21 +409,28 @@ class PayTheory(
      * confirmAlert() - Method called to allow user to confirm or cancel transaction initialization
      */
     private fun confirmAlert(
-            paymentAmount: Int, convenienceFee: String,
-            cardBrand: String, cardNumber: Long, context: Context, token: String, merchantId: String, currency: String, idempotency: String
+        paymentAmount: Int,
+        convenienceFee: String,
+        cardBrand: String,
+        cardNumber: Long,
+        context: Context,
+        token: String,
+        merchantId: String,
+        currency: String,
+        idempotency: String
     ) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Confirm")
         builder.setMessage(
-                "Are you sure you want to make a payment of $${paymentAmount.toDouble() / 100}, including a fee of $${convenienceFee.toDouble() / 100} on $cardBrand card beginning with ${
-                    cardNumber.toString().take(6)
-                }"
+            "Are you sure you want to make a payment of $${paymentAmount.toDouble() / 100}, including a fee of $${convenienceFee.toDouble() / 100} on $cardBrand card beginning with ${
+                cardNumber.toString().take(6)
+            }"
         )
         builder.setPositiveButton("YES") { dialog, which ->
             dialog.dismiss()
             Log.e(
-                    "PTLib",
-                    "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
+                "PTLib",
+                "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
             )
 
             transact(token, merchantId, currency, idempotency)
@@ -426,7 +456,7 @@ class PayTheory(
         alertDialog.setTitle("Alert")
         alertDialog.setMessage("Cancelled transaction")
         alertDialog.setButton(
-                AlertDialog.BUTTON_NEUTRAL, "OK"
+            AlertDialog.BUTTON_NEUTRAL, "OK"
         ) { dialog, which -> dialog.dismiss() }
         alertDialog.show()
         return "Payment Cancelled"
@@ -478,7 +508,7 @@ class PayTheory(
             if (idempotency != null) {
                 val identityTagsJsonObject = JSONObject()
                 identityTagsJsonObject.put("key", "pt-platform:android $idempotency")
-                entityJSONObject.put("entity" , personalAddressJsonObject)
+                entityJSONObject.put("entity", personalAddressJsonObject)
 
 //            identityJsonObject.put("tags", idempotency)
                 identityJsonObject.put("tags", identityTagsJsonObject)
@@ -489,17 +519,18 @@ class PayTheory(
             e.printStackTrace()
         }
 
-        val identityBody = identityJsonObject.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+        val identityBody = identityJsonObject.toString()
+            .toRequestBody("application/json; charset=utf-8".toMediaType())
         Log.e("PT-Lib", "Identity Call JSON body : $identityJsonObject")
 
         val authRequest = Request.Builder()
-                .method("POST", identityBody)
-                .header(
-                        "Authorization",
-                        "Basic $token"
-                )
-                .url("https://finix.sandbox-payments-api.com/identities")
-                .build()
+            .method("POST", identityBody)
+            .header(
+                "Authorization",
+                "Basic $token"
+            )
+            .url("https://finix.sandbox-payments-api.com/identities")
+            .build()
 
 
         val identityResponse = client.newCall(authRequest).execute()
@@ -514,8 +545,8 @@ class PayTheory(
             val paymentJsonObject = JSONObject()
             try {
                 paymentJsonObject.put(
-                        "identity",
-                        "${identityJsonResponse.getString("id")}"
+                    "identity",
+                    "${identityJsonResponse.getString("id")}"
                 )
                 paymentJsonObject.put("expiration_month", "$expirationMonth")
                 paymentJsonObject.put("expiration_year", "$expirationYear")
@@ -525,18 +556,19 @@ class PayTheory(
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
-            val paymentBody = paymentJsonObject.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+            val paymentBody = paymentJsonObject.toString()
+                .toRequestBody("application/json; charset=utf-8".toMediaType())
             Log.e("PT-Lib", "Payment Card Call JSON body : $paymentJsonObject")
 
 
             val request = Request.Builder()
-                    .method("POST", paymentBody)
-                    .header(
-                            "Authorization",
-                            "Basic $token"
-                    )
-                    .url("https://finix.sandbox-payments-api.com/payment_instruments")
-                    .build()
+                .method("POST", paymentBody)
+                .header(
+                    "Authorization",
+                    "Basic $token"
+                )
+                .url("https://finix.sandbox-payments-api.com/payment_instruments")
+                .build()
             val response = client.newCall(request).execute()
             val paymentJsonData: String? = response.body?.string()
             val paymentJsonResponse = JSONObject(paymentJsonData)
@@ -550,8 +582,8 @@ class PayTheory(
                 val authJsonObject = JSONObject()
                 try {
                     authJsonObject.put(
-                            "source",
-                            "${paymentJsonResponse.getString("id")}"
+                        "source",
+                        "${paymentJsonResponse.getString("id")}"
                     )
                     authJsonObject.put("merchant_identity", merchantId)
                     authJsonObject.put("amount", amountInCents)
@@ -561,17 +593,18 @@ class PayTheory(
                     e.printStackTrace()
                 }
 
-                val authBody = authJsonObject.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+                val authBody = authJsonObject.toString()
+                    .toRequestBody("application/json; charset=utf-8".toMediaType())
                 Log.e("PT-Lib", "Authorization Call JSON body : $authJsonObject")
 
                 val request = Request.Builder()
-                        .method("POST", authBody)
-                        .header(
-                                "Authorization",
-                                "Basic $token"
-                        )
-                        .url("https://finix.sandbox-payments-api.com/authorizations")
-                        .build()
+                    .method("POST", authBody)
+                    .header(
+                        "Authorization",
+                        "Basic $token"
+                    )
+                    .url("https://finix.sandbox-payments-api.com/authorizations")
+                    .build()
 
                 val authResponse = client.newCall(request).execute()
                 val jsonData: String? = authResponse.body?.string()
@@ -592,41 +625,43 @@ class PayTheory(
                     }
 
                     val capAuthBody =
-                            capAuthJsonObject.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+                        capAuthJsonObject.toString()
+                            .toRequestBody("application/json; charset=utf-8".toMediaType())
                     Log.e("PT-Lib", "JSON body : $capAuthJsonObject")
 
                     val request = Request.Builder()
-                            .method("PUT", capAuthBody)
-                            .header(
-                                    "Authorization",
-                                    "Basic $token"
-                            )
-                            .url(
-                                    "https://finix.sandbox-payments-api.com/authorizations/${
-                                        authJSONResponse.getString(
-                                                "id"
-                                        )
-                                    }"
-                            )
-                            .build()
+                        .method("PUT", capAuthBody)
+                        .header(
+                            "Authorization",
+                            "Basic $token"
+                        )
+                        .url(
+                            "https://finix.sandbox-payments-api.com/authorizations/${
+                                authJSONResponse.getString(
+                                    "id"
+                                )
+                            }"
+                        )
+                        .build()
                     val capAuthResponse = client.newCall(request).execute()
                     val jsonData: String? = capAuthResponse.body?.string()
                     val capAuthJSONResponse = JSONObject(jsonData)
 
                     //check if payment was complete or denied
                     if (capAuthJSONResponse.getString("state") == "SUCCEEDED") {
+
                         Log.e("PT-Lib", "Request Succeeded")
                         Log.e(
-                                "PT-Lib",
-                                "Authorization Capture Body: $capAuthJSONResponse"
+                            "PT-Lib",
+                            "Authorization Capture Body: $capAuthJSONResponse"
                         )
 //                            val status = capAuthJSONResponse.getString("state")
 //                            val paymentAmount = (capAuthJSONResponse.getString("amount")
 //                                .toDouble()) / 100
+                        val status = capAuthJSONResponse.getString("state")
 
-                       this.result = capAuthJSONResponse.toString()
-//                        setNewText("Payment Complete:\nStatus: $status\nPayment Amount: $$paymentAmount", resultView)
-//                        makeToast(paymentAmount, status, context)
+                        this.result = capAuthJSONResponse.toString()
+
 
                         //TODO
 //                            printToMain(capAuthJSONResponse, context)
@@ -644,6 +679,8 @@ class PayTheory(
         }
 //                        return "No Results"
 
+//        setNewText("Payment Complete:\nPayment Amount: $$paymentAmount", resultView)
+//        makeToast(paymentAmount.toDouble(), "Complete", context)
 
     }
 
@@ -668,18 +705,34 @@ class PayTheory(
             alertDialog.setTitle("Alert")
             alertDialog.setMessage("$cardNumber is an invalid credit card number")
             alertDialog.setButton(
-                    AlertDialog.BUTTON_NEUTRAL, "OK"
+                AlertDialog.BUTTON_NEUTRAL, "OK"
             ) { dialog, which -> dialog.dismiss() }
             alertDialog.show()
             false
         }
     }
-
-
 }
 
-
-
+//fun updateResult(){
+//    Thread.sleep(15000)
+//    resultView.text = "Payment Complete: $paymentAmount"
+//}
+//
+//}
+//
+//
+//private fun setNewText(input: String, resultView: TextView) {
+//
+//    val currentResponseText = resultView.text.toString() + "\n" + input
+//    resultView.text = currentResponseText
+//}
+//
+//private fun makeToast(paymentAmount: Double, status: String, context: Context) {
+//    Looper.prepare()
+//    Toast.makeText(context, "Payment Complete: \nAmount: $$paymentAmount \nStatus: $status", Toast.LENGTH_LONG).show()
+//    Looper.loop();
+//
+//}
 
 
 //    fun getResult(): String{
@@ -689,7 +742,18 @@ class PayTheory(
 
 //TODO - CREATE A METHOD TO PRINT TO MAIN ACTIVITY
 //private fun printToMain(capAuthJSONResponse: JSONObject, context: Context){
-//        Toast.makeText(context,"$capAuthJSONResponse",Toast.LENGTH_SHORT).show();
+//    val builder = AlertDialog.Builder(context)
+//    builder.setTitle("Payment Complete")
+//    builder.setMessage(
+//        "Payment ran successfully, Here is your receipt"
+//    )
+//    builder.setNeutralButton("OK"){ dialog, which ->
+//        dialog.dismiss()
+//    }
+//    val alert = builder.create()
+//    alert.show()
+//
+//
 //}
 
 

@@ -50,7 +50,6 @@ dependencies {
     //AWS android SDK
     implementation 'com.amazonaws:aws-android-sdk-kms:2.19.1'
 
-
     //OKHttp
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
 

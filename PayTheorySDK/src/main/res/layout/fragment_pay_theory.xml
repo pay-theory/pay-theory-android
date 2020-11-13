@@ -172,8 +172,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
-        android:hint="Results"
-        android:text="Results:"
+        android:hint=""
+        android:text=""
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 

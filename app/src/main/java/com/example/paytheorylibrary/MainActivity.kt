@@ -2,9 +2,14 @@ package com.example.paytheorylibrary
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.example.paytheorylibrarysdk.*
+import com.example.paytheorylibrarysdk.paytheory.PayTheory
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 
@@ -77,16 +82,62 @@ class MainActivity : AppCompatActivity() {
 
             val payTheoryObject = PayTheory(this, apiKey, amount, cardNumber, cvv,
                     expirationMonth, expirationYear, firstName, lastName, addressOne, addressTwo,
-                    phoneNumber, country, emailAddress, city, zipCode, state, customTags)
+                    phoneNumber, country, emailAddress, city, zipCode, state, customTags, resultView)
 
 
-            CoroutineScope(IO).launch{
+
+//            GlobalScope.launch(Dispatchers.Main) {
+//                val queue = async(Dispatchers.IO) {
+//                    payTheoryObject.initPayment()
+//                }
+//                val result = queue.await()
+//            }
+
+            Handler(Looper.getMainLooper()).post {
                 payTheoryObject.initPayment()
             }
 
+//
+//            GlobalScope.launch {
+//                suspend {
+//                    Log.d("coroutineScope", "#runs on ${Thread.currentThread().name}")
+//                    payTheoryObject.initPayment()
+//                    withContext(Dispatchers.Main) {
+//                        Log.d("coroutineScope", "#runs on ${Thread.currentThread().name}")
+//                    }
+//                }.invoke()
+//            }
+
+
+//            val thread = Thread {
+//                payTheoryObject.initPayment()
+//                println("${Thread.currentThread()} has run.")
+//            }
+//            thread.start()
 
 
 
+//            runBlocking {
+//                val result = initPayment().await()
+//                println(result)
+//            }
+
+
+//            val myScope = CoroutineScope(Dispatchers.Main)
+//            myScope.launch {
+//                withContext(IO) {
+//                    payTheoryObject.initPayment()
+//                }
+//
+//            }
+
+
+
+//            runOnUiThread {
+//                payTheoryObject.initPayment()
+//            }
+
+            
 //           GlobalScope.launch {
 //               val operation = async(IO) {
 //                   payTheoryObject.initPayment()
