@@ -2,4 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.paytheory.paytheorylibrarysdk">
 
+    <application>
+        <activity android:name=".paytheory.PayTheoryActivity"></activity>
+    </application>
+
 </manifest>

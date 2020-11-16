@@ -1,9 +1,11 @@
 package com.paytheory.paytheorylibrarysdk
 
 import android.content.Context
+import android.os.Handler
 import android.os.Looper
 import android.util.Base64.DEFAULT
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.kms.AWSKMSClient
@@ -110,11 +112,14 @@ class PayTheory(
             }
 
             if (kmsResult){
-                confirmAlert(cardPayment.amount,
-                    cardPayment.convenienceFee,
-                    "visa", //TODO
-                    cardPayment.cardNumber.toLong(),
-                    context)
+                Handler(Looper.getMainLooper()).post {
+                    confirmAlert(cardPayment.amount,
+                        cardPayment.convenienceFee,
+                        "visa", //TODO
+                        cardPayment.cardNumber.toLong(),
+                        context)
+                }
+
             }
         }
     }
@@ -128,7 +133,7 @@ class PayTheory(
 
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        Log.e("PTLib", "Challenge response body ${jsonData}")
+        Log.e("PTLib", "Challenge response body $jsonData")
         val challengeJSONResponse = JSONObject(jsonData)
         return if(challengeJSONResponse.has("challenge")){
             val challengeResponseString = challengeJSONResponse.getString("challenge")
@@ -319,7 +324,9 @@ class PayTheory(
                 "PTLib",
                 "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
             )
-            transact(token, merchantId, cardPayment.currency, idempotency)
+            CoroutineScope(IO).launch {
+                transact(token, merchantId, cardPayment.currency, idempotency)
+            }
 
 
         }
@@ -362,38 +369,38 @@ class PayTheory(
         val entityJSONObject = JSONObject()
         try {
             if (buyerOptions != null) {
-                if (buyerOptions.phoneNumber != null) {
+                if (buyerOptions.phoneNumber !== null) {
                     entityJSONObject.put("phone", "$buyerOptions.phoneNumber")
                 }
-                if (buyerOptions.firstName != null) {
+                if (buyerOptions.firstName !== null) {
                     entityJSONObject.put("first_name", "$buyerOptions.firstName")
                 }
-                if (buyerOptions.lastName != null) {
+                if (buyerOptions.lastName !== null) {
                     entityJSONObject.put("last_name", "$buyerOptions.lastName")
                 }
-                if (buyerOptions.email != null) {
+                if (buyerOptions.email !== null) {
                     entityJSONObject.put("email", "$buyerOptions.emailAddress")
                 }
-                if (buyerOptions.addressOne != null) {
+                if (buyerOptions.addressOne !== null) {
                     personalAddressJsonObject.put("line1", "$buyerOptions.addressOne")
                 }
-                if (buyerOptions.zipCode != null) {
+                if (buyerOptions.zipCode !== null) {
                     personalAddressJsonObject.put("postal_code", "$buyerOptions.zipCode")
                 }
-                if (buyerOptions.addressTwo != null) {
+                if (buyerOptions.addressTwo !== null) {
                     personalAddressJsonObject.put("line2", "$buyerOptions.addressTwo")
                 }
-                if (buyerOptions.city != null) {
+                if (buyerOptions.city !== null) {
                     personalAddressJsonObject.put("city", "$buyerOptions.city")
                 }
-                if (buyerOptions.country != null) {
+                if (buyerOptions.country !== null) {
                     personalAddressJsonObject.put("country", "$buyerOptions.country")
                 }
-                if (buyerOptions.state != null) {
+                if (buyerOptions.state !== null) {
                     personalAddressJsonObject.put("region", "$buyerOptions.state")
                 }
             }
-            if (idempotency != null) {
+            if (idempotency !== null) {
                 val identityTagsJsonObject = JSONObject()
                 identityTagsJsonObject.put("key", "pt-platform:android $idempotency")
                 entityJSONObject.put("entity", personalAddressJsonObject)
@@ -462,7 +469,7 @@ class PayTheory(
             val paymentJsonResponse = JSONObject(paymentJsonData)
 
             Log.e("PT2", "Payment Call Response: $paymentJsonResponse")
-            if (paymentJsonResponse.getString("id") != null) {
+            if (paymentJsonResponse.getString("id") != null) { //TODO - check if failed
                 val amountDouble = (cardPayment.amount.toDouble())
                 val amountInCents = amountDouble / .01
 
