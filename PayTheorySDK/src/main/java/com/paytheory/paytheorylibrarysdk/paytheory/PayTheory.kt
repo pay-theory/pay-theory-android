@@ -1,4 +1,4 @@
-package com.example.paytheorylibrarysdk
+package com.paytheory.paytheorylibrarysdk
 
 import android.content.Context
 import android.os.Looper
@@ -9,8 +9,8 @@ import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.kms.AWSKMSClient
 import com.amazonaws.services.kms.model.DecryptRequest
 import com.amazonaws.services.kms.model.VerifyRequest
-import com.example.paytheorylibrarysdk.paytheory.BuyerOptions
-import com.example.paytheorylibrarysdk.paytheory.CardPayment
+import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
+import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.safetynet.SafetyNet

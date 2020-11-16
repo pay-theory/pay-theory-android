@@ -1,12 +1,12 @@
-package com.example.paytheorylibrary
+package com.paytheory.paytheorylibrary
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import com.example.paytheorylibrarysdk.*
-import com.example.paytheorylibrarysdk.paytheory.BuyerOptions
-import com.example.paytheorylibrarysdk.paytheory.CardPayment
+import com.paytheory.paytheorylibrarysdk.*
+import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
+import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

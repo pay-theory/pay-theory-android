@@ -1,4 +1,4 @@
-package com.example.paytheorylibrarysdk
+package com.paytheory.paytheorylibrarysdk
 
 import android.os.Bundle
 import android.util.Log

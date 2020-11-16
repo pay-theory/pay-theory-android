@@ -1,10 +1,8 @@
-package com.example.paytheorylibrarysdk
+package com.paytheory.paytheorylibrarysdk
 
 import android.content.Context
 
 import android.util.AttributeSet
-import android.util.Log
-import androidx.core.content.res.ResourcesCompat
 
 /**
  * Custom AppCompatEditText class that can be used for PayTheory class inputs

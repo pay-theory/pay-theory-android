@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
     <fragment
-        android:name="com.example.paytheorylibrarysdk.PayTheoryFragment"
+        android:name="com.paytheory.paytheorylibrarysdk.PayTheoryFragment"
         android:id="@+id/payTheoryFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
