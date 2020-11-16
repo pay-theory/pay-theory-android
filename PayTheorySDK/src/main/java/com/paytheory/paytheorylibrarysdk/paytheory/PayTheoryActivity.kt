@@ -97,19 +97,11 @@ class PayTheoryActivity : AppCompatActivity() {
 //            val state = stateView.text.toString()
 //            val customTags = "TODO Custom Tags"
 
-
             val payment = CardPayment("4242424242424242", "04", "2024", "424", 5000)
             val buyerOptions = BuyerOptions("Some", "Body", "104 Testing", "", "Cincinnati", "OH", "USA", "45140", "5133333333", "TestEmail@gmail.com")
-
             val payTheory = PayTheory(this, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", payment, buyerOptions)
 
             payTheory.init()
-
-            suspend fun setTextOnMainThread(input:String) {
-                withContext(Dispatchers.Main){
-                    val newText = resultView.text.toString() + "\n$input"
-                    resultView.text = newText
-                }
 
             }
 
@@ -197,6 +189,5 @@ class PayTheoryActivity : AppCompatActivity() {
         }
 
     }
-}
 
 
