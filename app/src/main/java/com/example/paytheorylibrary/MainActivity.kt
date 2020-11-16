@@ -2,18 +2,33 @@ package com.example.paytheorylibrary
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import com.example.paytheorylibrarysdk.*
-import com.example.paytheorylibrarysdk.paytheory.PayTheory
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
+import com.example.paytheorylibrarysdk.paytheory.BuyerOptions
+import com.example.paytheorylibrarysdk.paytheory.CardPayment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+
+    //    val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
+//    val amount = 1550
+//    val cardNumber = 4242424242424242
+//    val cvv = 242
+//    val expirationMonth = 12
+//    val expirationYear = 24
+//    val firstName = "Some"
+//    val lastName = "Body"
+//    val addressOne = "101 Test Drive"
+//    val addressTwo= "Apartment 2"
+//    val phoneNumber = "5131111111"
+//    val country= "USA"
+//    val emailAddress = "TestEmail@gmail.com"
+//    val city = "Cincinnati"
+//    val zipCode = "45236"
+//    val state = "OH"
+//    val customTags = "CustomTagsTest"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,9 +95,30 @@ class MainActivity : AppCompatActivity() {
             val state = stateView.text.toString()
             val customTags = "TODO Custom Tags"
 
-            val payTheoryObject = PayTheory(this, apiKey, amount, cardNumber, cvv,
-                    expirationMonth, expirationYear, firstName, lastName, addressOne, addressTwo,
-                    phoneNumber, country, emailAddress, city, zipCode, state, customTags, resultView)
+
+            val payment = CardPayment("4242424242424242", "04", "24", "424", 5000)
+            val buyerOptions = BuyerOptions("Some", "Body", "104 Testing", "", "Cincinnati", "OH", "USA", "45140", "5133333333", "TestEmail@gmail.com")
+
+            val payTheory = PayTheory(this, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", payment, buyerOptions)
+
+            payTheory.init()
+
+            suspend fun setTextOnMainThread(input:String) {
+                withContext(Dispatchers.Main){
+                    val newText = resultView.text.toString() + "\n$input"
+                    resultView.text = newText
+                }
+
+            }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -93,9 +129,9 @@ class MainActivity : AppCompatActivity() {
 //                val result = queue.await()
 //            }
 
-            Handler(Looper.getMainLooper()).post {
-                payTheoryObject.initPayment()
-            }
+//            Handler(Looper.getMainLooper()).post {
+//                payTheoryObject.initPayment()
+//            }
 
 //
 //            GlobalScope.launch {
