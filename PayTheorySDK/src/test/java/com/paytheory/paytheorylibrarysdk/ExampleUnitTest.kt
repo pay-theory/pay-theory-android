@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrary
+package com.paytheory.paytheorylibrarysdk
 
 import org.junit.Test
 
@@ -14,4 +14,6 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+
 }

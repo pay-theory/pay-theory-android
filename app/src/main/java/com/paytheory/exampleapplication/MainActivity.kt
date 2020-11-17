@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrary
+package com.paytheory.exampleapplication
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
