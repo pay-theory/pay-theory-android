@@ -1,6 +1,6 @@
 # PayTheory
 
-##How to use PayTheory
+## How to use PayTheory
 
 1. Add library to project
 
