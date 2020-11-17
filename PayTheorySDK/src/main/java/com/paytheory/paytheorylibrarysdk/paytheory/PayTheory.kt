@@ -50,7 +50,7 @@ class PayTheory(
 ) {
     private var client = OkHttpClient()
     private var challengeResponse = ""
-    private var safetyNetResult = ""
+//    private var safetyNetResult = "" TODO
     private var googleApiAvailability = false
     private var attestationResponse: String? = null
     private var idempotencyResponse: String? = null
@@ -147,7 +147,6 @@ class PayTheory(
         return payTheoryTransactResponse
     }
 
-
     private fun challenge(): String {
         val request = Request.Builder()
             .url("https://dev.tags.api.paytheorystudy.com/challenge")
@@ -183,9 +182,6 @@ class PayTheory(
         }
     }
 
-
-
-
     private suspend fun attestation(nonce: String): String? {
 
         Looper.prepare()
@@ -200,7 +196,6 @@ class PayTheory(
         return attestationTask.result.jwsResult
 
     }
-
 
     private fun payTheoryIdempotency(nonce: String, attestation: String?): String {
         val jsonObject = JSONObject()
@@ -247,12 +242,8 @@ class PayTheory(
         }
     }
 
-
     private fun kms(response: String, signature: String, credId: String): Boolean {
-//        val decodedBytes = Base64.getDecoder().decode(credId)
-
         val decodedBytes = android.util.Base64.decode(credId, DEFAULT)
-
         val credArray: List<String> = String(decodedBytes).split(":")
 
         Log.e("PTLib", "decodedCredId ${(String(decodedBytes))}")
@@ -265,8 +256,6 @@ class PayTheory(
         var kmsClient = AWSKMSClient(awsCreds)
         var decryptRequest = DecryptRequest()
 
-
-
         decryptRequest.encryptionAlgorithm = "RSAES_OAEP_SHA_256"
         decryptRequest.keyId = "c731e986-c849-4534-9367-a004f6ca272c"
         decryptRequest.withCiphertextBlob(
@@ -277,8 +266,6 @@ class PayTheory(
         )
 
         val decryptResponse = kmsClient.decrypt(decryptRequest)
-
-
         val converted = String(decryptResponse.plaintext.array(), charset("UTF-8"))
         val convertedJSONResponse = JSONObject(converted)
         val payment = convertedJSONResponse.getJSONObject("payment")
@@ -289,7 +276,6 @@ class PayTheory(
         cardPayment.currency = payment.getString("currency")
         cardPayment.amount = payment.getString("amount").toInt()
         cardPayment.convenienceFee = payment.getString("convenience_fee")
-
 
         Log.e("PTLib", "decryptResponse.plaintext $converted")
         Log.e("PTLib", "decryptResponse $decryptResponse")
@@ -323,7 +309,6 @@ class PayTheory(
 
     }
 
-
     /**
      * confirmAlert() - Method called to allow user to confirm or cancel transaction initialization
      */
@@ -348,24 +333,15 @@ class PayTheory(
                 "PTLib",
                 "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
             )
-
-//            CoroutineScope(IO).launch {
-//                transact(token, merchantId, cardPayment.currency, idempotency)
-//            }
-
-
         }
         builder.setNegativeButton("NO") { dialog, which ->
             userConfirmation = false
             cancel()
             dialog.dismiss()
-
         }
         val alert = builder.create()
         alert.show()
-
     }
-
 
     /**
      * cancel()
@@ -387,9 +363,6 @@ class PayTheory(
      * transact() - Method called to complete transaction
      */
     private fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
-
-
-        //Creating json Object to pass into finix API
         val identityJsonObject = JSONObject()
         val personalAddressJsonObject = JSONObject()
         val entityJSONObject = JSONObject()
@@ -458,7 +431,6 @@ class PayTheory(
         val identityJsonData: String? = identityResponse.body?.string()
         val identityJsonResponse = JSONObject(identityJsonData)
         Log.e("PT2", "Identity Call Response: $identityJsonResponse")
-
 
         //TODO - Set up check if authorization response throws back an error
         if (identityJsonResponse.getString("id") != null) {
@@ -571,14 +543,7 @@ class PayTheory(
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
                         val transactResults = capAuthJSONResponse.getString("state")
-
-
-
                         return transactResults
-
-
-                        //TODO
-//                            printToMain(capAuthJSONResponse, context)
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")
                     }
@@ -591,119 +556,6 @@ class PayTheory(
         } else {
             Log.e("PT2", "Identity Call Request Failed")
         }
-//                        return "No Results"
-
-//        setNewText("Payment Complete:\nPayment Amount: $$paymentAmount", resultView)
-//        makeToast(paymentAmount.toDouble(), "Complete", context)
         return transactResults
     }
-
-
-
-
-
-//    private fun attestation(nonce: String): String? {
-//
-//                Looper.prepare()
-//                SafetyNet.getClient(context).attest(
-//                nonce.toByteArray(),
-//                "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
-//        )
-//                .addOnSuccessListener(Activity()) {
-//                    // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
-//                    val response = it.jwsResult
-//
-//                    Log.e("PTLib", "SafetyNet Response: $response")
-//                    attestationResponse = response
-////                        Log.e("PTLib", "Attestation Response Status: ${payTheoryAttest(response)}")
-//                }
-//                .addOnFailureListener(Activity()) { e ->
-//                    // An error occurred while communicating with the service.
-//                    if (e is ApiException) {
-//                        // An error with the Google Play services API contains some additional details.
-//                        val apiException = e as ApiException
-//                        Log.e("PTLib", "Api Exception Error: $apiException")
-//
-//                        // You can retrieve the status code using the apiException.statusCode property.
-//                    } else {
-//                        // A different, unknown type of error occurred.
-//                        Log.e("PTLib", "Unknown Error: " + e.message)
-//                    }
-//                }
-//                Looper.loop()
-//
-//        return attestationResponse
-//    }
-
-//        SafetyNet.getClient(context).attest(
-//                nonce.toByteArray(),
-//                "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
-//        )   //TODO - remove api key and hide it
-//                .addOnSuccessListener(Activity()) {
-//                    // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
-//                    val response = it.jwsResult
-//
-//                    Log.e("PTLib", "SafetyNet Response: $response")
-//                    attestationResponse = response
-////                        Log.e("PTLib", "Attestation Response Status: ${payTheoryAttest(response)}")
-//                    //TODO - Send the JWS object back to your server for validation and use using a secure connection.
-//
-//                }
-//                .addOnFailureListener(Activity()) { e ->
-//                    // An error occurred while communicating with the service.
-//                    if (e is ApiException) {
-//                        // An error with the Google Play services API contains some additional details.
-//                        val apiException = e as ApiException
-//                        Log.e("PTLib", "Api Exception Error: $apiException")
-//
-//                        // You can retrieve the status code using the apiException.statusCode property.
-//                    } else {
-//                        // A different, unknown type of error occurred.
-//                        Log.e("PTLib", "Unknown Error: " + e.message)
-//
-//                    }
-//
-//                }
-
-
-//    /**
-//     * authentication() - Method called to start authentication
-//     */
-//    private fun authentication(nonce: String) {
-//        //Call google play services to verify google play is available
-//        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-//            Log.e("PT2", "Google Play Service Available.")
-//            runBlocking {
-//                var safetyNetTask = SafetyNet.getClient(context).attest(
-//                        nonce.toByteArray(),
-//                        "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
-//                )
-//
-//            }//TODO - remove api key and hide it
-//
-//
-////                    .addOnSuccessListener(Activity()) {
-////                        // Indicates communication with the service was successful. Use response.getJwsResult() to get the result data.
-////                        val response = it.jwsResult
-////                        Log.e("PTLib", "SafetyNet Response: $response")
-////                        //TODO - Send the JWS object back to your server for validation and use using a secure connection.
-//////                        payTheoryIdempotency(nonce, response)
-////                    }
-////                    .addOnFailureListener(Activity()) { e ->
-////                        // An error occurred while communicating with the service.
-////                        if (e is ApiException) {
-////                            // An error with the Google Play services API contains some additional details.
-////                            val apiException = e as ApiException
-////                            Log.e("PTLib", "Api Exception Error: $apiException")
-////                            // You can retrieve the status code using the apiException.statusCode property.
-////                        } else {
-////                            // A different, unknown type of error occurred.
-////                            Log.e("PTLib", "Unknown Error: " + e.message)
-////                        }
-////                    }
-//        } else {
-//            // Prompt user to update Google Play services.
-//            Log.e("PT2", "Update Google Play services.")
-//        }
-//    }
 }

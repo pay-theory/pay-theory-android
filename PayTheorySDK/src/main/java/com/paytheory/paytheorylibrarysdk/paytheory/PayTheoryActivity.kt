@@ -1,11 +1,9 @@
 package com.paytheory.paytheorylibrarysdk.paytheory
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.paytheorylibrarysdk.*
 import kotlinx.coroutines.*
@@ -14,33 +12,11 @@ import kotlinx.coroutines.Dispatchers.IO
 
 class PayTheoryActivity : AppCompatActivity() {
 
-    //    val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
-//    val amount = 1550
-//    val cardNumber = 4242424242424242
-//    val cvv = 242
-//    val expirationMonth = 12
-//    val expirationYear = 24
-//    val firstName = "Some"
-//    val lastName = "Body"
-//    val addressOne = "101 Test Drive"
-//    val addressTwo= "Apartment 2"
-//    val phoneNumber = "5131111111"
-//    val country= "USA"
-//    val emailAddress = "TestEmail@gmail.com"
-//    val city = "Cincinnati"
-//    val zipCode = "45236"
-//    val state = "OH"
-//    val customTags = "CustomTagsTest"
-    private var transactResult = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         //Allows the style of an activity if setTheme is added
         setTheme(R.style.DarkTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_theory)
-
-
-
 
         val btn = findViewById<Button>(R.id.submitButton)
         val firstNameView = findViewById<FirstNameEditText>(R.id.firstNameEditText)
@@ -53,14 +29,13 @@ class PayTheoryActivity : AppCompatActivity() {
         val cityView = findViewById<CityEditText>(R.id.cityEditText)
         val zipCodeView = findViewById<ZipEditText>(R.id.zipEditText)
         val stateView = findViewById<StateEditText>(R.id.stateEditText)
-//        val customTagsView = findViewById<Custom>(R.id.EditText)
         val creditCardView = findViewById<CreditCardEditText>(R.id.creditCardEditText)
         val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
-//        val expirationView = findViewById<ExpEditText>(R.id.expEditText)
         val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
         val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
         val amountView = findViewById<AmountEditText>(R.id.amountEditText)
-        val resultView = findViewById<TextView>(R.id.responseText)
+        //        val expirationView = findViewById<ExpEditText>(R.id.expEditText)
+        //        val customTagsView = findViewById<Custom>(R.id.EditText)
 
         firstNameView.setText("Some")
         lastNameView.setText("Body")
@@ -78,42 +53,37 @@ class PayTheoryActivity : AppCompatActivity() {
         expirationYearView.setText("2024")
         amountView.setText("12.22")
 
-
-
-
-
-        //Click listener for submit button
         btn.setOnClickListener {
-//            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
-//            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
-//            val cardNumber = creditCardView.text.toString().toLong()
-//            val cvv = cvvView.text.toString().toInt()
-//            val expirationMonth = expirationMonthView.text.toString().toInt()
-//            val expirationYear = expirationYearView.text.toString().toInt()
-//            val firstName = firstNameView.text.toString()
-//            val lastName = lastNameView.text.toString()
-//            val addressOne = addressOneView.text.toString()
-//            val addressTwo = addressTwoView.text.toString()
-//            val phoneNumber = phoneNumberView.text.toString()
-//            val country = countryView.text.toString()
-//            val emailAddress = emailAddressView.text.toString()
-//            val city = cityView.text.toString()
-//            val zipCode = zipCodeView.text.toString()
-//            val state = stateView.text.toString()
+            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
+            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
+            val cardNumber = creditCardView.text.toString().toLong()
+            val cvv = cvvView.text.toString().toInt()
+            val expirationMonth = expirationMonthView.text.toString().toInt()
+            val expirationYear = expirationYearView.text.toString().toInt()
+            val firstName = firstNameView.text.toString()
+            val lastName = lastNameView.text.toString()
+            val addressOne = addressOneView.text.toString()
+            val addressTwo = addressTwoView.text.toString()
+            val city = cityView.text.toString()
+            val state = stateView.text.toString()
+            val country = countryView.text.toString()
+            val zipCode = zipCodeView.text.toString()
+            val phoneNumber = phoneNumberView.text.toString()
+            val emailAddress = emailAddressView.text.toString()
 //            val customTags = "TODO Custom Tags"
 
-            val payment = CardPayment("4242424242424242", "04", "2024", "424", 5000)
+            val payment = CardPayment(cardNumber, expirationMonth, expirationYear, cvv, amount)
             val buyerOptions = BuyerOptions(
-                "Some",
-                "Body",
-                "104 Testing",
-                "",
-                "Cincinnati",
-                "OH",
-                "USA",
-                "45140",
-                "5133333333",
-                "TestEmail@gmail.com"
+                firstName,
+                lastName,
+                addressOne,
+                addressTwo,
+                city,
+                state,
+                country,
+                zipCode,
+                phoneNumber,
+                emailAddress
             )
             val payTheory = PayTheory(
                 this,
@@ -122,112 +92,22 @@ class PayTheoryActivity : AppCompatActivity() {
                 buyerOptions
             )
 
-//            payTheory.init()
-
 
             val returnIntent = Intent()
-
             CoroutineScope(IO).launch {
-                val transactResult = async{
+                val transactResult = async {
                     payTheory.init()
                 }.await()
-                while (transactResult == ""){
+                while (transactResult == "") {
                     delay(500)
                 }
-                    Log.e("PT2", "Transact Result : $transactResult")
-                    returnIntent.putExtra("result", transactResult)
-                    setResult(1,returnIntent);
-                    finish()
+                Log.e("PT2", "Transact Result : $transactResult")
+                returnIntent.putExtra("result", transactResult)
+                setResult(1, returnIntent);
+                finish()
             }
-
-
-
-
         }
-
-
-
-
-
-
-
-
-
-
-
-
-//            GlobalScope.launch(Dispatchers.Main) {
-//                val queue = async(Dispatchers.IO) {
-//                    payTheoryObject.initPayment()
-//                }
-//                val result = queue.await()
-//            }
-
-//            Handler(Looper.getMainLooper()).post {
-//                payTheoryObject.initPayment()
-//            }
-
-//
-//            GlobalScope.launch {
-//                suspend {
-//                    Log.d("coroutineScope", "#runs on ${Thread.currentThread().name}")
-//                    payTheoryObject.initPayment()
-//                    withContext(Dispatchers.Main) {
-//                        Log.d("coroutineScope", "#runs on ${Thread.currentThread().name}")
-//                    }
-//                }.invoke()
-//            }
-
-
-//            val thread = Thread {
-//                payTheoryObject.initPayment()
-//                println("${Thread.currentThread()} has run.")
-//            }
-//            thread.start()
-
-
-
-//            runBlocking {
-//                val result = initPayment().await()
-//                println(result)
-//            }
-
-
-//            val myScope = CoroutineScope(Dispatchers.Main)
-//            myScope.launch {
-//                withContext(IO) {
-//                    payTheoryObject.initPayment()
-//                }
-//
-//            }
-
-
-
-//            runOnUiThread {
-//                payTheoryObject.initPayment()
-//            }
-
-
-//           GlobalScope.launch {
-//               val operation = async(IO) {
-//                   payTheoryObject.initPayment()
-//
-//               }
-//               operation.await()
-//               runOnUiThread {
-//                   val result = payTheoryObject.getResult()
-//                   resultView.text = ("Final Results: $result")
-//               }
-//            }
-
-
-
-//                runOnUiThread {
-//                    resultView.text = ("Final Results: $${finalResults}")
-//                }
-
-        }
-
     }
+}
 
 
