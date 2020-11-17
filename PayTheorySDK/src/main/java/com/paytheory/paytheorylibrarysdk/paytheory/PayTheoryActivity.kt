@@ -1,12 +1,16 @@
 package com.paytheory.paytheorylibrarysdk.paytheory
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.paytheorylibrarysdk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
+
 
 class PayTheoryActivity : AppCompatActivity() {
 
@@ -27,10 +31,11 @@ class PayTheoryActivity : AppCompatActivity() {
 //    val zipCode = "45236"
 //    val state = "OH"
 //    val customTags = "CustomTagsTest"
+    private var transactResult = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //Allows the style of an activity if setTheme is added
-        setTheme(android.R.style.Theme)
+        setTheme(R.style.DarkTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_theory)
 
@@ -98,12 +103,47 @@ class PayTheoryActivity : AppCompatActivity() {
 //            val customTags = "TODO Custom Tags"
 
             val payment = CardPayment("4242424242424242", "04", "2024", "424", 5000)
-            val buyerOptions = BuyerOptions("Some", "Body", "104 Testing", "", "Cincinnati", "OH", "USA", "45140", "5133333333", "TestEmail@gmail.com")
-            val payTheory = PayTheory(this, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", payment, buyerOptions)
+            val buyerOptions = BuyerOptions(
+                "Some",
+                "Body",
+                "104 Testing",
+                "",
+                "Cincinnati",
+                "OH",
+                "USA",
+                "45140",
+                "5133333333",
+                "TestEmail@gmail.com"
+            )
+            val payTheory = PayTheory(
+                this,
+                "pt-sandbox-dev-d9de9154964990737db2f80499029dd6",
+                payment,
+                buyerOptions
+            )
 
-            payTheory.init()
+//            payTheory.init()
 
+
+            val returnIntent = Intent()
+
+            CoroutineScope(IO).launch {
+                val transactResult = async{
+                    payTheory.init()
+                }.await()
+                while (transactResult == ""){
+                    delay(500)
+                }
+                    Log.e("PT2", "Transact Result : $transactResult")
+                    returnIntent.putExtra("result", transactResult)
+                    setResult(1,returnIntent);
+                    finish()
             }
+
+
+
+
+        }
 
 
 

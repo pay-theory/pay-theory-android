@@ -1,5 +1,6 @@
 package com.paytheory.paytheorylibrarysdk
 
+import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -60,8 +61,11 @@ class PayTheory(
     private var token = ""
     private var idempotency = ""
     private var merchantId = ""
+    private var transactResults = ""
+    private var userConfirmation: Boolean? = null
+    private var payTheoryTransactResponse = ""
 
-    fun init(){
+    suspend fun init(): String {
         Log.e("PT2", "Init PT2")
         CoroutineScope(IO).launch {
 
@@ -106,8 +110,7 @@ class PayTheory(
                 }.await()
 
                 Log.e("PT2", "Printing KMS Result $kmsResult")
-            }
-            else {
+            } else {
                 Log.e("PT2", "Validation Failed")
             }
 
@@ -120,8 +123,28 @@ class PayTheory(
                         context)
                 }
 
+            } else{
+                Log.e("PT2", "Verification failed")
+            }
+
+            while (userConfirmation == null) {
+                delay(500)
+            }
+            if (userConfirmation == true){
+                payTheoryTransactResponse = async{
+                    transact(token, merchantId, cardPayment.currency, idempotency)
+                }.await()
+                Log.e("PT2", "payTheoryTransactResponse : $payTheoryTransactResponse")
+
+            } else {
+                Log.e("PT2", "User Confirmation : $userConfirmation")
             }
         }
+        while (payTheoryTransactResponse == ""){
+            delay(5000)
+        }
+        Log.e("PT2", "payTheoryTransactResponse returned back to function call : $payTheoryTransactResponse")
+        return payTheoryTransactResponse
     }
 
 
@@ -319,18 +342,21 @@ class PayTheory(
             }"
         )
         builder.setPositiveButton("YES") { dialog, which ->
+            userConfirmation = true
             dialog.dismiss()
             Log.e(
                 "PTLib",
                 "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
             )
-            CoroutineScope(IO).launch {
-                transact(token, merchantId, cardPayment.currency, idempotency)
-            }
+
+//            CoroutineScope(IO).launch {
+//                transact(token, merchantId, cardPayment.currency, idempotency)
+//            }
 
 
         }
         builder.setNegativeButton("NO") { dialog, which ->
+            userConfirmation = false
             cancel()
             dialog.dismiss()
 
@@ -360,7 +386,7 @@ class PayTheory(
     /**
      * transact() - Method called to complete transaction
      */
-    private fun transact(token: String, merchantId: String, currency: String, idempotency: String) {
+    private fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
 
 
         //Creating json Object to pass into finix API
@@ -370,34 +396,34 @@ class PayTheory(
         try {
             if (buyerOptions != null) {
                 if (buyerOptions.phoneNumber !== null) {
-                    entityJSONObject.put("phone", "$buyerOptions.phoneNumber")
+                    entityJSONObject.put("phone", "${buyerOptions.phoneNumber}")
                 }
                 if (buyerOptions.firstName !== null) {
-                    entityJSONObject.put("first_name", "$buyerOptions.firstName")
+                    entityJSONObject.put("first_name", "${buyerOptions.firstName}")
                 }
                 if (buyerOptions.lastName !== null) {
-                    entityJSONObject.put("last_name", "$buyerOptions.lastName")
+                    entityJSONObject.put("last_name", "${buyerOptions.lastName}")
                 }
                 if (buyerOptions.email !== null) {
-                    entityJSONObject.put("email", "$buyerOptions.emailAddress")
+                    entityJSONObject.put("email", "${buyerOptions.email}")
                 }
                 if (buyerOptions.addressOne !== null) {
-                    personalAddressJsonObject.put("line1", "$buyerOptions.addressOne")
+                    personalAddressJsonObject.put("line1", "${buyerOptions.addressOne}")
                 }
                 if (buyerOptions.zipCode !== null) {
-                    personalAddressJsonObject.put("postal_code", "$buyerOptions.zipCode")
+                    personalAddressJsonObject.put("postal_code", "${buyerOptions.zipCode}")
                 }
                 if (buyerOptions.addressTwo !== null) {
-                    personalAddressJsonObject.put("line2", "$buyerOptions.addressTwo")
+                    personalAddressJsonObject.put("line2", "${buyerOptions.addressTwo}")
                 }
                 if (buyerOptions.city !== null) {
-                    personalAddressJsonObject.put("city", "$buyerOptions.city")
+                    personalAddressJsonObject.put("city", "${buyerOptions.city}")
                 }
                 if (buyerOptions.country !== null) {
-                    personalAddressJsonObject.put("country", "$buyerOptions.country")
+                    personalAddressJsonObject.put("country", "${buyerOptions.country}")
                 }
                 if (buyerOptions.state !== null) {
-                    personalAddressJsonObject.put("region", "$buyerOptions.state")
+                    personalAddressJsonObject.put("region", "${buyerOptions.state}")
                 }
             }
             if (idempotency !== null) {
@@ -470,10 +496,6 @@ class PayTheory(
 
             Log.e("PT2", "Payment Call Response: $paymentJsonResponse")
             if (paymentJsonResponse.getString("id") != null) { //TODO - check if failed
-                val amountDouble = (cardPayment.amount.toDouble())
-                val amountInCents = amountDouble / .01
-
-
                 val authJsonObject = JSONObject()
                 try {
                     authJsonObject.put(
@@ -481,7 +503,7 @@ class PayTheory(
                         "${paymentJsonResponse.getString("id")}"
                     )
                     authJsonObject.put("merchant_identity", merchantId)
-                    authJsonObject.put("amount", amountInCents)
+                    authJsonObject.put("amount", cardPayment.amount)
                     authJsonObject.put("currency", currency)
 
                 } catch (e: JSONException) {
@@ -508,12 +530,10 @@ class PayTheory(
 
                 if (authJSONResponse.getString("state") == "SUCCEEDED") {
                     Log.e("PT2", "Request Succeeded")
-                    val amountDouble = (cardPayment.amount.toDouble())
-                    val amountInCents = 100 * amountDouble
 
                     val capAuthJsonObject = JSONObject()
                     try {
-                        capAuthJsonObject.put("capture_amount", amountInCents)
+                        capAuthJsonObject.put("capture_amount", cardPayment.amount)
 
                     } catch (e: JSONException) {
                         e.printStackTrace()
@@ -550,12 +570,11 @@ class PayTheory(
                             "PT2",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
-//                            val status = capAuthJSONResponse.getString("state")
-//                            val paymentAmount = (capAuthJSONResponse.getString("amount")
-//                                .toDouble()) / 100
-                        val status = capAuthJSONResponse.getString("state")
+                        val transactResults = capAuthJSONResponse.getString("state")
 
 
+
+                        return transactResults
 
 
                         //TODO
@@ -576,7 +595,7 @@ class PayTheory(
 
 //        setNewText("Payment Complete:\nPayment Amount: $$paymentAmount", resultView)
 //        makeToast(paymentAmount.toDouble(), "Complete", context)
-
+        return transactResults
     }
 
 
