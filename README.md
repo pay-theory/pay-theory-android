@@ -1,9 +1,10 @@
 # PayTheory
 
 ##How to use PayTheory
+
 1. Add library to project
 
-    'implementation '''
+    implementation ''
 
 2. import Activity in Activity that will will request to pay
 
@@ -11,17 +12,18 @@ import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
 
 3. Add on click listener to button that will request to start Pay Theory Activity
 
-    'override fun onCreate(savedInstanceState: Bundle?) {
+    //Button that will start PayTheoryActivity
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //Button that will start PayTheoryActivity
+
         var toPaymentButton = findViewById<Button>(R.id.toPayment)
         toPaymentButton.setOnClickListener {
             val intent = Intent(this, PayTheoryActivity::class.java)
             startActivityForResult(intent, 1);
         }
-    }'
+    }
 
 4. Add method to retrieve result data once Pay Theory Activity has completed
 
