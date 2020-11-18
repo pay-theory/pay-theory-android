@@ -9,13 +9,16 @@
     implementation ''
 ```
 
-2. Import Activity in Activity that will will request to pay
+2. Update Api-key
+
+
+3. Import PayTheoryActivity in Activity that will request to submit payment
 
 ```
 	import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
 ```
 
-3. Add on click listener to button that will request to start Pay Theory Activity
+4. Add on click listener to button that will request to start Pay Theory Activity
 
 ```
 override fun onCreate(savedInstanceState: Bundle?) {
