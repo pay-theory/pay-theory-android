@@ -33,7 +33,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-4. Add method to retrieve result data once Pay Theory Activity has completed
+5. Add method to retrieve result data once Pay Theory Activity has completed
 
 ```
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
