@@ -5,11 +5,15 @@
 
 1. Add library to project
 
+```
     implementation ''
+```
 
 2. Import Activity in Activity that will will request to pay
 
+```
 	import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
+```
 
 3. Add on click listener to button that will request to start Pay Theory Activity
 
