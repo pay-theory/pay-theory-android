@@ -43,27 +43,27 @@ import java.nio.ByteBuffer
  * @constructor creates a PayTheory Object that will be used during initialization of the transaction
  */
 class PayTheory(
-    private val context: Context,
-    private val apiKey: String,
-    private val cardPayment: CardPayment,
-    private val buyerOptions: BuyerOptions?
+    val context: Context,
+    val apiKey: String,
+    val cardPayment: CardPayment,
+    val buyerOptions: BuyerOptions?
 ) {
-    private var client = OkHttpClient()
-    private var challengeResponse = ""
-//    private var safetyNetResult = "" TODO
-    private var googleApiAvailability = false
-    private var attestationResponse: String? = null
-    private var idempotencyResponse: String? = null
-    private var idempotencyResponseString: String = ""
-    private var idempotencySignatureString: String = ""
-    private var idempotencyCredIdString: String = ""
-    private var kmsResult: Boolean = false
-    private var token = ""
-    private var idempotency = ""
-    private var merchantId = ""
-    private var transactResults = ""
-    private var userConfirmation: Boolean? = null
-    private var payTheoryTransactResponse = ""
+    var client = OkHttpClient()
+    var challengeResponse = ""
+//    var safetyNetResult = "" TODO
+    var googleApiAvailability = false
+    var attestationResponse: String? = null
+    var idempotencyResponse: String? = null
+    var idempotencyResponseString: String = ""
+    var idempotencySignatureString: String = ""
+    var idempotencyCredIdString: String = ""
+    var kmsResult: Boolean = false
+    var token = ""
+    var idempotency = ""
+    var merchantId = ""
+    var transactResults = ""
+    var userConfirmation: Boolean? = null
+    var payTheoryTransactResponse = ""
 
     suspend fun init(): String {
         Log.e("PT2", "Init PT2")
@@ -147,10 +147,10 @@ class PayTheory(
         return payTheoryTransactResponse
     }
 
-    private fun challenge(): String {
+    fun challenge(): String {
         val request = Request.Builder()
             .url("https://dev.tags.api.paytheorystudy.com/challenge")
-            .header("X-API-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+            .header("X-API-Key", apiKey)
             .build()
 
         val response = client.newCall(request).execute()
@@ -170,7 +170,7 @@ class PayTheory(
 
     }
 
-    private fun googleApi(): Boolean {
+    fun googleApi(): Boolean {
         //Call google play services to verify google play is available
         return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
             Log.e("PT2", "Google Play Service Available.")
@@ -182,7 +182,7 @@ class PayTheory(
         }
     }
 
-    private suspend fun attestation(nonce: String): String? {
+    suspend fun attestation(nonce: String): String? {
 
         Looper.prepare()
         var attestationTask = SafetyNet.getClient(context).attest(
@@ -197,7 +197,7 @@ class PayTheory(
 
     }
 
-    private fun payTheoryIdempotency(nonce: String, attestation: String?): String {
+    fun payTheoryIdempotency(nonce: String, attestation: String?): String {
         val jsonObject = JSONObject()
         jsonObject.put("currency", "USD")
         jsonObject.put("amount", cardPayment.amount)
@@ -242,7 +242,7 @@ class PayTheory(
         }
     }
 
-    private fun kms(response: String, signature: String, credId: String): Boolean {
+    fun kms(response: String, signature: String, credId: String): Boolean {
         val decodedBytes = android.util.Base64.decode(credId, DEFAULT)
         val credArray: List<String> = String(decodedBytes).split(":")
 
@@ -312,7 +312,7 @@ class PayTheory(
     /**
      * confirmAlert() - Method called to allow user to confirm or cancel transaction initialization
      */
-    private fun confirmAlert(
+    fun confirmAlert(
         paymentAmount: Int,
         convenienceFee: String,
         cardBrand: String,
@@ -346,7 +346,7 @@ class PayTheory(
     /**
      * cancel()
      */
-    private fun cancel(): String {
+    fun cancel(): String {
         Log.e("PTLib", "Cancel complete")
         val alertDialog = AlertDialog.Builder(context).create()
         alertDialog.setTitle("Alert")
@@ -362,7 +362,7 @@ class PayTheory(
     /**
      * transact() - Method called to complete transaction
      */
-    private fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
+    fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
         val identityJsonObject = JSONObject()
         val personalAddressJsonObject = JSONObject()
         val entityJSONObject = JSONObject()
