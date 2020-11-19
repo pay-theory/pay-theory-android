@@ -1,6 +1,7 @@
 package com.paytheory.paytheorylibrarysdk.paytheory
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,8 +19,10 @@ import kotlinx.coroutines.launch
 class PayTheoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //Allows the style of an activity if setTheme is added
-        setTheme(R.style.DarkTheme)
+//        val theme :Resources.Theme = intent.getParcelableExtra("Theme")!!
+//        //Allows the style of an activity if setTheme is added
+////        setTheme(R.style.DarkTheme)
+//        setTheme(theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_theory)
 
@@ -38,7 +41,7 @@ class PayTheoryActivity : AppCompatActivity() {
         val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
         val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
         val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
-        val amountView = findViewById<AmountEditText>(R.id.amountEditText)
+//        val amountView = findViewById<AmountEditText>(R.id.amountEditText)
         //        val expirationView = findViewById<ExpEditText>(R.id.expEditText)
         //        val customTagsView = findViewById<Custom>(R.id.EditText)
 
@@ -56,11 +59,11 @@ class PayTheoryActivity : AppCompatActivity() {
         cvvView.setText("424")
         expirationMonthView.setText("04")
         expirationYearView.setText("2024")
-        amountView.setText("12.22")
+//        amountView.setText("12.22")
 
         btn.setOnClickListener {
-            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
-            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
+//            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
+//            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
             val cardNumber = creditCardView.text.toString().toLong()
             val cvv = cvvView.text.toString().toInt()
             val expirationMonth = expirationMonthView.text.toString().toInt()
@@ -77,7 +80,8 @@ class PayTheoryActivity : AppCompatActivity() {
             val emailAddress = emailAddressView.text.toString()
 //            val customTags = "TODO Custom Tags"
 
-            val payment = CardPayment(cardNumber, expirationMonth, expirationYear, cvv, amount)
+            val payment = CardPayment(cardNumber, expirationMonth, expirationYear, cvv, intent.getStringExtra("Payment-Amount")!!
+                .toInt())
             val buyerOptions = BuyerOptions(
                 firstName,
                 lastName,
@@ -92,7 +96,7 @@ class PayTheoryActivity : AppCompatActivity() {
             )
             val payTheory = PayTheory(
                 this,
-                "pt-sandbox-dev-d9de9154964990737db2f80499029dd6",
+                intent.getStringExtra("Api-Key")!!,
                 payment,
                 buyerOptions
             )

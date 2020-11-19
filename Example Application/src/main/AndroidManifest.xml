@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PayTheoryLibrary">
+<!--        android:theme="@style/Theme.AppCompat.DayNight">-->
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,6 +22,7 @@
 
         <!--Add Other activities like this-->
         <activity android:name="com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity" >
+
             <!--Default Intent Filter-->
             <intent-filter>
                 <action android:name="android.intent.action.DEFAULT" />

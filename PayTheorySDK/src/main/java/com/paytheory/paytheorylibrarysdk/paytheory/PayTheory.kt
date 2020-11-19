@@ -261,7 +261,6 @@ class PayTheory(
         decryptRequest.withCiphertextBlob(
             ByteBuffer.wrap(
                 android.util.Base64.decode(response, DEFAULT)
-//                        Base64.getDecoder().decode(response)
             )
         )
 
@@ -542,7 +541,7 @@ class PayTheory(
                             "PT2",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
-                        val transactResults = capAuthJSONResponse.getString("state")
+                        transactResults = capAuthJSONResponse.getString("state")
                         return transactResults
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")
