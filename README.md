@@ -6,13 +6,13 @@
 1. Add library to project
 
 ```
-    implementation ''
+implementation ''
 ```
 
 2. Import PayTheoryActivity in Activity that will request to submit payment
 
 ```
-	import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
+import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
 ```
 
 3. Add on click listener to button that will request to start Pay Theory Activity
@@ -33,47 +33,47 @@ override fun onCreate(savedInstanceState: Bundle?) {
 4. Set Api-Key as string and set Payment-Amount as string in pennies
 
 ```
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-        //Button that will start PayTheoryActivity
-        var toPaymentButton = findViewById<Button>(R.id.toPayment)
+    //Button that will start PayTheoryActivity
+    var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-        //On Click Listener to start PayTheoryActivity
-        toPaymentButton.setOnClickListener {
-            val intent = Intent(this, PayTheoryActivity::class.java)
-            //Set payment amount value in pennies
-            intent.putExtra("Payment-Amount", "***Payment-Amount-Here***")
-            //Set api-key value
-            intent.putExtra("Api-Key", "***Api-Key-Here***")
-            //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
-        }
+    //On Click Listener to start PayTheoryActivity
+    toPaymentButton.setOnClickListener {
+        val intent = Intent(this, PayTheoryActivity::class.java)
+        //Set payment amount value in pennies
+        intent.putExtra("Payment-Amount", "***Payment-Amount-Here***")
+        //Set api-key value
+        intent.putExtra("Api-Key", "***Api-Key-Here***")
+        //Start PayTheoryActivity
+        startActivityForResult(intent, 1);
     }
+}
 ```
 
 Should look like this:
 
 ```
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-        //Button that will start PayTheoryActivity
-        var toPaymentButton = findViewById<Button>(R.id.toPayment)
+    //Button that will start PayTheoryActivity
+    var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-        //On Click Listener to start PayTheoryActivity
-        toPaymentButton.setOnClickListener {
-            val intent = Intent(this, PayTheoryActivity::class.java)
-            //Set payment amount value in pennies
-            intent.putExtra("Payment-Amount", "5050")
-            //Set api-key value
-            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-            //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
-        }
+    //On Click Listener to start PayTheoryActivity
+    toPaymentButton.setOnClickListener {
+        val intent = Intent(this, PayTheoryActivity::class.java)
+        //Set payment amount value in pennies
+        intent.putExtra("Payment-Amount", "5050")
+        //Set api-key value
+        intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+        //Start PayTheoryActivity
+        startActivityForResult(intent, 1);
     }
+}
 ```
 
 
@@ -96,35 +96,35 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 Final code should look similar to this
 
 ```
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-        //Button that will start PayTheoryActivity
-        var toPaymentButton = findViewById<Button>(R.id.toPayment)
+    //Button that will start PayTheoryActivity
+    var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-        //On Click Listener to start PayTheoryActivity
-        toPaymentButton.setOnClickListener {
-            val intent = Intent(this, PayTheoryActivity::class.java)
-            //Set payment amount value in pennies
-            intent.putExtra("Payment-Amount", "5050")
-            //Set api-key value
-            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-            //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
-        }
+    //On Click Listener to start PayTheoryActivity
+    toPaymentButton.setOnClickListener {
+        val intent = Intent(this, PayTheoryActivity::class.java)
+        //Set payment amount value in pennies
+        intent.putExtra("Payment-Amount", "5050")
+        //Set api-key value
+        intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+        //Start PayTheoryActivity
+        startActivityForResult(intent, 1);
     }
-    // This method is called when the PayTheoryActivity finishes
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                // Get String data from PayTheoryActivity
-                val returnString = data!!.getStringExtra("keyName")
-                Log.e("Main Activity", "Here is the result data string : $returnString")
-            }
-        }
-    }
+}
+// This method is called when the PayTheoryActivity finishes
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == 1) {
+        if (resultCode == Activity.RESULT_OK) {
+            // Get String data from PayTheoryActivity
+            val returnString = data!!.getStringExtra("keyName")
+            Log.e("Main Activity","Here is the result data string : $returnString")
+	     }
+	 }
+}
 ```
 
 ## How to change Pay Theory Activity Theme
