@@ -14,15 +14,15 @@ import android.view.ViewGroup
 
 /**
  * A simple [Fragment] subclass.
- * Use the [PayTheoryFragment.newInstance] factory method to
+ * Use the [PayTheoryFragmentBuyerOptions.newInstance] factory method to
  * create an instance of this fragment.
  */
-class PayTheoryFragment : Fragment() {
+class PayTheoryFragmentBuyerOptions : Fragment() {
 
     companion object {
 
-        fun newInstance(): PayTheoryFragment {
-            return PayTheoryFragment()
+        fun newInstance(): PayTheoryFragmentBuyerOptions {
+            return PayTheoryFragmentBuyerOptions()
         }
     }
     // TODO: Rename and change types of parameters
@@ -40,7 +40,7 @@ class PayTheoryFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         Log.e("Fragment", "onCreateView")
-        return inflater.inflate(R.layout.fragment_pay_theory, container, false)
+        return inflater.inflate(R.layout.fragment_pay_theory_buyer_options, container, false)
     }
 
 //    companion object {
@@ -50,12 +50,12 @@ class PayTheoryFragment : Fragment() {
 //         *
 //         * @param param1 Parameter 1.
 //         * @param param2 Parameter 2.
-//         * @return A new instance of fragment PayTheoryFragment.
+//         * @return A new instance of fragment PayTheoryFragmentBuyerOptions.
 //         */
 //        // TODO: Rename and change types and number of parameters
 //        @JvmStatic
 //        fun newInstance(param1: String, param2: String) =
-//                PayTheoryFragment().apply {
+//                PayTheoryFragmentBuyerOptions().apply {
 //                    arguments = Bundle().apply {
 //                        putString(ARG_PARAM1, param1)
 //                        putString(ARG_PARAM2, param2)

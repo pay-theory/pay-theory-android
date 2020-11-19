@@ -156,14 +156,14 @@
         android:hint="Expiration year (ex: 2024)"
         android:inputType="text" />
 
-    <com.paytheory.paytheorylibrarysdk.AmountEditText
-        android:id="@+id/amountEditText"
+<!--    <com.paytheory.paytheorylibrarysdk.AmountEditText-->
+<!--        android:id="@+id/amountEditText"-->
 
-        android:layout_width="400dp"
+<!--        android:layout_width="400dp"-->
 
-        android:layout_height="wrap_content"
-        android:hint="Payment amount"
-        android:inputType="text" />
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Payment amount"-->
+<!--        android:inputType="text" />-->
 
     <Button
         android:id="@+id/submitButton"

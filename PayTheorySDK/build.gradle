@@ -51,18 +51,14 @@ dependencies {
 
     // SafetyNet Attestation
     implementation "com.google.android.gms:play-services-safetynet:17.0.0"
-
-    //google play services
+    //Google Play services
     implementation "com.google.android.gms:play-services-base:17.5.0"
-
-    //AWS android SDK
+    //AWS Android SDK
     implementation 'com.amazonaws:aws-android-sdk-kms:2.19.1'
-
     //OKHttp
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
-
+    //Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0'
-
 
 }
 

@@ -30,18 +30,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.nio.ByteBuffer
 
-/**
- * Pay Theory Class
- *
- * This class takes all the details required for initiating a payment
- * @property context the context of the activity
- * @property apiKey the API key required to make the call to PayTheory
- * @property paymentAmount the payment amount for the transaction in USD cents
- * @property cardNumber the card number used for the transaction
- * @property cvv the cvv of the card used for the transaction
- * @property expirationMonth the expiration month of the card used for the transaction
- * @constructor creates a PayTheory Object that will be used during initialization of the transaction
- */
+
 class PayTheory(
     val context: Context,
     val apiKey: String,
@@ -308,9 +297,6 @@ class PayTheory(
 
     }
 
-    /**
-     * confirmAlert() - Method called to allow user to confirm or cancel transaction initialization
-     */
     fun confirmAlert(
         paymentAmount: Int,
         convenienceFee: String,
@@ -342,9 +328,7 @@ class PayTheory(
         alert.show()
     }
 
-    /**
-     * cancel()
-     */
+
     fun cancel(): String {
         Log.e("PTLib", "Cancel complete")
         val alertDialog = AlertDialog.Builder(context).create()
@@ -358,9 +342,6 @@ class PayTheory(
     }
 
 
-    /**
-     * transact() - Method called to complete transaction
-     */
     fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
         val identityJsonObject = JSONObject()
         val personalAddressJsonObject = JSONObject()
