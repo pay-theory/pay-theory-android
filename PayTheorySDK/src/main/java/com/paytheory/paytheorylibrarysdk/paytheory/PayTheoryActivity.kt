@@ -209,8 +209,6 @@ class PayTheoryActivity : AppCompatActivity() {
                         payment,
                         buyerOptions
                     )
-
-
                     val returnIntent = Intent()
                     CoroutineScope(IO).launch {
                         val transactResult = async {
@@ -225,12 +223,9 @@ class PayTheoryActivity : AppCompatActivity() {
                         finish()
 
                     }
-
-
                 }
             }
         }
-
     }
     private fun showToast(message: String){
         Toast.makeText(
