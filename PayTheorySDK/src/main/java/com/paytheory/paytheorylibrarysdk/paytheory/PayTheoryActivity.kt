@@ -54,13 +54,14 @@ class PayTheoryActivity : AppCompatActivity() {
             cityView.setText("Cincinnati")
             zipCodeView.setText("45236")
             stateView.setText("OH")
-            creditCardView.setText("4242424242424242")
+            creditCardView.setText("5597069690181758")
             cvvView.setText("424")
             expirationMonthView.setText("04")
             expirationYearView.setText("2024")
 //        amountView.setText("12.22")
 
             btn.setOnClickListener {
+                showToast("Processing payment please wait...")
 //            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
 //            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
                 if (creditCardView.text.toString().isNullOrEmpty()) {
@@ -167,6 +168,7 @@ class PayTheoryActivity : AppCompatActivity() {
             expirationYearView.setText("2024")
 
             btn.setOnClickListener {
+                showToast("Processing payment please wait...")
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
                 } else if(!cardValidation(creditCardView.text.toString())){
@@ -214,12 +216,12 @@ class PayTheoryActivity : AppCompatActivity() {
                         val transactResult = async {
                             payTheory.init()
                         }.await()
-                        while (transactResult == "") {
+                        while (transactResult == null) {
                             delay(500)
                         }
                         Log.e("PT2", "Transact Result : $transactResult")
                         returnIntent.putExtra("result", transactResult)
-                        setResult(1, returnIntent);
+                        setResult(-1, returnIntent);
                         finish()
 
                     }

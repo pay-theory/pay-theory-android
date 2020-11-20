@@ -1,6 +1,5 @@
 package com.paytheory.paytheorylibrarysdk
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -32,10 +31,10 @@ import java.nio.ByteBuffer
 
 
 class PayTheory(
-    val context: Context,
+    private val context: Context,
     val apiKey: String,
-    val cardPayment: CardPayment,
-    val buyerOptions: BuyerOptions?
+    private val cardPayment: CardPayment,
+    private val buyerOptions: BuyerOptions?
 ) {
     var client = OkHttpClient()
     var challengeResponse = ""
@@ -107,8 +106,8 @@ class PayTheory(
                 Handler(Looper.getMainLooper()).post {
                     confirmAlert(cardPayment.amount,
                         cardPayment.convenienceFee,
-                        "visa", //TODO
-                        cardPayment.cardNumber.toLong(),
+                        getCardType(cardPayment.cardNumber.toString()),
+                        cardPayment.cardNumber,
                         context)
                 }
 
@@ -538,4 +537,26 @@ class PayTheory(
         }
         return transactResults
     }
+
+
+    private fun getCardType(number: String): String {
+
+        val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
+        val mastercard = Regex("^5[1-5][0-9]{14}$")
+        val amx = Regex("^3[47][0-9]{13}$")
+        val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
+        val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
+
+        return when {
+            visa.matches(number) -> "Visa"
+            mastercard.matches(number) -> "Mastercard"
+            amx.matches(number) -> "American Express"
+            diners.matches(number) -> "Diners"
+            discover.matches(number) -> "Discover"
+            else -> "Unknown"
+        }
+    }
 }
+
+
+
