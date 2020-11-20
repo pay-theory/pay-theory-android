@@ -2,20 +2,11 @@ package com.paytheory.paytheorylibrarysdk
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
 import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.FixMethodOrder
 import org.junit.Test

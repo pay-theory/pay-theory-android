@@ -22,17 +22,14 @@ class PayTheoryActivity : AppCompatActivity() {
 ////        setTheme(R.style.DarkTheme)
 //        setTheme(theme)
         super.onCreate(savedInstanceState)
-        if (intent.getStringExtra("Buyer-Options") == "true") {
-            setContentView(R.layout.activity_pay_theory_buyer_options)
+        if (intent.getStringExtra("Display") == "Card-Account") {
+            setContentView(R.layout.activity_pay_theory_credit_card_account)
 
             val btn = findViewById<Button>(R.id.submitButton)
             val firstNameView = findViewById<FirstNameEditText>(R.id.firstNameEditText)
             val lastNameView = findViewById<LastNameEditText>(R.id.lastNameEditText)
             val addressOneView = findViewById<AddressOneEditText>(R.id.addressOneEditText)
             val addressTwoView = findViewById<AddressTwoEditText>(R.id.addressTwoEditText)
-            val phoneNumberView = findViewById<PhoneNumberEditText>(R.id.phoneNumberEditText)
-            val countryView = findViewById<CountryEditText>(R.id.countryEditText)
-            val emailAddressView = findViewById<EmailAddressEditText>(R.id.emailAddressEditText)
             val cityView = findViewById<CityEditText>(R.id.cityEditText)
             val zipCodeView = findViewById<ZipEditText>(R.id.zipEditText)
             val stateView = findViewById<StateEditText>(R.id.stateEditText)
@@ -48,9 +45,6 @@ class PayTheoryActivity : AppCompatActivity() {
             lastNameView.setText("Body")
             addressOneView.setText("1234 Test Lane")
             addressTwoView.setText("Apt 2")
-            phoneNumberView.setText("5131111111")
-            countryView.setText("USA")
-            emailAddressView.setText("test@gmail.com")
             cityView.setText("Cincinnati")
             zipCodeView.setText("45236")
             stateView.setText("OH")
@@ -61,12 +55,11 @@ class PayTheoryActivity : AppCompatActivity() {
 //        amountView.setText("12.22")
 
             btn.setOnClickListener {
-                showToast("Processing payment please wait...")
 //            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
 //            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
-                } else if(!cardValidation(creditCardView.text.toString())){
+                } else if (!cardValidation(creditCardView.text.toString())) {
                     showToast("Card Number Invalid")
                 } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
@@ -84,12 +77,12 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("City Required")
                 } else if (stateView.text.toString().isNullOrEmpty()) {
                     showToast("State Required")
-                } else if (countryView.text.toString().isNullOrEmpty()) {
-                    showToast("Country Required")
-                } else if (zipCodeView.text.toString().isNullOrEmpty()) {
-                    showToast("Zip Code Required")
-                } else if (countryView.text.toString().isNullOrEmpty()) {
-                    showToast("Country Required")
+//                } else if (countryView.text.toString().isNullOrEmpty()) {
+//                    showToast("Country Required")
+//                } else if (zipCodeView.text.toString().isNullOrEmpty()) {
+//                    showToast("Zip Code Required")
+//                } else if (countryView.text.toString().isNullOrEmpty()) {
+//                    showToast("Country Required")
                     //                else if (addressTwoView.text.toString().isNullOrEmpty()) {
 //                    showToast("Address Two Required")
 //                } else if (phoneNumberView.text.toString().isNullOrEmpty()) {
@@ -108,52 +101,91 @@ class PayTheoryActivity : AppCompatActivity() {
                     val addressTwo = addressTwoView.text.toString()
                     val city = cityView.text.toString()
                     val state = stateView.text.toString()
-                    val country = countryView.text.toString()
                     val zipCode = zipCodeView.text.toString()
-                    val phoneNumber = phoneNumberView.text.toString()
-                    val emailAddress = emailAddressView.text.toString()
+//                    val country = countryView.text.toString()
+//                    val phoneNumber = phoneNumberView.text.toString()
+//                    val emailAddress = emailAddressView.text.toString()
 //            val customTags = "TODO Custom Tags"
 
                     val payment = CardPayment(
-                        cardNumber, expirationMonth, expirationYear, cvv, intent.getStringExtra(
-                            "Payment-Amount"
-                        )!!
-                            .toInt()
-                    )
-                    val buyerOptions = BuyerOptions(
+                        cardNumber,
+                        expirationMonth,
+                        expirationYear,
+                        cvv,
+                        intent.getStringExtra("Payment-Amount")!!.toInt(),
                         firstName,
                         lastName,
                         addressOne,
                         addressTwo,
                         city,
                         state,
-                        country,
-                        zipCode,
-                        phoneNumber,
-                        emailAddress
+                        zipCode
                     )
-                    val payTheory = PayTheory(
-                        this,
-                        intent.getStringExtra("Api-Key")!!,
-                        payment,
-                        buyerOptions
-                    )
-                    val returnIntent = Intent()
-                    CoroutineScope(IO).launch {
-                        val transactResult = async {
-                            payTheory.init()
-                        }.await()
-                        while (transactResult == "") {
-                            delay(500)
+                    if (intent.getStringExtra("Buyer-Options") == "True") {
+                        val buyerOptions = BuyerOptions(
+                            intent.getStringExtra("First-Name")!!,
+                            intent.getStringExtra("Last-Name")!!,
+                            intent.getStringExtra("Address-One")!!,
+                            intent.getStringExtra("Address-Two")!!,
+                            intent.getStringExtra("City")!!,
+                            intent.getStringExtra("State")!!,
+                            intent.getStringExtra("Country")!!,
+                            intent.getStringExtra("Zip-Code")!!,
+                            intent.getStringExtra("Phone-Number")!!,
+                            intent.getStringExtra("Email-Address")!!
+                        )
+                        val payTheory = PayTheory(
+                            this,
+                            intent.getStringExtra("Api-Key")!!,
+                            payment,
+                            buyerOptions
+                        )
+
+                        showToast("Processing payment please wait...")
+
+                        val returnIntent = Intent()
+                        CoroutineScope(IO).launch {
+                            val transactResult = async {
+                                payTheory.init()
+                            }.await()
+                            while (transactResult == "") {
+                                delay(500)
+                            }
+                            Log.e("PT2", "Transact Result : $transactResult")
+                            returnIntent.putExtra("result", transactResult)
+                            setResult(1, returnIntent);
+                            finish()
                         }
-                        Log.e("PT2", "Transact Result : $transactResult")
-                        returnIntent.putExtra("result", transactResult)
-                        setResult(1, returnIntent);
-                        finish()
+                    } else {
+                        //If buyer options is false or null
+                        val payTheory = PayTheory(
+                            this,
+                            intent.getStringExtra("Api-Key")!!,
+                            payment
+                        )
+
+                        showToast("Processing payment please wait...")
+
+                        val returnIntent = Intent()
+                        CoroutineScope(IO).launch {
+                            val transactResult = async {
+                                payTheory.init()
+                            }.await()
+                            while (transactResult == "") {
+                                delay(500)
+                            }
+                            Log.e("PT2", "Transact Result : $transactResult")
+                            returnIntent.putExtra("result", transactResult)
+                            setResult(1, returnIntent);
+                            finish()
+                        }
+
                     }
+
                 }
+
             }
-        } else {
+        } else if (intent.getStringExtra("Display") == "Card-Only") {
             setContentView(R.layout.activity_pay_theory_credit_card)
 
             val btn = findViewById<Button>(R.id.submitButton)
@@ -161,17 +193,23 @@ class PayTheoryActivity : AppCompatActivity() {
             val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
             val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
             val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
+//        val amountView = findViewById<AmountEditText>(R.id.amountEditText)
+            //        val expirationView = findViewById<ExpEditText>(R.id.expEditText)
+            //        val customTagsView = findViewById<Custom>(R.id.EditText)
 
-            creditCardView.setText("4242424242424242")
+
+            creditCardView.setText("5597069690181758")
             cvvView.setText("424")
             expirationMonthView.setText("04")
             expirationYearView.setText("2024")
+//        amountView.setText("12.22")
 
             btn.setOnClickListener {
-                showToast("Processing payment please wait...")
+//            val apiKey = "pt-sandbox-dev-d9de9154964990737db2f80499029dd6";
+//            val amount = ((amountView.text.toString().toDouble()) * 100).toInt()
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
-                } else if(!cardValidation(creditCardView.text.toString())){
+                } else if (!cardValidation(creditCardView.text.toString())) {
                     showToast("Card Number Invalid")
                 } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
@@ -179,55 +217,129 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Expiration Month Required")
                 } else if (expirationYearView.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Year Required")
+//                } else if (firstNameView.text.toString().isNullOrEmpty()) {
+//                    showToast("First Name Required")
+//                } else if (lastNameView.text.toString().isNullOrEmpty()) {
+//                    showToast("Last Name Required")
+//                } else if (addressOneView.text.toString().isNullOrEmpty()) {
+//                    showToast("Address One Required")
+//                } else if (cityView.text.toString().isNullOrEmpty()) {
+//                    showToast("City Required")
+//                } else if (stateView.text.toString().isNullOrEmpty()) {
+//                    showToast("State Required")
+//                } else if (countryView.text.toString().isNullOrEmpty()) {
+//                    showToast("Country Required")
+//                } else if (zipCodeView.text.toString().isNullOrEmpty()) {
+//                    showToast("Zip Code Required")
+//                } else if (countryView.text.toString().isNullOrEmpty()) {
+//                    showToast("Country Required")
+                    //                else if (addressTwoView.text.toString().isNullOrEmpty()) {
+//                    showToast("Address Two Required")
+//                } else if (phoneNumberView.text.toString().isNullOrEmpty()) {
+//                    showToast("Phone Number Required")
+//                } else if (emailAddressView.text.toString().isNullOrEmpty()) {
+//                    showToast("Email Address Required")
+//                }
                 } else {
                     val cardNumber = creditCardView.text.toString().toLong()
                     val cvv = cvvView.text.toString().toInt()
                     val expirationMonth = expirationMonthView.text.toString().toInt()
                     val expirationYear = expirationYearView.text.toString().toInt()
+//                    val firstName = firstNameView.text.toString()
+//                    val lastName = lastNameView.text.toString()
+//                    val addressOne = addressOneView.text.toString()
+//                    val addressTwo = addressTwoView.text.toString()
+//                    val city = cityView.text.toString()
+//                    val state = stateView.text.toString()
+//                    val zipCode = zipCodeView.text.toString()
+//                    val country = countryView.text.toString()
+//                    val phoneNumber = phoneNumberView.text.toString()
+//                    val emailAddress = emailAddressView.text.toString()
+//            val customTags = "TODO Custom Tags"
 
                     val payment = CardPayment(
                         cardNumber,
                         expirationMonth,
                         expirationYear,
                         cvv,
-                        intent.getStringExtra("Payment-Amount")!!
-                            .toInt()
+                        intent.getStringExtra("Payment-Amount")!!.toInt(),
+//                        firstName,
+//                        lastName,
+//                        addressOne,
+//                        addressTwo,
+//                        city,
+//                        state,
+//                        zipCode
                     )
-                    val buyerOptions = BuyerOptions(
-                        intent.getStringExtra("First-Name")!!,
-                        intent.getStringExtra("Last-Name")!!,
-                        intent.getStringExtra("Address-One")!!,
-                        intent.getStringExtra("Address-Two")!!,
-                        intent.getStringExtra("City")!!,
-                        intent.getStringExtra("State")!!,
-                        intent.getStringExtra("Country")!!,
-                        intent.getStringExtra("Zip-Code")!!,
-                        intent.getStringExtra("Phone-Number")!!,
-                        intent.getStringExtra("Email-Address")!!
-                    )
-                    val payTheory = PayTheory(
-                        this,
-                        intent.getStringExtra("Api-Key")!!,
-                        payment,
-                        buyerOptions
-                    )
-                    val returnIntent = Intent()
-                    CoroutineScope(IO).launch {
-                        val transactResult = async {
-                            payTheory.init()
-                        }.await()
-                        while (transactResult == null) {
-                            delay(500)
+                    if (intent.getStringExtra("Buyer-Options") == "True") {
+                        val buyerOptions = BuyerOptions(
+                            intent.getStringExtra("First-Name")!!,
+                            intent.getStringExtra("Last-Name")!!,
+                            intent.getStringExtra("Address-One")!!,
+                            intent.getStringExtra("Address-Two")!!,
+                            intent.getStringExtra("City")!!,
+                            intent.getStringExtra("State")!!,
+                            intent.getStringExtra("Country")!!,
+                            intent.getStringExtra("Zip-Code")!!,
+                            intent.getStringExtra("Phone-Number")!!,
+                            intent.getStringExtra("Email-Address")!!
+                        )
+                        val payTheory = PayTheory(
+                            this,
+                            intent.getStringExtra("Api-Key")!!,
+                            payment,
+                            buyerOptions
+                        )
+
+                        showToast("Processing payment please wait...")
+
+                        val returnIntent = Intent()
+                        CoroutineScope(IO).launch {
+                            val transactResult = async {
+                                payTheory.init()
+                            }.await()
+                            while (transactResult == "") {
+                                delay(500)
+                            }
+                            Log.e("PT2", "Transact Result : $transactResult")
+                            returnIntent.putExtra("result", transactResult)
+                            setResult(1, returnIntent);
+                            finish()
                         }
-                        Log.e("PT2", "Transact Result : $transactResult")
-                        returnIntent.putExtra("result", transactResult)
-                        setResult(-1, returnIntent);
-                        finish()
+                    } else {
+                        //If buyer options is false or null
+                        val payTheory = PayTheory(
+                            this,
+                            intent.getStringExtra("Api-Key")!!,
+                            payment
+                        )
+                        showToast("Processing payment please wait...")
+
+                        val returnIntent = Intent()
+                        CoroutineScope(IO).launch {
+                            val transactResult = async {
+                                payTheory.init()
+                            }.await()
+                            while (transactResult == "") {
+                                delay(500)
+                            }
+                            Log.e("PT2", "Transact Result : $transactResult")
+                            returnIntent.putExtra("result", transactResult)
+                            setResult(1, returnIntent);
+                            finish()
+                        }
 
                     }
+
                 }
+
             }
+        } else {
+            //If "Display" not selected or input
+            Log.e("PT2", "Pay Theory \"Display\" Not Selected")
         }
+
+
     }
     private fun showToast(message: String){
         Toast.makeText(
@@ -252,6 +364,87 @@ class PayTheoryActivity : AppCompatActivity() {
         return sum % 10 == 0
     }
 }
+
+
+//                setContentView(R.layout.activity_pay_theory_credit_card)
+//
+//                val btn = findViewById<Button>(R.id.submitButton)
+//                val creditCardView = findViewById<CreditCardEditText>(R.id.creditCardEditText)
+//                val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
+//                val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
+//                val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
+//
+//                creditCardView.setText("4242424242424242")
+//                cvvView.setText("424")
+//                expirationMonthView.setText("04")
+//                expirationYearView.setText("2024")
+//
+//                btn.setOnClickListener {
+//                    showToast("Processing payment please wait...")
+//                    if (creditCardView.text.toString().isNullOrEmpty()) {
+//                        showToast("Card Number Required")
+//                    } else if (!cardValidation(creditCardView.text.toString())) {
+//                        showToast("Card Number Invalid")
+//                    } else if (cvvView.text.toString().isNullOrEmpty()) {
+//                        showToast("CVV Number Required")
+//                    } else if (expirationMonthView.text.toString().isNullOrEmpty()) {
+//                        showToast("Expiration Month Required")
+//                    } else if (expirationYearView.text.toString().isNullOrEmpty()) {
+//                        showToast("Expiration Year Required")
+//                    } else {
+//                        val cardNumber = creditCardView.text.toString().toLong()
+//                        val cvv = cvvView.text.toString().toInt()
+//                        val expirationMonth = expirationMonthView.text.toString().toInt()
+//                        val expirationYear = expirationYearView.text.toString().toInt()
+//
+//                        val payment = CardPayment(
+//                            cardNumber,
+//                            expirationMonth,
+//                            expirationYear,
+//                            cvv,
+//                            intent.getStringExtra("Payment-Amount")!!
+//                                .toInt()
+//                        )
+//                        val buyerOptions = BuyerOptions(
+//                            intent.getStringExtra("First-Name")!!,
+//                            intent.getStringExtra("Last-Name")!!,
+//                            intent.getStringExtra("Address-One")!!,
+//                            intent.getStringExtra("Address-Two")!!,
+//                            intent.getStringExtra("City")!!,
+//                            intent.getStringExtra("State")!!,
+//                            intent.getStringExtra("Country")!!,
+//                            intent.getStringExtra("Zip-Code")!!,
+//                            intent.getStringExtra("Phone-Number")!!,
+//                            intent.getStringExtra("Email-Address")!!
+//                        )
+//                        val payTheory = PayTheory(
+//                            this,
+//                            intent.getStringExtra("Api-Key")!!,
+//                            payment,
+//                            buyerOptions
+//                        )
+//                        val returnIntent = Intent()
+//                        CoroutineScope(IO).launch {
+//                            val transactResult = async {
+//                                payTheory.init()
+//                            }.await()
+//                            while (transactResult == null) {
+//                                delay(500)
+//                            }
+//                            Log.e("PT2", "Transact Result : $transactResult")
+//                            returnIntent.putExtra("result", transactResult)
+//                            setResult(-1, returnIntent);
+//                            finish()
+//
+//                        }
+//                    }
+//                }
+
+
+
+
+
+
 
 
 

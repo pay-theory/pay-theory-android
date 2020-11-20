@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Base64.DEFAULT
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.kms.AWSKMSClient
@@ -34,7 +33,7 @@ class PayTheory(
     private val context: Context,
     val apiKey: String,
     private val cardPayment: CardPayment,
-    private val buyerOptions: BuyerOptions?
+    private val buyerOptions: BuyerOptions? = null
 ) {
     var client = OkHttpClient()
     var challengeResponse = ""
@@ -49,7 +48,7 @@ class PayTheory(
     var token = ""
     var idempotency = ""
     var merchantId = ""
-    var transactResults = ""
+
     var userConfirmation: Boolean? = null
     var payTheoryTransactResponse = ""
 
@@ -392,9 +391,12 @@ class PayTheory(
             e.printStackTrace()
         }
 
+
         val identityBody = identityJsonObject.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaType())
         Log.e("PT2", "Identity Call JSON body : $identityJsonObject")
+
+
 
         val authRequest = Request.Builder()
             .method("POST", identityBody)
@@ -407,6 +409,8 @@ class PayTheory(
 
 
         val identityResponse = client.newCall(authRequest).execute()
+
+
         val identityJsonData: String? = identityResponse.body?.string()
         val identityJsonResponse = JSONObject(identityJsonData)
         Log.e("PT2", "Identity Call Response: $identityJsonResponse")
@@ -414,17 +418,32 @@ class PayTheory(
         //TODO - Set up check if authorization response throws back an error
         if (identityJsonResponse.getString("id") != null) {
 
+            val addressJsonObject = JSONObject()
+            addressJsonObject.put("city", "${cardPayment.cardCity}")
+            addressJsonObject.put("region", "${cardPayment.cardState}")
+            addressJsonObject.put("postal_code", "${cardPayment.cardZip}")
+            addressJsonObject.put("line1", "${cardPayment.cardAddressOne}")
+            addressJsonObject.put("line2", "${cardPayment.cardAddressTwo}")
+
             val paymentJsonObject = JSONObject()
             try {
                 paymentJsonObject.put(
                     "identity",
                     "${identityJsonResponse.getString("id")}"
                 )
+                if (!cardPayment.cardFirstName.isNullOrBlank()){
+                    paymentJsonObject.put("name", "${cardPayment.cardFirstName} ${cardPayment.cardLastName}")
+                }
+                if (!cardPayment.cardAddressOne.isNullOrBlank() || !cardPayment.cardAddressTwo.isNullOrBlank()){
+                    paymentJsonObject.put("address", addressJsonObject)
+                }
+
                 paymentJsonObject.put("expiration_month", "${cardPayment.cardExpMon}")
                 paymentJsonObject.put("expiration_year", "${cardPayment.cardExpYear}")
                 paymentJsonObject.put("security_code", "${cardPayment.cardCvv}")
                 paymentJsonObject.put("number", "${cardPayment.cardNumber}")
                 paymentJsonObject.put("type", "PAYMENT_CARD")
+
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -446,7 +465,9 @@ class PayTheory(
             val paymentJsonResponse = JSONObject(paymentJsonData)
 
             Log.e("PT2", "Payment Call Response: $paymentJsonResponse")
-            if (paymentJsonResponse.getString("id") != null) { //TODO - check if failed
+           if(!paymentJsonResponse.has("_embedded"))
+//            if (paymentJsonResponse.getString("id") != null)
+                { //TODO - check if failed
                 val authJsonObject = JSONObject()
                 try {
                     authJsonObject.put(
@@ -521,8 +542,8 @@ class PayTheory(
                             "PT2",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
-                        transactResults = capAuthJSONResponse.getString("state")
-                        return transactResults
+                        payTheoryTransactResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${cardPayment.cardNumber.toString().takeLast(4)}\", \"brand\":\"${getCardType(cardPayment.cardNumber.toString())}\", \"created_at\":\"TIME CREATED\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString("state")}\", \"tags\":{ \"pay-theory-environment\":\":\"env\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"YOUR_TAG_VALUE\" }"
+                        return payTheoryTransactResponse
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")
                     }
@@ -530,12 +551,20 @@ class PayTheory(
                     Log.e("PT2", "Create Authorization Request Failed")
                 }
             } else {
-                Log.e("PT2", "Payment Call Request Failed")
+               var embedded = paymentJsonResponse.getJSONObject("_embedded")
+               var error = embedded.getJSONArray("errors")
+               var errorJson = error.getJSONObject(0)
+               var messageString = errorJson.getString("message")
+               payTheoryTransactResponse = messageString
+               Log.e("PT2", "Payment Call Request Failed")
+
+               return payTheoryTransactResponse
+
             }
         } else {
             Log.e("PT2", "Identity Call Request Failed")
         }
-        return transactResults
+        return payTheoryTransactResponse
     }
 
 

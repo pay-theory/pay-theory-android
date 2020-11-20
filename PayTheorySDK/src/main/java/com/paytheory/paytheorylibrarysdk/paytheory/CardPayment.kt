@@ -6,10 +6,15 @@ class CardPayment(
     var cardExpYear: Int,
     var cardCvv: Int,
     var amount: Int,
-    var convenienceFee: String = "",
-    var currency: String = "",
-
+    var cardFirstName: String?= null,
+    var cardLastName: String?= null,
+    var cardAddressOne: String? = null,
+    var cardAddressTwo: String?= null,
+    var cardCity: String?= null,
+    var cardState: String?= null,
+    var cardZip: String?= null,
     ){
 
-
+    var currency = ""
+    var convenienceFee: String = ""
 }
