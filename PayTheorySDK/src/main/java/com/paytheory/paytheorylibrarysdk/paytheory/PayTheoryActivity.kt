@@ -145,14 +145,14 @@ class PayTheoryActivity : AppCompatActivity() {
 
                         val returnIntent = Intent()
                         CoroutineScope(IO).launch {
-                            val transactResult = async {
+                            val payTheoryResult = async {
                                 payTheory.init()
                             }.await()
-                            while (transactResult == "") {
+                            while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $transactResult")
-                            returnIntent.putExtra("result", transactResult)
+                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            returnIntent.putExtra("result", payTheoryResult)
                             setResult(1, returnIntent);
                             finish()
                         }
@@ -168,14 +168,14 @@ class PayTheoryActivity : AppCompatActivity() {
 
                         val returnIntent = Intent()
                         CoroutineScope(IO).launch {
-                            val transactResult = async {
+                            val payTheoryResult = async {
                                 payTheory.init()
                             }.await()
-                            while (transactResult == "") {
+                            while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $transactResult")
-                            returnIntent.putExtra("result", transactResult)
+                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            returnIntent.putExtra("result", payTheoryResult)
                             setResult(1, returnIntent);
                             finish()
                         }
@@ -295,14 +295,14 @@ class PayTheoryActivity : AppCompatActivity() {
 
                         val returnIntent = Intent()
                         CoroutineScope(IO).launch {
-                            val transactResult = async {
+                            val payTheoryResult = async {
                                 payTheory.init()
                             }.await()
-                            while (transactResult == "") {
+                            while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $transactResult")
-                            returnIntent.putExtra("result", transactResult)
+                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            returnIntent.putExtra("result", payTheoryResult)
                             setResult(1, returnIntent);
                             finish()
                         }
@@ -317,15 +317,15 @@ class PayTheoryActivity : AppCompatActivity() {
 
                         val returnIntent = Intent()
                         CoroutineScope(IO).launch {
-                            val transactResult = async {
+                            val payTheoryResult = async {
                                 payTheory.init()
                             }.await()
-                            while (transactResult == "") {
+                            while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $transactResult")
-                            returnIntent.putExtra("result", transactResult)
-                            setResult(1, returnIntent);
+                            Log.e("PT2", "Pay Theory Result : $payTheoryResult")
+                            returnIntent.putExtra("result", payTheoryResult)
+                            setResult(-1, returnIntent);
                             finish()
                         }
 
@@ -425,14 +425,14 @@ class PayTheoryActivity : AppCompatActivity() {
 //                        )
 //                        val returnIntent = Intent()
 //                        CoroutineScope(IO).launch {
-//                            val transactResult = async {
+//                            val payTheoryResult = async {
 //                                payTheory.init()
 //                            }.await()
-//                            while (transactResult == null) {
+//                            while (payTheoryResult == null) {
 //                                delay(500)
 //                            }
-//                            Log.e("PT2", "Transact Result : $transactResult")
-//                            returnIntent.putExtra("result", transactResult)
+//                            Log.e("PT2", "Transact Result : $payTheoryResult")
+//                            returnIntent.putExtra("result", payTheoryResult)
 //                            setResult(-1, returnIntent);
 //                            finish()
 //

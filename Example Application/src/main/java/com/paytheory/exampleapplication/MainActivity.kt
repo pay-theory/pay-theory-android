@@ -49,33 +49,33 @@ class MainActivity : AppCompatActivity() {
 
 
 
-//        //Buyer-Options = True , Display = "Card-Account"
-//        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
-//        toPaymentButton.setOnClickListener {
-//            val intent = Intent(this, PayTheoryActivity::class.java)
-//            //Set payment amount value in pennies
-//            intent.putExtra("Payment-Amount", "3000")
-//            //Set api-key value
-//            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-//            //Set Display
-//            intent.putExtra("Display", "Card-Account")
-//
-//            //Set buyer options as false and provide buyer info
-//            intent.putExtra("Buyer-Options", "True")
-//            //Set Buyer Options data
-//            intent.putExtra("First-Name", "Buyer")
-//            intent.putExtra("Last-Name", "Options")
-//            intent.putExtra("Address-One", "123 Options Lane")
-//            intent.putExtra("Address-Two", "Apt 1")
-//            intent.putExtra("City", "Cincinnati")
-//            intent.putExtra("State", "OH")
-//            intent.putExtra("Country", "USA")
-//            intent.putExtra("Zip-Code", "45236")
-//            intent.putExtra("Phone-Number", "513-123-1234")
-//            intent.putExtra("Email-Address", "test@paytheory.com")
-//            //Start PayTheoryActivity
-//            startActivityForResult(intent, 1);
-//        }
+        //Buyer-Options = True , Display = "Card-Account"
+        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        toPaymentButton.setOnClickListener {
+            val intent = Intent(this, PayTheoryActivity::class.java)
+            //Set payment amount value in pennies
+            intent.putExtra("Payment-Amount", "3000")
+            //Set api-key value
+            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+            //Set Display
+            intent.putExtra("Display", "Card-Account")
+
+            //Set buyer options as false and provide buyer info
+            intent.putExtra("Buyer-Options", "True")
+            //Set Buyer Options data
+            intent.putExtra("First-Name", "Buyer")
+            intent.putExtra("Last-Name", "Options")
+            intent.putExtra("Address-One", "123 Options Lane")
+            intent.putExtra("Address-Two", "Apt 1")
+            intent.putExtra("City", "Cincinnati")
+            intent.putExtra("State", "OH")
+            intent.putExtra("Country", "USA")
+            intent.putExtra("Zip-Code", "45236")
+            intent.putExtra("Phone-Number", "513-123-1234")
+            intent.putExtra("Email-Address", "test@paytheory.com")
+            //Start PayTheoryActivity
+            startActivityForResult(intent, 1);
+        }
 
 
 
@@ -95,19 +95,23 @@ class MainActivity : AppCompatActivity() {
 //            startActivityForResult(intent, 1);
 //        }
 
-        //Buyer-Options = null , Display = "Card-Only"
-        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
-        toPaymentButton.setOnClickListener {
-            val intent = Intent(this, PayTheoryActivity::class.java)
-            //Set payment amount value in pennies
-            intent.putExtra("Payment-Amount", "5000")
-            //Set api-key value
-            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-            //Set Display
-            intent.putExtra("Display", "Card-Only")
-            //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
-        }
+
+
+
+
+//        //Buyer-Options = null , Display = "Card-Only"
+//        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+//        toPaymentButton.setOnClickListener {
+//            val intent = Intent(this, PayTheoryActivity::class.java)
+//            //Set payment amount value in pennies
+//            intent.putExtra("Payment-Amount", "5000")
+//            //Set api-key value
+//            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+//            //Set Display
+//            intent.putExtra("Display", "Card-Only")
+//            //Start PayTheoryActivity
+//            startActivityForResult(intent, 1);
+//        }
 
 
 
