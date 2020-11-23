@@ -570,7 +570,7 @@ class PayTheory(
                             "created_at"
                         )}\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString(
                             "state"
-                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"${cardPayment.tags}\" }"
+                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"${cardPayment.tags.toString()}\" }"
                         return payTheoryTransactResponse
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")
