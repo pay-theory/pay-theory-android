@@ -10,11 +10,11 @@ import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.kms.AWSKMSClient
 import com.amazonaws.services.kms.model.DecryptRequest
 import com.amazonaws.services.kms.model.VerifyRequest
-import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
-import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.safetynet.SafetyNet
+import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
+import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -93,7 +93,11 @@ class PayTheory(
 
                 //KMS
                 val kmsResult = async{
-                    kms(idempotencyResponseString, idempotencySignatureString, idempotencyCredIdString)
+                    kms(
+                        idempotencyResponseString,
+                        idempotencySignatureString,
+                        idempotencyCredIdString
+                    )
                 }.await()
 
                 Log.e("PT2", "Printing KMS Result $kmsResult")
@@ -103,11 +107,13 @@ class PayTheory(
 
             if (kmsResult){
                 Handler(Looper.getMainLooper()).post {
-                    confirmAlert(cardPayment.amount,
+                    confirmAlert(
+                        cardPayment.amount,
                         cardPayment.convenienceFee,
                         getCardType(cardPayment.cardNumber.toString()),
                         cardPayment.cardNumber,
-                        context)
+                        context
+                    )
                 }
 
             } else{
@@ -130,7 +136,10 @@ class PayTheory(
         while (payTheoryTransactResponse == ""){
             delay(5000)
         }
-        Log.e("PT2", "payTheoryTransactResponse returned back to function call : $payTheoryTransactResponse")
+        Log.e(
+            "PT2",
+            "payTheoryTransactResponse returned back to function call : $payTheoryTransactResponse"
+        )
         return payTheoryTransactResponse
     }
 
@@ -171,7 +180,10 @@ class PayTheory(
 
     suspend fun attestation(nonce: String): String? {
 
-        Looper.prepare()
+        if (Looper.myLooper()==null){
+            Looper.prepare()
+        }
+
         var attestationTask = SafetyNet.getClient(context).attest(
             nonce.toByteArray(),
             "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
@@ -181,7 +193,6 @@ class PayTheory(
         }
         attestationResponse = attestationTask.result.jwsResult
         return attestationTask.result.jwsResult
-
     }
 
     fun payTheoryIdempotency(nonce: String, attestation: String?): String {
@@ -214,7 +225,9 @@ class PayTheory(
         val jsonData: String? = response.body?.string()
         Log.e("PTLib", "Idempotency response body ${jsonData}")
         val idempotencyJSONResponse = JSONObject(jsonData)
-        return if(idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has("credId")){
+        return if(idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has(
+                "credId"
+            )){
             idempotencyResponse = idempotencyJSONResponse.toString()
             idempotencyResponseString = idempotencyJSONResponse.getString("response")
             idempotencySignatureString = idempotencyJSONResponse.getString("signature")
@@ -261,7 +274,7 @@ class PayTheory(
         merchantId = payment.getString("merchant")
         cardPayment.currency = payment.getString("currency")
         cardPayment.amount = payment.getString("amount").toInt()
-        cardPayment.convenienceFee = payment.getString("convenience_fee")
+        cardPayment.convenienceFee = payment.getString("service_fee")
 
         Log.e("PTLib", "decryptResponse.plaintext $converted")
         Log.e("PTLib", "decryptResponse $decryptResponse")
@@ -432,7 +445,10 @@ class PayTheory(
                     "${identityJsonResponse.getString("id")}"
                 )
                 if (!cardPayment.cardFirstName.isNullOrBlank()){
-                    paymentJsonObject.put("name", "${cardPayment.cardFirstName} ${cardPayment.cardLastName}")
+                    paymentJsonObject.put(
+                        "name",
+                        "${cardPayment.cardFirstName} ${cardPayment.cardLastName}"
+                    )
                 }
                 if (!cardPayment.cardAddressOne.isNullOrBlank() || !cardPayment.cardAddressTwo.isNullOrBlank()){
                     paymentJsonObject.put("address", addressJsonObject)
@@ -477,6 +493,11 @@ class PayTheory(
                     authJsonObject.put("merchant_identity", merchantId)
                     authJsonObject.put("amount", cardPayment.amount)
                     authJsonObject.put("currency", currency)
+                    if(!cardPayment.tags.isNullOrBlank()){
+                        val tagsJson = JSONObject()
+                        tagsJson.put("order_number", cardPayment.tags.toString())
+                        authJsonObject.put("tags", tagsJson)
+                    }
 
                 } catch (e: JSONException) {
                     e.printStackTrace()
@@ -534,6 +555,7 @@ class PayTheory(
                     val jsonData: String? = capAuthResponse.body?.string()
                     val capAuthJSONResponse = JSONObject(jsonData)
 
+
                     //check if payment was complete or denied
                     if (capAuthJSONResponse.getString("state") == "SUCCEEDED") {
 
@@ -542,7 +564,13 @@ class PayTheory(
                             "PT2",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
-                        payTheoryTransactResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${cardPayment.cardNumber.toString().takeLast(4)}\", \"brand\":\"${getCardType(cardPayment.cardNumber.toString())}\", \"created_at\":\"TIME CREATED\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString("state")}\", \"tags\":{ \"pay-theory-environment\":\":\"env\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"YOUR_TAG_VALUE\" }"
+                        payTheoryTransactResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${cardPayment.cardNumber.toString().takeLast(
+                            4
+                        )}\", \"brand\":\"${getCardType(cardPayment.cardNumber.toString())}\", \"created_at\":\"${capAuthJSONResponse.getString(
+                            "created_at"
+                        )}\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString(
+                            "state"
+                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"${cardPayment.tags}\" }"
                         return payTheoryTransactResponse
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")

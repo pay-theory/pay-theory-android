@@ -1,5 +1,6 @@
 package com.paytheory.paytheorylibrarysdk.paytheory
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -61,12 +62,24 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Card Number Required")
                 } else if (!cardValidation(creditCardView.text.toString())) {
                     showToast("Card Number Invalid")
+                } else if (creditCardView.text.toString().length < 13) {
+                    showToast("Card Number Invalid")
                 } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
+                } else if (cvvView.text.toString().length <= 2) {
+                    showToast("CVV Number Must Be 3 Digits")
                 } else if (expirationMonthView.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Month Required")
+                }  else if (expirationMonthView.text.toString().length <= 1) {
+                    showToast("Expiration Month Must Be 2 Digits")
                 } else if (expirationYearView.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Year Required")
+                } else if (expirationYearView.text.toString().length <= 3) {
+                    showToast("Expiration Year Must Be 4 Digits")
+                } else if (zipCodeView.text.toString().isNullOrEmpty()) {
+                    showToast("Zip Code Required")
+                } else if (zipCodeView.text.toString().length <= 4) {
+                    showToast("Zip Code Must Be 5 Digits")
                 } else if (firstNameView.text.toString().isNullOrEmpty()) {
                     showToast("First Name Required")
                 } else if (lastNameView.text.toString().isNullOrEmpty()) {
@@ -113,6 +126,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         expirationYear,
                         cvv,
                         intent.getStringExtra("Payment-Amount")!!.toInt(),
+                        //add tags if intent is there
+                        intent.getStringExtra("Tags"),
                         firstName,
                         lastName,
                         addressOne,
@@ -120,6 +135,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         city,
                         state,
                         zipCode
+
                     )
                     if (intent.getStringExtra("Buyer-Options") == "True") {
                         val buyerOptions = BuyerOptions(
@@ -153,7 +169,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(1, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent);
                             finish()
                         }
                     } else {
@@ -176,7 +192,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(1, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent);
                             finish()
                         }
 
@@ -211,10 +227,16 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Card Number Required")
                 } else if (!cardValidation(creditCardView.text.toString())) {
                     showToast("Card Number Invalid")
+                } else if (creditCardView.text.toString().length < 13) {
+                    showToast("Card Number Invalid")
                 } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
+                } else if (cvvView.text.toString().length <= 2) {
+                    showToast("CVV Number Must Be 3 Digits")
                 } else if (expirationMonthView.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Month Required")
+                } else if (expirationMonthView.text.toString().length <= 1) {
+                    showToast("Expiration Month Must Be 2 Digits")
                 } else if (expirationYearView.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Year Required")
 //                } else if (firstNameView.text.toString().isNullOrEmpty()) {
@@ -240,6 +262,8 @@ class PayTheoryActivity : AppCompatActivity() {
 //                } else if (emailAddressView.text.toString().isNullOrEmpty()) {
 //                    showToast("Email Address Required")
 //                }
+                } else if (expirationYearView.text.toString().length <= 3) {
+                    showToast("Expiration Year Must Be 4 Digits")
                 } else {
                     val cardNumber = creditCardView.text.toString().toLong()
                     val cvv = cvvView.text.toString().toInt()
@@ -263,6 +287,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         expirationYear,
                         cvv,
                         intent.getStringExtra("Payment-Amount")!!.toInt(),
+                        intent.getStringExtra("Tags"),
 //                        firstName,
 //                        lastName,
 //                        addressOne,
@@ -303,7 +328,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(1, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent);
                             finish()
                         }
                     } else {
@@ -325,7 +350,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Pay Theory Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(-1, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent);
                             finish()
                         }
 
@@ -335,8 +360,14 @@ class PayTheoryActivity : AppCompatActivity() {
 
             }
         } else {
+            //TODO -TEST FUN
+            val returnIntent = Intent()
             //If "Display" not selected or input
-            Log.e("PT2", "Pay Theory \"Display\" Not Selected")
+            var errorMessage = "Pay Theory \"Display\" Not Selected"
+            Log.e("PT2", errorMessage)
+            returnIntent.putExtra("result", errorMessage)
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish()
         }
 
 
