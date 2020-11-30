@@ -6,6 +6,7 @@ class CardPayment(
     var cardExpYear: Int,
     var cardCvv: Int,
     var amount: Int,
+    var feeMode: String = "",
     var tags: String? = "",
     var cardFirstName: String?= null,
     var cardLastName: String?= null,

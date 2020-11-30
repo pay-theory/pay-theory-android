@@ -126,6 +126,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         expirationYear,
                         cvv,
                         intent.getStringExtra("Payment-Amount")!!.toInt(),
+                        //add fee mode
+                        intent.getStringExtra("Fee-Mode")!!,
                         //add tags if intent is there
                         intent.getStringExtra("Tags"),
                         firstName,
@@ -287,6 +289,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         expirationYear,
                         cvv,
                         intent.getStringExtra("Payment-Amount")!!.toInt(),
+                        //add fee mode
+                        intent.getStringExtra("Fee-Mode")!!,
                         intent.getStringExtra("Tags"),
 //                        firstName,
 //                        lastName,

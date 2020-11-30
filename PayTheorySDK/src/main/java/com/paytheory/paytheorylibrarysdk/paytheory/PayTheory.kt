@@ -207,6 +207,9 @@ class PayTheory(
             if (attestation != null) {
                 jsonObject.put("attestation", "$attestation")
             }
+            if (!cardPayment.feeMode.isNullOrBlank()) {
+                jsonObject.put("fee_mode", "${cardPayment.feeMode}")
+            }
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -495,7 +498,7 @@ class PayTheory(
                     authJsonObject.put("currency", currency)
                     if(!cardPayment.tags.isNullOrBlank()){
                         val tagsJson = JSONObject()
-                        tagsJson.put("order_number", cardPayment.tags.toString())
+                        tagsJson.put("tags", cardPayment.tags.toString())
                         authJsonObject.put("tags", tagsJson)
                     }
 
