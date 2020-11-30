@@ -13,7 +13,7 @@
         android:theme="@style/Theme.PayTheoryLibrary">
 <!--        android:theme="@style/Theme.AppCompat.DayNight">-->
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".ExampleAppMainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

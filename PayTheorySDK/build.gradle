@@ -4,6 +4,8 @@ plugins {
     id 'maven'
 }
 
+def VERSION_NAME = "0.0.1"
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
@@ -12,7 +14,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName VERSION_NAME
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -62,8 +64,35 @@ dependencies {
 
 }
 
+ext {
+    bintrayRepo = 'pay-theory-android' // Repo name in bintray dashboard
+    bintrayName = 'com.paytheorylibrary' // package name of the bintray repo
+
+    publishedGroupId = 'com.paytheory'   // this is the ID we want to see in implementation line
+    libraryName = 'pay-theory-android'     // this is the module name of library
+    artifact = 'pay-theory-android'        // this is the artifact we want to see in implementation line
+
+    libraryDescription = 'pay-theory-android' // description of library
+
+    siteUrl = 'https://github.com/pay-theory/pay-theory-android'    // git repo url
+    gitUrl = 'https://github.com/pay-theory/pay-theory-android' // git repo vcs url
+
+    libraryVersion = 0.1    // library version
+
+    developerId = 'abel@paytheory'                // This is your bintray username
+    developerName = 'Abel Collins'              // Developer's name
+    developerEmail = 'abel.dejesus.collins@gmail.com'                // Developer's email
+
+    licenseName = 'The MIT License (MIT)'  // for example, The Apache Software License, Version 2.0
+    licenseUrl = 'https://opensource.org/licenses/MIT'   // for example, http://www.apache.org/licenses/LICENSE-2.0.txt
+    allLicenses = ["MIT"]    // array of licenses, for example, ["Apache-2.0"]
+}
+
 
 apply plugin: 'org.jetbrains.dokka'
+apply from: "$project.rootDir/tools/script-git-version.gradle"
+apply from: 'publish.gradle'
+
 
 dokka {
     outputFormat = 'gfm'
@@ -94,3 +123,9 @@ task writeNewPom {
         }.writeTo("$buildDir/pom.xml")
     }
 }
+
+// Avoid Kotlin docs error
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+

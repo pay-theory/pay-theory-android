@@ -29,7 +29,7 @@ class FirstNameEditText : androidx.appcompat.widget.AppCompatEditText{
  */
 
 class LastNameEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -48,7 +48,7 @@ class LastNameEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class AddressOneEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -67,7 +67,7 @@ class AddressOneEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class AddressTwoEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -86,7 +86,7 @@ class AddressTwoEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class PhoneNumberEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -105,7 +105,7 @@ class PhoneNumberEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class CountryEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -124,7 +124,7 @@ class CountryEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class EmailAddressEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -143,7 +143,7 @@ class EmailAddressEditText : androidx.appcompat.widget.AppCompatEditText{
  * Custom AppCompatEditText class that can be used for PayTheory class inputs
  */
 class CityEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -160,7 +160,7 @@ class CityEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class ZipEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -177,7 +177,7 @@ class ZipEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class StateEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -194,7 +194,7 @@ class StateEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class CreditCardEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -217,7 +217,7 @@ class CreditCardEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class CVVEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -234,7 +234,7 @@ class CVVEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class ExpEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -251,7 +251,7 @@ class ExpEditText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class ExpMonthText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -268,7 +268,7 @@ class ExpMonthText : androidx.appcompat.widget.AppCompatEditText{
 }
 
 class ExpYearText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
@@ -286,7 +286,7 @@ class ExpYearText : androidx.appcompat.widget.AppCompatEditText{
 
 
 class AmountEditText : androidx.appcompat.widget.AppCompatEditText{
-        constructor(context: Context) : super(context){
+    constructor(context: Context) : super(context){
         init()
     }
 
