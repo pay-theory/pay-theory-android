@@ -65,7 +65,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
         }
 ```
 
-4. Set configurations (Payment-Amount (Required), Api-Key (Required), Display type (Required), Buyer-Options (Optional), Fee-Mode (Optional), Custom-Tags (Optional))
+4. Set configurations: Payment-Amount (Required), Api-Key (Required), Display type (Required), Buyer-Options (Optional), Fee-Mode (Optional), Custom-Tags (Optional)
 
 ```
             //Set Payment Amount in cents ($50.25 = "5025")
@@ -115,7 +115,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 }
 ```
 
-Here are different examples
+Here are complete examples
 
 ```
 override fun onCreate(savedInstanceState: Bundle?) {
