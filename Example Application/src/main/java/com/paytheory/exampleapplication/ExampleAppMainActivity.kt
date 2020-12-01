@@ -20,19 +20,26 @@ class ExampleAppMainActivity : AppCompatActivity() {
         //Buyer-Options = True , Display = "Card-Only", Tags = "My Custom Tags"
         toPaymentButton.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
             val intent = Intent(this, PayTheoryActivity::class.java)
+
             //Set Fee Mode ("surcharge" or "service-fee")
             intent.putExtra("Fee-Mode", "service_fee")
+
             //Set Payment Amount in cents ($50.25 = "5025")
             intent.putExtra("Payment-Amount", "4000")
+
             //Set Api-Key
             intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+
             //Set Display type ("Card-Only" or "Card-Account")
             intent.putExtra("Display", "Card-Only")
-//            //Set Custom Tags for payments
-//            intent.putExtra("Tags-Key", "My Custom Tags")
-//            intent.putExtra("Tags-Value", "My Custom Tags Value")
+
+            //Set Custom Tags for payments
+            intent.putExtra("Tags-Key", "My Custom Tags")
+            intent.putExtra("Tags-Value", "My Custom Tags Value")
+
             //Set Buyer Options ("True" or "False")
             intent.putExtra("Buyer-Options", "True")
+
             //Set Buyer Options data
             intent.putExtra("First-Name", "Buyer")
             intent.putExtra("Last-Name", "Options")
@@ -44,6 +51,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Zip-Code", "45236")
             intent.putExtra("Phone-Number", "513-123-1234")
             intent.putExtra("Email-Address", "test@paytheory.com")
+
             //Start PayTheoryActivity
             startActivityForResult(intent, 1);
         }
