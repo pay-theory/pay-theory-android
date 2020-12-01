@@ -31,26 +31,25 @@ import java.nio.ByteBuffer
 
 class PayTheory(
     private val context: Context,
-    val apiKey: String,
+    private val apiKey: String,
     private val cardPayment: CardPayment,
     private val buyerOptions: BuyerOptions? = null
 ) {
-    var client = OkHttpClient()
-    var challengeResponse = ""
-//    var safetyNetResult = "" TODO
-    var googleApiAvailability = false
-    var attestationResponse: String? = null
-    var idempotencyResponse: String? = null
-    var idempotencyResponseString: String = ""
-    var idempotencySignatureString: String = ""
-    var idempotencyCredIdString: String = ""
-    var kmsResult: Boolean = false
-    var token = ""
-    var idempotency = ""
-    var merchantId = ""
+   private var client = OkHttpClient()
+   private var challengeResponse = ""
+   private var googleApiAvailability = false
+   private var attestationResponse: String? = null
+   private var idempotencyResponse: String? = null
+   private var idempotencyResponseString: String = ""
+   private var idempotencySignatureString: String = ""
+   private var idempotencyCredIdString: String = ""
+   private var kmsResult: Boolean = false
+   private var token = ""
+   private var idempotency = ""
+   private var merchantId = ""
 
-    var userConfirmation: Boolean? = null
-    var payTheoryTransactResponse = ""
+   private var userConfirmation: Boolean? = null
+   private var payTheoryTransactResponse = ""
 
     suspend fun init(): String {
         Log.e("PT2", "Init PT2")
@@ -183,7 +182,6 @@ class PayTheory(
         if (Looper.myLooper()==null){
             Looper.prepare()
         }
-
         var attestationTask = SafetyNet.getClient(context).attest(
             nonce.toByteArray(),
             "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
@@ -402,7 +400,11 @@ class PayTheory(
                 identityJsonObject.put("tags", identityTagsJsonObject)
                 identityJsonObject.put("entity", entityJSONObject)
             }
-
+            if(!cardPayment.tagsKey.isNullOrBlank() && !cardPayment.tagsValue.isNullOrBlank()){
+                val tagsJson = JSONObject()
+                tagsJson.put(cardPayment.tagsKey, cardPayment.tagsValue.toString())
+                identityJsonObject.put("tags", tagsJson)
+            }
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -432,7 +434,7 @@ class PayTheory(
         Log.e("PT2", "Identity Call Response: $identityJsonResponse")
 
         //TODO - Set up check if authorization response throws back an error
-        if (identityJsonResponse.getString("id") != null) {
+        if (!identityJsonResponse.getString("id").isNullOrBlank()) {
 
             val addressJsonObject = JSONObject()
             addressJsonObject.put("city", "${cardPayment.cardCity}")
@@ -462,7 +464,11 @@ class PayTheory(
                 paymentJsonObject.put("security_code", "${cardPayment.cardCvv}")
                 paymentJsonObject.put("number", "${cardPayment.cardNumber}")
                 paymentJsonObject.put("type", "PAYMENT_CARD")
-
+                if(!cardPayment.tagsKey.isNullOrBlank() && !cardPayment.tagsValue.isNullOrBlank()){
+                    val tagsJson = JSONObject()
+                    tagsJson.put(cardPayment.tagsKey, cardPayment.tagsValue.toString())
+                    paymentJsonObject.put("tags", tagsJson)
+                }
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -496,9 +502,9 @@ class PayTheory(
                     authJsonObject.put("merchant_identity", merchantId)
                     authJsonObject.put("amount", cardPayment.amount)
                     authJsonObject.put("currency", currency)
-                    if(!cardPayment.tags.isNullOrBlank()){
+                    if(!cardPayment.tagsKey.isNullOrBlank() && !cardPayment.tagsValue.isNullOrBlank()){
                         val tagsJson = JSONObject()
-                        tagsJson.put("tags", cardPayment.tags.toString())
+                        tagsJson.put(cardPayment.tagsKey, cardPayment.tagsValue.toString())
                         authJsonObject.put("tags", tagsJson)
                     }
 
@@ -573,7 +579,16 @@ class PayTheory(
                             "created_at"
                         )}\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString(
                             "state"
-                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\", \"YOUR_TAG_KEY\": \"${cardPayment.tags.toString()}\" }"
+                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\""
+
+                        if(!cardPayment.tagsKey.isNullOrBlank() && !cardPayment.tagsValue.isNullOrBlank()){
+                            payTheoryTransactResponse += ", \"${cardPayment.tagsKey.toString()}\": \"${cardPayment.tagsValue.toString()}\" }"
+                        }
+                        else {
+                            payTheoryTransactResponse += "} }"
+                        }
+
+
                         return payTheoryTransactResponse
                     } else {
                         Log.e("PT2", "Capture Authorization Request Failed")
@@ -582,10 +597,10 @@ class PayTheory(
                     Log.e("PT2", "Create Authorization Request Failed")
                 }
             } else {
-               var embedded = paymentJsonResponse.getJSONObject("_embedded")
-               var error = embedded.getJSONArray("errors")
-               var errorJson = error.getJSONObject(0)
-               var messageString = errorJson.getString("message")
+              var embedded = paymentJsonResponse.getJSONObject("_embedded")
+              var error = embedded.getJSONArray("errors")
+              var errorJson = error.getJSONObject(0)
+              var messageString = errorJson.getString("message")
                payTheoryTransactResponse = messageString
                Log.e("PT2", "Payment Call Request Failed")
 
@@ -594,6 +609,7 @@ class PayTheory(
             }
         } else {
             Log.e("PT2", "Identity Call Request Failed")
+            return "Payment Request Failed"
         }
         return payTheoryTransactResponse
     }

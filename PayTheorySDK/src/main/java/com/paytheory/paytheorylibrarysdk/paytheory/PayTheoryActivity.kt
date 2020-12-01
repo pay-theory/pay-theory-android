@@ -118,7 +118,6 @@ class PayTheoryActivity : AppCompatActivity() {
 //                    val country = countryView.text.toString()
 //                    val phoneNumber = phoneNumberView.text.toString()
 //                    val emailAddress = emailAddressView.text.toString()
-//            val customTags = "TODO Custom Tags"
 
                     val payment = CardPayment(
                         cardNumber,
@@ -129,7 +128,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         //add fee mode
                         intent.getStringExtra("Fee-Mode")!!,
                         //add tags if intent is there
-                        intent.getStringExtra("Tags"),
+                        intent.getStringExtra("Tags-Key"),
+                        intent.getStringExtra("Tags-Value"),
                         firstName,
                         lastName,
                         addressOne,
@@ -281,7 +281,6 @@ class PayTheoryActivity : AppCompatActivity() {
 //                    val country = countryView.text.toString()
 //                    val phoneNumber = phoneNumberView.text.toString()
 //                    val emailAddress = emailAddressView.text.toString()
-//            val customTags = "TODO Custom Tags"
 
                     val payment = CardPayment(
                         cardNumber,
@@ -291,7 +290,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         intent.getStringExtra("Payment-Amount")!!.toInt(),
                         //add fee mode
                         intent.getStringExtra("Fee-Mode")!!,
-                        intent.getStringExtra("Tags"),
+                        intent.getStringExtra("Tags-Key"),
+                        intent.getStringExtra("Tags-Value"),
 //                        firstName,
 //                        lastName,
 //                        addressOne,
