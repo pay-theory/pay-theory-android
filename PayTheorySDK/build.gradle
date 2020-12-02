@@ -1,7 +1,8 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'maven'
+    id 'com.jfrog.bintray'
+    id 'maven-publish'
 }
 
 def VERSION_NAME = "0.0.1"
@@ -64,6 +65,45 @@ dependencies {
 
 }
 
+def libraryGroupId = 'com.paytheory.android'
+def libraryArtifactId = 'pay-theory-android'
+def libraryVersion = '0.0.1'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = libraryGroupId
+                artifactId = libraryArtifactId
+                version = libraryVersion
+            }
+        }
+    }
+}
+
+bintray {
+    user = "abel@paytheory"
+    key = "57896ed31cf5a957cdae75145e29db67ef8f96a3"
+    publications = ['release']  // afterEvaluate:publishing:publications
+    publish = true
+    override = true
+    pkg {
+        repo = 'pay-theory-android'
+        name = libraryArtifactId
+        userOrg = 'paytheory'
+        desc = 'Pay Theory android library'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/pay-theory/pay-theory-android'
+        publicDownloadNumbers = true
+        version {
+            name = libraryVersion
+            released = new Date()
+        }
+    }
+}
+
+
 ext {
     bintrayRepo = 'pay-theory-android' // Repo name in bintray dashboard
     bintrayName = 'com.paytheorylibrary' // package name of the bintray repo
@@ -88,9 +128,6 @@ ext {
     allLicenses = ["MIT"]    // array of licenses, for example, ["Apache-2.0"]
 }
 
-
-apply from: "$project.rootDir/tools/script-git-version.gradle"
-apply from: 'publish.gradle'
 
 
 // Avoid Kotlin docs error

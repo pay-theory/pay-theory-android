@@ -6,7 +6,7 @@
 1. Add library to project
 
 ```
-implementation ''
+implementation 'com.paytheory.android:pay-theory-android:0.1'
 ```
 
 2. Import PayTheoryActivity in Activity that will request to submit payment
