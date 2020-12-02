@@ -89,40 +89,9 @@ ext {
 }
 
 
-apply plugin: 'org.jetbrains.dokka'
 apply from: "$project.rootDir/tools/script-git-version.gradle"
 apply from: 'publish.gradle'
 
-
-dokka {
-    outputFormat = 'gfm'
-    outputDirectory = "$buildDir/gfm"
-
-    configuration {
-        includeNonPublic = false
-        skipEmptyPackages = true
-        skipDeprecated = true
-        reportUndocumented = true
-        jdkVersion = 8
-    }
-}
-
-task writeNewPom {
-    doLast {
-        pom {
-            project {
-                inceptionYear '2020'
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-            }
-        }.writeTo("$buildDir/pom.xml")
-    }
-}
 
 // Avoid Kotlin docs error
 tasks.withType(Javadoc).all {
