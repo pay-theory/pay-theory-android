@@ -23,6 +23,25 @@ class PayTheoryActivity : AppCompatActivity() {
 ////        setTheme(R.style.DarkTheme)
 //        setTheme(theme)
         super.onCreate(savedInstanceState)
+
+        if (intent.getStringExtra("Payment-Amount").isNullOrBlank()){
+            val returnIntent = Intent()
+            //If "Display" not selected or input
+            var errorMessage = "Pay Theory \"Payment-Amount\" not valid"
+            Log.e("PT2", errorMessage)
+            returnIntent.putExtra("result", errorMessage)
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish()
+        }
+        if (intent.getStringExtra("Api-Key").isNullOrBlank()){
+            val returnIntent = Intent()
+            //If "Display" not selected or input
+            var errorMessage = "Pay Theory \"Api-Key\" must be supplied"
+            Log.e("PT2", errorMessage)
+            returnIntent.putExtra("result", errorMessage)
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish()
+        }
         if (intent.getStringExtra("Display") == "Card-Account") {
             setContentView(R.layout.activity_pay_theory_credit_card_account)
 

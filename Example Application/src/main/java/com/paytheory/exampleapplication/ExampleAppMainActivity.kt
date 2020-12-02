@@ -22,10 +22,10 @@ class ExampleAppMainActivity : AppCompatActivity() {
             val intent = Intent(this, PayTheoryActivity::class.java)
 
             //Set Fee Mode ("surcharge" or "service-fee")
-            intent.putExtra("Fee-Mode", "service_fee")
+            intent.putExtra("Fee-Mode", "surcharge")
 
             //Set Payment Amount in cents ($50.25 = "5025")
-            intent.putExtra("Payment-Amount", "4000")
+            intent.putExtra("Payment-Amount", "5025")
 
             //Set Api-Key
             intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")

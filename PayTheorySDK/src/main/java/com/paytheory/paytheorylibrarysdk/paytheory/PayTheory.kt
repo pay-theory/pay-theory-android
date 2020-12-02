@@ -27,6 +27,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.ByteBuffer
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 
 class PayTheory(
@@ -319,7 +321,7 @@ class PayTheory(
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Confirm")
         builder.setMessage(
-            "Are you sure you want to make a payment of $${paymentAmount.toDouble() / 100}, including a fee of $${convenienceFee.toDouble() / 100} on $cardBrand card beginning with ${
+            "Are you sure you want to make a payment of $${String.format("%.2f", (paymentAmount.toDouble() / 100))}, including a fee of $${String.format("%.2f", (convenienceFee.toDouble() / 100))} on $cardBrand card beginning with ${
                 cardNumber.toString().take(6)
             }"
         )
