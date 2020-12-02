@@ -3,19 +3,19 @@
 
 ## How to use PayTheory
 
-###1. Add library to project
+1. Add library to project
 
 ```
 implementation ''
 ```
 
-###2. Import PayTheoryActivity in Activity that will request to submit payment
+2. Import PayTheoryActivity in Activity that will request to submit payment
 
 ```
 import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
 ```
 
-###3. Copy into activity that will call Pay Theory by setOnClickListener
+3. Copy into activity that will call Pay Theory by setOnClickListener
 
 ```
 class ExampleAppMainActivity : AppCompatActivity() {
@@ -65,7 +65,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
         }
 ```
 
-###4. Set configurations: Payment-Amount (Required), Api-Key (Required), Display type (Required), Buyer-Options (Optional), Fee-Mode (Optional), Custom-Tags (Optional)
+4. Set configurations: Payment-Amount (Required), Api-Key (Required), Display type (Required), Buyer-Options (Optional), Fee-Mode (Optional), Custom-Tags (Optional)
 
 ```
             //Set Payment Amount in cents ($50.25 = "5025")
@@ -100,7 +100,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Tags-Value", "tagValue")
 ```
 
-###5. Add method to retrieve result data once Pay Theory Activity has completed
+5. Add method to retrieve result data once Pay Theory Activity has completed
 
 ```
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -115,7 +115,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 }
 ```
 
-###Here are complete examples
+Here are complete examples
 
 ```
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -226,9 +226,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ```
 
 ## How to change Pay Theory Activity Theme
-###1. Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
+1. Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
 
-###2. Change theme for application to ensure PayTheoryActivity has same theme as application
+2. Change theme for application to ensure PayTheoryActivity has same theme as application
 
 ```
     <application
@@ -241,7 +241,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
 <!--        android:theme="@style/Theme.AppCompat.DayNight">-->
 
 ```
-
 
 ## License
 
