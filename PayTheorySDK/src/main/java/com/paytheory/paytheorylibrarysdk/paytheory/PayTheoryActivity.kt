@@ -27,19 +27,19 @@ class PayTheoryActivity : AppCompatActivity() {
         if (intent.getStringExtra("Payment-Amount").isNullOrBlank()){
             val returnIntent = Intent()
             //If "Display" not selected or input
-            var errorMessage = "Pay Theory \"Payment-Amount\" not valid"
+            val errorMessage = "Pay Theory \"Payment-Amount\" not valid"
             Log.e("PT2", errorMessage)
             returnIntent.putExtra("result", errorMessage)
-            setResult(Activity.RESULT_OK, returnIntent);
+            setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
         if (intent.getStringExtra("Api-Key").isNullOrBlank()){
             val returnIntent = Intent()
             //If "Display" not selected or input
-            var errorMessage = "Pay Theory \"Api-Key\" must be supplied"
+            val errorMessage = "Pay Theory \"Api-Key\" must be supplied"
             Log.e("PT2", errorMessage)
             returnIntent.putExtra("result", errorMessage)
-            setResult(Activity.RESULT_OK, returnIntent);
+            setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
         if (intent.getStringExtra("Display") == "Card-Account") {
@@ -190,7 +190,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(Activity.RESULT_OK, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent)
                             finish()
                         }
                     } else {
@@ -213,7 +213,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(Activity.RESULT_OK, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent)
                             finish()
                         }
 
@@ -351,7 +351,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(Activity.RESULT_OK, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent)
                             finish()
                         }
                     } else {
@@ -373,7 +373,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             }
                             Log.e("PT2", "Pay Theory Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
-                            setResult(Activity.RESULT_OK, returnIntent);
+                            setResult(Activity.RESULT_OK, returnIntent)
                             finish()
                         }
 
@@ -383,13 +383,12 @@ class PayTheoryActivity : AppCompatActivity() {
 
             }
         } else {
-            //TODO -TEST FUN
             val returnIntent = Intent()
             //If "Display" not selected or input
-            var errorMessage = "Pay Theory \"Display\" Not Selected"
+            val errorMessage = "Pay Theory \"Display\" Not Selected"
             Log.e("PT2", errorMessage)
             returnIntent.putExtra("result", errorMessage)
-            setResult(Activity.RESULT_OK, returnIntent);
+            setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
 

@@ -33,7 +33,7 @@ import kotlin.math.roundToLong
 
 class PayTheory(
     private val context: Context,
-    private val apiKey: String,
+    val apiKey: String,
     private val cardPayment: CardPayment,
     private val buyerOptions: BuyerOptions? = null
 ) {
@@ -184,7 +184,7 @@ class PayTheory(
         if (Looper.myLooper()==null){
             Looper.prepare()
         }
-        var attestationTask = SafetyNet.getClient(context).attest(
+        val attestationTask = SafetyNet.getClient(context).attest(
             nonce.toByteArray(),
             "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
         )
@@ -201,14 +201,14 @@ class PayTheory(
         jsonObject.put("amount", cardPayment.amount)
         jsonObject.put("type", "android")
         try {
-            if (nonce != null) {
-                jsonObject.put("nonce", "$nonce")
+            if (!nonce.isNullOrBlank()) {
+                jsonObject.put("nonce", nonce)
             }
             if (attestation != null) {
                 jsonObject.put("attestation", "$attestation")
             }
             if (!cardPayment.feeMode.isNullOrBlank()) {
-                jsonObject.put("fee_mode", "${cardPayment.feeMode}")
+                jsonObject.put("fee_mode", cardPayment.feeMode)
             }
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -253,11 +253,11 @@ class PayTheory(
         Log.e("PTLib", "credArray[0] ${credArray[0]}")
         Log.e("PTLib", "credArray[0] ${credArray[1]}")
         Log.e("PTLib", "credArray[0] ${credArray[2]}")
-        var awsCreds =
+        val awsCreds =
             BasicSessionCredentials(credArray[0], credArray[1], credArray[2])
 
-        var kmsClient = AWSKMSClient(awsCreds)
-        var decryptRequest = DecryptRequest()
+        val kmsClient = AWSKMSClient(awsCreds)
+        val decryptRequest = DecryptRequest()
 
         decryptRequest.encryptionAlgorithm = "RSAES_OAEP_SHA_256"
         decryptRequest.keyId = "c731e986-c849-4534-9367-a004f6ca272c"
@@ -286,7 +286,7 @@ class PayTheory(
             (ByteBuffer.wrap(android.util.Base64.decode(signature, DEFAULT)))
         val responseBuff3 = (ByteBuffer.wrap(android.util.Base64.decode(response, DEFAULT)))
 
-        var verifyRequest = VerifyRequest()
+        val verifyRequest = VerifyRequest()
 
         verifyRequest.keyId = "9c25fd5d-fd5e-4f02-83ce-a981f1824c4f" //hard coded
         verifyRequest.signature = signatureBuff3 // 64 to bytebuffer
@@ -362,38 +362,38 @@ class PayTheory(
         val entityJSONObject = JSONObject()
         try {
             if (buyerOptions != null) {
-                if (buyerOptions.phoneNumber !== null) {
-                    entityJSONObject.put("phone", "${buyerOptions.phoneNumber}")
+                if (!buyerOptions.phoneNumber.isNullOrBlank()) {
+                    entityJSONObject.put("phone", buyerOptions.phoneNumber)
                 }
-                if (buyerOptions.firstName !== null) {
-                    entityJSONObject.put("first_name", "${buyerOptions.firstName}")
+                if (!buyerOptions.firstName.isNullOrBlank()) {
+                    entityJSONObject.put("first_name", buyerOptions.firstName)
                 }
-                if (buyerOptions.lastName !== null) {
-                    entityJSONObject.put("last_name", "${buyerOptions.lastName}")
+                if (!buyerOptions.lastName.isNullOrBlank()) {
+                    entityJSONObject.put("last_name", buyerOptions.lastName)
                 }
-                if (buyerOptions.email !== null) {
-                    entityJSONObject.put("email", "${buyerOptions.email}")
+                if (!buyerOptions.email.isNullOrBlank()) {
+                    entityJSONObject.put("email", buyerOptions.email)
                 }
-                if (buyerOptions.addressOne !== null) {
-                    personalAddressJsonObject.put("line1", "${buyerOptions.addressOne}")
+                if (!buyerOptions.addressOne.isNullOrBlank()) {
+                    personalAddressJsonObject.put("line1", buyerOptions.addressOne)
                 }
-                if (buyerOptions.zipCode !== null) {
-                    personalAddressJsonObject.put("postal_code", "${buyerOptions.zipCode}")
+                if (!buyerOptions.zipCode.isNullOrBlank()) {
+                    personalAddressJsonObject.put("postal_code", buyerOptions.zipCode)
                 }
-                if (buyerOptions.addressTwo !== null) {
-                    personalAddressJsonObject.put("line2", "${buyerOptions.addressTwo}")
+                if (!buyerOptions.addressTwo.isNullOrBlank()) {
+                    personalAddressJsonObject.put("line2", buyerOptions.addressTwo)
                 }
-                if (buyerOptions.city !== null) {
-                    personalAddressJsonObject.put("city", "${buyerOptions.city}")
+                if (!buyerOptions.city.isNullOrBlank()) {
+                    personalAddressJsonObject.put("city", buyerOptions.city)
                 }
-                if (buyerOptions.country !== null) {
-                    personalAddressJsonObject.put("country", "${buyerOptions.country}")
+                if (!buyerOptions.country.isNullOrBlank()) {
+                    personalAddressJsonObject.put("country", buyerOptions.country)
                 }
-                if (buyerOptions.state !== null) {
-                    personalAddressJsonObject.put("region", "${buyerOptions.state}")
+                if (!buyerOptions.state.isNullOrBlank()) {
+                    personalAddressJsonObject.put("region", buyerOptions.state)
                 }
             }
-            if (idempotency !== null) {
+            if (!idempotency.isNullOrBlank()) {
                 val identityTagsJsonObject = JSONObject()
                 identityTagsJsonObject.put("key", "pt-platform:android $idempotency")
                 entityJSONObject.put("entity", personalAddressJsonObject)
@@ -449,7 +449,7 @@ class PayTheory(
             try {
                 paymentJsonObject.put(
                     "identity",
-                    "${identityJsonResponse.getString("id")}"
+                    identityJsonResponse.getString("id")
                 )
                 if (!cardPayment.cardFirstName.isNullOrBlank()){
                     paymentJsonObject.put(
@@ -499,7 +499,7 @@ class PayTheory(
                 try {
                     authJsonObject.put(
                         "source",
-                        "${paymentJsonResponse.getString("id")}"
+                        paymentJsonResponse.getString("id")
                     )
                     authJsonObject.put("merchant_identity", merchantId)
                     authJsonObject.put("amount", cardPayment.amount)
@@ -599,10 +599,10 @@ class PayTheory(
                     Log.e("PT2", "Create Authorization Request Failed")
                 }
             } else {
-              var embedded = paymentJsonResponse.getJSONObject("_embedded")
-              var error = embedded.getJSONArray("errors")
-              var errorJson = error.getJSONObject(0)
-              var messageString = errorJson.getString("message")
+              val embedded = paymentJsonResponse.getJSONObject("_embedded")
+              val error = embedded.getJSONArray("errors")
+              val errorJson = error.getJSONObject(0)
+              val messageString = errorJson.getString("message")
                payTheoryTransactResponse = messageString
                Log.e("PT2", "Payment Call Request Failed")
 

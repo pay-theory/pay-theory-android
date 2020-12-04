@@ -1,11 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'com.jfrog.bintray'
-    id 'maven-publish'
 }
-
-def VERSION_NAME = "0.0.1"
 
 android {
     compileSdkVersion 30
@@ -15,7 +11,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName VERSION_NAME
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -46,11 +42,11 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
 
     //test dependencies
-    testImplementation 'androidx.test.ext:junit:1.0.0-beta02'
-    testImplementation 'androidx.test:runner:1.1.0-beta02'
-    testImplementation 'androidx.test:core:1.0.0-beta02'
-    testImplementation "org.robolectric:robolectric:4.0.2"
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.0")
+//    testImplementation 'androidx.test.ext:junit:1.0.0-beta02'
+//    testImplementation 'androidx.test:runner:1.1.0-beta02'
+//    testImplementation 'androidx.test:core:1.0.0-beta02'
+//    testImplementation "org.robolectric:robolectric:4.0.2"
+//    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.0")
 
     // SafetyNet Attestation
     implementation "com.google.android.gms:play-services-safetynet:17.0.0"
@@ -65,70 +61,8 @@ dependencies {
 
 }
 
-def libraryGroupId = 'com.paytheory.android'
-def libraryArtifactId = 'pay-theory-android'
-def libraryVersion = '0.0.1'
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-                groupId = libraryGroupId
-                artifactId = libraryArtifactId
-                version = libraryVersion
-            }
-        }
-    }
-}
-
-bintray {
-    user = "abel@paytheory"
-    key = "57896ed31cf5a957cdae75145e29db67ef8f96a3"
-    publications = ['release']  // afterEvaluate:publishing:publications
-    publish = true
-    override = true
-    pkg {
-        repo = 'pay-theory-android'
-        name = libraryArtifactId
-        userOrg = 'paytheory'
-        desc = 'Pay Theory android library'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/pay-theory/pay-theory-android'
-        publicDownloadNumbers = true
-        version {
-            name = libraryVersion
-            released = new Date()
-        }
-    }
-}
-
-
-ext {
-    bintrayRepo = 'pay-theory-android' // Repo name in bintray dashboard
-    bintrayName = 'com.paytheorylibrary' // package name of the bintray repo
-
-    publishedGroupId = 'com.paytheory'   // this is the ID we want to see in implementation line
-    libraryName = 'pay-theory-android'     // this is the module name of library
-    artifact = 'pay-theory-android'        // this is the artifact we want to see in implementation line
-
-    libraryDescription = 'pay-theory-android' // description of library
-
-    siteUrl = 'https://github.com/pay-theory/pay-theory-android'    // git repo url
-    gitUrl = 'https://github.com/pay-theory/pay-theory-android' // git repo vcs url
-
-    libraryVersion = 0.1    // library version
-
-    developerId = 'abel@paytheory'                // This is your bintray username
-    developerName = 'Abel Collins'              // Developer's name
-    developerEmail = 'abel.dejesus.collins@gmail.com'                // Developer's email
-
-    licenseName = 'The MIT License (MIT)'  // for example, The Apache Software License, Version 2.0
-    licenseUrl = 'https://opensource.org/licenses/MIT'   // for example, http://www.apache.org/licenses/LICENSE-2.0.txt
-    allLicenses = ["MIT"]    // array of licenses, for example, ["Apache-2.0"]
-}
-
-
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'
 
 // Avoid Kotlin docs error
 tasks.withType(Javadoc).all {
