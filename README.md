@@ -7,7 +7,9 @@ Add library to your application
 
 ```kotlin
 dependencies {
+
 implementation 'com.paytheory.android:pay-theory-android:0.1'
+
 }
 ```
 
@@ -28,7 +30,8 @@ class ExampleAppMainActivity : AppCompatActivity() {
         //Button that will start PayTheoryActivity
         var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-        toPaymentButton.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        toPaymentButton.setOnClickListener { 
             val intent = Intent(this, PayTheoryActivity::class.java)
 
             //Set Payment Amount in cents ($50.25 = "5025")
@@ -65,6 +68,8 @@ class ExampleAppMainActivity : AppCompatActivity() {
             //Start PayTheoryActivity
             startActivityForResult(intent, 1);
         }
+    }
+}
 ```
 
 
@@ -77,22 +82,22 @@ class ExampleAppMainActivity : AppCompatActivity() {
 Payment-Amount (Required)
 
 ```kotlin
-            //Set Payment Amount in cents ($50.25 = "5025")
-            intent.putExtra("Payment-Amount", "4000")
+//Set Payment Amount in cents ($50.25 = "5025")
+intent.putExtra("Payment-Amount", "4000")
 ```
 
 Api-Key (Required)
 
 ```kotlin
-            //Set Api-Key
-            intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+//Set Api-Key
+intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
 ```
 
 Display type (Required)
 
 ```kotlin
-            //Set Display type ("Card-Only" or "Card-Account")
-            intent.putExtra("Display", "Card-Only")
+//Set Display type ("Card-Only" or "Card-Account")
+intent.putExtra("Display", "Card-Only")
 ```
 
 ###Optional
@@ -100,35 +105,35 @@ Display type (Required)
 Buyer-Options (Optional)
 
 ```kotlin
-            //Set Buyer Options ("True" or "False")
-            intent.putExtra("Buyer-Options", "True")
+//Set Buyer Options ("True" or "False")
+intent.putExtra("Buyer-Options", "True")
 
-            //Set Buyer Options data
-            intent.putExtra("First-Name", "firstName")
-            intent.putExtra("Last-Name", "lastName")
-            intent.putExtra("Address-One", "addressOne")
-            intent.putExtra("Address-Two", "addressTwo")
-            intent.putExtra("City", "city")
-            intent.putExtra("State", "state")
-            intent.putExtra("Country", "country")
-            intent.putExtra("Zip-Code", "zipcode")
-            intent.putExtra("Phone-Number", "phoneNumber")
-            intent.putExtra("Email-Address", "emailAddress")
+//Set Buyer Options data
+intent.putExtra("First-Name", "firstName")
+intent.putExtra("Last-Name", "lastName")
+intent.putExtra("Address-One", "addressOne")
+intent.putExtra("Address-Two", "addressTwo")
+intent.putExtra("City", "city")
+intent.putExtra("State", "state")
+intent.putExtra("Country", "country")
+intent.putExtra("Zip-Code", "zipcode")
+intent.putExtra("Phone-Number", "phoneNumber")
+intent.putExtra("Email-Address", "emailAddress")
 ```
 
 Fee-Mode (Optional)
 
 ```kotlin
-            //Set Fee Mode ("surcharge" or "service-fee")
-            intent.putExtra("Fee-Mode", "service_fee")
+//Set Fee Mode ("surcharge" or "service-fee")
+intent.putExtra("Fee-Mode", "service_fee")
 ```
 
 Custom-Tags (Optional)
 
 ```kotlin
-            //Set Custom Tags for payments
-            intent.putExtra("Tags-Key", "tagKey")
-            intent.putExtra("Tags-Value", "tagValue")
+//Set Custom Tags for payments
+intent.putExtra("Tags-Key", "tagKey")
+intent.putExtra("Tags-Value", "tagValue")
 ```
 
 
@@ -190,15 +195,16 @@ Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-
 Change theme for application to ensure PayTheoryActivity has same theme as application
 
 ```kotlin
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.PayTheoryLibrary">
-<!--        android:theme="@style/Theme.AppCompat.DayNight">-->
+<application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.PayTheoryLibrary">
+<!--android:theme="@style/Theme.AppCompat.DayNight">-->
 
+</application>
 ```
 
 ##Complete Code Samples
