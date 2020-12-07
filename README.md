@@ -71,11 +71,11 @@ class ExampleAppMainActivity : AppCompatActivity() {
 ```
 
 
-##Usage
+## Usage
 
-#Set configurations: 
+# Set configurations: 
 
-###Required
+### Required
 
 Payment-Amount (Required)
 
@@ -98,7 +98,7 @@ Display type (Required)
 intent.putExtra("Display", "Card-Only")
 ```
 
-###Optional
+### Optional
 
 Buyer-Options (Optional)
 
@@ -139,7 +139,7 @@ intent.putExtra("Tags-Value", "tagValue")
 
 
 
-##Handle Response
+## Handle Response
 
 Copy this code into your Activity. This method is used to retrieve result data once Pay Theory Activity has completed
 
@@ -156,7 +156,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 }
 ```
 
-###Completion response
+### Completion response
 
 Upon completion of authorization and capture, details similar to the following are returned:
 
@@ -187,7 +187,7 @@ If a failure or decline occurs during the transaction, the response will be simi
 }
 ```
 
-##Style
+## Style
 
 Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
 Change theme for application to ensure PayTheoryActivity has same theme as application
@@ -205,7 +205,7 @@ Change theme for application to ensure PayTheoryActivity has same theme as appli
 </application>
 ```
 
-##Complete Code Samples
+## Complete Code Samples
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
