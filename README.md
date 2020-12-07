@@ -2,7 +2,7 @@
 # PayTheory Android SDK
 
 ## Setup
-
+------
 Add library to your applications dependencies using jcenter's repository
 
 ```kotlin
@@ -72,8 +72,8 @@ class ExampleAppMainActivity : AppCompatActivity() {
 
 
 ## Usage
-
-### Set configurations: 
+------
+### Set configurations for Pay Theory Activity: 
 
 #### Required
 
@@ -140,7 +140,7 @@ intent.putExtra("Tags-Value", "tagValue")
 
 
 ## Handle Response
-
+------
 Copy this code into your Activity. This method is used to retrieve result data once Pay Theory Activity has completed
 
 ```kotlin
@@ -188,7 +188,7 @@ If a failure or decline occurs during the transaction, the response will be simi
 ```
 
 ## Style
-
+------
 Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
 Change theme for application to ensure PayTheoryActivity has same theme as application
 
@@ -206,7 +206,7 @@ Change theme for application to ensure PayTheoryActivity has same theme as appli
 ```
 
 ## Complete Code Samples
-
+------
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -317,5 +317,5 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 
 ## License
-
+------
 PayTheory is available under the MIT license. See the LICENSE file for more info.
