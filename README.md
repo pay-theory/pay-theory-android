@@ -73,9 +73,9 @@ class ExampleAppMainActivity : AppCompatActivity() {
 
 ## Usage
 
-# Set configurations: 
+### Set configurations: 
 
-### Required
+#### Required
 
 Payment-Amount (Required)
 
@@ -98,7 +98,7 @@ Display type (Required)
 intent.putExtra("Display", "Card-Only")
 ```
 
-### Optional
+#### Optional
 
 Buyer-Options (Optional)
 
