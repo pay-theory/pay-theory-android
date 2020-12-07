@@ -36,7 +36,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Payment-Amount", "4000")
 
             //Set Api-Key
-            intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+            intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 
             //Set Display type ("Card-Only" or "Card-Account")
             intent.putExtra("Display", "Card-Only")
@@ -45,16 +45,16 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Buyer-Options", "True")
 
             //Set Buyer Options data
-            intent.putExtra("First-Name", "firstName")
-            intent.putExtra("Last-Name", "lastName")
-            intent.putExtra("Address-One", "addressOne")
-            intent.putExtra("Address-Two", "addressTwo")
-            intent.putExtra("City", "city")
-            intent.putExtra("State", "state")
-            intent.putExtra("Country", "country")
-            intent.putExtra("Zip-Code", "zipcode")
-            intent.putExtra("Phone-Number", "phoneNumber")
-            intent.putExtra("Email-Address", "emailAddress")
+            intent.putExtra("First-Name", "Henry")
+            intent.putExtra("Last-Name", "Smith")
+            intent.putExtra("Address-One", "123 Greenwood Drive")
+            intent.putExtra("Address-Two", "Apt 2")
+            intent.putExtra("City", "Cincinnati")
+            intent.putExtra("State", "OH")
+            intent.putExtra("Country", "USA")
+            intent.putExtra("Zip-Code", "45236")
+            intent.putExtra("Phone-Number", "513-111-1111")
+            intent.putExtra("Email-Address", "Hsmith@gmail.com")
 
             //Set Fee Mode ("surcharge" or "service-fee")
             intent.putExtra("Fee-Mode", "service_fee")
@@ -88,10 +88,35 @@ Api-Key (Required)
 
 ```kotlin
 //Set Api-Key
-intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 ```
 
 Display type (Required)
+
+Select which type of display you prefer for you application:
+
+1. **Card-Only**
+-Card number field
+-Card expiration month field
+-Card expiration year field
+-Card cvv field
+
+
+**OR**
+
+
+2. **Card-Account**
+-First name field
+-Last name field
+-Address one field
+-Address two field
+-City field
+-State field
+-Zip code field
+-Card number field
+-Card expiration month field
+-Card expiration year field
+-Card cvv field
 
 ```kotlin
 //Set Display type ("Card-Only" or "Card-Account")
@@ -107,19 +132,21 @@ Buyer-Options (Optional)
 intent.putExtra("Buyer-Options", "True")
 
 //Set Buyer Options data
-intent.putExtra("First-Name", "firstName")
-intent.putExtra("Last-Name", "lastName")
-intent.putExtra("Address-One", "addressOne")
-intent.putExtra("Address-Two", "addressTwo")
-intent.putExtra("City", "city")
-intent.putExtra("State", "state")
-intent.putExtra("Country", "country")
-intent.putExtra("Zip-Code", "zipcode")
-intent.putExtra("Phone-Number", "phoneNumber")
-intent.putExtra("Email-Address", "emailAddress")
+intent.putExtra("First-Name", "Henry")
+intent.putExtra("Last-Name", "Smith")
+intent.putExtra("Address-One", "123 Greenwood Drive")
+intent.putExtra("Address-Two", "Apt 2")
+intent.putExtra("City", "Cincinnati")
+intent.putExtra("State", "OH")
+intent.putExtra("Country", "USA")
+intent.putExtra("Zip-Code", "45236")
+intent.putExtra("Phone-Number", "513-111-1111")
+intent.putExtra("Email-Address", "Hsmith@gmail.com")
 ```
 
 Fee-Mode (Optional)
+
+The Fee-Mode is defaulted to "surcharge"
 
 ```kotlin
 //Set Fee Mode ("surcharge" or "service-fee")
@@ -127,6 +154,8 @@ intent.putExtra("Fee-Mode", "service_fee")
 ```
 
 Custom-Tags (Optional)
+
+Add custom tags to transactions (Customer ID, Tracking #, etc.)
 
 ```kotlin
 //Set Custom Tags for payments
@@ -170,7 +199,7 @@ Upon completion of authorization and capture, details similar to the following a
     "created_at":"YYYY-MM-DDTHH:MM:SS.ssZ",
     "amount": 999,
     "service_fee": 195,
-    "state":"SUCCEEDED",
+    "OH":"SUCCEEDED",
     "tags":{ "pay-theory-environment":"env","pt-number":"pt-env-XXXXXX", "YOUR_TAG_KEY": "YOUR_TAG_VALUE" }
 }
 ```
@@ -182,7 +211,7 @@ If a failure or decline occurs during the transaction, the response will be simi
     "receipt_number":"pt-test-XXXXXX",
     "last_four":"XXXX",
     "brand":"VISA",
-    "state":"FAILURE",
+    "OH":"FAILURE",
     "type":"some descriptive reason for the failure / decline"
 }
 ```
@@ -192,7 +221,7 @@ If a failure or decline occurs during the transaction, the response will be simi
 Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
 Change theme for application to ensure PayTheoryActivity has same theme as application
 
-```kotlin
+```xml
 <application
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"
@@ -222,7 +251,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Payment-Amount", "4000")
 
         //Set Api-Key
-        intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+        intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 
         //Set Display type ("Card-Only" or "Card-Account")
         intent.putExtra("Display", "Card-Only")
@@ -231,16 +260,16 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Buyer-Options", "True")
 
         //Set Buyer Options data
-        intent.putExtra("First-Name", "firstName")
-        intent.putExtra("Last-Name", "lastName")
-        intent.putExtra("Address-One", "addressOne")
-        intent.putExtra("Address-Two", "addressTwo")
-        intent.putExtra("City", "city")
-        intent.putExtra("State", "state")
-        intent.putExtra("Country", "country")
-        intent.putExtra("Zip-Code", "zipcode")
-        intent.putExtra("Phone-Number", "phoneNumber")
-        intent.putExtra("Email-Address", "emailAddress")
+        intent.putExtra("First-Name", "Henry")
+        intent.putExtra("Last-Name", "Smith")
+        intent.putExtra("Address-One", "123 Greenwood Drive")
+        intent.putExtra("Address-Two", "Apt 2")
+        intent.putExtra("City", "Cincinnati")
+        intent.putExtra("State", "OH")
+        intent.putExtra("Country", "USA")
+        intent.putExtra("Zip-Code", "45236")
+        intent.putExtra("Phone-Number", "513-111-1111")
+        intent.putExtra("Email-Address", "H_smith@gmail.com")
 
         //Set Fee Mode ("surcharge" or "service-fee")
         intent.putExtra("Fee-Mode", "service_fee")
@@ -282,7 +311,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Payment-Amount", "6523")
 
         //Set Api-Key
-        intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+        intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 
         //Set Display type ("Card-Only" or "Card-Account")
         intent.putExtra("Display", "Card-Account")
