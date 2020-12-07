@@ -1,23 +1,25 @@
 
-# PayTheory
+# PayTheory Android SDK
 
-## How to use PayTheory
+## Setup
 
-1. Add library to project
+Add library to your application
 
-```
+```kotlin
+dependencies {
 implementation 'com.paytheory.android:pay-theory-android:0.1'
+}
 ```
 
-2. Import PayTheoryActivity in Activity that will request to submit payment
+Import PayTheoryActivity in your Activity that will have payment on click listener
 
-```
+```kotlin
 import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
 ```
 
-3. Copy into activity that will call Pay Theory by setOnClickListener
+Copy this code into your Activity
 
-```
+```kotlin
 class ExampleAppMainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,18 +67,39 @@ class ExampleAppMainActivity : AppCompatActivity() {
         }
 ```
 
-4. Set configurations: Payment-Amount (Required), Api-Key (Required), Display type (Required), Buyer-Options (Optional), Fee-Mode (Optional), Custom-Tags (Optional)
 
-```
+##Usage
+
+#Set configurations: 
+
+###Required
+
+Payment-Amount (Required)
+
+```kotlin
             //Set Payment Amount in cents ($50.25 = "5025")
             intent.putExtra("Payment-Amount", "4000")
+```
 
+Api-Key (Required)
+
+```kotlin
             //Set Api-Key
             intent.putExtra("Api-Key", d9de91546564990737dd2f8049nhjy9dd6")
+```
 
+Display type (Required)
+
+```kotlin
             //Set Display type ("Card-Only" or "Card-Account")
             intent.putExtra("Display", "Card-Only")
+```
 
+###Optional
+
+Buyer-Options (Optional)
+
+```kotlin
             //Set Buyer Options ("True" or "False")
             intent.putExtra("Buyer-Options", "True")
 
@@ -91,33 +114,96 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Zip-Code", "zipcode")
             intent.putExtra("Phone-Number", "phoneNumber")
             intent.putExtra("Email-Address", "emailAddress")
+```
 
+Fee-Mode (Optional)
+
+```kotlin
             //Set Fee Mode ("surcharge" or "service-fee")
             intent.putExtra("Fee-Mode", "service_fee")
+```
 
+Custom-Tags (Optional)
+
+```kotlin
             //Set Custom Tags for payments
             intent.putExtra("Tags-Key", "tagKey")
             intent.putExtra("Tags-Value", "tagValue")
 ```
 
-5. Add method to retrieve result data once Pay Theory Activity has completed
 
-```
+
+
+
+
+##Handle Response
+
+Copy this code into your Activity. This method is used to retrieve result data once Pay Theory Activity has completed
+
+```kotlin
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == 1) {
         if (resultCode == Activity.RESULT_OK) {
             // Get String data from PayTheoryActivity
             val returnString = data!!.getStringExtra("keyName")
-            Log.e("Main Activity","Here is the result data string : $returnString")
+            Log.d("Main Activity","Here is the result data string : $returnString")
 	     }
 	 }
 }
 ```
 
-Here are complete examples
+###Completion response
+
+Upon completion of authorization and capture, details similar to the following are returned:
+
+*note that the service fee is included in amount*
+
+```json
+{
+    "receipt_number":"pt-env-XXXXXX",
+    "last_four": "XXXX",
+    "brand": "XXXXXXXXX",
+    "created_at":"YYYY-MM-DDTHH:MM:SS.ssZ",
+    "amount": 999,
+    "service_fee": 195,
+    "state":"SUCCEEDED",
+    "tags":{ "pay-theory-environment":"env","pt-number":"pt-env-XXXXXX", "YOUR_TAG_KEY": "YOUR_TAG_VALUE" }
+}
+```
+
+If a failure or decline occurs during the transaction, the response will be similar to the following:
+
+```json
+{
+    "receipt_number":"pt-test-XXXXXX",
+    "last_four":"XXXX",
+    "brand":"VISA",
+    "state":"FAILURE",
+    "type":"some descriptive reason for the failure / decline"
+}
+```
+
+##Style
+
+Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
+Change theme for application to ensure PayTheoryActivity has same theme as application
+
+```kotlin
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PayTheoryLibrary">
+<!--        android:theme="@style/Theme.AppCompat.DayNight">-->
 
 ```
+
+##Complete Code Samples
+
+```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -177,7 +263,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-```
+```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -225,22 +311,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-## How to change Pay Theory Activity Theme
-1. Go to your applications [AndroidManifest.xml](https://github.com/pay-theory/pay-theory-android/blob/main/Example%20Application/src/main/AndroidManifest.xml) file
-
-2. Change theme for application to ensure PayTheoryActivity has same theme as application
-
-```
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.PayTheoryLibrary">
-<!--        android:theme="@style/Theme.AppCompat.DayNight">-->
-
-```
 
 ## License
 
