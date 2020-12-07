@@ -240,26 +240,20 @@ Change theme for application to ensure PayTheoryActivity has same theme as appli
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    //Button that will start PayTheoryActivity
+    
     var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-    //Buyer-Options = True , Display = "Card-Only", Tags = "My Custom Tags"
-    toPaymentButton.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+    toPaymentButton.setOnClickListener { 
         val intent = Intent(this, PayTheoryActivity::class.java)
 
-        //Set Payment Amount in cents ($50.25 = "5025")
-        intent.putExtra("Payment-Amount", "4000")
+        intent.putExtra("Payment-Amount", "4632")
 
-        //Set Api-Key
         intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 
-        //Set Display type ("Card-Only" or "Card-Account")
         intent.putExtra("Display", "Card-Only")
 
-        //Set Buyer Options ("True" or "False")
         intent.putExtra("Buyer-Options", "True")
 
-        //Set Buyer Options data
         intent.putExtra("First-Name", "Henry")
         intent.putExtra("Last-Name", "Smith")
         intent.putExtra("Address-One", "123 Greenwood Drive")
@@ -271,24 +265,21 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Phone-Number", "513-111-1111")
         intent.putExtra("Email-Address", "H_smith@gmail.com")
 
-        //Set Fee Mode ("surcharge" or "service-fee")
         intent.putExtra("Fee-Mode", "service_fee")
 
-        //Set Custom Tags for payments
-        intent.putExtra("Tags-Key", "tagKey")
-        intent.putExtra("Tags-Value", "tagValue")
+        intent.putExtra("Tags-Key", "customerID")
+        intent.putExtra("Tags-Value", "ID-12548")
 
-        //Start PayTheoryActivity
         startActivityForResult(intent, 1);
     }
 
-    // This method is called when the PayTheoryActivity finishes
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                // Get String data from PayTheoryActivity
                 val returnString = data!!.getStringExtra("keyName")
+
                 Log.e("Main Activity","Here is the result data string : $returnString")
             }
         }
@@ -303,8 +294,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
     //Button that will start PayTheoryActivity
     var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-    //Buyer-Options = True , Display = "Card-Only", Tags = "My Custom Tags"
-    toPaymentButton.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        //Buyer-Options = True , Display = "Card-Only", Tags = "My Custom Tags"
+        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        toPaymentButton.setOnClickListener { 
         val intent = Intent(this, PayTheoryActivity::class.java)
 
         //Set Payment Amount in cents ($50.25 = "5025")
@@ -319,12 +311,11 @@ override fun onCreate(savedInstanceState: Bundle?) {
         //Set Buyer Options ("True" or "False")
         intent.putExtra("Buyer-Options", "False")
 
-        //Set Fee Mode ("surcharge" or "service-fee")
-        intent.putExtra("Fee-Mode", "surcharge")
+        //Fee Mode (defaults to "surcharge" if not added)
 
         //Set Custom Tags for payments
-        intent.putExtra("Tags-Key", "Customer ID")
-        intent.putExtra("Tags-Value", "customerId")
+        intent.putExtra("Tags-Key", "customerID")
+        intent.putExtra("Tags-Value", "ID-12648")
 
         //Start PayTheoryActivity
         startActivityForResult(intent, 1);
