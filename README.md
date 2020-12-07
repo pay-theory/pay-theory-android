@@ -3,14 +3,12 @@
 
 ## Setup
 
-Add library to your application
+Add library to your applications dependencies using jcenter's repository
 
 ```kotlin
-dependencies {
 
-implementation 'com.paytheory.android:pay-theory-android:0.1'
+compile 'com.paytheory.android:pay-theory-android:0.1'
 
-}
 ```
 
 Import PayTheoryActivity in your Activity that will have payment on click listener
