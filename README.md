@@ -93,28 +93,28 @@ intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 
 Select which type of display you prefer for you application:
 
-1. **Card-Only**
--Card number field
--Card expiration month field
--Card expiration year field
--Card cvv field
-
-
-**OR**
-
-
-2. **Card-Account**
--First name field
--Last name field
--Address one field
--Address two field
--City field
--State field
--Zip code field
--Card number field
--Card expiration month field
--Card expiration year field
--Card cvv field
+ **"Card-Only"**  
++ Card number field  
++ Card expiration month field  
++ Card expiration year field  
++ Card cvv field  
+  
+  
+**OR**  
+  
+  
+**"Card-Account"**  
++ First name field  
++ Last name field  
++ Address one field  
++ Address two field  
++ City field  
++ State field  
++ Zip code field  
++ Card number field  
++ Card expiration month field  
++ Card expiration year field  
++ Card cvv field  
 
 ```kotlin
 //Set Display type ("Card-Only" or "Card-Account")
@@ -151,7 +151,7 @@ intent.putExtra("Fee-Mode", "service_fee")
 
 #### Custom-Tags (Optional)
 
-Add custom tags to transactions (Customer ID, Tracking #, etc.)
+Add custom tags as key-value pair to transactions (Customer ID, Tracking #, etc.)
 
 ```kotlin
 //Set Custom Tags for payments
