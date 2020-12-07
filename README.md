@@ -75,23 +75,21 @@ class ExampleAppMainActivity : AppCompatActivity() {
 
 ### Set configurations for Pay Theory Activity: 
 
-#### Required
-
-Payment-Amount (Required)
+#### Payment-Amount (Required)
 
 ```kotlin
 //Set Payment Amount in cents ($50.25 = "5025")
 intent.putExtra("Payment-Amount", "4000")
 ```
 
-Api-Key (Required)
+#### Api-Key (Required)
 
 ```kotlin
 //Set Api-Key
 intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 ```
 
-Display type (Required)
+#### Display type (Required)
 
 Select which type of display you prefer for you application:
 
@@ -123,9 +121,7 @@ Select which type of display you prefer for you application:
 intent.putExtra("Display", "Card-Only")
 ```
 
-#### Optional
-
-Buyer-Options (Optional)
+#### Buyer-Options (Optional)
 
 ```kotlin
 //Set Buyer Options ("True" or "False")
@@ -144,7 +140,7 @@ intent.putExtra("Phone-Number", "513-111-1111")
 intent.putExtra("Email-Address", "Hsmith@gmail.com")
 ```
 
-Fee-Mode (Optional)
+#### Fee-Mode (Optional)
 
 The Fee-Mode is defaulted to "surcharge"
 
@@ -153,7 +149,7 @@ The Fee-Mode is defaulted to "surcharge"
 intent.putExtra("Fee-Mode", "service_fee")
 ```
 
-Custom-Tags (Optional)
+#### Custom-Tags (Optional)
 
 Add custom tags to transactions (Customer ID, Tracking #, etc.)
 
@@ -162,10 +158,6 @@ Add custom tags to transactions (Customer ID, Tracking #, etc.)
 intent.putExtra("Tags-Key", "tagKey")
 intent.putExtra("Tags-Value", "tagValue")
 ```
-
-
-
-
 
 
 ## Handle Response
