@@ -52,6 +52,7 @@ class PayTheory(
 
    private var userConfirmation: Boolean? = null
    private var payTheoryTransactResponse = ""
+   private var authJsonState = ""
 
     suspend fun init(): String {
         Log.e("PT2", "Init PT2")
@@ -566,9 +567,10 @@ class PayTheory(
                     val jsonData: String? = capAuthResponse.body?.string()
                     val capAuthJSONResponse = JSONObject(jsonData)
 
+                    authJsonState = capAuthJSONResponse.getString("state")
 
                     //check if payment was complete or denied
-                    if (capAuthJSONResponse.getString("state") == "SUCCEEDED") {
+                    if (authJsonState == "SUCCEEDED") {
 
                         Log.e("PT2", "Request Succeeded")
                         Log.e(
@@ -579,9 +581,7 @@ class PayTheory(
                             4
                         )}\", \"brand\":\"${getCardType(cardPayment.cardNumber.toString())}\", \"created_at\":\"${capAuthJSONResponse.getString(
                             "created_at"
-                        )}\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${capAuthJSONResponse.getString(
-                            "state"
-                        )}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\""
+                        )}\", \"amount\": ${cardPayment.amount}, \"convenience_fee\": ${cardPayment.convenienceFee}, \"state\":\"${authJsonState}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\""
 
                         if(!cardPayment.tagsKey.isNullOrBlank() && !cardPayment.tagsValue.isNullOrBlank()){
                             payTheoryTransactResponse += ", \"${cardPayment.tagsKey.toString()}\": \"${cardPayment.tagsValue.toString()}\" }"
@@ -610,8 +610,14 @@ class PayTheory(
 
             }
         } else {
-            Log.e("PT2", "Identity Call Request Failed")
-            return "Payment Request Failed"
+            Log.e("PT2", "Identity Call Request Failed / Payment Request Failed")
+            val failError = "Identity Call Request Failed / Payment Request Failed"
+
+//            "{"receipt_number":"pt-test-XXXXXX","last_four":"XXXX","brand":"VISA","state":"FAILURE","type":"some descriptive reason for the failure / decline" }"
+            val response = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${cardPayment.cardNumber.toString().takeLast(
+                4
+            )}\", \"brand\":\"${getCardType(cardPayment.cardNumber.toString())}\", \"state\":\"${authJsonState}\", \"type\":\"$failError\"}"
+            return failError
         }
         return payTheoryTransactResponse
     }
