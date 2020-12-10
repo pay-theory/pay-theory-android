@@ -21,7 +21,7 @@
         </activity>
 
         <!--Add Other activities like this-->
-        <activity android:name="com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity" >
+        <activity android:name="com.paytheory.paytheorylibrarysdk.classes.PayTheoryActivity" >
 
             <!--Default Intent Filter-->
             <intent-filter>

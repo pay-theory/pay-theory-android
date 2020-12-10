@@ -10,15 +10,15 @@ import com.paytheory.paytheorylibrarysdk.R
 
 /**
  * A simple [Fragment] subclass.
- * Use the [PayTheoryFragmentBuyerOptions.newInstance] factory method to
+ * Use the [CardAccountFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class PayTheoryFragmentBuyerOptions : Fragment() {
+class CardAccountFragment : Fragment() {
 
     companion object {
 
-        fun newInstance(): PayTheoryFragmentBuyerOptions {
-            return PayTheoryFragmentBuyerOptions()
+        fun newInstance(): CardAccountFragment {
+            return CardAccountFragment()
         }
     }
 

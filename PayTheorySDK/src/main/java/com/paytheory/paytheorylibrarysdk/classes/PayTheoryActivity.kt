@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrarysdk.paytheory
+package com.paytheory.paytheorylibrarysdk.classes
 
 import android.app.Activity
 import android.content.Intent
@@ -138,7 +138,7 @@ class PayTheoryActivity : AppCompatActivity() {
 //                    val phoneNumber = phoneNumberView.text.toString()
 //                    val emailAddress = emailAddressView.text.toString()
 
-                    val payment = CardPayment(
+                    val payment = Payment(
                         cardNumber,
                         expirationMonth,
                         expirationYear,
@@ -171,7 +171,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             intent.getStringExtra("Phone-Number")!!,
                             intent.getStringExtra("Email-Address")!!
                         )
-                        val payTheory = PayTheory(
+                        val payTheory = Transaction(
                             this,
                             intent.getStringExtra("Api-Key")!!,
                             payment,
@@ -195,7 +195,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         }
                     } else {
                         //If buyer options is false or null
-                        val payTheory = PayTheory(
+                        val payTheory = Transaction(
                             this,
                             intent.getStringExtra("Api-Key")!!,
                             payment
@@ -301,7 +301,7 @@ class PayTheoryActivity : AppCompatActivity() {
 //                    val phoneNumber = phoneNumberView.text.toString()
 //                    val emailAddress = emailAddressView.text.toString()
 
-                    val payment = CardPayment(
+                    val payment = Payment(
                         cardNumber,
                         expirationMonth,
                         expirationYear,
@@ -332,7 +332,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             intent.getStringExtra("Phone-Number")!!,
                             intent.getStringExtra("Email-Address")!!
                         )
-                        val payTheory = PayTheory(
+                        val payTheory = Transaction(
                             this,
                             intent.getStringExtra("Api-Key")!!,
                             payment,
@@ -356,7 +356,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         }
                     } else {
                         //If buyer options is false or null
-                        val payTheory = PayTheory(
+                        val payTheory = Transaction(
                             this,
                             intent.getStringExtra("Api-Key")!!,
                             payment
@@ -450,7 +450,7 @@ class PayTheoryActivity : AppCompatActivity() {
 //                        val expirationMonth = expirationMonthView.text.toString().toInt()
 //                        val expirationYear = expirationYearView.text.toString().toInt()
 //
-//                        val payment = CardPayment(
+//                        val payment = Payment(
 //                            cardNumber,
 //                            expirationMonth,
 //                            expirationYear,
@@ -470,7 +470,7 @@ class PayTheoryActivity : AppCompatActivity() {
 //                            intent.getStringExtra("Phone-Number")!!,
 //                            intent.getStringExtra("Email-Address")!!
 //                        )
-//                        val payTheory = PayTheory(
+//                        val payTheory = Transaction(
 //                            this,
 //                            intent.getStringExtra("Api-Key")!!,
 //                            payment,

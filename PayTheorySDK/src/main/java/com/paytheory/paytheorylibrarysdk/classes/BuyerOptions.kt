@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrarysdk.paytheory
+package com.paytheory.paytheorylibrarysdk.classes
 
 class BuyerOptions(
         val firstName : String,

@@ -3,7 +3,7 @@
     package="com.paytheory.paytheorylibrarysdk">
 
     <application>
-        <activity android:name=".paytheory.PayTheoryActivity"></activity>
+        <activity android:name=".classes.PayTheoryActivity"></activity>
 
     </application>
 

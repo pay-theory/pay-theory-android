@@ -1,6 +1,6 @@
-package com.paytheory.paytheorylibrarysdk.paytheory
+package com.paytheory.paytheorylibrarysdk.classes
 
-class CardPayment(
+class Payment(
     var cardNumber: Long,
     var cardExpMon: Int,
     var cardExpYear: Int,

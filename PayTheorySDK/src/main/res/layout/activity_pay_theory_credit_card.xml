@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".paytheory.PayTheoryActivity">
+    tools:context=".classes.PayTheoryActivity">
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -21,7 +21,7 @@
 
         <fragment
             android:id="@+id/payTheoryFragment"
-            android:name="com.paytheory.paytheorylibrarysdk.fragments.PayTheoryFragmentCreditCard"
+            android:name="com.paytheory.paytheorylibrarysdk.fragments.CardOnlyFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </ScrollView>

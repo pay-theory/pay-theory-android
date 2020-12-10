@@ -3,7 +3,7 @@
 //import android.util.Log
 //import androidx.test.platform.app.InstrumentationRegistry
 //import com.paytheory.paytheorylibrarysdk.paytheory.BuyerOptions
-//import com.paytheory.paytheorylibrarysdk.paytheory.CardPayment
+//import com.paytheory.paytheorylibrarysdk.paytheory.Payment
 //import okhttp3.OkHttpClient
 //import okhttp3.Request
 //import org.json.JSONObject
@@ -25,7 +25,7 @@
 //class PayTheoryTests {
 //    private var client = OkHttpClient()
 //    private var context = InstrumentationRegistry.getInstrumentation().targetContext
-//    private var cardPayment = CardPayment(7, 6, 5, 4, 3, "2", "1")
+//    private var cardPayment = Payment(7, 6, 5, 4, 3, "2", "1")
 //    private var buyerOptions = BuyerOptions(
 //        "firstName",
 //        "lastName",
@@ -38,8 +38,8 @@
 //        "phoneNumber",
 //        "email"
 //    )
-//    private var payTheory = PayTheory(context, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", cardPayment, buyerOptions)
-//    private var failedPayTheory = PayTheory(context, "wrong api", cardPayment, buyerOptions)
+//    private var payTheory = Transaction(context, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", cardPayment, buyerOptions)
+//    private var failedPayTheory = Transaction(context, "wrong api", cardPayment, buyerOptions)
 //
 //    @Test
 //    fun test1ChallengeCall() {

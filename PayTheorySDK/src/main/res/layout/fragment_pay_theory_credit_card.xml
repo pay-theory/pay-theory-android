@@ -3,7 +3,7 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:id="@+id/PayTheoryFragment">
 
-    <com.paytheory.paytheorylibrarysdk.CreditCardEditText
+    <com.paytheory.paytheorylibrarysdk.classes.CreditCardEditText
         android:id="@+id/creditCardEditText"
 
 
@@ -14,7 +14,7 @@
         android:hint="Card number"
         android:inputType="number" />
 
-    <com.paytheory.paytheorylibrarysdk.CVVEditText
+    <com.paytheory.paytheorylibrarysdk.classes.CVVEditText
         android:id="@+id/cvvEditText"
 
         android:layout_width="400dp"
@@ -23,7 +23,7 @@
         android:hint="CVV (ex:123)"
         android:inputType="text" />
 
-    <com.paytheory.paytheorylibrarysdk.ExpMonthText
+    <com.paytheory.paytheorylibrarysdk.classes.ExpMonthText
         android:id="@+id/expirationMonthEditText"
 
         android:layout_width="400dp"
@@ -32,7 +32,7 @@
         android:hint="Expiration month (ex: 04)"
         android:inputType="text" />
 
-    <com.paytheory.paytheorylibrarysdk.ExpYearText
+    <com.paytheory.paytheorylibrarysdk.classes.ExpYearText
         android:id="@+id/expirationYearEditText"
 
         android:layout_width="400dp"
