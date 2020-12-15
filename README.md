@@ -64,7 +64,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Tags-Value", "tagValue")
 
             //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, 1)
         }
     }
 }
@@ -262,7 +262,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Tags-Key", "customerID")
         intent.putExtra("Tags-Value", "ID-12548")
 
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, 1)
     }
 
 
@@ -310,7 +310,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
         intent.putExtra("Tags-Value", "ID-12648")
 
         //Start PayTheoryActivity
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, 1)
     }
 
     // This method is called when the PayTheoryActivity finishes

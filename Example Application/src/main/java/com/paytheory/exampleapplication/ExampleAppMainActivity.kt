@@ -86,7 +86,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             intent.putExtra("Phone-Number", "513-123-1234")
             intent.putExtra("Email-Address", "test@paytheory.com")
             //Start PayTheoryActivity
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, 1)
         }
 
 

@@ -33,63 +33,62 @@ class Transaction(
     private val payment: Payment,
     private val buyerOptions: BuyerOptions? = null
 ) {
-   private var client = OkHttpClient()
-   private var payTheoryChallengeResponse = ""
-   private var googleAvailability = false
-   private var attestationResponse: String? = null
-   private var idempotencyResponse: String? = null
-   private var idempotencyResponseData: String = ""
-   private var idempotencySignatureData: String = ""
-   private var idempotencyCredIdData: String = ""
-   private var kmsResult: Boolean = false
-   private var token = ""
-   private var idempotency = ""
-   private var merchantId = ""
-   private var userConfirmation: Boolean? = null
-   private var transactionResponse = ""
-   private var transactionState = "NOT COMPLETE"
+    private var client = OkHttpClient()
+    private var payTheoryChallengeResponse = ""
+    private var googleAvailability = false
+    private var attestationResponse: String? = null
+    private var idempotencyResponse: String? = null
+    private var idempotencyResponseData: String = ""
+    private var idempotencySignatureData: String = ""
+    private var idempotencyCredIdData: String = ""
+    private var kmsResult: Boolean = false
+    private var token = ""
+    private var idempotency = ""
+    private var merchantId = ""
+    private var userConfirmation: Boolean? = null
+    private var transactionResponse = ""
+    private var transactionState = "NOT COMPLETE"
 
     suspend fun init(): String {
         Log.e("PT2", "Init transaction")
         CoroutineScope(IO).launch {
 
             //Challenge Api
-            val challengeResult = async{
+            val challengeResult = async {
                 challenge()
             }.await()
             Log.e("PT2", "Challenge Result: $challengeResult")
 
 
             //Google Api
-            val googleApiResult = async{
+            val googleApiResult = async {
                 googleApi()
             }.await()
             Log.e("PT2", "Google Api Result: $googleApiResult")
 
 
             //Attestation Api
-            val attestationResponse = async{
+            val attestationResponse = async {
                 attestation(challengeResult)
             }.await()
-            if(attestationResponse == null ){
+            if (attestationResponse == null) {
                 Log.e("PT2", "ERROR: Attestation failed")
-            }
-            else{
+            } else {
                 Log.e("PT2", "Attestation Result: $attestationResponse")
             }
 
 
 
-            if (!attestationResponse.isNullOrEmpty() || googleAvailability || !payTheoryChallengeResponse.isNullOrEmpty()){
+            if (!attestationResponse.isNullOrEmpty() || googleAvailability || !payTheoryChallengeResponse.isNullOrEmpty()) {
                 //Pay Theory Idempotency
-                val idempotencyResponse = async{
+                val idempotencyResponse = async {
                     payTheoryIdempotency(payTheoryChallengeResponse, attestationResponse)
                 }.await()
 
                 Log.e("PT2", "Idempotency Result: $idempotencyResponse")
 
                 //KMS
-                val kmsResult = async{
+                val kmsResult = async {
                     kms(
                         idempotencyResponseData,
                         idempotencySignatureData,
@@ -102,7 +101,7 @@ class Transaction(
                 Log.e("PT2", "ERROR: Validation Failed")
             }
 
-            if (kmsResult){
+            if (kmsResult) {
                 Handler(Looper.getMainLooper()).post {
                     confirmAlert(
                         payment.amount,
@@ -113,15 +112,15 @@ class Transaction(
                     )
                 }
 
-            } else{
+            } else {
                 Log.e("PT2", "ERROR: Verification failed")
             }
 
             while (userConfirmation == null) {
                 delay(500)
             }
-            if (userConfirmation == true){
-                transactionResponse = async{
+            if (userConfirmation == true) {
+                transactionResponse = async {
                     transact(token, merchantId, payment.currency, idempotency)
                 }.await()
                 Log.e("PT2", "Transaction Response: $transactionResponse")
@@ -130,7 +129,7 @@ class Transaction(
                 Log.e("PT2", "User Cancelled Transaction: $userConfirmation")
             }
         }
-        while (transactionResponse == ""){
+        while (transactionResponse == "") {
             delay(5000)
         }
         return transactionResponse
@@ -146,12 +145,11 @@ class Transaction(
         val jsonData: String? = response.body?.string()
         Log.e("PTLib", "Challenge Response: $jsonData")
         val challengeJSONResponse = JSONObject(jsonData)
-        return if(challengeJSONResponse.has("challenge")){
+        return if (challengeJSONResponse.has("challenge")) {
             val payTheoryChallengeResponseString = challengeJSONResponse.getString("challenge")
             payTheoryChallengeResponse = challengeJSONResponse.getString("challenge")
             payTheoryChallengeResponseString
-        }
-        else {
+        } else {
             challengeJSONResponse.getString("message")
         }
 
@@ -160,7 +158,9 @@ class Transaction(
 
     fun googleApi(): Boolean {
         //Call google play services to verify google play is available
-        return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+        return if (GoogleApiAvailability.getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        ) {
             Log.e("PT2", "Google Play Service Available.")
             googleAvailability = true
             true
@@ -172,14 +172,14 @@ class Transaction(
 
     suspend fun attestation(nonce: String): String? {
 
-        if (Looper.myLooper()==null){
+        if (Looper.myLooper() == null) {
             Looper.prepare()
         }
         val attestationTask = SafetyNet.getClient(context).attest(
             nonce.toByteArray(),
             "AIzaSyCtRWLrt0I67VhmJV3cue-18ENmxZ8MXGo"
         )
-        while(!attestationTask.isComplete){
+        while (!attestationTask.isComplete) {
             delay(3000)
         }
         attestationResponse = attestationTask.result.jwsResult
@@ -219,9 +219,10 @@ class Transaction(
         val jsonData: String? = response.body?.string()
         Log.e("PTLib", "Idempotency response body ${jsonData}")
         val idempotencyJSONResponse = JSONObject(jsonData)
-        return if(idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has(
+        return if (idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has(
                 "credId"
-            )){
+            )
+        ) {
             idempotencyResponse = idempotencyJSONResponse.toString()
             idempotencyResponseData = idempotencyJSONResponse.getString("response")
             idempotencySignatureData = idempotencyJSONResponse.getString("signature")
@@ -229,10 +230,16 @@ class Transaction(
 
             Log.e("PTLib", "Idempotency response $idempotencyResponse")
             idempotencyResponse.toString()
-        }
-        else {
-            idempotencyJSONResponse.getString("message")
-            return ""
+        } else {
+
+            val failError = idempotencyJSONResponse.getString("message")
+
+            transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${payment.cardNumber.toString().takeLast(
+                4
+            )}\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
+            return transactionResponse
+
+
         }
     }
 
@@ -287,12 +294,11 @@ class Transaction(
 
         val verifiedResponse = kmsClient.verify(verifyRequest)
         Log.e("PT2", "verifiedResponse $verifiedResponse")
-        return if (verifiedResponse.isSignatureValid){
+        return if (verifiedResponse.isSignatureValid) {
             kmsResult = true
             Log.e("PT2", "Verified Response is True")
             kmsResult
-        }
-        else{
+        } else {
             kmsResult = false
             Log.e("PT2", "Verified Response is False")
             kmsResult
@@ -311,7 +317,17 @@ class Transaction(
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Confirm")
         builder.setMessage(
-            "Are you sure you want to make a payment of $${String.format("%.2f", (paymentAmount.toDouble() / 100))}, including a fee of $${String.format("%.2f", (convenienceFee.toDouble() / 100))} on $cardBrand card beginning with ${
+            "Are you sure you want to make a payment of $${
+                String.format(
+                    "%.2f",
+                    (paymentAmount.toDouble() / 100)
+                )
+            }, including a fee of $${
+                String.format(
+                    "%.2f",
+                    (convenienceFee.toDouble() / 100)
+                )
+            } on $cardBrand card beginning with ${
                 cardNumber.toString().take(6)
             }"
         )
@@ -387,12 +403,10 @@ class Transaction(
                 val identityTagsJsonObject = JSONObject()
                 identityTagsJsonObject.put("key", "pt-platform:android $idempotency")
                 entityJSONObject.put("entity", personalAddressJsonObject)
-
-//            identityJsonObject.put("tags", idempotency)
                 identityJsonObject.put("tags", identityTagsJsonObject)
                 identityJsonObject.put("entity", entityJSONObject)
             }
-            if(!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()){
+            if (!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()) {
                 val tagsJson = JSONObject()
                 tagsJson.put(payment.tagsKey, payment.tagsValue.toString())
                 identityJsonObject.put("tags", tagsJson)
@@ -405,7 +419,6 @@ class Transaction(
         val identityBody = identityJsonObject.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaType())
         Log.e("PT2", "Identity Call JSON body : $identityJsonObject")
-
 
 
         val authRequest = Request.Builder()
@@ -441,13 +454,13 @@ class Transaction(
                     "identity",
                     identityJsonResponse.getString("id")
                 )
-                if (!payment.cardFirstName.isNullOrBlank()){
+                if (!payment.cardFirstName.isNullOrBlank()) {
                     paymentJsonObject.put(
                         "name",
                         "${payment.cardFirstName} ${payment.cardLastName}"
                     )
                 }
-                if (!payment.cardAddressOne.isNullOrBlank() || !payment.cardAddressTwo.isNullOrBlank()){
+                if (!payment.cardAddressOne.isNullOrBlank() || !payment.cardAddressTwo.isNullOrBlank()) {
                     paymentJsonObject.put("address", addressJsonObject)
                 }
 
@@ -456,7 +469,7 @@ class Transaction(
                 paymentJsonObject.put("security_code", "${payment.cardCvv}")
                 paymentJsonObject.put("number", "${payment.cardNumber}")
                 paymentJsonObject.put("type", "PAYMENT_CARD")
-                if(!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()){
+                if (!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()) {
                     val tagsJson = JSONObject()
                     tagsJson.put(payment.tagsKey, payment.tagsValue.toString())
                     paymentJsonObject.put("tags", tagsJson)
@@ -482,9 +495,8 @@ class Transaction(
             val paymentJsonResponse = JSONObject(paymentJsonData)
 
             Log.e("PT2", "Payment Call Response: $paymentJsonResponse")
-           if(!paymentJsonResponse.has("_embedded"))
-//            if (paymentJsonResponse.getString("id") != null)
-                { //TODO - check if failed
+            if (!paymentJsonResponse.has("_embedded"))
+            {
                 val authJsonObject = JSONObject()
                 try {
                     authJsonObject.put(
@@ -494,7 +506,7 @@ class Transaction(
                     authJsonObject.put("merchant_identity", merchantId)
                     authJsonObject.put("amount", payment.amount)
                     authJsonObject.put("currency", currency)
-                    if(!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()){
+                    if (!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()) {
                         val tagsJson = JSONObject()
                         tagsJson.put(payment.tagsKey, payment.tagsValue.toString())
                         authJsonObject.put("tags", tagsJson)
@@ -558,7 +570,6 @@ class Transaction(
 
                     transactionState = capAuthJSONResponse.getString("state")
 
-                    //check if payment was complete or denied
                     if (transactionState == "SUCCEEDED") {
 
                         Log.e("PT2", "Request Succeeded")
@@ -566,45 +577,76 @@ class Transaction(
                             "PT2",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
-                        transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${payment.cardNumber.toString().takeLast(
-                            4
-                        )}\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"created_at\":\"${capAuthJSONResponse.getString(
-                            "created_at"
-                        )}\", \"amount\": ${payment.amount}, \"convenience_fee\": ${payment.convenienceFee}, \"state\":\"${transactionState}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\""
+                        transactionResponse =
+                            "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                                payment.cardNumber.toString().takeLast(
+                                    4
+                                )
+                            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"created_at\":\"${
+                                capAuthJSONResponse.getString(
+                                    "created_at"
+                                )
+                            }\", \"amount\": ${payment.amount}, \"convenience_fee\": ${payment.convenienceFee}, \"state\":\"${transactionState}\", \"tags\":{ \"pay-theory-environment\":\":\"test\",\"pt-number\":\"pt-env-XXXXXX\""
 
-                        if(!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()){
+                        if (!payment.tagsKey.isNullOrBlank() && !payment.tagsValue.isNullOrBlank()) {
                             transactionResponse += ", \"${payment.tagsKey.toString()}\": \"${payment.tagsValue.toString()}\" }"
-                        }
-                        else {
+                        } else {
                             transactionResponse += "} }"
                         }
 
 
                         return transactionResponse
                     } else {
-                        Log.e("PT2", "Capture Authorization Request Failed")
+                        Log.e("PT2", "Capture Authorization Request Failed / Payment Request Failed")
+                        val embedded = capAuthJSONResponse.getJSONObject("_embedded")
+                        val error = embedded.getJSONArray("errors")
+                        val errorJson = error.getJSONObject(0)
+                        val failError = errorJson.getString("message")
+
+                        transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                            payment.cardNumber.toString().takeLast(
+                                4
+                            )
+                        }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
+                        return transactionResponse
                     }
                 } else {
-                    Log.e("PT2", "Create Authorization Request Failed")
+                    Log.e("PT2", "Create Authorization Request Failed  / Payment Request Failed")
+                    val embedded = authJSONResponse.getJSONObject("_embedded")
+                    val error = embedded.getJSONArray("errors")
+                    val errorJson = error.getJSONObject(0)
+                    val failError = errorJson.getString("message")
+
+                    transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                        payment.cardNumber.toString().takeLast(
+                            4
+                        )
+                    }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
+                    return transactionResponse
                 }
             } else {
-              val embedded = paymentJsonResponse.getJSONObject("_embedded")
-              val error = embedded.getJSONArray("errors")
-              val errorJson = error.getJSONObject(0)
-              val messageString = errorJson.getString("message")
-               transactionResponse = messageString
-               Log.e("PT2", "Payment Call Request Failed")
+                Log.e("PT2", "Payment Instrument Request Failed / Payment Request Failed")
+                val embedded = paymentJsonResponse.getJSONObject("_embedded")
+                val error = embedded.getJSONArray("errors")
+                val errorJson = error.getJSONObject(0)
+                val failError = errorJson.getString("message")
 
-               return transactionResponse
-
+                transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                    payment.cardNumber.toString().takeLast(
+                        4
+                    )
+                }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
+                return transactionResponse
             }
         } else {
             Log.e("PT2", "Identity Call Request Failed / Payment Request Failed")
             val failError = "Identity Call Request Failed / Payment Request Failed"
 
-            transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${payment.cardNumber.toString().takeLast(
-                4
-            )}\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
+            transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                payment.cardNumber.toString().takeLast(
+                    4
+                )
+            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
             return transactionResponse
         }
         return transactionResponse

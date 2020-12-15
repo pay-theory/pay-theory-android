@@ -12,5 +12,4 @@ class BuyerOptions(
         val phoneNumber: String,
         val email : String,
 
-) {
-}
+)
