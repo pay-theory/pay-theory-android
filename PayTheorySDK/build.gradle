@@ -68,8 +68,8 @@ apply plugin: 'org.jetbrains.dokka'
 
 //Dokka
 dokka {
-    outputFormat = 'markdown'
-    outputDirectory = "$buildDir/markdowndocs"
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/html"
 
     configuration {
         includeNonPublic = false

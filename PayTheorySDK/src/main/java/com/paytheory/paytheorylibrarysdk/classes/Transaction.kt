@@ -26,7 +26,10 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.nio.ByteBuffer
 
-
+/**
+ * Transaction Class is created after data validation and click listener is activated.
+ * This hold all pay theory logic to process payments.
+ */
 class Transaction(
     private val context: Context,
     private val apiKey: String,

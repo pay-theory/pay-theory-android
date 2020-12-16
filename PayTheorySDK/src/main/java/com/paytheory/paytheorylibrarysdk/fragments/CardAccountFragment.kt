@@ -9,14 +9,12 @@ import android.view.ViewGroup
 import com.paytheory.paytheorylibrarysdk.R
 
 /**
- * A simple [Fragment] subclass.
- * Use the [CardAccountFragment.newInstance] factory method to
- * create an instance of this fragment.
+ * CardAccountFragment is a simple Fragment subclass.
+ * Used to create Card Account fields
  */
 class CardAccountFragment : Fragment() {
 
     companion object {
-
         fun newInstance(): CardAccountFragment {
             return CardAccountFragment()
         }
