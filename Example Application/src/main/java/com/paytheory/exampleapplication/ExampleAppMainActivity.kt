@@ -28,7 +28,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
 //            intent.putExtra("Payment-Amount", "5025")
 //
 //            //Set Api-Key
-//            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+//            intent.putExtra("Api-Key", "MY API KEY")
 //
 //            //Set Display type ("Card-Only" or "Card-Account")
 //            intent.putExtra("Display", "Card-Only")
@@ -67,7 +67,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             //Set Payment Amount in cents ($50.25 = "5025")
             intent.putExtra("Payment-Amount", "3000")
             //Set Api-Key
-            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+            intent.putExtra("Api-Key", "MY API KEY")
             //Set Display type ("Card-Only" or "Card-Account")
             intent.putExtra("Display", "Card-Account")
             //Set Custom Tags for payments
@@ -101,7 +101,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
 //            //Set Payment Amount in cents ($50.25 = "5025")
 //            intent.putExtra("Payment-Amount", "5000")
 //            //Set Api-Key
-//            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+//            intent.putExtra("Api-Key", "MY API KEY")
 //            //Set Display type ("Card-Only" or "Card-Account")
 //            intent.putExtra("Display", "Card-Account")
 //            //Set Custom Tags for payments
@@ -124,7 +124,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
 //            //Set Payment Amount in cents ($50.25 = "5025")
 //            intent.putExtra("Payment-Amount", "5000")
 //            //Set Api-Key
-//            intent.putExtra("Api-Key", "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
+//            intent.putExtra("Api-Key", "MY API KEY")
 //            //Set Display type ("Card-Only" or "Card-Account")
 //            intent.putExtra("Display", "Card-Only")
 //            //Set Custom Tags for payments
