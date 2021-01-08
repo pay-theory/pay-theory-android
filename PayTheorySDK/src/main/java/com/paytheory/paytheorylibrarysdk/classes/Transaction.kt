@@ -53,6 +53,24 @@ class Transaction(
     private var transactionState = "NOT COMPLETE"
     private var challengeComplete: Boolean? = null
 
+    private fun getCardType(number: String): String {
+
+        val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
+        val mastercard = Regex("^5[1-5][0-9]{14}$")
+        val amx = Regex("^3[47][0-9]{13}$")
+        val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
+        val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
+
+        return when {
+            visa.matches(number) -> "Visa"
+            mastercard.matches(number) -> "Mastercard"
+            amx.matches(number) -> "American Express"
+            diners.matches(number) -> "Diners"
+            discover.matches(number) -> "Discover"
+            else -> "Unknown"
+        }
+    }
+
     suspend fun init(): String {
         Log.d("Pay Theory", "Init transaction")
         CoroutineScope(IO).launch {
@@ -149,16 +167,6 @@ class Transaction(
         }
         return transactionResponse
     }
-
-
-
-
-
-
-
-
-
-
 
     fun challenge(): String {
         val request = Request.Builder()
@@ -390,7 +398,6 @@ class Transaction(
         alert.show()
     }
 
-
     fun cancel(): String {
         Log.d("PTLib", "Cancel complete")
         val alertDialog = AlertDialog.Builder(context).create()
@@ -402,7 +409,6 @@ class Transaction(
         alertDialog.show()
         return "Payment Cancelled"
     }
-
 
     fun transact(token: String, merchantId: String, currency: String, idempotency: String): String {
         val identityJsonObject = JSONObject()
@@ -692,25 +698,6 @@ class Transaction(
             return transactionResponse
         }
         return transactionResponse
-    }
-
-
-    private fun getCardType(number: String): String {
-
-        val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
-        val mastercard = Regex("^5[1-5][0-9]{14}$")
-        val amx = Regex("^3[47][0-9]{13}$")
-        val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
-        val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
-
-        return when {
-            visa.matches(number) -> "Visa"
-            mastercard.matches(number) -> "Mastercard"
-            amx.matches(number) -> "American Express"
-            diners.matches(number) -> "Diners"
-            discover.matches(number) -> "Discover"
-            else -> "Unknown"
-        }
     }
 }
 
