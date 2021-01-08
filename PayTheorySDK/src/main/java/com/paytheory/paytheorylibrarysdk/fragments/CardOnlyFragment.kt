@@ -20,7 +20,6 @@ class CardOnlyFragment : Fragment() {
      */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        Log.e("Fragment", "onCreateView")
         return inflater.inflate(R.layout.fragment_pay_theory_credit_card, container, false)
     }
 

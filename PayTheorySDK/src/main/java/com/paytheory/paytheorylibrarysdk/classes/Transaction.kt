@@ -51,23 +51,25 @@ class Transaction(
     private var userConfirmation: Boolean? = null
     private var transactionResponse = ""
     private var transactionState = "NOT COMPLETE"
+    private var challengeComplete: Boolean? = null
 
     suspend fun init(): String {
-        Log.e("PT2", "Init transaction")
+        Log.d("Pay Theory", "Init transaction")
         CoroutineScope(IO).launch {
 
             //Challenge Api
             val challengeResult = async {
                 challenge()
             }.await()
-            Log.e("PT2", "Challenge Result: $challengeResult")
+            if (challengeComplete == true) {
+                Log.d("Pay Theory", "Challenge Result: $challengeResult")
 
 
             //Google Api
             val googleApiResult = async {
                 googleApi()
             }.await()
-            Log.e("PT2", "Google Api Result: $googleApiResult")
+            Log.d("Pay Theory", "Google Api Result: $googleApiResult")
 
 
             //Attestation Api
@@ -75,9 +77,9 @@ class Transaction(
                 attestation(challengeResult)
             }.await()
             if (attestationResponse == null) {
-                Log.e("PT2", "ERROR: Attestation failed")
+                Log.d("Pay Theory", "ERROR: Attestation failed")
             } else {
-                Log.e("PT2", "Attestation Result: $attestationResponse")
+                Log.d("Pay Theory", "Attestation Result: $attestationResponse")
             }
 
 
@@ -88,7 +90,7 @@ class Transaction(
                     payTheoryIdempotency(payTheoryChallengeResponse, attestationResponse)
                 }.await()
 
-                Log.e("PT2", "Idempotency Result: $idempotencyResponse")
+                Log.d("Pay Theory", "Idempotency Result: $idempotencyResponse")
 
                 //KMS
                 val kmsResult = async {
@@ -99,9 +101,9 @@ class Transaction(
                     )
                 }.await()
 
-                Log.e("PT2", "KMS Result: $kmsResult")
+                Log.d("Pay Theory", "KMS Result: $kmsResult")
             } else {
-                Log.e("PT2", "ERROR: Validation Failed")
+                Log.d("Pay Theory", "ERROR: Validation Failed")
             }
 
             if (kmsResult) {
@@ -116,7 +118,7 @@ class Transaction(
                 }
 
             } else {
-                Log.e("PT2", "ERROR: Verification failed")
+                Log.d("Pay Theory", "ERROR: Verification failed")
             }
 
             while (userConfirmation == null) {
@@ -126,17 +128,37 @@ class Transaction(
                 transactionResponse = async {
                     transact(token, merchantId, payment.currency, idempotency)
                 }.await()
-                Log.e("PT2", "Transaction Response: $transactionResponse")
+                Log.d("Pay Theory", "Transaction Response: $transactionResponse")
 
             } else {
-                Log.e("PT2", "User Cancelled Transaction: $userConfirmation")
+                Log.d("Pay Theory", "User Cancelled Transaction: $userConfirmation")
             }
+
+            } else {
+                Log.d("Pay Theory", "ERROR: Challenge failed")
+                transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                    payment.cardNumber.toString().takeLast(
+                        4
+                    )
+                }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"${challengeResult}\"}"
+            }
+
         }
         while (transactionResponse == "") {
             delay(5000)
         }
         return transactionResponse
     }
+
+
+
+
+
+
+
+
+
+
 
     fun challenge(): String {
         val request = Request.Builder()
@@ -146,13 +168,15 @@ class Transaction(
 
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        Log.e("PTLib", "Challenge Response: $jsonData")
+        Log.d("PTLib", "Challenge Response: $jsonData")
         val challengeJSONResponse = JSONObject(jsonData)
         return if (challengeJSONResponse.has("challenge")) {
             val payTheoryChallengeResponseString = challengeJSONResponse.getString("challenge")
             payTheoryChallengeResponse = challengeJSONResponse.getString("challenge")
+            challengeComplete = true
             payTheoryChallengeResponseString
         } else {
+            challengeComplete = false
             challengeJSONResponse.getString("message")
         }
 
@@ -164,7 +188,7 @@ class Transaction(
         return if (GoogleApiAvailability.getInstance()
                 .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
         ) {
-            Log.e("PT2", "Google Play Service Available.")
+            Log.d("Pay Theory", "Google Play Service Available.")
             googleAvailability = true
             true
         } else {
@@ -207,7 +231,7 @@ class Transaction(
         } catch (e: JSONException) {
             e.printStackTrace()
         }
-        Log.e("PT2", "payTheoryIdempotency JSON Body: $jsonObject")
+        Log.d("Pay Theory", "payTheoryIdempotency JSON Body: $jsonObject")
 
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = jsonObject.toString().toRequestBody(mediaType)
@@ -220,8 +244,23 @@ class Transaction(
 
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        Log.e("PTLib", "Idempotency response body ${jsonData}")
+        Log.d("PTLib", "Idempotency response body ${jsonData}")
+        //TODO -  Idempotency response body  <!DOCTYPE of type java.lang.String cannot be converted to JSONObject   <!DOCTYPE html>
+        //    <html lang="en">
+        //    <head>
+        //    <meta charset="utf-8">
+        //    <title>Error</title>
+        //    </head>
+        //    <body>
+        //    <pre>Cannot POST /idempotency</pre>
+        //    </body>
+        //    </html>
+
+
+
         val idempotencyJSONResponse = JSONObject(jsonData)
+
+        //TODO - Idempotency Result: { "receipt_number":"", "last_four":"1758", "brand":"Mastercard", "state":"NOT COMPLETE", "type":"Forbidden"} as string
         return if (idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has(
                 "credId"
             )
@@ -231,7 +270,7 @@ class Transaction(
             idempotencySignatureData = idempotencyJSONResponse.getString("signature")
             idempotencyCredIdData = idempotencyJSONResponse.getString("credId")
 
-            Log.e("PTLib", "Idempotency response $idempotencyResponse")
+            Log.d("PTLib", "Idempotency response $idempotencyResponse")
             idempotencyResponse.toString()
         } else {
 
@@ -250,10 +289,10 @@ class Transaction(
         val decodedBytes = android.util.Base64.decode(credId, DEFAULT)
         val credArray: List<String> = String(decodedBytes).split(":")
 
-        Log.e("PTLib", "decodedCredId ${(String(decodedBytes))}")
-        Log.e("PTLib", "credArray[0] ${credArray[0]}")
-        Log.e("PTLib", "credArray[0] ${credArray[1]}")
-        Log.e("PTLib", "credArray[0] ${credArray[2]}")
+        Log.d("PTLib", "decodedCredId ${(String(decodedBytes))}")
+        Log.d("PTLib", "credArray[0] ${credArray[0]}")
+        Log.d("PTLib", "credArray[0] ${credArray[1]}")
+        Log.d("PTLib", "credArray[0] ${credArray[2]}")
         val awsCreds =
             BasicSessionCredentials(credArray[0], credArray[1], credArray[2])
 
@@ -280,8 +319,8 @@ class Transaction(
         this.payment.amount = payment.getString("amount").toInt()
         this.payment.convenienceFee = payment.getString("service_fee")
 
-        Log.e("PTLib", "decryptResponse.plaintext $converted")
-        Log.e("PTLib", "decryptResponse $decryptResponse")
+        Log.d("PTLib", "decryptResponse.plaintext $converted")
+        Log.d("PTLib", "decryptResponse $decryptResponse")
 
         val signatureBuff3 =
             (ByteBuffer.wrap(android.util.Base64.decode(signature, DEFAULT)))
@@ -296,14 +335,14 @@ class Transaction(
         verifyRequest.signingAlgorithm = "ECDSA_SHA_384"
 
         val verifiedResponse = kmsClient.verify(verifyRequest)
-        Log.e("PT2", "verifiedResponse $verifiedResponse")
+        Log.d("Pay Theory", "verifiedResponse $verifiedResponse")
         return if (verifiedResponse.isSignatureValid) {
             kmsResult = true
-            Log.e("PT2", "Verified Response is True")
+            Log.d("Pay Theory", "Verified Response is True")
             kmsResult
         } else {
             kmsResult = false
-            Log.e("PT2", "Verified Response is False")
+            Log.d("Pay Theory", "Verified Response is False")
             kmsResult
         }
 
@@ -337,7 +376,7 @@ class Transaction(
         builder.setPositiveButton("YES") { dialog, which ->
             userConfirmation = true
             dialog.dismiss()
-            Log.e(
+            Log.d(
                 "PTLib",
                 "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
             )
@@ -353,7 +392,7 @@ class Transaction(
 
 
     fun cancel(): String {
-        Log.e("PTLib", "Cancel complete")
+        Log.d("PTLib", "Cancel complete")
         val alertDialog = AlertDialog.Builder(context).create()
         alertDialog.setTitle("Alert")
         alertDialog.setMessage("Cancelled transaction")
@@ -421,7 +460,7 @@ class Transaction(
 
         val identityBody = identityJsonObject.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaType())
-        Log.e("PT2", "Identity Call JSON body : $identityJsonObject")
+        Log.d("Pay Theory", "Identity Call JSON body : $identityJsonObject")
 
 
         val authRequest = Request.Builder()
@@ -439,7 +478,7 @@ class Transaction(
 
         val identityJsonData: String? = identityResponse.body?.string()
         val identityJsonResponse = JSONObject(identityJsonData)
-        Log.e("PT2", "Identity Call Response: $identityJsonResponse")
+        Log.d("Pay Theory", "Identity Call Response: $identityJsonResponse")
 
         //TODO - Set up check if authorization response throws back an error
         if (!identityJsonResponse.getString("id").isNullOrBlank()) {
@@ -482,7 +521,7 @@ class Transaction(
             }
             val paymentBody = paymentJsonObject.toString()
                 .toRequestBody("application/json; charset=utf-8".toMediaType())
-            Log.e("PT2", "Payment Card Call JSON body : $paymentJsonObject")
+            Log.d("Pay Theory", "Payment Card Call JSON body : $paymentJsonObject")
 
 
             val request = Request.Builder()
@@ -497,7 +536,7 @@ class Transaction(
             val paymentJsonData: String? = response.body?.string()
             val paymentJsonResponse = JSONObject(paymentJsonData)
 
-            Log.e("PT2", "Payment Call Response: $paymentJsonResponse")
+            Log.d("Pay Theory", "Payment Call Response: $paymentJsonResponse")
             if (!paymentJsonResponse.has("_embedded"))
             {
                 val authJsonObject = JSONObject()
@@ -521,7 +560,7 @@ class Transaction(
 
                 val authBody = authJsonObject.toString()
                     .toRequestBody("application/json; charset=utf-8".toMediaType())
-                Log.e("PT2", "Authorization Call JSON body : $authJsonObject")
+                Log.d("Pay Theory", "Authorization Call JSON body : $authJsonObject")
 
                 val request = Request.Builder()
                     .method("POST", authBody)
@@ -535,10 +574,10 @@ class Transaction(
                 val authResponse = client.newCall(request).execute()
                 val jsonData: String? = authResponse.body?.string()
                 val authJSONResponse = JSONObject(jsonData)
-                Log.e("PT2", "Authorization Call Response: $authJSONResponse")
+                Log.d("Pay Theory", "Authorization Call Response: $authJSONResponse")
 
                 if (authJSONResponse.getString("state") == "SUCCEEDED") {
-                    Log.e("PT2", "Request Succeeded")
+                    Log.d("Pay Theory", "Request Succeeded")
 
                     val capAuthJsonObject = JSONObject()
                     try {
@@ -551,7 +590,7 @@ class Transaction(
                     val capAuthBody =
                         capAuthJsonObject.toString()
                             .toRequestBody("application/json; charset=utf-8".toMediaType())
-                    Log.e("PT2", "JSON body : $capAuthJsonObject")
+                    Log.d("Pay Theory", "JSON body : $capAuthJsonObject")
 
                     val request = Request.Builder()
                         .method("PUT", capAuthBody)
@@ -575,9 +614,9 @@ class Transaction(
 
                     if (transactionState == "SUCCEEDED") {
 
-                        Log.e("PT2", "Request Succeeded")
-                        Log.e(
-                            "PT2",
+                        Log.d("Pay Theory", "Request Succeeded")
+                        Log.d(
+                            "Pay Theory",
                             "Authorization Capture Body: $capAuthJSONResponse"
                         )
                         transactionResponse =
@@ -600,7 +639,7 @@ class Transaction(
 
                         return transactionResponse
                     } else {
-                        Log.e("PT2", "Capture Authorization Request Failed / Payment Request Failed")
+                        Log.d("Pay Theory", "Capture Authorization Request Failed / Payment Request Failed")
                         val embedded = capAuthJSONResponse.getJSONObject("_embedded")
                         val error = embedded.getJSONArray("errors")
                         val errorJson = error.getJSONObject(0)
@@ -614,7 +653,7 @@ class Transaction(
                         return transactionResponse
                     }
                 } else {
-                    Log.e("PT2", "Create Authorization Request Failed  / Payment Request Failed")
+                    Log.d("Pay Theory", "Create Authorization Request Failed  / Payment Request Failed")
                     val embedded = authJSONResponse.getJSONObject("_embedded")
                     val error = embedded.getJSONArray("errors")
                     val errorJson = error.getJSONObject(0)
@@ -628,7 +667,7 @@ class Transaction(
                     return transactionResponse
                 }
             } else {
-                Log.e("PT2", "Payment Instrument Request Failed / Payment Request Failed")
+                Log.d("Pay Theory", "Payment Instrument Request Failed / Payment Request Failed")
                 val embedded = paymentJsonResponse.getJSONObject("_embedded")
                 val error = embedded.getJSONArray("errors")
                 val errorJson = error.getJSONObject(0)
@@ -642,7 +681,7 @@ class Transaction(
                 return transactionResponse
             }
         } else {
-            Log.e("PT2", "Identity Call Request Failed / Payment Request Failed")
+            Log.d("Pay Theory", "Identity Call Request Failed / Payment Request Failed")
             val failError = "Identity Call Request Failed / Payment Request Failed"
 
             transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${

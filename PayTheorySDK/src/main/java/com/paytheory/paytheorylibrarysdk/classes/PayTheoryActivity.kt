@@ -26,7 +26,7 @@ class PayTheoryActivity : AppCompatActivity() {
             val returnIntent = Intent()
             //If "Display" not selected or input
             val errorMessage = "Pay Theory \"Payment-Amount\" not valid"
-            Log.e("PT2", errorMessage)
+            Log.d("Pay Theory", errorMessage)
             returnIntent.putExtra("result", errorMessage)
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
@@ -35,7 +35,7 @@ class PayTheoryActivity : AppCompatActivity() {
             val returnIntent = Intent()
             //If "Display" not selected or input
             val errorMessage = "Pay Theory \"Api-Key\" must be supplied"
-            Log.e("PT2", errorMessage)
+            Log.d("Pay Theory", errorMessage)
             returnIntent.putExtra("result", errorMessage)
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
@@ -164,7 +164,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            Log.d("Pay Theory", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
                             setResult(Activity.RESULT_OK, returnIntent)
                             finish()
@@ -187,7 +187,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            Log.d("Pay Theory", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
                             setResult(Activity.RESULT_OK, returnIntent)
                             finish()
@@ -274,7 +274,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Transact Result : $payTheoryResult")
+                            Log.d("Pay Theory", "Transact Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
                             setResult(Activity.RESULT_OK, returnIntent)
                             finish()
@@ -296,7 +296,7 @@ class PayTheoryActivity : AppCompatActivity() {
                             while (payTheoryResult == "") {
                                 delay(500)
                             }
-                            Log.e("PT2", "Pay Theory Result : $payTheoryResult")
+                            Log.d("Pay Theory", "Pay Theory Result : $payTheoryResult")
                             returnIntent.putExtra("result", payTheoryResult)
                             setResult(Activity.RESULT_OK, returnIntent)
                             finish()
@@ -308,7 +308,7 @@ class PayTheoryActivity : AppCompatActivity() {
             val returnIntent = Intent()
             //If "Display" not selected or input
             val errorMessage = "Pay Theory \"Display\" Not Selected"
-            Log.e("PT2", errorMessage)
+            Log.d("Pay Theory", errorMessage)
             returnIntent.putExtra("result", errorMessage)
             setResult(Activity.RESULT_OK, returnIntent)
             finish()

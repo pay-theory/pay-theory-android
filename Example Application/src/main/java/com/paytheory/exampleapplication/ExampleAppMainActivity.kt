@@ -150,7 +150,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 // Get String data from PayTheoryActivity
                 val returnString = data!!.getStringExtra("result")
-                Log.e("Main Activity", "Here is the result data string : $returnString")
+                Log.d("Pay Theory", "Here is the result data string : $returnString")
                 if (returnString != null) {
                     showToast(returnString)
                 }
@@ -158,7 +158,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
 //            else if(Activity.RESULT_CANCELED == 0){
 //                // Get String data from PayTheoryActivity
 //                val returnString = data!!.getStringExtra("result")
-//                Log.e("Main Activity", "Here is the result data string : $returnString")
+//                Log.d("MPay Theory, "Here is the result data string : $returnString")
 //                if (returnString != null) {
 //                    showToast(returnString)
 //                }
