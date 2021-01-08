@@ -37,8 +37,8 @@ class Transaction(
     private val buyerOptions: BuyerOptions? = null
 ) {
     private var client = OkHttpClient()
-    private var payTheoryChallengeResponse = ""
-    private var googleAvailability = false
+    private var challengeResponse = ""
+    private var googleVerify = false
     private var attestationResponse: String? = null
     private var idempotencyResponse: String? = null
     private var idempotencyResponseData: String = ""
@@ -46,7 +46,7 @@ class Transaction(
     private var idempotencyCredIdData: String = ""
     private var kmsResult: Boolean = false
     private var token = ""
-    private var idempotency = ""
+    private var idempotency = "Not Created"
     private var merchantId = ""
     private var userConfirmation: Boolean? = null
     private var transactionResponse = ""
@@ -102,10 +102,10 @@ class Transaction(
 
 
 
-            if (!attestationResponse.isNullOrEmpty() || googleAvailability || !payTheoryChallengeResponse.isNullOrEmpty()) {
+            if (!attestationResponse.isNullOrEmpty() || googleVerify || !challengeResponse.isNullOrEmpty()) {
                 //Pay Theory Idempotency
                 val idempotencyResponse = async {
-                    payTheoryIdempotency(payTheoryChallengeResponse, attestationResponse)
+                    payTheoryIdempotency(challengeResponse, attestationResponse)
                 }.await()
 
                 Log.d("Pay Theory", "Idempotency Result: $idempotencyResponse")
@@ -177,18 +177,20 @@ class Transaction(
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
         Log.d("PTLib", "Challenge Response: $jsonData")
+
+        if(response.message == "Forbidden"){
+            return response.message
+        }
         val challengeJSONResponse = JSONObject(jsonData)
         return if (challengeJSONResponse.has("challenge")) {
-            val payTheoryChallengeResponseString = challengeJSONResponse.getString("challenge")
-            payTheoryChallengeResponse = challengeJSONResponse.getString("challenge")
+            val challengeResponseString = challengeJSONResponse.getString("challenge")
+            challengeResponse = challengeJSONResponse.getString("challenge")
             challengeComplete = true
-            payTheoryChallengeResponseString
+            challengeResponseString
         } else {
             challengeComplete = false
             challengeJSONResponse.getString("message")
         }
-
-
     }
 
     fun googleApi(): Boolean {
@@ -197,10 +199,10 @@ class Transaction(
                 .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
         ) {
             Log.d("Pay Theory", "Google Play Service Available.")
-            googleAvailability = true
+            googleVerify = true
             true
         } else {
-            googleAvailability = false
+            googleVerify = false
             false
         }
     }
@@ -288,8 +290,6 @@ class Transaction(
                 4
             )}\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
             return transactionResponse
-
-
         }
     }
 
