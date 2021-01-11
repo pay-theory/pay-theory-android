@@ -67,7 +67,7 @@ class ExampleAppMainActivity : AppCompatActivity() {
             //Set Payment Amount in cents ($50.25 = "5025")
             intent.putExtra("Payment-Amount", "3000")
             //Set Api-Key
-            intent.putExtra("Api-Key", "MY API KEY")
+            intent.putExtra("Api-Key", "My API Key")
             //Set Display type ("Card-Only" or "Card-Account")
             intent.putExtra("Display", "Card-Account")
             //Set Custom Tags for payments

@@ -176,7 +176,7 @@ class Transaction(
 
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        Log.d("PTLib", "Challenge Response: $jsonData")
+
 
         if(response.message == "Forbidden"){
             return response.message
@@ -198,7 +198,6 @@ class Transaction(
         return if (GoogleApiAvailability.getInstance()
                 .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
         ) {
-            Log.d("Pay Theory", "Google Play Service Available.")
             googleVerify = true
             true
         } else {
@@ -241,7 +240,6 @@ class Transaction(
         } catch (e: JSONException) {
             e.printStackTrace()
         }
-        Log.d("Pay Theory", "payTheoryIdempotency JSON Body: $jsonObject")
 
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = jsonObject.toString().toRequestBody(mediaType)
@@ -254,7 +252,6 @@ class Transaction(
 
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        Log.d("PTLib", "Idempotency response body ${jsonData}")
         //TODO -  Idempotency response body  <!DOCTYPE of type java.lang.String cannot be converted to JSONObject   <!DOCTYPE html>
         //    <html lang="en">
         //    <head>
@@ -279,8 +276,6 @@ class Transaction(
             idempotencyResponseData = idempotencyJSONResponse.getString("response")
             idempotencySignatureData = idempotencyJSONResponse.getString("signature")
             idempotencyCredIdData = idempotencyJSONResponse.getString("credId")
-
-            Log.d("PTLib", "Idempotency response $idempotencyResponse")
             idempotencyResponse.toString()
         } else {
 
@@ -297,10 +292,6 @@ class Transaction(
         val decodedBytes = android.util.Base64.decode(credId, DEFAULT)
         val credArray: List<String> = String(decodedBytes).split(":")
 
-        Log.d("PTLib", "decodedCredId ${(String(decodedBytes))}")
-        Log.d("PTLib", "credArray[0] ${credArray[0]}")
-        Log.d("PTLib", "credArray[0] ${credArray[1]}")
-        Log.d("PTLib", "credArray[0] ${credArray[2]}")
         val awsCreds =
             BasicSessionCredentials(credArray[0], credArray[1], credArray[2])
 
@@ -327,9 +318,6 @@ class Transaction(
         this.payment.amount = payment.getString("amount").toInt()
         this.payment.convenienceFee = payment.getString("service_fee")
 
-        Log.d("PTLib", "decryptResponse.plaintext $converted")
-        Log.d("PTLib", "decryptResponse $decryptResponse")
-
         val signatureBuff3 =
             (ByteBuffer.wrap(android.util.Base64.decode(signature, DEFAULT)))
         val responseBuff3 = (ByteBuffer.wrap(android.util.Base64.decode(response, DEFAULT)))
@@ -343,7 +331,7 @@ class Transaction(
         verifyRequest.signingAlgorithm = "ECDSA_SHA_384"
 
         val verifiedResponse = kmsClient.verify(verifyRequest)
-        Log.d("Pay Theory", "verifiedResponse $verifiedResponse")
+
         return if (verifiedResponse.isSignatureValid) {
             kmsResult = true
             Log.d("Pay Theory", "Verified Response is True")
@@ -466,7 +454,6 @@ class Transaction(
 
         val identityBody = identityJsonObject.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaType())
-        Log.d("Pay Theory", "Identity Call JSON body : $identityJsonObject")
 
 
         val authRequest = Request.Builder()
@@ -484,7 +471,6 @@ class Transaction(
 
         val identityJsonData: String? = identityResponse.body?.string()
         val identityJsonResponse = JSONObject(identityJsonData)
-        Log.d("Pay Theory", "Identity Call Response: $identityJsonResponse")
 
         //TODO - Set up check if authorization response throws back an error
         if (!identityJsonResponse.getString("id").isNullOrBlank()) {
@@ -527,7 +513,6 @@ class Transaction(
             }
             val paymentBody = paymentJsonObject.toString()
                 .toRequestBody("application/json; charset=utf-8".toMediaType())
-            Log.d("Pay Theory", "Payment Card Call JSON body : $paymentJsonObject")
 
 
             val request = Request.Builder()
@@ -542,7 +527,6 @@ class Transaction(
             val paymentJsonData: String? = response.body?.string()
             val paymentJsonResponse = JSONObject(paymentJsonData)
 
-            Log.d("Pay Theory", "Payment Call Response: $paymentJsonResponse")
             if (!paymentJsonResponse.has("_embedded"))
             {
                 val authJsonObject = JSONObject()
@@ -566,7 +550,6 @@ class Transaction(
 
                 val authBody = authJsonObject.toString()
                     .toRequestBody("application/json; charset=utf-8".toMediaType())
-                Log.d("Pay Theory", "Authorization Call JSON body : $authJsonObject")
 
                 val request = Request.Builder()
                     .method("POST", authBody)
@@ -580,10 +563,8 @@ class Transaction(
                 val authResponse = client.newCall(request).execute()
                 val jsonData: String? = authResponse.body?.string()
                 val authJSONResponse = JSONObject(jsonData)
-                Log.d("Pay Theory", "Authorization Call Response: $authJSONResponse")
 
                 if (authJSONResponse.getString("state") == "SUCCEEDED") {
-                    Log.d("Pay Theory", "Request Succeeded")
 
                     val capAuthJsonObject = JSONObject()
                     try {
@@ -596,7 +577,6 @@ class Transaction(
                     val capAuthBody =
                         capAuthJsonObject.toString()
                             .toRequestBody("application/json; charset=utf-8".toMediaType())
-                    Log.d("Pay Theory", "JSON body : $capAuthJsonObject")
 
                     val request = Request.Builder()
                         .method("PUT", capAuthBody)
@@ -620,11 +600,6 @@ class Transaction(
 
                     if (transactionState == "SUCCEEDED") {
 
-                        Log.d("Pay Theory", "Request Succeeded")
-                        Log.d(
-                            "Pay Theory",
-                            "Authorization Capture Body: $capAuthJSONResponse"
-                        )
                         transactionResponse =
                             "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
                                 payment.cardNumber.toString().takeLast(
