@@ -1,7 +1,7 @@
 package com.paytheory.paytheorylibrarysdk.classes
 
 /**
- * Payment Class is created when Transaction has initiated
+ * Payment Class is created when OldTransaction has initiated
  * @property cardNumber card number value from user
  * @property cardExpMon card expiration month value from user
  * @property cardExpYear car expiration year value from user

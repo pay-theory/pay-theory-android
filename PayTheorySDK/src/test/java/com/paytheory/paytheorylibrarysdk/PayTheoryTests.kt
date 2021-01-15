@@ -38,8 +38,8 @@
 //        "phoneNumber",
 //        "email"
 //    )
-//    private var payTheory = Transaction(context, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", cardPayment, buyerOptions)
-//    private var failedPayTheory = Transaction(context, "wrong api", cardPayment, buyerOptions)
+//    private var payTheory = OldTransaction(context, "pt-sandbox-dev-d9de9154964990737db2f80499029dd6", cardPayment, buyerOptions)
+//    private var failedPayTheory = OldTransaction(context, "wrong api", cardPayment, buyerOptions)
 //
 //    @Test
 //    fun test1ChallengeCall() {
