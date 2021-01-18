@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">PayTheoryLibrary</string>
 
+    <string-array name="payment_array">
+        <item>Card</item>
+        <item>ACH</item>
+    </string-array>
 </resources>

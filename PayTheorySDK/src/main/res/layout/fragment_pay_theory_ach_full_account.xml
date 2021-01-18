@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:id="@+id/PayTheoryFragment">
+    <com.paytheory.paytheorylibrarysdk.classes.FirstNameEditText
+        android:id="@+id/firstNameEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Account Holder First name"
+        android:inputType="text" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.LastNameEditText
+        android:id="@+id/lastNameEditText"
+
+
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:hint="Account Holder Last name"
+        android:inputType="text" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.AddressOneEditText
+        android:id="@+id/addressOneEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Billing Address"
+        android:inputType="text" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.AddressTwoEditText
+        android:id="@+id/addressTwoEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Address Cont."
+        android:inputType="text" />
+
+
+    <com.paytheory.paytheorylibrarysdk.classes.CityEditText
+        android:id="@+id/cityEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="City"
+        android:inputType="text" />
+    <com.paytheory.paytheorylibrarysdk.classes.StateEditText
+        android:id="@+id/stateEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="State (ex: OH)"
+        android:inputType="text" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.ZipEditText
+        android:id="@+id/zipEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Billing Zipcode"
+        android:inputType="number" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.ACHAccountNumber
+        android:id="@+id/accountNumberEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Bank Account Number"
+        android:inputType="number" />
+
+    <com.paytheory.paytheorylibrarysdk.classes.ACHRoutingNumber
+        android:id="@+id/routingNumberEditText"
+
+        android:layout_width="400dp"
+
+        android:layout_height="wrap_content"
+        android:hint="Bank Routing Number"
+        android:inputType="number" />
+
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="Submit Payment" />
+</LinearLayout>

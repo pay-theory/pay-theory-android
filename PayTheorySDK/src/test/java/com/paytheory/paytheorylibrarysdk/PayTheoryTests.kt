@@ -75,7 +75,7 @@
 //        assert(challengeJSONResponse.getString("message") == "Forbidden")
 //    }
 //
-//    //TODO - set up unit tests with coroutines
+
 ////    @Test
 ////    fun test3PayTheoryIdempotency() {
 ////        var payTheoryIdempotency: String

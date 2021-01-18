@@ -62,26 +62,9 @@
         android:layout_width="400dp"
 
         android:layout_height="wrap_content"
-        android:hint="Card zipcode"
-        android:inputType="text" />
+        android:hint="Billing Zipcode"
+        android:inputType="number" />
 
-
-
-    <!--    <com.example.paytheorylibrarysdk.CustomTagsEditText-->
-    <!--        android:id="@+id/customTagsEditText"-->
-    <!--        android:inputType="text"-->
-    <!--        android:layout_width="375dp"-->
-    <!--        android:layout_height="50dp"-->
-    <!--        android:layout_marginStart="175dp"-->
-    <!--        android:layout_marginLeft="175dp"-->
-    <!--        android:layout_marginTop="233dp"-->
-    <!--        android:layout_marginEnd="179dp"-->
-    <!--        android:layout_marginRight="179dp"-->
-    <!--        android:layout_marginBottom="479dp"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <com.paytheory.paytheorylibrarysdk.classes.CreditCardEditText
         android:id="@+id/creditCardEditText"
@@ -101,18 +84,9 @@
 
         android:layout_height="wrap_content"
         android:hint="CVV (ex:123)"
-        android:inputType="text" />
+        android:inputType="number" />
 
-    <!--    <com.example.paytheorylibrarysdk.ExpEditText-->
-    <!--        android:id="@+id/expEditText"-->
-    <!--        android:inputType="text"-->
-    <!--        android:layout_width="375dp"-->
-    <!--        android:layout_height="50dp"-->
 
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
     <com.paytheory.paytheorylibrarysdk.classes.ExpMonthText
         android:id="@+id/expirationMonthEditText"
 
@@ -120,7 +94,7 @@
 
         android:layout_height="wrap_content"
         android:hint="Expiration month (ex: 04)"
-        android:inputType="text" />
+        android:inputType="number" />
 
     <com.paytheory.paytheorylibrarysdk.classes.ExpYearText
         android:id="@+id/expirationYearEditText"
@@ -129,7 +103,7 @@
 
         android:layout_height="wrap_content"
         android:hint="Expiration year (ex: 2024)"
-        android:inputType="text" />
+        android:inputType="number"/>
 
     <Button
         android:id="@+id/submitButton"

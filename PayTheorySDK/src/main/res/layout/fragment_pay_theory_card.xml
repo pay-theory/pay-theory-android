@@ -21,7 +21,7 @@
 
         android:layout_height="wrap_content"
         android:hint="CVV (ex:123)"
-        android:inputType="text" />
+        android:inputType="number" />
 
     <com.paytheory.paytheorylibrarysdk.classes.ExpMonthText
         android:id="@+id/expirationMonthEditText"
@@ -30,7 +30,7 @@
 
         android:layout_height="wrap_content"
         android:hint="Expiration month (ex: 04)"
-        android:inputType="text" />
+        android:inputType="number" />
 
     <com.paytheory.paytheorylibrarysdk.classes.ExpYearText
         android:id="@+id/expirationYearEditText"
@@ -39,7 +39,7 @@
 
         android:layout_height="wrap_content"
         android:hint="Expiration year (ex: 2024)"
-        android:inputType="text" />
+        android:inputType="number" />
 
 
     <Button

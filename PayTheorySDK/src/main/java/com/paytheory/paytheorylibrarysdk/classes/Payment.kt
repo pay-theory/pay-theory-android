@@ -10,32 +10,36 @@ package com.paytheory.paytheorylibrarysdk.classes
  * @property feeMode Fee mode value
  * @property tagsKey Tags Key value
  * @property tagsValue Tags value
- * @property cardFirstName Card holders first name value from user
- * @property cardLastName Card holders last name value from user
- * @property cardAddressOne Address One value from user
- * @property cardAddressTwo Address Two value from user
- * @property cardCity City value from user
- * @property cardState State value from user
- * @property cardZip Zip value from user
+ * @property firstName Card holders first name value from user
+ * @property lastName Card holders last name value from user
+ * @property addressOne Address One value from user
+ * @property addressTwo Address Two value from user
+ * @property city City value from user
+ * @property state State value from user
+ * @property zip Zip value from user
  * @property currency Currency type
  * @property convenienceFee Convenience fee added to payment amount
  */
 class Payment(
-    var cardNumber: Long,
-    var cardExpMon: Int,
-    var cardExpYear: Int,
-    var cardCvv: Int,
+    var cardNumber: Long?,
+    var cardExpMon: Int?,
+    var cardExpYear: Int?,
+    var cardCvv: String?,
+    var achAccountNumber: Long?,
+    var achRoutingNumber: Int?,
+    var achAccountType: String?,
     var amount: Int,
+    var type: String,
     var feeMode: String = "",
     var tagsKey: String? = "",
     var tagsValue: String? = "",
-    var cardFirstName: String?= null,
-    var cardLastName: String?= null,
-    var cardAddressOne: String? = null,
-    var cardAddressTwo: String?= null,
-    var cardCity: String?= null,
-    var cardState: String?= null,
-    var cardZip: String?= null,
+    var firstName: String?= null,
+    var lastName: String?= null,
+    var addressOne: String? = null,
+    var addressTwo: String?= null,
+    var city: String?= null,
+    var state: String?= null,
+    var zip: String?= null
     ){
 
     var currency = ""

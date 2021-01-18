@@ -3,13 +3,8 @@ package com.paytheory.paytheorylibrarysdk.classes
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Base64.DEFAULT
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
-import com.amazonaws.auth.BasicSessionCredentials
-import com.amazonaws.services.kms.AWSKMSClient
-import com.amazonaws.services.kms.model.DecryptRequest
-import com.amazonaws.services.kms.model.VerifyRequest
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.safetynet.SafetyNet
@@ -18,17 +13,15 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.Challenge
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
-import java.nio.ByteBuffer
 
 /**
- * OldTransaction Class is created after data validation and click listener is activated.
+ * Transaction Class is created after data validation and click listener is activated.
  * This hold all pay theory logic to process payments.
  */
 class Transaction(
@@ -39,7 +32,7 @@ class Transaction(
 ) {
     private var client = OkHttpClient()
     private var challengeResponse = ""
-    private var googleVerify = false
+
     private var attestationResponse: String? = null
     private var idempotencyResponse: String? = null
     private var idempotencyResponseData: String = ""
@@ -51,10 +44,10 @@ class Transaction(
     private var userConfirmation: Boolean? = null
     private var transactionResponse = ""
     private var transactionState = "NOT COMPLETE"
+
     private var challengeComplete = false
-
-
-    private lateinit var newPayment: JSONObject
+    private var googleVerifyComplete = false
+    private var idempotencyComplete = false
 
 
     private fun getCardType(number: String): String {
@@ -90,7 +83,7 @@ class Transaction(
                 val googleApiResult = async {
                     googleApi()
                 }.await()
-                if (googleVerify) {
+                if (googleVerifyComplete) {
                     Log.d("Pay Theory", "Google Api Result: $googleApiResult")
 
                     //Attestation Api
@@ -101,42 +94,54 @@ class Transaction(
                         Log.d("Pay Theory", "Attestation Api Result: $attestationResponse")
 
 
-                        if (!attestationResponse.isNullOrEmpty() || googleVerify || !challengeResponse.isNullOrEmpty()) {
+                        if (!attestationResponse.isNullOrEmpty() && googleVerifyComplete && challengeComplete) {
                             //Pay Theory Idempotency
                             val idempotencyResponse = async {
                                 payTheoryIdempotency(challengeResponse, attestationResponse)
                             }.await()
 
-                            if (!idempotencyResponse.isNullOrBlank()) {
+                            if (!idempotencyResponse.isNullOrBlank() && idempotencyComplete) {
 
 
                                 Log.d("Pay Theory", "Idempotency Result: $idempotencyResponse")
 
-                                Handler(Looper.getMainLooper()).post {
-                                    confirmAlert(
-                                        newPayment.get("amount") as Int,
-                                        newPayment.get("service_fee").toString(),
-                                        getCardType(payment.cardNumber.toString()),
-                                        payment.cardNumber,
-                                        context
-                                    )
+                                if (payment.type == "Card") {
+                                    Handler(Looper.getMainLooper()).post {
+                                        confirmCard(
+                                            payment.amount,
+                                            payment.convenienceFee,
+                                            getCardType(payment.cardNumber.toString()),
+                                            payment.cardNumber,
+                                            context
+                                        )
+                                    }
+                                } else {
+                                    Handler(Looper.getMainLooper()).post {
+                                        confirmACH(
+                                            payment.amount,
+                                            payment.convenienceFee,
+                                            payment.achAccountNumber,
+                                            context
+                                        )
+                                    }
                                 }
+
                                 while (userConfirmation == null) {
                                     delay(500)
                                 }
                                 if (userConfirmation == true) {
                                     transactionResponse = async {
-                                        payment(token, merchantId, payment.currency, idempotency)
+                                        payment(idempotency)
                                     }.await()
                                     Log.d(
                                         "Pay Theory",
-                                        "OldTransaction Response: $transactionResponse"
+                                        "Transaction Response: $transactionResponse"
                                     )
 
                                 } else {
                                     Log.d(
                                         "Pay Theory",
-                                        "User Confirmed OldTransaction: $userConfirmation"
+                                        "User Confirmed Transaction: $userConfirmation"
                                     )
                                 }
 
@@ -226,10 +231,10 @@ class Transaction(
         return if (GoogleApiAvailability.getInstance()
                 .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
         ) {
-            googleVerify = true
+            googleVerifyComplete = true
             true
         } else {
-            googleVerify = false
+            googleVerifyComplete = false
             false
         }
     }
@@ -277,34 +282,39 @@ class Transaction(
             .build()
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
-        //TODO -  Idempotency response body  <!DOCTYPE of type java.lang.String cannot be converted to JSONObject   <!DOCTYPE html>
-        //    <html lang="en">
-        //    <head>
-        //    <meta charset="utf-8">
-        //    <title>Error</title>
-        //    </head>
-        //    <body>
-        //    <pre>Cannot POST /idempotency</pre>
-        //    </body>
-        //    </html>
 
         val idempotencyJSONResponse = JSONObject(jsonData)
 
-        //TODO - Idempotency Result: { "receipt_number":"", "last_four":"1758", "brand":"Mastercard", "state":"NOT COMPLETE", "type":"Forbidden"} as string
-        return if (idempotencyJSONResponse.has("response") && idempotencyJSONResponse.has("signature") && idempotencyJSONResponse.has(
-                "credId"
-            )
+        Log.d("PayTheory", idempotencyJSONResponse.toString())
+
+        return if (idempotencyJSONResponse.has("response")
         ) {
             idempotencyResponse = idempotencyJSONResponse.toString()
             idempotencyResponseData = idempotencyJSONResponse.getString("response")
             idempotencySignatureData = idempotencyJSONResponse.getString("signature")
             idempotencyCredIdData = idempotencyJSONResponse.getString("credId")
             idempotency = idempotencyJSONResponse.getString("idempotency")
-            newPayment = JSONObject(idempotencyJSONResponse.getString("payment"))
+            var newPayment = JSONObject(idempotencyJSONResponse.getString("payment"))
+            payment.amount = newPayment.get("amount") as Int
+            payment.convenienceFee = newPayment.get("service_fee").toString()
+            idempotencyComplete = true
             idempotencyResponse.toString()
-        } else {
+        } else if (idempotencyJSONResponse.getString("state") == "error") {
 
-            val failError = idempotencyJSONResponse.getString("message")
+            val failError = idempotencyJSONResponse.getString("reason")
+
+            transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                payment.cardNumber.toString().takeLast(
+                    4
+                )
+            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${
+                idempotencyJSONResponse.getString(
+                    "state"
+                )
+            }\", \"type\":\"$failError\"}"
+            return transactionResponse
+        } else {
+            val failError = "application error"
 
             transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
                 payment.cardNumber.toString().takeLast(
@@ -315,11 +325,11 @@ class Transaction(
         }
     }
 
-    fun confirmAlert(
+    fun confirmCard(
         paymentAmount: Int,
         convenienceFee: String,
         cardBrand: String,
-        cardNumber: Long,
+        cardNumber: Long?,
         context: Context
     ) {
         val builder = AlertDialog.Builder(context)
@@ -339,15 +349,55 @@ class Transaction(
                 cardNumber.toString().take(6)
             }"
         )
-        builder.setPositiveButton("YES") { dialog, which ->
+        builder.setPositiveButton("YES") { dialog, _ ->
             userConfirmation = true
             dialog.dismiss()
             Log.d(
                 "Pay Theory",
-                "User Confirmed Yes - $paymentAmount, $convenienceFee, $cardBrand, $cardNumber"
+                "User Confirmed Yes - $paymentAmount, $convenienceFee"
             )
         }
-        builder.setNegativeButton("NO") { dialog, which ->
+        builder.setNegativeButton("NO") { dialog, _ ->
+            userConfirmation = false
+            cancel()
+            dialog.dismiss()
+        }
+        val alert = builder.create()
+        alert.show()
+    }
+
+    fun confirmACH(
+        paymentAmount: Int,
+        convenienceFee: String,
+        accountNumber: Long?,
+        context: Context
+    ) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Confirm")
+        builder.setMessage(
+            "Are you sure you want to make a payment of $${
+                String.format(
+                    "%.2f",
+                    (paymentAmount.toDouble() / 100)
+                )
+            }, including a fee of $${
+                String.format(
+                    "%.2f",
+                    (convenienceFee.toDouble() / 100)
+                )
+            } on account beginning with ${
+                accountNumber.toString().take(6)
+            }"
+        )
+        builder.setPositiveButton("YES") { dialog, _ ->
+            userConfirmation = true
+            dialog.dismiss()
+            Log.d(
+                "Pay Theory",
+                "User Confirmed Yes - $paymentAmount, $convenienceFee"
+            )
+        }
+        builder.setNegativeButton("NO") { dialog, _ ->
             userConfirmation = false
             cancel()
             dialog.dismiss()
@@ -363,12 +413,12 @@ class Transaction(
         alertDialog.setMessage("Cancelled transaction")
         alertDialog.setButton(
             AlertDialog.BUTTON_NEUTRAL, "OK"
-        ) { dialog, which -> dialog.dismiss() }
+        ) { dialog, _ -> dialog.dismiss() }
         alertDialog.show()
         return "Payment Cancelled"
     }
 
-    fun payment(token: String, merchantId: String, currency: String, idempotency: String): String {
+    fun payment(idempotency: String): String {
         val paymentBody = JSONObject()
         val buyerOptionsAddress = JSONObject()
         val buyerOptionsJson = JSONObject()
@@ -408,11 +458,21 @@ class Transaction(
 
             val paymentJsonObject = JSONObject()
 
-            paymentJsonObject.put("expiration_month", payment.cardExpMon)
-            paymentJsonObject.put("expiration_year", payment.cardExpYear)
-            paymentJsonObject.put("security_code", "${payment.cardCvv}")
-            paymentJsonObject.put("number", "${payment.cardNumber}")
-            paymentJsonObject.put("type", "PAYMENT_CARD")
+            if (payment.type == "Card") {
+                paymentJsonObject.put("expiration_month", payment.cardExpMon)
+                paymentJsonObject.put("expiration_year", payment.cardExpYear)
+                paymentJsonObject.put("security_code", "${payment.cardCvv}")
+                paymentJsonObject.put("number", "${payment.cardNumber}")
+                paymentJsonObject.put("type", "PAYMENT_CARD")
+            } else {
+                paymentJsonObject.put("account_number", "${payment.achAccountNumber}")
+                paymentJsonObject.put("account_type", payment.achAccountType)
+                paymentJsonObject.put("bank_code", payment.achRoutingNumber)
+                paymentJsonObject.put("name", "${payment.firstName} ${payment.lastName}")
+                paymentJsonObject.put("type", "BANK_ACCOUNT")
+            }
+
+
 
             if (!idempotency.isNullOrBlank()) {
                 val tagsJson = JSONObject()
@@ -448,7 +508,6 @@ class Transaction(
         val paymentJsonData: String? = paymentResponse.body?.string()
         val paymentJsonObject = JSONObject(paymentJsonData)
 
-        //TODO - Set up check if authorization response throws back an error
         if (paymentJsonObject.getString("state") != "error") {
 
             transactionResponse = paymentJsonObject.toString()
