@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+/PayTheorySDK/install.gradle
+/PayTheorySDK/bintray.gradle
