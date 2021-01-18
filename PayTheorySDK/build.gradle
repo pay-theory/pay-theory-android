@@ -61,29 +61,32 @@ dependencies {
 
 }
 
-apply from: 'install.gradle'
-apply from: 'bintray.gradle'
-//Dokka Documentation
-apply plugin: 'org.jetbrains.dokka'
 
-//Dokka
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/html"
-
-    configuration {
-        includeNonPublic = false
-        skipEmptyPackages = true
-        skipDeprecated = true
-        reportUndocumented = true
-        jdkVersion = 8
-    }
-}
-
-// Avoid Kotlin docs error
-tasks.withType(Javadoc).all {
-    enabled = false
-}
+//TODO
+//
+//apply from: 'install.gradle'
+//apply from: 'bintray.gradle'
+////Dokka Documentation
+//apply plugin: 'org.jetbrains.dokka'
+//
+////Dokka
+//dokka {
+//    outputFormat = 'html'
+//    outputDirectory = "$buildDir/html"
+//
+//    configuration {
+//        includeNonPublic = false
+//        skipEmptyPackages = true
+//        skipDeprecated = true
+//        reportUndocumented = true
+//        jdkVersion = 8
+//    }
+//}
+//
+//// Avoid Kotlin docs error
+//tasks.withType(Javadoc).all {
+//    enabled = false
+//}
 
 
 

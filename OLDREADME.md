@@ -3,7 +3,7 @@
 
 ## Setup
 
-Add library to your applications dependencies using jitpack.io (https://jitpack.io/)
+Add library to your applications dependencies using jcenter's repository
 
 ```kotlin
 
