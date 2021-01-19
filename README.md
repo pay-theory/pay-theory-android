@@ -120,7 +120,7 @@ task clean(type: Delete) {
 ```kotlin
 dependencies {
 	        implementation 'com.github.pay-theory:pay-theory-android:0.0.1
-	}
+}
 ```
 
 + add the implementation to your applications build.gradle file
