@@ -38,7 +38,7 @@ class PayTheoryActivity : AppCompatActivity() {
         const val FEE_MODE_SERVICE = "service_fee"
         const val PAYMENT_AMOUNT = "Payment-Amount"
         const val API_KEY = "Api-Key"
-        fun payTheoryIntent(config: HashMap<String,String>, activity: PayTheoryActivity): Intent {
+        fun payTheoryIntent(config: HashMap<String,String>, activity: AppCompatActivity): Intent {
             if (!config.containsKey(PAYMENT_TYPE)) {
                 config[PAYMENT_TYPE] = PAYMENT_TYPE_CARD
             }
