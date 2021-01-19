@@ -20,15 +20,7 @@ import kotlin.collections.HashMap
  * PayTheoryActivity Class is an AppCompatActivity. Activity used when inputting data to submit payment
  */
 
-const val COLLECT_BILLING_ADDRESS = "Billing-Address"
-const val PAYMENT_TYPE = "Payment-Type"
-const val PAYMENT_TYPE_CARD = "CARD"
-const val PAYMENT_TYPE_ACH = "ACH"
-const val FEE_MODE = "Fee-Mode"
-const val FEE_MODE_SURCHARGE = "surcharge"
-const val FEE_MODE_SERVICE = "service_fee"
-const val PAYMENT_AMOUNT = "Payment-Amount"
-const val API_KEY = "Api-Key"
+
 
 
 
@@ -37,6 +29,15 @@ class PayTheoryActivity : AppCompatActivity() {
     var achPaymentType: String = "Card"
 
     companion object {
+        const val COLLECT_BILLING_ADDRESS = "Billing-Address"
+        const val PAYMENT_TYPE = "Payment-Type"
+        const val PAYMENT_TYPE_CARD = "CARD"
+        const val PAYMENT_TYPE_ACH = "ACH"
+        const val FEE_MODE = "Fee-Mode"
+        const val FEE_MODE_SURCHARGE = "surcharge"
+        const val FEE_MODE_SERVICE = "service_fee"
+        const val PAYMENT_AMOUNT = "Payment-Amount"
+        const val API_KEY = "Api-Key"
         fun payTheoryIntent(config: HashMap<String,String>, activity: PayTheoryActivity): Intent {
             if (!config.containsKey(PAYMENT_TYPE)) {
                 config[PAYMENT_TYPE] = PAYMENT_TYPE_CARD
