@@ -13,20 +13,54 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * PayTheoryActivity Class is an AppCompatActivity. Activity used when inputting data to submit payment
  */
+
+const val COLLECT_BILLING_ADDRESS = "Billing-Address"
+const val PAYMENT_TYPE = "Payment-Type"
+const val PAYMENT_TYPE_CARD = "CARD"
+const val PAYMENT_TYPE_ACH = "ACH"
+const val FEE_MODE = "Fee-Mode"
+const val FEE_MODE_SURCHARGE = "surcharge"
+const val FEE_MODE_SERVICE = "service_fee"
+const val PAYMENT_AMOUNT = "Payment-Amount"
+const val API_KEY = "Api-Key"
+
+
+
 class PayTheoryActivity : AppCompatActivity() {
 
     var achPaymentType: String = "Card"
+
+    companion object {
+        fun payTheoryIntent(config: HashMap<String,String>, activity: PayTheoryActivity): Intent {
+            if (!config.containsKey(PAYMENT_TYPE)) {
+                config[PAYMENT_TYPE] = PAYMENT_TYPE_CARD
+            }
+            if (!config.containsKey(FEE_MODE)) {
+                config[FEE_MODE] = FEE_MODE_SURCHARGE
+            }
+
+            val intent = Intent(activity, PayTheoryActivity::class.java)
+
+            for ((k, v) in config) {
+                intent.putExtra(k, v)
+            }
+
+            return intent
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
 
-        if (intent.getStringExtra("Payment-Amount").isNullOrBlank()) {
+        if (intent.getStringExtra(PAYMENT_AMOUNT).isNullOrBlank()) {
             val returnIntent = Intent()
             //If "Display" not selected or input
             val errorMessage = "Activity intent \"Payment-Amount\" not valid"
@@ -35,7 +69,7 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
-        if (intent.getStringExtra("Api-Key").isNullOrBlank()) {
+        if (intent.getStringExtra(API_KEY).isNullOrBlank()) {
             val returnIntent = Intent()
             //If "Display" not selected or input
             val errorMessage = "Activity intent \"Api-Key\" must be supplied"
@@ -44,7 +78,8 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
-        if (intent.getStringExtra("Payment-Type") == "Card" && intent.getStringExtra("Full-Account-Details") == "True") {
+        if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
+                COLLECT_BILLING_ADDRESS) == "True") {
             setContentView(R.layout.activity_pay_theory_card_full_account)
 
             val btn = findViewById<Button>(R.id.submitButton)
@@ -127,10 +162,10 @@ class PayTheoryActivity : AppCompatActivity() {
                         null,
                         achPaymentType,
 
-                        intent.getStringExtra("Payment-Amount")!!.toInt(),
-                        intent.getStringExtra("Payment-Type")!!.toString(),
+                        intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
+                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
                         //add fee mode
-                        intent.getStringExtra("Fee-Mode")!!,
+                        intent.getStringExtra(FEE_MODE)!!,
                         //add tags if intent is there
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
@@ -158,7 +193,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         )
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment,
                             buyerOptions
                         )
@@ -182,7 +217,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         //If buyer options is false or null
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment
                         )
 
@@ -204,7 +239,8 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra("Payment-Type") == "Card" && intent.getStringExtra("Full-Account-Details") != "True") {
+        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
+                COLLECT_BILLING_ADDRESS) != "True") {
             setContentView(R.layout.activity_pay_theory_card)
 
             val btn = findViewById<Button>(R.id.submitButton)
@@ -251,9 +287,9 @@ class PayTheoryActivity : AppCompatActivity() {
                         null,
                         null,
                         achPaymentType,
-                        intent.getStringExtra("Payment-Amount")!!.toInt(),
-                        intent.getStringExtra("Payment-Type")!!.toString(),
-                        intent.getStringExtra("Fee-Mode")!!,
+                        intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
+                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
+                        intent.getStringExtra(FEE_MODE)!!,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                     )
@@ -272,7 +308,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         )
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment,
                             buyerOptions
                         )
@@ -297,7 +333,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         //If buyer options is false or null
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment
                         )
                         showToast("Processing payment please wait...")
@@ -318,7 +354,8 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra("Payment-Type") == "ACH" && intent.getStringExtra("Full-Account-Details") == "True") {
+        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
+                COLLECT_BILLING_ADDRESS) == "True") {
             setContentView(R.layout.activity_pay_theory_ach_full_account)
 
             setPaymentTypeSpinner()
@@ -379,9 +416,9 @@ class PayTheoryActivity : AppCompatActivity() {
                         accountNumber,
                         routingNumber,
                         achPaymentType,
-                        intent.getStringExtra("Payment-Amount")!!.toInt(),
-                        intent.getStringExtra("Payment-Type")!!.toString(),
-                        intent.getStringExtra("Fee-Mode")!!,
+                        intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
+                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
+                        intent.getStringExtra(FEE_MODE)!!,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                         firstName,
@@ -407,7 +444,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         )
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment,
                             buyerOptions
                         )
@@ -431,7 +468,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         //If buyer options is false or null
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment
                         )
                         showToast("Processing payment please wait...")
@@ -452,7 +489,8 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra("Payment-Type") == "ACH" && intent.getStringExtra("Full-Account-Details") != "True") {
+        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
+                COLLECT_BILLING_ADDRESS) != "True") {
             setContentView(R.layout.activity_pay_theory_ach)
 
             setPaymentTypeSpinner()
@@ -490,9 +528,9 @@ class PayTheoryActivity : AppCompatActivity() {
                         accountNumber,
                         routingNumber,
                         achPaymentType,
-                        intent.getStringExtra("Payment-Amount")!!.toInt(),
-                        intent.getStringExtra("Payment-Type")!!.toString(),
-                        intent.getStringExtra("Fee-Mode")!!,
+                        intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
+                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
+                        intent.getStringExtra(FEE_MODE)!!,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                         firstName,
@@ -514,7 +552,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         )
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment,
                             buyerOptions
                         )
@@ -538,7 +576,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         //If buyer options is false or null
                         val payTheory = Transaction(
                             this,
-                            intent.getStringExtra("Api-Key")!!,
+                            intent.getStringExtra(API_KEY)!!,
                             payment
                         )
                         showToast("Processing payment please wait...")
