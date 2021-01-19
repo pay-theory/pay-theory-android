@@ -3,40 +3,9 @@
 
 ## Setup
 
-Add internet permission to your android projects manifest.xml file. 
+Create or open an Android project
 
-```kotlin
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-Here is an example:
-
-```kotlin
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.testingpaytheory">
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.TestingPayTheory">
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-
-</manifest>
-```
-
-Create an Activity that will use Pay Theory Library.
+Create or open an Activity file that will use Pay Theory Library.
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -69,6 +38,39 @@ Create a button on your Activity layout xml file that will initiate the payment 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+Add internet permission to your android project's manifest.xml file. 
+
+```kotlin
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+Here is an example:
+
+```kotlin
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.testingpaytheory">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TestingPayTheory">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
 ```
 
 Add library to your applications dependencies using jitpack.io 
