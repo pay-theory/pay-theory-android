@@ -124,6 +124,7 @@ dependencies {
 ```
 
 + add the implementation to your applications build.gradle file
+Here is an example of the build.grade file:
 
 ```kotlin
 plugins {
