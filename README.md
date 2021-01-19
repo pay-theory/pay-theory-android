@@ -3,77 +3,305 @@
 
 ## Setup
 
-Add library to your applications dependencies using jitpack.io (https://jitpack.io/)
+Add internet permission to your android projects manifest.xml file. 
 
 ```kotlin
-
-compile 'com.paytheory.android:pay-theory-android:0.1'
-
+<uses-permission android:name="android.permission.INTERNET" />
 ```
 
-Import PayTheoryActivity in your Activity that will have payment on click listener
+Here is an example:
 
 ```kotlin
-import com.paytheory.paytheorylibrarysdk.paytheory.PayTheoryActivity
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.testingpaytheory">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TestingPayTheory">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
 ```
 
-Copy this code into your Activity
+Create an Activity that will use Pay Theory Library.
 
 ```kotlin
-class ExampleAppMainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //Button that will start PayTheoryActivity
-        var toPaymentButton = findViewById<Button>(R.id.toPayment)
 
-        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
-        toPaymentButton.setOnClickListener { 
+    }
+}
+```
+
+Create a button on your Activity layout xml file that will initiate the payment page
+
+```kotlin
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/payment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+Add library to your applications dependencies using jitpack.io 
++ Go to https://jitpack.io/
++ Enter https://github.com/pay-theory/pay-theory-android in the "Look up"
++ A list of versions should appear. You will use the most up-to-date version.
+
+Instructions for Gradle:
++ In you project's root build.gradle file you will add "maven { url 'https://jitpack.io' }" under ALL of the repositories 
+(Make sure to add it under "allprojects" and "repositories")
+
+```kotlin
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext.kotlin_version = "1.4.20"
+    repositories {
+        google()
+        jcenter()
+
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.1.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+```
+
++ On jitpack.io click on "Get it" next to the version you are adding
++ jitpack will give you a line of code to copy 
+
+```kotlin
+dependencies {
+	        implementation 'com.github.pay-theory:pay-theory-android:0.0.1
+	}
+```
+
++ add the implementation to your applications build.gradle file
+
+```kotlin
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        applicationId "com.example.testingpaytheory"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation 'com.github.pay-theory:pay-theory-android:0.0.1'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+```
+
++ Sync project so Pay Theory Library can be added to your project
+
+
+## Usage
+
+In your Activity's "onCreate" method create a button and add the setOnClickListener method
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Button that will start PayTheoryActivity
+        var paymentButton = findViewById<Button>(R.id.payment_button)
+
+        setOnClickListener("ACH", paymentButton)
+
+    }
+}
+```
+
+Add these three methods inside the onCreate method
+
++ setOnClickListener()
+This method initiates the Pay Theory payment page. 
+paymentType - "ACH" or "Card" (Display input fields for the specific payment method)
+button - Button that will start Pay Theory payment page
+
++ onActivityResult()
+This method will return the result after a payment has been submitted.
+returnString - result of payment request as a String in JSON format
+
++ showToast()
+This method will display an alert of a string that is passed in.
+
+Here is an example of how you will add to the onCreate method:
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Button that will start PayTheoryActivity
+        var paymentButton = findViewById<Button>(R.id.payment_button)
+
+        setOnClickListener("ACH", paymentButton)
+    }
+
+    //Payment Type should be ("Card" or "ACH")
+    fun setOnClickListener(paymentType : String, button: Button) {
+        button.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
             val intent = Intent(this, PayTheoryActivity::class.java)
 
+            //Set Full-Account-Details ("True" or "False")
+            intent.putExtra("Full-Account-Details", "True")
+
+            //Payment Type is set ("Card" or "ACH")
+            intent.putExtra("Payment-Type", paymentType)
+
+            //Set Fee Mode ("surcharge" or "service-fee")
+            intent.putExtra("Fee-Mode", "surcharge")
+
             //Set Payment Amount in cents ($50.25 = "5025")
-            intent.putExtra("Payment-Amount", "4000")
+            intent.putExtra("Payment-Amount", "5025")
 
             //Set Api-Key
-            intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
+            intent.putExtra("Api-Key", "MY API KEY")
 
-            //Set Display type ("Card-Only" or "Card-Account")
-            intent.putExtra("Display", "Card-Only")
+
+            //Set Custom Tags for payments
+            intent.putExtra("Tags-Key", "My Custom Tags")
+            intent.putExtra("Tags-Value", "My Custom Tags Value")
 
             //Set Buyer Options ("True" or "False")
             intent.putExtra("Buyer-Options", "True")
 
             //Set Buyer Options data
-            intent.putExtra("First-Name", "Henry")
-            intent.putExtra("Last-Name", "Smith")
-            intent.putExtra("Address-One", "123 Greenwood Drive")
-            intent.putExtra("Address-Two", "Apt 2")
+            intent.putExtra("First-Name", "Buyer")
+            intent.putExtra("Last-Name", "Options")
+            intent.putExtra("Address-One", "123 Options Lane")
+            intent.putExtra("Address-Two", "Apt 1")
             intent.putExtra("City", "Cincinnati")
             intent.putExtra("State", "OH")
             intent.putExtra("Country", "USA")
             intent.putExtra("Zip-Code", "45236")
-            intent.putExtra("Phone-Number", "513-111-1111")
-            intent.putExtra("Email-Address", "Hsmith@gmail.com")
-
-            //Set Fee Mode ("surcharge" or "service-fee")
-            intent.putExtra("Fee-Mode", "service_fee")
-
-            //Set Custom Tags for payments
-            intent.putExtra("Tags-Key", "tagKey")
-            intent.putExtra("Tags-Value", "tagValue")
+            intent.putExtra("Phone-Number", "513-123-1234")
+            intent.putExtra("Email-Address", "test@paytheory.com")
 
             //Start PayTheoryActivity
-            startActivityForResult(intent, 1)
+            startActivityForResult(intent, 1);
         }
+    }
+
+
+    // This method is called when the PayTheoryActivity finishes
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Get String data from PayTheoryActivity
+                val returnString = data!!.getStringExtra("result")
+                Log.d("Pay Theory", "Here is the result data string : $returnString")
+                if (returnString != null) {
+                    showToast(returnString)
+                }
+            } else {
+                showToast("Error getting result data")
+            }
+        }
+    }
+
+    private fun showToast(message: String){
+        Toast.makeText(
+                this, message,
+                Toast.LENGTH_LONG
+        ).show()
     }
 }
 ```
 
-
-## Usage
-
 ### Set configurations for Pay Theory Activity: 
+
+#### Payment-Type (Required)
+
+
+
+```kotlin
+//Payment Type is set ("Card" or "ACH")
+intent.putExtra("Payment-Type", "Card")
+```
 
 #### Payment-Amount (Required)
 
@@ -89,37 +317,33 @@ intent.putExtra("Payment-Amount", "4000")
 intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
 ```
 
-#### Display type (Required)
-
-Select which type of display you prefer for you application:
-
- **"Card-Only"**  
-+ Card number field  
-+ Card expiration month field  
-+ Card expiration year field  
-+ Card cvv field  
-  
-  
-**OR**  
-  
-  
-**"Card-Account"**  
-+ First name field  
-+ Last name field  
-+ Address one field  
-+ Address two field  
-+ City field  
-+ State field  
-+ Zip code field  
-+ Card number field  
-+ Card expiration month field  
-+ Card expiration year field  
-+ Card cvv field  
+#### Full-Account-Details (Required)
 
 ```kotlin
-//Set Display type ("Card-Only" or "Card-Account")
-intent.putExtra("Display", "Card-Only")
+//Set Full-Account-Details ("True" or "False")
+intent.putExtra("Full-Account-Details", "True")
 ```
+
+ **"True"**  
+ 
+ True will display more fields for user to fill out for the payment transaction:
+ 
+ + First name field  
+ + Last name field  
+ + Address one field  
+ + Address two field  
+ + City field  
+ + State field  
+ + Zip code field  
+ + All required payment fields
+ 
+**OR**  
+  
+**"False"**  
+
+False will display fields only required for a payment transaction:
+
+ + All required payment fields
 
 #### Buyer-Options (Optional)
 
@@ -225,108 +449,6 @@ Change theme for application to ensure PayTheoryActivity has same theme as appli
 
 </application>
 ```
-
-## Complete Code Samples
-
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-    
-    var toPaymentButton = findViewById<Button>(R.id.toPayment)
-
-    toPaymentButton.setOnClickListener { 
-        val intent = Intent(this, PayTheoryActivity::class.java)
-
-        intent.putExtra("Payment-Amount", "4632")
-
-        intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
-
-        intent.putExtra("Display", "Card-Only")
-
-        intent.putExtra("Buyer-Options", "True")
-
-        intent.putExtra("First-Name", "Henry")
-        intent.putExtra("Last-Name", "Smith")
-        intent.putExtra("Address-One", "123 Greenwood Drive")
-        intent.putExtra("Address-Two", "Apt 2")
-        intent.putExtra("City", "Cincinnati")
-        intent.putExtra("State", "OH")
-        intent.putExtra("Country", "USA")
-        intent.putExtra("Zip-Code", "45236")
-        intent.putExtra("Phone-Number", "513-111-1111")
-        intent.putExtra("Email-Address", "H_smith@gmail.com")
-
-        intent.putExtra("Fee-Mode", "service_fee")
-
-        intent.putExtra("Tags-Key", "customerID")
-        intent.putExtra("Tags-Value", "ID-12548")
-
-        startActivityForResult(intent, 1)
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                val returnString = data!!.getStringExtra("keyName")
-
-                Log.e("Main Activity","Here is the result data string : $returnString")
-            }
-        }
-    }
-}
-```
-
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-    //Button that will start PayTheoryActivity
-    var toPaymentButton = findViewById<Button>(R.id.toPayment)
-
-        //Buyer-Options = True , Display = "Card-Only", Tags = "My Custom Tags"
-        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
-        toPaymentButton.setOnClickListener { 
-        val intent = Intent(this, PayTheoryActivity::class.java)
-
-        //Set Payment Amount in cents ($50.25 = "5025")
-        intent.putExtra("Payment-Amount", "6523")
-
-        //Set Api-Key
-        intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
-
-        //Set Display type ("Card-Only" or "Card-Account")
-        intent.putExtra("Display", "Card-Account")
-
-        //Set Buyer Options ("True" or "False")
-        intent.putExtra("Buyer-Options", "False")
-
-        //Fee Mode (defaults to "surcharge" if not added)
-
-        //Set Custom Tags for payments
-        intent.putExtra("Tags-Key", "customerID")
-        intent.putExtra("Tags-Value", "ID-12648")
-
-        //Start PayTheoryActivity
-        startActivityForResult(intent, 1)
-    }
-
-    // This method is called when the PayTheoryActivity finishes
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                // Get String data from PayTheoryActivity
-                val returnString = data!!.getStringExtra("keyName")
-                Log.e("Main Activity","Here is the result data string : $returnString")
-            }
-        }
-    }
-}
-```
-
 
 ## License
 
