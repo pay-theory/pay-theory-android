@@ -3,22 +3,14 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:id="@+id/PayTheoryFragment">
 
-    <com.paytheory.paytheorylibrarysdk.classes.FirstNameEditText
-        android:id="@+id/firstNameEditText"
+    <com.paytheory.paytheorylibrarysdk.classes.FullNameEditText
+        android:id="@+id/fullNameEditText"
 
         android:layout_width="400dp"
 
         android:layout_height="wrap_content"
-        android:hint="Card First name"
+        android:hint="Account Holder's Name"
         android:inputType="text" />
-
-    <com.paytheory.paytheorylibrarysdk.classes.LastNameEditText
-        android:id="@+id/lastNameEditText"
-
-
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
-        android:hint="Card Last name" />
 
     <com.paytheory.paytheorylibrarysdk.classes.AddressOneEditText
         android:id="@+id/addressOneEditText"

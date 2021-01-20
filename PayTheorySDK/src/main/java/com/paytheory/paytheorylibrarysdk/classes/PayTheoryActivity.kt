@@ -3,6 +3,8 @@ package com.paytheory.paytheorylibrarysdk.classes
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -14,7 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.collections.HashMap
+
 
 /**
  * PayTheoryActivity Class is an AppCompatActivity. Activity used when inputting data to submit payment
@@ -38,7 +40,7 @@ class PayTheoryActivity : AppCompatActivity() {
         const val FEE_MODE_SERVICE = "service_fee"
         const val PAYMENT_AMOUNT = "Payment-Amount"
         const val API_KEY = "Api-Key"
-        fun payTheoryIntent(config: HashMap<String,String>, activity: AppCompatActivity): Intent {
+        fun payTheoryIntent(config: HashMap<String, String>, activity: AppCompatActivity): Intent {
             if (!config.containsKey(PAYMENT_TYPE)) {
                 config[PAYMENT_TYPE] = PAYMENT_TYPE_CARD
             }
@@ -80,12 +82,12 @@ class PayTheoryActivity : AppCompatActivity() {
             finish()
         }
         if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
-                COLLECT_BILLING_ADDRESS) == "True") {
+                COLLECT_BILLING_ADDRESS
+            ) == "True") {
             setContentView(R.layout.activity_pay_theory_card_full_account)
 
             val btn = findViewById<Button>(R.id.submitButton)
-            val firstNameView = findViewById<FirstNameEditText>(R.id.firstNameEditText)
-            val lastNameView = findViewById<LastNameEditText>(R.id.lastNameEditText)
+            val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
             val addressOneView = findViewById<AddressOneEditText>(R.id.addressOneEditText)
             val addressTwoView = findViewById<AddressTwoEditText>(R.id.addressTwoEditText)
             val cityView = findViewById<CityEditText>(R.id.cityEditText)
@@ -95,6 +97,92 @@ class PayTheoryActivity : AppCompatActivity() {
             val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
             val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
             val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
+
+//            creditCardView.addTextChangedListener(object : TextWatcher {
+//                private val TOTAL_SYMBOLS = 19 // size of pattern 0000-0000-0000-0000
+//                private val TOTAL_DIGITS = 16 // max numbers of digits in pattern: 0000 x 4
+//                private val DIVIDER_MODULO =
+//                    5 // means divider position is every 5th symbol beginning with 1
+//                private val DIVIDER_POSITION =
+//                    DIVIDER_MODULO - 1 // means divider position is every 4th symbol beginning with 0
+//                private val DIVIDER = '-'
+//                override fun beforeTextChanged(
+//                    s: CharSequence,
+//                    start: Int,
+//                    count: Int,
+//                    after: Int
+//                ) {
+//                    // noop
+//                }
+//
+//                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+//                    // noop
+//                }
+//
+//                override fun afterTextChanged(s: Editable) {
+//                    if (!isInputCorrect(s, TOTAL_SYMBOLS, DIVIDER_MODULO, DIVIDER)) {
+//                        s.replace(
+//                            0,
+//                            s.length,
+//                            buildCorrectString(
+//                                getDigitArray(s, TOTAL_DIGITS),
+//                                DIVIDER_POSITION,
+//                                DIVIDER
+//                            )
+//                        )
+//                    }
+//                }
+//
+//                private fun isInputCorrect(
+//                    s: Editable,
+//                    totalSymbols: Int,
+//                    dividerModulo: Int,
+//                    divider: Char
+//                ): Boolean {
+//                    var isCorrect = s.length <= totalSymbols // check size of entered string
+//                    for (i in 0 until s.length) { // check that every element is right
+//                        isCorrect = if (i > 0 && (i + 1) % dividerModulo == 0) {
+//                            isCorrect and (divider == s[i])
+//                        } else {
+//                            isCorrect and Character.isDigit(s[i])
+//                        }
+//                    }
+//                    return isCorrect
+//                }
+//
+//                private fun buildCorrectString(
+//                    digits: CharArray,
+//                    dividerPosition: Int,
+//                    divider: Char
+//                ): String? {
+//                    val formatted = StringBuilder()
+//                    for (i in digits.indices) {
+//                        if (digits[i].toInt() != 0) {
+//                            formatted.append(digits[i])
+//                            if (i > 0 && i < digits.size - 1 && (i + 1) % dividerPosition == 0) {
+//                                formatted.append(divider)
+//                            }
+//                        }
+//                    }
+//                    return formatted.toString()
+//                }
+//
+//                private fun getDigitArray(s: Editable, size: Int): CharArray {
+//                    val digits = CharArray(size)
+//                    var index = 0
+//                    var i = 0
+//                    while (i < s.length && index < size) {
+//                        val current = s[i]
+//                        if (Character.isDigit(current)) {
+//                            digits[index] = current
+//                            index++
+//                        }
+//                        i++
+//                    }
+//                    return digits
+//                }
+//            })
+
 
 //            firstNameView.setText("Some")
 //            lastNameView.setText("Body")
@@ -131,10 +219,8 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Zip Code Required")
                 } else if (zipCodeView.text.toString().length <= 4) {
                     showToast("Zip Code Must Be 5 Digits")
-                } else if (firstNameView.text.toString().isNullOrEmpty()) {
-                    showToast("First Name Required")
-                } else if (lastNameView.text.toString().isNullOrEmpty()) {
-                    showToast("Last Name Required")
+                } else if (fullNameView.text.toString().isNullOrEmpty()) {
+                    showToast("Name Required")
                 } else if (addressOneView.text.toString().isNullOrEmpty()) {
                     showToast("Address One Required")
                 } else if (cityView.text.toString().isNullOrEmpty()) {
@@ -146,8 +232,13 @@ class PayTheoryActivity : AppCompatActivity() {
                     val cvv = cvvView.text.toString()
                     val expirationMonth = expirationMonthView.text.toString().toInt()
                     val expirationYear = expirationYearView.text.toString().toInt()
-                    val firstName = firstNameView.text.toString()
-                    val lastName = lastNameView.text.toString()
+
+                    var name: String = fullNameView.text.toString()
+                    var parts  = name.split(" ").toMutableList()
+                    val firstName = parts.firstOrNull()
+                    parts.removeAt(0)
+                    val lastName = parts.joinToString(" ")
+
                     val addressOne = addressOneView.text.toString()
                     val addressTwo = addressTwoView.text.toString()
                     val city = cityView.text.toString()
@@ -241,7 +332,8 @@ class PayTheoryActivity : AppCompatActivity() {
                 }
             }
         } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
-                COLLECT_BILLING_ADDRESS) != "True") {
+                COLLECT_BILLING_ADDRESS
+            ) != "True") {
             setContentView(R.layout.activity_pay_theory_card)
 
             val btn = findViewById<Button>(R.id.submitButton)
@@ -356,7 +448,8 @@ class PayTheoryActivity : AppCompatActivity() {
                 }
             }
         } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
-                COLLECT_BILLING_ADDRESS) == "True") {
+                COLLECT_BILLING_ADDRESS
+            ) == "True") {
             setContentView(R.layout.activity_pay_theory_ach_full_account)
 
             setPaymentTypeSpinner()
@@ -364,8 +457,7 @@ class PayTheoryActivity : AppCompatActivity() {
             val btn = findViewById<Button>(R.id.submitButton)
             val accountNumberView = findViewById<ACHAccountNumber>(R.id.accountNumberEditText)
             val routingNumberView = findViewById<ACHRoutingNumber>(R.id.routingNumberEditText)
-            val firstNameView = findViewById<FirstNameEditText>(R.id.firstNameEditText)
-            val lastNameView = findViewById<LastNameEditText>(R.id.lastNameEditText)
+            val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
             val addressOneView = findViewById<AddressOneEditText>(R.id.addressOneEditText)
             val addressTwoView = findViewById<AddressTwoEditText>(R.id.addressTwoEditText)
             val cityView = findViewById<CityEditText>(R.id.cityEditText)
@@ -388,10 +480,8 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Account Number Required")
                 } else if (routingNumberView.text.toString().length <= 8 || routingNumberView.text.toString().length >= 10) {
                     showToast("Routing Number Must Be 9 Digits")
-                } else if (firstNameView.text.toString().isNullOrEmpty()) {
-                    showToast("First Name Required")
-                } else if (lastNameView.text.toString().isNullOrEmpty()) {
-                    showToast("Last Name Required")
+                } else if (fullNameView.text.toString().isNullOrEmpty()) {
+                    showToast("Name Required")
                 } else if (addressOneView.text.toString().isNullOrEmpty()) {
                     showToast("Address One Required")
                 } else if (cityView.text.toString().isNullOrEmpty()) {
@@ -401,8 +491,13 @@ class PayTheoryActivity : AppCompatActivity() {
                 } else {
                     val accountNumber = accountNumberView.text.toString().toLong()
                     val routingNumber = routingNumberView.text.toString().toInt()
-                    val firstName = firstNameView.text.toString()
-                    val lastName = lastNameView.text.toString()
+
+                    var name: String = fullNameView.text.toString()
+                    var parts  = name.split(" ").toMutableList()
+                    val firstName = parts.firstOrNull()
+                    parts.removeAt(0)
+                    val lastName = parts.joinToString(" ")
+
                     val addressOne = addressOneView.text.toString()
                     val addressTwo = addressTwoView.text.toString()
                     val city = cityView.text.toString()
@@ -491,7 +586,8 @@ class PayTheoryActivity : AppCompatActivity() {
                 }
             }
         } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
-                COLLECT_BILLING_ADDRESS) != "True") {
+                COLLECT_BILLING_ADDRESS
+            ) != "True") {
             setContentView(R.layout.activity_pay_theory_ach)
 
             setPaymentTypeSpinner()
@@ -499,8 +595,7 @@ class PayTheoryActivity : AppCompatActivity() {
             val btn = findViewById<Button>(R.id.submitButton)
             val accountNumberView = findViewById<ACHAccountNumber>(R.id.accountNumberEditText)
             val routingNumberView = findViewById<ACHRoutingNumber>(R.id.routingNumberEditText)
-            val firstNameView = findViewById<FirstNameEditText>(R.id.firstNameEditText)
-            val lastNameView = findViewById<LastNameEditText>(R.id.lastNameEditText)
+            val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
 
 //            accountNumberView.setText("12345678910")
 //            routingNumberView.setText("789456124")
@@ -511,15 +606,17 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("Account Number Required")
                 } else if (routingNumberView.text.toString().length <= 8 || routingNumberView.text.toString().length >= 10) {
                     showToast("Routing Number Must Be 9 Digits")
-                } else if (firstNameView.text.toString().isNullOrEmpty()) {
-                    showToast("First Name Required")
-                } else if (lastNameView.text.toString().isNullOrEmpty()) {
-                    showToast("Last Name Required")
-                } else {
+                } else if (fullNameView.text.toString().isNullOrEmpty()) {
+                    showToast("Name Required")
+                }else {
                     val accountNumber = accountNumberView.text.toString().toLong()
                     val routingNumber = routingNumberView.text.toString().toInt()
-                    val firstName = firstNameView.text.toString()
-                    val lastName = lastNameView.text.toString()
+
+                    var name: String = fullNameView.text.toString()
+                    var parts  = name.split(" ").toMutableList()
+                    val firstName = parts.firstOrNull()
+                    parts.removeAt(0)
+                    val lastName = parts.joinToString(" ")
 
                     val payment = Payment(
                         null,

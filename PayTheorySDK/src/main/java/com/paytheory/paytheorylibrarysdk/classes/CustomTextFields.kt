@@ -5,6 +5,25 @@ import android.content.Context
 import android.util.AttributeSet
 
 /**
+ * Custom AppCompatEditText class that is used by fragments for full name input
+ */
+class FullNameEditText : androidx.appcompat.widget.AppCompatEditText{
+    constructor(context: Context) : super(context){
+        init()
+    }
+
+    constructor(context: Context, attrs : AttributeSet) : super(context,attrs){
+        init()
+    }
+
+    constructor(context: Context,  attrs: AttributeSet , defStyleAttr : Int) : super(context, attrs, defStyleAttr){
+        init()
+    }
+    private fun init() {
+    }
+}
+
+/**
  * Custom AppCompatEditText class that is used by fragment CardFullAccountFragment for first name input
  */
 class FirstNameEditText : androidx.appcompat.widget.AppCompatEditText{

@@ -105,7 +105,7 @@ class Transaction(
 
                                 Log.d("Pay Theory", "Idempotency Result: $idempotencyResponse")
 
-                                if (payment.type == "Card") {
+                                if (payment.type == "CARD") {
                                     Handler(Looper.getMainLooper()).post {
                                         confirmCard(
                                             payment.amount,
@@ -206,7 +206,7 @@ class Transaction(
     fun challenge(): String {
         val request = Request.Builder()
             .url("https://dev.tags.api.paytheorystudy.com/challenge")
-            .header("X-API-Key", apiKey)
+            .header("x-api-key", apiKey)
             .build()
         val response = client.newCall(request).execute()
         val jsonData: String? = response.body?.string()
@@ -299,7 +299,7 @@ class Transaction(
             payment.convenienceFee = newPayment.get("service_fee").toString()
             idempotencyComplete = true
             idempotencyResponse.toString()
-        } else if (idempotencyJSONResponse.getString("state") == "error") {
+        } else if (idempotencyJSONResponse.has("state")) {
 
             val failError = idempotencyJSONResponse.getString("reason")
 
@@ -458,7 +458,7 @@ class Transaction(
 
             val paymentJsonObject = JSONObject()
 
-            if (payment.type == "Card") {
+            if (payment.type == "CARD") {
                 paymentJsonObject.put("expiration_month", payment.cardExpMon)
                 paymentJsonObject.put("expiration_year", payment.cardExpYear)
                 paymentJsonObject.put("security_code", "${payment.cardCvv}")
