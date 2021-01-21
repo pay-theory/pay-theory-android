@@ -41,7 +41,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
 
     //added to use PayTheorySDK as library
-    implementation project(path: ':PayTheorySDK')
+    implementation project(path: ':AndroidSDK')
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

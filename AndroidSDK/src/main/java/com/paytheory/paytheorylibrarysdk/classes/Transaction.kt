@@ -385,8 +385,8 @@ class Transaction(
                     "%.2f",
                     (convenienceFee.toDouble() / 100)
                 )
-            } on account beginning with ${
-                accountNumber.toString().take(6)
+            } on account ending in ${
+                accountNumber.toString().takeLast(4)
             }"
         )
         builder.setPositiveButton("YES") { dialog, _ ->
@@ -493,7 +493,6 @@ class Transaction(
         } catch (e: JSONException) {
             e.printStackTrace()
         }
-
         val paymentRequest = Request.Builder()
             .method(
                 "POST",

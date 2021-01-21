@@ -11,8 +11,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/Example Application" />
-            <option value="$PROJECT_DIR$/PayTheorySDK" />
+            <option value="$PROJECT_DIR$/AndroidSDK" />
+            <option value="$PROJECT_DIR$/ExampleApplication" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

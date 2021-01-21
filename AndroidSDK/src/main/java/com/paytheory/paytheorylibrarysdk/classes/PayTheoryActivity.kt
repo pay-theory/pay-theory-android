@@ -4,31 +4,26 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.paytheory.paytheorylibrarysdk.*
+import com.paytheory.paytheorylibrarysdk.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 /**
  * PayTheoryActivity Class is an AppCompatActivity. Activity used when inputting data to submit payment
  */
-
-
-
-
-
 class PayTheoryActivity : AppCompatActivity() {
 
-    var achPaymentType: String = "Card"
+
 
     companion object {
         const val COLLECT_BILLING_ADDRESS = "Billing-Address"
@@ -36,32 +31,16 @@ class PayTheoryActivity : AppCompatActivity() {
         const val PAYMENT_TYPE_CARD = "CARD"
         const val PAYMENT_TYPE_ACH = "ACH"
         const val FEE_MODE = "Fee-Mode"
-        const val FEE_MODE_SURCHARGE = "surcharge"
-        const val FEE_MODE_SERVICE = "service_fee"
+        const val DEFAULT_FEE_MODE = "surcharge"
         const val PAYMENT_AMOUNT = "Payment-Amount"
         const val API_KEY = "Api-Key"
-        fun payTheoryIntent(config: HashMap<String, String>, activity: AppCompatActivity): Intent {
-            if (!config.containsKey(PAYMENT_TYPE)) {
-                config[PAYMENT_TYPE] = PAYMENT_TYPE_CARD
-            }
-            if (!config.containsKey(FEE_MODE)) {
-                config[FEE_MODE] = FEE_MODE_SURCHARGE
-            }
-
-            val intent = Intent(activity, PayTheoryActivity::class.java)
-
-            for ((k, v) in config) {
-                intent.putExtra(k, v)
-            }
-
-            return intent
-        }
+        var feeMode = ""
+        var paymentType = ""
+        var achType: String = "CHECKING"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
 
         if (intent.getStringExtra(PAYMENT_AMOUNT).isNullOrBlank()) {
             val returnIntent = Intent()
@@ -81,12 +60,25 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
-        if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
+        paymentType = if (intent.getStringExtra(PAYMENT_TYPE).toString().isNullOrBlank() || paymentType == "") {
+            PAYMENT_TYPE_CARD
+        }else {
+            intent.getStringExtra(PAYMENT_TYPE).toString()
+        }
+
+        feeMode = if(intent.getStringExtra(FEE_MODE).toString().isNullOrBlank()) {
+            DEFAULT_FEE_MODE
+        }else {
+            intent.getStringExtra(FEE_MODE).toString()
+        }
+
+        if (paymentType == PAYMENT_TYPE_CARD && intent.getStringExtra(
                 COLLECT_BILLING_ADDRESS
             ) == "True") {
             setContentView(R.layout.activity_pay_theory_card_full_account)
 
             val btn = findViewById<Button>(R.id.submitButton)
+            val btnToACH = findViewById<Button>(R.id.toACH)
             val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
             val addressOneView = findViewById<AddressOneEditText>(R.id.addressOneEditText)
             val addressTwoView = findViewById<AddressTwoEditText>(R.id.addressTwoEditText)
@@ -95,126 +87,78 @@ class PayTheoryActivity : AppCompatActivity() {
             val stateView = findViewById<StateEditText>(R.id.stateEditText)
             val creditCardView = findViewById<CreditCardEditText>(R.id.creditCardEditText)
             val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
-            val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
-            val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
+            val expiration = findViewById<ExpirationEditText>(R.id.expirationEditText)
 
-//            creditCardView.addTextChangedListener(object : TextWatcher {
-//                private val TOTAL_SYMBOLS = 19 // size of pattern 0000-0000-0000-0000
-//                private val TOTAL_DIGITS = 16 // max numbers of digits in pattern: 0000 x 4
-//                private val DIVIDER_MODULO =
-//                    5 // means divider position is every 5th symbol beginning with 1
-//                private val DIVIDER_POSITION =
-//                    DIVIDER_MODULO - 1 // means divider position is every 4th symbol beginning with 0
-//                private val DIVIDER = '-'
-//                override fun beforeTextChanged(
-//                    s: CharSequence,
-//                    start: Int,
-//                    count: Int,
-//                    after: Int
-//                ) {
-//                    // noop
-//                }
-//
-//                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-//                    // noop
-//                }
-//
-//                override fun afterTextChanged(s: Editable) {
-//                    if (!isInputCorrect(s, TOTAL_SYMBOLS, DIVIDER_MODULO, DIVIDER)) {
-//                        s.replace(
-//                            0,
-//                            s.length,
-//                            buildCorrectString(
-//                                getDigitArray(s, TOTAL_DIGITS),
-//                                DIVIDER_POSITION,
-//                                DIVIDER
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                private fun isInputCorrect(
-//                    s: Editable,
-//                    totalSymbols: Int,
-//                    dividerModulo: Int,
-//                    divider: Char
-//                ): Boolean {
-//                    var isCorrect = s.length <= totalSymbols // check size of entered string
-//                    for (i in 0 until s.length) { // check that every element is right
-//                        isCorrect = if (i > 0 && (i + 1) % dividerModulo == 0) {
-//                            isCorrect and (divider == s[i])
-//                        } else {
-//                            isCorrect and Character.isDigit(s[i])
-//                        }
-//                    }
-//                    return isCorrect
-//                }
-//
-//                private fun buildCorrectString(
-//                    digits: CharArray,
-//                    dividerPosition: Int,
-//                    divider: Char
-//                ): String? {
-//                    val formatted = StringBuilder()
-//                    for (i in digits.indices) {
-//                        if (digits[i].toInt() != 0) {
-//                            formatted.append(digits[i])
-//                            if (i > 0 && i < digits.size - 1 && (i + 1) % dividerPosition == 0) {
-//                                formatted.append(divider)
-//                            }
-//                        }
-//                    }
-//                    return formatted.toString()
-//                }
-//
-//                private fun getDigitArray(s: Editable, size: Int): CharArray {
-//                    val digits = CharArray(size)
-//                    var index = 0
-//                    var i = 0
-//                    while (i < s.length && index < size) {
-//                        val current = s[i]
-//                        if (Character.isDigit(current)) {
-//                            digits[index] = current
-//                            index++
-//                        }
-//                        i++
-//                    }
-//                    return digits
-//                }
-//            })
+            btnToACH.setOnClickListener{
+                intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_ACH)
+                val intent = intent
+                finish()
+                startActivity(intent)
+            }
 
+            expiration.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {}
 
-//            firstNameView.setText("Some")
-//            lastNameView.setText("Body")
-//            addressOneView.setText("1234 Test Lane")
-//            addressTwoView.setText("Apt 2")
-//            cityView.setText("Cincinnati")
-//            zipCodeView.setText("45236")
-//            stateView.setText("OH")
-//            creditCardView.setText("5597069690181758")
-//            cvvView.setText("424")
-//            expirationMonthView.setText("04")
-//            expirationYearView.setText("2024")
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                override fun onTextChanged(
+                    p0: CharSequence?,
+                    start: Int,
+                    removed: Int,
+                    added: Int
+                ) {
+                    if (start == 1 && start + added == 2 && p0?.contains('/') == false) {
+                        expiration.setText("$p0/")
+                        expiration.setSelection(expiration.text!!.length);
+                    } else if (start == 3 && start - removed == 2 && p0?.contains('/') == true) {
+                        expiration.setText(p0.toString().replace("/", ""))
+                        expiration.setSelection(expiration.text!!.length);
+                    }
+                }
+            })
+
+            creditCardView.addTextChangedListener(object : TextWatcher {
+                private var current = ""
+                private val nonDigits = Regex("[^\\d]")
+
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun afterTextChanged(s: Editable) {
+                    if (s.toString() != current) {
+                        val userInput = s.toString().replace(nonDigits, "")
+                        if (userInput.length <= 16) {
+                            current = userInput.chunked(4).joinToString(" ")
+                            s.filters = arrayOfNulls<InputFilter>(0)
+                        }
+                        s.replace(0, s.length, current, 0, current.length)
+                    }
+                }
+            })
 
             btn.setOnClickListener {
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
                 } else if (!cardValidation(creditCardView.text.toString())) {
                     showToast("Card Number Invalid")
-                } else if (creditCardView.text.toString().length < 13) {
+                } else if (creditCardView.text.toString().length < 17) {
                     showToast("Card Number Invalid")
-                } else if (cvvView.text.toString().isNullOrEmpty()) {
+                }else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
                 } else if (cvvView.text.toString().length <= 2) {
                     showToast("CVV Number Must Be 3 Digits")
-                } else if (expirationMonthView.text.toString().isNullOrEmpty()) {
+                } else if (expiration.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Month Required")
-                } else if (expirationMonthView.text.toString().length <= 1) {
-                    showToast("Expiration Month Must Be 2 Digits")
-                } else if (expirationYearView.text.toString().isNullOrEmpty()) {
-                    showToast("Expiration Year Required")
-                } else if (expirationYearView.text.toString().length <= 3) {
-                    showToast("Expiration Year Must Be 4 Digits")
+                } else if (expiration.text.toString().length < 5) {
+                    showToast("Expiration Must Be 4 Digits")
                 } else if (zipCodeView.text.toString().isNullOrEmpty()) {
                     showToast("Zip Code Required")
                 } else if (zipCodeView.text.toString().length <= 4) {
@@ -228,10 +172,13 @@ class PayTheoryActivity : AppCompatActivity() {
                 } else if (stateView.text.toString().isNullOrEmpty()) {
                     showToast("State Required")
                 } else {
-                    val cardNumber = creditCardView.text.toString().toLong()
+                    val number = creditCardView.text.toString()
+                    val cardNumber = number.replace("\\s".toRegex(), "").toLong()
                     val cvv = cvvView.text.toString()
-                    val expirationMonth = expirationMonthView.text.toString().toInt()
-                    val expirationYear = expirationYearView.text.toString().toInt()
+                    val expirationString = expiration.text.toString()
+                    val expirationMonth = expirationString.take(2).toInt()
+                    val expirationYear = ("20" + expirationString.takeLast(2)).toInt()
+
 
                     var name: String = fullNameView.text.toString()
                     var parts  = name.split(" ").toMutableList()
@@ -252,12 +199,12 @@ class PayTheoryActivity : AppCompatActivity() {
                         cvv,
                         null,
                         null,
-                        achPaymentType,
+                        achType,
 
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
-                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
+                        paymentType,
                         //add fee mode
-                        intent.getStringExtra(FEE_MODE)!!,
+                        feeMode,
                         //add tags if intent is there
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
@@ -331,7 +278,7 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_CARD && intent.getStringExtra(
+        } else if (paymentType == PAYMENT_TYPE_CARD && intent.getStringExtra(
                 COLLECT_BILLING_ADDRESS
             ) != "True") {
             setContentView(R.layout.activity_pay_theory_card)
@@ -339,13 +286,62 @@ class PayTheoryActivity : AppCompatActivity() {
             val btn = findViewById<Button>(R.id.submitButton)
             val creditCardView = findViewById<CreditCardEditText>(R.id.creditCardEditText)
             val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
-            val expirationMonthView = findViewById<ExpMonthText>(R.id.expirationMonthEditText)
-            val expirationYearView = findViewById<ExpYearText>(R.id.expirationYearEditText)
+            val expiration = findViewById<ExpirationEditText>(R.id.expirationEditText)
+            val btnToACH = findViewById<Button>(R.id.toACH)
+            btnToACH.setOnClickListener{
+                intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_ACH)
+                val intent = intent
+                finish()
+                startActivity(intent)
+            }
 
-//            creditCardView.setText("5597069690181758")
-//            cvvView.setText("424")
-//            expirationMonthView.setText("04")
-//            expirationYearView.setText("2024")
+            expiration.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {}
+
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                override fun onTextChanged(
+                    p0: CharSequence?,
+                    start: Int,
+                    removed: Int,
+                    added: Int
+                ) {
+                    if (start == 1 && start + added == 2 && p0?.contains('/') == false) {
+                        expiration.setText("$p0/")
+                        expiration.setSelection(expiration.text!!.length);
+                    } else if (start == 3 && start - removed == 2 && p0?.contains('/') == true) {
+                        expiration.setText(p0.toString().replace("/", ""))
+                        expiration.setSelection(expiration.text!!.length);
+                    }
+                }
+            })
+
+            creditCardView.addTextChangedListener(object : TextWatcher {
+                private var current = ""
+                private val nonDigits = Regex("[^\\d]")
+
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun afterTextChanged(s: Editable) {
+                    if (s.toString() != current) {
+                        val userInput = s.toString().replace(nonDigits, "")
+                        if (userInput.length <= 16) {
+                            current = userInput.chunked(4).joinToString(" ")
+                            s.filters = arrayOfNulls<InputFilter>(0)
+                        }
+                        s.replace(0, s.length, current, 0, current.length)
+                    }
+                }
+            })
 
             btn.setOnClickListener {
                 if (creditCardView.text.toString().isNullOrEmpty()) {
@@ -358,19 +354,18 @@ class PayTheoryActivity : AppCompatActivity() {
                     showToast("CVV Number Required")
                 } else if (cvvView.text.toString().length <= 2) {
                     showToast("CVV Number Must Be 3 Digits")
-                } else if (expirationMonthView.text.toString().isNullOrEmpty()) {
+                } else if (expiration.text.toString().isNullOrEmpty()) {
                     showToast("Expiration Month Required")
-                } else if (expirationMonthView.text.toString().length <= 1) {
-                    showToast("Expiration Month Must Be 2 Digits")
-                } else if (expirationYearView.text.toString().isNullOrEmpty()) {
-                    showToast("Expiration Year Required")
-                } else if (expirationYearView.text.toString().length <= 3) {
-                    showToast("Expiration Year Must Be 4 Digits")
+                } else if (expiration.text.toString().length < 5) {
+                    showToast("Expiration Must Be 4 Digits")
                 } else {
-                    val cardNumber = creditCardView.text.toString().toLong()
+                    val number = creditCardView.text.toString()
+                    val cardNumber = number.replace("\\s".toRegex(), "").toLong()
                     val cvv = cvvView.text.toString()
-                    val expirationMonth = expirationMonthView.text.toString().toInt()
-                    val expirationYear = expirationYearView.text.toString().toInt()
+                    val expirationString = expiration.text.toString()
+                    val expirationMonth = expirationString.take(2).toInt()
+                    val expirationYear = ("20" + expirationString.takeLast(2)).toInt()
+
 
                     val payment = Payment(
                         cardNumber,
@@ -379,10 +374,10 @@ class PayTheoryActivity : AppCompatActivity() {
                         cvv,
                         null,
                         null,
-                        achPaymentType,
+                        achType,
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
-                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
-                        intent.getStringExtra(FEE_MODE)!!,
+                        paymentType,
+                        feeMode,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                     )
@@ -447,7 +442,7 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
+        } else if (paymentType == PAYMENT_TYPE_ACH && intent.getStringExtra(
                 COLLECT_BILLING_ADDRESS
             ) == "True") {
             setContentView(R.layout.activity_pay_theory_ach_full_account)
@@ -463,7 +458,13 @@ class PayTheoryActivity : AppCompatActivity() {
             val cityView = findViewById<CityEditText>(R.id.cityEditText)
             val zipCodeView = findViewById<ZipEditText>(R.id.zipEditText)
             val stateView = findViewById<StateEditText>(R.id.stateEditText)
-
+            val btnToCard = findViewById<Button>(R.id.toCard)
+            btnToCard.setOnClickListener{
+                intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_CARD)
+                val intent = intent
+                finish()
+                startActivity(intent)
+            }
 //            accountNumberView.setText("12345678910")
 //            routingNumberView.setText("789456124")
 //            firstNameView.setText("Some")
@@ -511,10 +512,10 @@ class PayTheoryActivity : AppCompatActivity() {
                         null,
                         accountNumber,
                         routingNumber,
-                        achPaymentType,
+                        achType,
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
-                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
-                        intent.getStringExtra(FEE_MODE)!!,
+                        paymentType,
+                        feeMode,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                         firstName,
@@ -585,7 +586,7 @@ class PayTheoryActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else if (intent.getStringExtra(PAYMENT_TYPE) == PAYMENT_TYPE_ACH && intent.getStringExtra(
+        } else if (paymentType == PAYMENT_TYPE_ACH && intent.getStringExtra(
                 COLLECT_BILLING_ADDRESS
             ) != "True") {
             setContentView(R.layout.activity_pay_theory_ach)
@@ -596,7 +597,13 @@ class PayTheoryActivity : AppCompatActivity() {
             val accountNumberView = findViewById<ACHAccountNumber>(R.id.accountNumberEditText)
             val routingNumberView = findViewById<ACHRoutingNumber>(R.id.routingNumberEditText)
             val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
-
+            val btnToCard = findViewById<Button>(R.id.toCard)
+            btnToCard.setOnClickListener{
+                intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_CARD)
+                val intent = intent
+                finish()
+                startActivity(intent)
+            }
 //            accountNumberView.setText("12345678910")
 //            routingNumberView.setText("789456124")
 
@@ -625,10 +632,10 @@ class PayTheoryActivity : AppCompatActivity() {
                         null,
                         accountNumber,
                         routingNumber,
-                        achPaymentType,
+                        achType,
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
-                        intent.getStringExtra(PAYMENT_TYPE)!!.toString(),
-                        intent.getStringExtra(FEE_MODE)!!,
+                        paymentType,
+                        feeMode,
                         intent.getStringExtra("Tags-Key"),
                         intent.getStringExtra("Tags-Value"),
                         firstName,
@@ -739,7 +746,7 @@ class PayTheoryActivity : AppCompatActivity() {
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
             this,
-            R.array.payment_type_array,
+            R.array.ach_type_array,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
@@ -756,7 +763,7 @@ class PayTheoryActivity : AppCompatActivity() {
                 id: Long
             ) {
 
-                achPaymentType = spinner.selectedItem as String
+                achType = spinner.selectedItem as String
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?) {

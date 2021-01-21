@@ -3,6 +3,7 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:id="@+id/PayTheoryFragment">
 
+
     <com.paytheory.paytheorylibrarysdk.classes.FullNameEditText
         android:id="@+id/fullNameEditText"
 
@@ -57,45 +58,24 @@
         android:hint="Billing Zipcode"
         android:inputType="number" />
 
-
-    <com.paytheory.paytheorylibrarysdk.classes.CreditCardEditText
-        android:id="@+id/creditCardEditText"
-
+    <com.paytheory.paytheorylibrarysdk.classes.ACHAccountNumber
+        android:id="@+id/accountNumberEditText"
 
         android:layout_width="400dp"
-        android:layout_height="wrap_content"
 
-        android:digits="1234567890"
-        android:hint="Card number"
+        android:layout_height="wrap_content"
+        android:hint="Bank Account Number"
         android:inputType="number" />
 
-    <com.paytheory.paytheorylibrarysdk.classes.CVVEditText
-        android:id="@+id/cvvEditText"
+    <com.paytheory.paytheorylibrarysdk.classes.ACHRoutingNumber
+        android:id="@+id/routingNumberEditText"
 
         android:layout_width="400dp"
 
         android:layout_height="wrap_content"
-        android:hint="CVV (ex:123)"
+        android:hint="Bank Routing Number"
         android:inputType="number" />
 
-
-    <com.paytheory.paytheorylibrarysdk.classes.ExpMonthText
-        android:id="@+id/expirationMonthEditText"
-
-        android:layout_width="400dp"
-
-        android:layout_height="wrap_content"
-        android:hint="Expiration month (ex: 04)"
-        android:inputType="number" />
-
-    <com.paytheory.paytheorylibrarysdk.classes.ExpYearText
-        android:id="@+id/expirationYearEditText"
-
-        android:layout_width="400dp"
-
-        android:layout_height="wrap_content"
-        android:hint="Expiration year (ex: 2024)"
-        android:inputType="number"/>
 
     <Button
         android:id="@+id/submitButton"
@@ -103,5 +83,4 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text="Submit Payment" />
-
 </LinearLayout>

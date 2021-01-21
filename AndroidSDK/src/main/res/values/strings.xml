@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="payment_type_array">
+    <string-array name="ach_type_array">
         <item>CHECKING</item>
         <item>SAVINGS</item>
     </string-array>

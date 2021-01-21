@@ -4,6 +4,9 @@ import android.content.Context
 
 import android.util.AttributeSet
 
+
+
+
 /**
  * Custom AppCompatEditText class that is used by fragments for full name input
  */
@@ -20,6 +23,7 @@ class FullNameEditText : androidx.appcompat.widget.AppCompatEditText{
         init()
     }
     private fun init() {
+
     }
 }
 
@@ -267,7 +271,7 @@ class CVVEditText : androidx.appcompat.widget.AppCompatEditText{
 /**
  * Custom AppCompatEditText class that is used by fragment CardFullAccountFragment and CardFragment for card expiration month input
  */
-class ExpMonthText : androidx.appcompat.widget.AppCompatEditText{
+class ExpirationEditText : androidx.appcompat.widget.AppCompatEditText{
     constructor(context: Context) : super(context){
         init()
     }
@@ -284,25 +288,7 @@ class ExpMonthText : androidx.appcompat.widget.AppCompatEditText{
     }
 }
 
-/**
- * Custom AppCompatEditText class that is used by fragment CardFullAccountFragment and CardFragment for card expiration year input
- */
-class ExpYearText : androidx.appcompat.widget.AppCompatEditText{
-    constructor(context: Context) : super(context){
-        init()
-    }
 
-    constructor(context: Context, attrs : AttributeSet) : super(context,attrs){
-        init()
-    }
-
-    constructor(context: Context,  attrs: AttributeSet , defStyleAttr : Int) : super(context, attrs, defStyleAttr){
-        init()
-    }
-    private fun init() {
-
-    }
-}
 
 /**
  * Custom AppCompatEditText class that is used by fragment CardFullAccountFragment for ACH Bank Account Number input
