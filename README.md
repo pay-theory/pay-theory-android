@@ -20,6 +20,20 @@ class MainActivity : AppCompatActivity() {
 Create a button on your Activity layout.xml file that will initiate the payment page
 
 ```kotlin
+    <Button
+        android:id="@+id/payment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+```
+
+Code example:
+
+```kotlin
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -47,7 +61,7 @@ Add internet permission to your android project's manifest.xml file.
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-Here is an example:
+Code example:
 
 ```kotlin
 <?xml version="1.0" encoding="utf-8"?>
@@ -124,7 +138,7 @@ dependencies {
 ```
 
 + add the implementation to your applications build.gradle file
-Here is an example of the build.grade file:
+Code example of the build.grade file:
 
 ```kotlin
 plugins {
@@ -182,77 +196,160 @@ dependencies {
 ## Usage
 
 In your Activity's "onCreate" method:
-+ create a variable to reference the button
-+ add the setOnClickListener call
+
+1. Add constant variables 
 ```kotlin
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+val COLLECT_BILLING_ADDRESS = "Billing-Address"
+val COLLECT_BILLING_ADDRESS_TRUE = "True"
+val COLLECT_BILLING_ADDRESS_FALSE = "False"
+val FEE_MODE = "Fee-Mode"
+val FEE_MODE_SURCHARGE = "surcharge"
+val FEE_MODE_SERVICE = "service_fee"
+val PAYMENT_AMOUNT = "Payment-Amount"
+val BUYER_OPTIONS = "Buyer-Options"
+val BUYER_OPTIONS_TRUE = "True"
+val BUYER_OPTIONS_FALSE = "False"
+val API_KEY = "Api-Key"
+val TAG_KEY = "Tag-Key"
+val TAG_VALUE = "Tag-Value"
+```        
+        
+2. Create a variable to reference your submit button
+```kotlin
+  var submitButton = findViewById<Button>(R.id.submitButton)
+```
 
-        // Button that will start PayTheoryActivity
-        var paymentButton = findViewById<Button>(R.id.payment_button)
+3. Add this setOnClickListener code to your submit button
+```kotlin
+//On Click Listener to start PayTheoryActivity with Buyer Options Fields
+submitButton.setOnClickListener {
+    val intent = Intent(this, PayTheoryActivity::class.java)
 
-        setOnClickListener("ACH", paymentButton)
+    //Set COLLECT_BILLING_ADDRESS (COLLECT_BILLING_ADDRESS_TRUE or COLLECT_BILLING_ADDRESS_FALSE)
+    intent.putExtra(COLLECT_BILLING_ADDRESS, COLLECT_BILLING_ADDRESS_TRUE)
+
+    //Set FEE_MODE (FEE_MODE_SURCHARGE or FEE_MODE_SERVICE)
+    intent.putExtra(FEE_MODE, FEE_MODE_SURCHARGE)
+
+    //Set PAYMENT_AMOUNT in cents ($50.25 = "5025")
+    intent.putExtra(PAYMENT_AMOUNT, "5025")
+
+    //Set API_KEY
+    intent.putExtra(API_KEY, "My-API-Key")
+
+    //Set TAG_KEY and TAG_VALUE
+    intent.putExtra(TAG_KEY, "Custom Tag Key")
+    intent.putExtra(TAG_VALUE, "Custom Tag Value")
+
+    //Set BUYER_OPTIONS (BUYER_OPTIONS_TRUE or BUYER_OPTIONS_FALSE)
+    intent.putExtra(BUYER_OPTIONS, BUYER_OPTIONS_TRUE)
+
+    //Set Buyer Options data
+    intent.putExtra("First-Name", "Buyer")
+    intent.putExtra("Last-Name", "Options")
+    intent.putExtra("Address-One", "123 Options Lane")
+    intent.putExtra("Address-Two", "Apt 1")
+    intent.putExtra("City", "Cincinnati")
+    intent.putExtra("State", "OH")
+    intent.putExtra("Country", "USA")
+    intent.putExtra("Zip-Code", "45236")
+    intent.putExtra("Phone-Number", "513-123-1234")
+    intent.putExtra("Email-Address", "test@paytheory.com")
+
+    //Start PayTheoryActivity
+    startActivityForResult(intent, 1);
+}
+
+```
+
+4. Add these methods inside your Activity Class
+
++ onActivityResult()
+This method will return the result after a payment has been submitted.
+returnString - result of payment request as a String in JSON format
+```kotlin
+// This method is called when the PayTheoryActivity finishes
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    Log.d("Pay Theory", "Result Code $resultCode and Request Code $requestCode and Activity.RESULT_OK ${Activity.RESULT_OK} and data $data")
+    if (resultCode == -1 && requestCode == 1 ) {
+        // Get String data from PayTheoryActivity
+        val returnString = data!!.getStringExtra("result")
+        Log.d("Pay Theory", "Here is the result data string : $returnString")
+        if (returnString != null) {
+            showToast(returnString)
+        }
 
     }
 }
 ```
 
-Add these three methods inside the onCreate method
-
-+ setOnClickListener()
-This method initiates the Pay Theory payment page. 
-paymentType - "ACH" or "Card" (Display input fields for the specific payment method)
-button - Button that will start Pay Theory payment page
-
-+ onActivityResult()
-This method will return the result after a payment has been submitted.
-returnString - result of payment request as a String in JSON format
-
 + showToast()
 This method will display an alert of a string that is passed in.
-
-Here is an example of how you will add to the onCreate method:
 ```kotlin
-class MainActivity : AppCompatActivity() {
+private fun showToast(message: String){
+    Toast.makeText(
+        this, message,
+        Toast.LENGTH_LONG
+    ).show()
+}
+```
+
+Code example of how your activity should look after all implementation
+```kotlin
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.paytheory.paytheorylibrarysdk.classes.PayTheoryActivity
+
+class ExampleAppMainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val COLLECT_BILLING_ADDRESS = "Billing-Address"
+        val COLLECT_BILLING_ADDRESS_TRUE = "True"
+        val COLLECT_BILLING_ADDRESS_FALSE = "False"
+        val FEE_MODE = "Fee-Mode"
+        val FEE_MODE_SURCHARGE = "surcharge"
+        val FEE_MODE_SERVICE = "service_fee"
+        val PAYMENT_AMOUNT = "Payment-Amount"
+        val BUYER_OPTIONS = "Buyer-Options"
+        val BUYER_OPTIONS_TRUE = "True"
+        val BUYER_OPTIONS_FALSE = "False"
+        val API_KEY = "Api-Key"
+        val TAG_KEY = "Tag-Key"
+        val TAG_VALUE = "Tag-Value"
+
         // Button that will start PayTheoryActivity
-        var paymentButton = findViewById<Button>(R.id.payment_button)
+        var submitButton = findViewById<Button>(R.id.submitButton)
 
-        setOnClickListener("ACH", paymentButton)
-    }
-
-    //Payment Type should be ("Card" or "ACH")
-    fun setOnClickListener(paymentType : String, button: Button) {
-        button.setOnClickListener { //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        //On Click Listener to start PayTheoryActivity with Buyer Options Fields
+        submitButton.setOnClickListener {
             val intent = Intent(this, PayTheoryActivity::class.java)
 
-            //Set Full-Account-Details ("True" or "False")
-            intent.putExtra("Full-Account-Details", "True")
+            //Set COLLECT_BILLING_ADDRESS (COLLECT_BILLING_ADDRESS_TRUE or COLLECT_BILLING_ADDRESS_FALSE)
+            intent.putExtra(COLLECT_BILLING_ADDRESS, COLLECT_BILLING_ADDRESS_TRUE)
 
-            //Payment Type is set ("Card" or "ACH")
-            intent.putExtra("Payment-Type", paymentType)
+            //Set FEE_MODE (FEE_MODE_SURCHARGE or FEE_MODE_SERVICE)
+            intent.putExtra(FEE_MODE, FEE_MODE_SURCHARGE)
 
-            //Set Fee Mode ("surcharge" or "service-fee")
-            intent.putExtra("Fee-Mode", "surcharge")
+            //Set PAYMENT_AMOUNT in cents ($50.25 = "5025")
+            intent.putExtra(PAYMENT_AMOUNT, "5025")
 
-            //Set Payment Amount in cents ($50.25 = "5025")
-            intent.putExtra("Payment-Amount", "5025")
+            //Set API_KEY
+            intent.putExtra(API_KEY, "My-API-Key")
 
-            //Set Api-Key
-            intent.putExtra("Api-Key", "MY API KEY")
+            //Set TAG_KEY and TAG_VALUE
+            intent.putExtra(TAG_KEY, "Custom Tag Key")
+            intent.putExtra(TAG_VALUE, "Custom Tag Value")
 
-
-            //Set Custom Tags for payments ( { Tags-Key : Tags-Value } )
-            intent.putExtra("Tags-Key", "My Custom Tags")
-            intent.putExtra("Tags-Value", "My Custom Tags Value")
-
-            //Set Buyer Options ("True" or "False")
-            intent.putExtra("Buyer-Options", "True")
+            //Set BUYER_OPTIONS (BUYER_OPTIONS_TRUE or BUYER_OPTIONS_FALSE)
+            intent.putExtra(BUYER_OPTIONS, BUYER_OPTIONS_TRUE)
 
             //Set Buyer Options data
             intent.putExtra("First-Name", "Buyer")
@@ -271,28 +368,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     // This method is called when the PayTheoryActivity finishes
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                // Get String data from PayTheoryActivity
-                val returnString = data!!.getStringExtra("result")
-                Log.d("Pay Theory", "Here is the result data string : $returnString")
-                if (returnString != null) {
-                    showToast(returnString)
-                }
-            } else {
-                showToast("Error getting result data")
+        Log.d("Pay Theory", "Result Code $resultCode and Request Code $requestCode and Activity.RESULT_OK ${Activity.RESULT_OK} and data $data")
+        if (resultCode == -1 && requestCode == 1 ) {
+            // Get String data from PayTheoryActivity
+            val returnString = data!!.getStringExtra("result")
+            Log.d("Pay Theory", "Here is the result data string : $returnString")
+            if (returnString != null) {
+                showToast(returnString)
             }
+
         }
     }
 
     private fun showToast(message: String){
         Toast.makeText(
-                this, message,
-                Toast.LENGTH_LONG
+            this, message,
+            Toast.LENGTH_LONG
         ).show()
     }
 }
@@ -300,41 +394,32 @@ class MainActivity : AppCompatActivity() {
 
 ### Set configurations for Pay Theory Activity: 
 
-#### Payment-Type (Required)
-
-Allows you to dynamically change input fields for a card or bank account
-
-```kotlin
-//Payment Type is set ("Card" or "ACH")
-intent.putExtra("Payment-Type", "Card")
-```
-
-#### Payment-Amount (Required)
+#### Payment Amount (Required)
 
 Payment amount that will be submitted
 
 ```kotlin
-//Set Payment Amount in cents ($50.25 = "5025")
-intent.putExtra("Payment-Amount", "4000")
+//Set PAYMENT_AMOUNT in cents ($50.25 = "5025")
+intent.putExtra(PAYMENT_AMOUNT, "5025")
 ```
 
 #### Api-Key (Required)
 
 ```kotlin
-//Set Api-Key
-intent.putExtra("Api-Key", "d9de91546564990737dd2f8049nhjy9dd6")
+//Set API_KEY
+intent.putExtra(API_KEY, "My-API-Key")
 ```
 
-#### Full-Account-Details (Required)
+#### Collect Billing Address (Required)
 
 ```kotlin
-//Set Full-Account-Details ("True" or "False")
-intent.putExtra("Full-Account-Details", "True")
+//Set COLLECT_BILLING_ADDRESS (COLLECT_BILLING_ADDRESS_TRUE or COLLECT_BILLING_ADDRESS_FALSE)
+intent.putExtra(COLLECT_BILLING_ADDRESS, COLLECT_BILLING_ADDRESS_TRUE)
 ```
 
- **"True"**  
+ **COLLECT_BILLING_ADDRESS_TRUE**  
  
- True will display more fields for user to fill out for the payment transaction:
+Display billing address fields for user to fill out to transact a payment:
  
  + First name field  
  + Last name field  
@@ -344,22 +429,20 @@ intent.putExtra("Full-Account-Details", "True")
  + State field  
  + Zip code field  
  + All required payment fields
- 
-**OR**  
   
-**"False"**  
+**COLLECT_BILLING_ADDRESS_FALSE**  
 
-False will display fields only required for a payment transaction:
+Display fields only required to transact a payment:
 
  + All required payment fields
 
-#### Buyer-Options (Optional)
+#### Buyer Options (Optional)
 
 ```kotlin
-//Set Buyer Options ("True" or "False")
-intent.putExtra("Buyer-Options", "True")
+//Set BUYER_OPTIONS (BUYER_OPTIONS_TRUE or BUYER_OPTIONS_FALSE)
+intent.putExtra(BUYER_OPTIONS, BUYER_OPTIONS_TRUE)
 
-//Set Buyer Options data
+//Set BUYER_OPTIONS data
 intent.putExtra("First-Name", "Henry")
 intent.putExtra("Last-Name", "Smith")
 intent.putExtra("Address-One", "123 Greenwood Drive")
@@ -372,29 +455,29 @@ intent.putExtra("Phone-Number", "513-111-1111")
 intent.putExtra("Email-Address", "Hsmith@gmail.com")
 ```
 
-#### Fee-Mode (Optional)
+#### Fee Mode (Optional)
 
-The Fee-Mode is defaulted to "surcharge"
-
+The Fee-Mode is defaulted to "surcharge" if not implemented
 ```kotlin
-//Set Fee Mode ("surcharge" or "service-fee")
-intent.putExtra("Fee-Mode", "service_fee")
+//Set FEE_MODE (FEE_MODE_SURCHARGE or FEE_MODE_SERVICE)
+intent.putExtra(FEE_MODE, FEE_MODE_SURCHARGE)
 ```
 
-#### Custom-Tags (Optional)
+#### Custom Tags (Optional)
 
 Add custom tags as key-value pair to transactions (Customer ID, Tracking #, etc.)
+This value will be returned in the transaction response
+```kotlin
+//Set TAG_KEY and TAG_VALUE
+intent.putExtra(TAG_KEY, "Custom Tag Key")
+intent.putExtra(TAG_VALUE, "Custom Tag Value")
+```
+
 Example Tags:
  ```kotlin
- { Tags-Key : Tags-Value }
+intent.putExtra(TAG_KEY, "CustomerId")
+intent.putExtra(TAG_VALUE, "59487613")
 ```
-
-```kotlin
-//Set Custom Tags for payments 
-intent.putExtra("Tags-Key", "tagKey")
-intent.putExtra("Tags-Value", "tagValue")
-```
-
 
 ## Handle Response
 
@@ -402,15 +485,19 @@ This method is used to retrieve result data once Pay Theory Activity has complet
 You can use the "returnString" variable to get completion response.
 
 ```kotlin
+// This method is called when the PayTheoryActivity finishes
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
-    if (requestCode == 1) {
-        if (resultCode == Activity.RESULT_OK) {
-            // Get String data from PayTheoryActivity
-            val returnString = data!!.getStringExtra("keyName")
-            Log.d("Main Activity","Here is the result data string : $returnString")
-	     }
-	 }
+    Log.d("Pay Theory", "Result Code $resultCode and Request Code $requestCode and Activity.RESULT_OK ${Activity.RESULT_OK} and data $data")
+    if (resultCode == -1 && requestCode == 1 ) {
+        // Get String data from PayTheoryActivity
+        val returnString = data!!.getStringExtra("result")
+        Log.d("Pay Theory", "Here is the result data string : $returnString")
+        if (returnString != null) {
+            showToast(returnString)
+        }
+
+    }
 }
 ```
 
@@ -428,7 +515,7 @@ Upon completion of authorization and capture, details similar to the following a
     "created_at":"YYYY-MM-DDTHH:MM:SS.ssZ",
     "amount": 999,
     "service_fee": 195,
-    "OH":"SUCCEEDED",
+    "state":"SUCCEEDED",
     "tags":{ "pay-theory-environment":"env","pt-number":"pt-env-XXXXXX", "YOUR_TAG_KEY": "YOUR_TAG_VALUE" }
 }
 ```
@@ -440,7 +527,7 @@ If a failure or decline occurs during the transaction, the response will be simi
     "receipt_number":"pt-test-XXXXXX",
     "last_four":"XXXX",
     "brand":"VISA",
-    "OH":"FAILURE",
+    "state":"FAILURE",
     "type":"some descriptive reason for the failure / decline"
 }
 ```
@@ -458,8 +545,17 @@ Change theme for application to ensure PayTheoryActivity has same theme as appli
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/Theme.PayTheoryLibrary">
-<!--android:theme="@style/Theme.AppCompat.DayNight">-->
+</application>
+```
 
+```xml
+<application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.AppCompat.DayNight">
 </application>
 ```
 

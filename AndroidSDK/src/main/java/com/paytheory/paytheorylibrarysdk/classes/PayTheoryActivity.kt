@@ -38,6 +38,10 @@ class PayTheoryActivity : AppCompatActivity() {
         var paymentType = ""
         var achType: String = "CHECKING"
     }
+    override fun onBackPressed() {
+        setResult(5, intent)
+        finish()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,10 +64,11 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
-        paymentType = if (intent.getStringExtra(PAYMENT_TYPE).toString().isNullOrBlank() || paymentType == "") {
-            PAYMENT_TYPE_CARD
-        }else {
-            intent.getStringExtra(PAYMENT_TYPE).toString()
+        if (intent.hasExtra(PAYMENT_TYPE)) {
+            paymentType = intent.getStringExtra(PAYMENT_TYPE).toString()
+        }
+        if ((!intent.hasExtra(PAYMENT_TYPE)) && paymentType == "") {
+            paymentType = PAYMENT_TYPE_CARD
         }
 
         feeMode = if(intent.getStringExtra(FEE_MODE).toString().isNullOrBlank()) {
@@ -91,9 +96,9 @@ class PayTheoryActivity : AppCompatActivity() {
 
             btnToACH.setOnClickListener{
                 intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_ACH)
-                val intent = intent
-                finish()
+                intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
                 startActivity(intent)
+                finish()
             }
 
             expiration.addTextChangedListener(object : TextWatcher {
@@ -145,13 +150,36 @@ class PayTheoryActivity : AppCompatActivity() {
             })
 
             btn.setOnClickListener {
+//                val number
+//                val cardNumber
+//                lateinit var cardString: String
+//                lateinit var cardNumber: Long
+//
+//                if (creditCardView.text.toString().isNullOrEmpty()) {
+//                    showToast("Card Number Required")
+//                }  else if (creditCardView.text.toString().length < 17) {
+//                    showToast("Card Number Invalid")
+//                } else if(!(creditCardView.text.toString().isNullOrEmpty()) && creditCardView.text.toString().length >= 17) {
+//                    cardString = creditCardView.text.toString()
+//                    cardNumber = cardString.replace("\\s".toRegex(), "").toLong()
+//                } else if (!cardValidation(cardNumber.toString())) {
+//                    showToast("Card Number Invalid")
+//                }
+
+
+
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
-                } else if (!cardValidation(creditCardView.text.toString())) {
+                }  else if (creditCardView.text.toString().length < 17) {
                     showToast("Card Number Invalid")
-                } else if (creditCardView.text.toString().length < 17) {
+                } else if(!cardValidation(
+                        creditCardView.text.toString().replace(
+                            "\\s".toRegex(),
+                            ""
+                        )
+                    )) {
                     showToast("Card Number Invalid")
-                }else if (cvvView.text.toString().isNullOrEmpty()) {
+                } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
                 } else if (cvvView.text.toString().length <= 2) {
                     showToast("CVV Number Must Be 3 Digits")
@@ -288,11 +316,13 @@ class PayTheoryActivity : AppCompatActivity() {
             val cvvView = findViewById<CVVEditText>(R.id.cvvEditText)
             val expiration = findViewById<ExpirationEditText>(R.id.expirationEditText)
             val btnToACH = findViewById<Button>(R.id.toACH)
+
+
             btnToACH.setOnClickListener{
                 intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_ACH)
-                val intent = intent
-                finish()
+                intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
                 startActivity(intent)
+                finish()
             }
 
             expiration.addTextChangedListener(object : TextWatcher {
@@ -346,9 +376,14 @@ class PayTheoryActivity : AppCompatActivity() {
             btn.setOnClickListener {
                 if (creditCardView.text.toString().isNullOrEmpty()) {
                     showToast("Card Number Required")
-                } else if (!cardValidation(creditCardView.text.toString())) {
+                }  else if (creditCardView.text.toString().length < 17) {
                     showToast("Card Number Invalid")
-                } else if (creditCardView.text.toString().length < 13) {
+                } else if(!cardValidation(
+                        creditCardView.text.toString().replace(
+                            "\\s".toRegex(),
+                            ""
+                        )
+                    )) {
                     showToast("Card Number Invalid")
                 } else if (cvvView.text.toString().isNullOrEmpty()) {
                     showToast("CVV Number Required")
@@ -459,11 +494,13 @@ class PayTheoryActivity : AppCompatActivity() {
             val zipCodeView = findViewById<ZipEditText>(R.id.zipEditText)
             val stateView = findViewById<StateEditText>(R.id.stateEditText)
             val btnToCard = findViewById<Button>(R.id.toCard)
+
+
             btnToCard.setOnClickListener{
                 intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_CARD)
-                val intent = intent
-                finish()
+                intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
                 startActivity(intent)
+                finish()
             }
 //            accountNumberView.setText("12345678910")
 //            routingNumberView.setText("789456124")
@@ -598,11 +635,13 @@ class PayTheoryActivity : AppCompatActivity() {
             val routingNumberView = findViewById<ACHRoutingNumber>(R.id.routingNumberEditText)
             val fullNameView = findViewById<FullNameEditText>(R.id.fullNameEditText)
             val btnToCard = findViewById<Button>(R.id.toCard)
+
+
             btnToCard.setOnClickListener{
                 intent.putExtra(PAYMENT_TYPE, PAYMENT_TYPE_CARD)
-                val intent = intent
-                finish()
+                intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
                 startActivity(intent)
+                finish()
             }
 //            accountNumberView.setText("12345678910")
 //            routingNumberView.setText("789456124")
@@ -686,7 +725,7 @@ class PayTheoryActivity : AppCompatActivity() {
                         )
                         showToast("Processing payment please wait...")
 
-                        val returnIntent = Intent()
+
                         CoroutineScope(IO).launch {
                             val payTheoryResult = async {
                                 payTheory.init()
@@ -695,8 +734,8 @@ class PayTheoryActivity : AppCompatActivity() {
                                 delay(500)
                             }
                             Log.d("Pay Theory", "Pay Theory Result : $payTheoryResult")
-                            returnIntent.putExtra("result", payTheoryResult)
-                            setResult(Activity.RESULT_OK, returnIntent)
+                            intent.putExtra("result", payTheoryResult)
+                            setResult(RESULT_OK, intent)
                             finish()
                         }
                     }
@@ -709,11 +748,10 @@ class PayTheoryActivity : AppCompatActivity() {
                 "Pay Theory activity intents not set up correctly. Please review your on click listener intents."
             Log.d("Pay Theory", errorMessage)
             returnIntent.putExtra("result", errorMessage)
-            setResult(Activity.RESULT_OK, returnIntent)
+            setResult(RESULT_CANCELED, returnIntent)
             finish()
         }
     }
-
 
     private fun showToast(message: String) {
         Toast.makeText(
