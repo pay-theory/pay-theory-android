@@ -137,7 +137,7 @@ task clean(type: Delete) {
 
 ```gradle
 dependencies {
-	        implementation 'com.github.pay-theory:pay-theory-android:0.0.1
+	        implementation 'com.github.pay-theory:pay-theory-android:1.0.4-alpha'
 }
 ```
 
@@ -181,7 +181,7 @@ android {
 
 dependencies {
 
-    implementation 'com.github.pay-theory:pay-theory-android:0.0.1'
+    implementation 'com.github.pay-theory:pay-theory-android:1.0.4-alpha'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
