@@ -491,7 +491,6 @@ You can use the "returnString" variable to get completion response.
 // This method is called when the PayTheoryActivity finishes
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
-    Log.d("Pay Theory", "Result Code $resultCode and Request Code $requestCode and Activity.RESULT_OK ${Activity.RESULT_OK} and data $data")
     if (resultCode == -1 && requestCode == 1 ) {
         // Get String data from PayTheoryActivity
         val returnString = data!!.getStringExtra("result")
