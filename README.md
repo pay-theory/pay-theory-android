@@ -262,9 +262,9 @@ submitButton.setOnClickListener {
 
 ```
 
-4. Add these methods inside your Activity Class
+In your Activity class add these methods:
 
-+ onActivityResult()
+1. onActivityResult()
 This method will return the result after a payment has been submitted.
 returnString - result of payment request as a String in JSON format
 ```kotlin
@@ -284,7 +284,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 }
 ```
 
-+ showToast()
+2. showToast()
 This method will display an alert of a string that is passed in.
 ```kotlin
 private fun showToast(message: String){
