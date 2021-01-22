@@ -3,9 +3,9 @@
 
 ## Setup
 
-Create or open an Android project
+1. Create or open an Android project
 
-Create or open an Activity file that will use Pay Theory Library.
+2. Create or open an Activity file that will use Pay Theory Library.
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -17,18 +17,18 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
-Create a button on your Activity layout.xml file that will initiate the payment page
+3. Create a button on your Activity layout.xml file that will initiate the payment page
 
 ```kotlin
-    <Button
-        android:id="@+id/payment_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<Button
+    android:id="@+id/payment_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Button"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
 ```
 
 Code example:
@@ -55,7 +55,7 @@ Code example:
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
-Add internet permission to your android project's manifest.xml file. 
+4. Add internet permission to your android project's manifest.xml file. 
 
 ```kotlin
 <uses-permission android:name="android.permission.INTERNET" />
@@ -88,7 +88,7 @@ Code example:
 </manifest>
 ```
 
-Add library to your applications dependencies using jitpack.io 
+5. Add library to your applications dependencies using jitpack.io 
 + Go to https://jitpack.io/
 + Enter https://github.com/pay-theory/pay-theory-android in the "Look up"
 + A list of versions should appear. You will use the most up-to-date version.
@@ -190,7 +190,7 @@ dependencies {
 }
 ```
 
-+ Sync and build project so Pay Theory Library can be imported into your application
+6. Sync and build project so Pay Theory Library can be imported into your application
 
 
 ## Usage
