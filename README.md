@@ -97,7 +97,7 @@ Instructions for Gradle:
 + In you project's root build.gradle file you will add "maven { url 'https://jitpack.io' }" 
 (Make sure to add it under "allprojects" and "repositories". Also make sure it is under ALL existing repositories )
 
-```kotlin
+```gradle
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlin_version = "1.4.20"
@@ -131,7 +131,7 @@ task clean(type: Delete) {
 + On jitpack.io click on "Get it" next to the version you are adding
 + jitpack will give you a line of code to copy 
 
-```kotlin
+```gradle
 dependencies {
 	        implementation 'com.github.pay-theory:pay-theory-android:0.0.1
 }
@@ -140,7 +140,7 @@ dependencies {
 + add the implementation to your applications build.gradle file
 Code example of the build.grade file:
 
-```kotlin
+```gradle
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
