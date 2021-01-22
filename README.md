@@ -5,7 +5,7 @@
 
 1. Create or open an Android project
 
-2. Create or open an Activity file that will use Pay Theory Library.
+2. Create or open an Activity class that will use Pay Theory Library.
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
