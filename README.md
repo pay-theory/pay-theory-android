@@ -1,6 +1,9 @@
 
 # PayTheory Android SDK
 
+## Requirements
+Android 4.1 (API level 16) and above
+
 ## Setup
 
 1. Create or open an Android project
@@ -88,13 +91,14 @@ Code example:
 </manifest>
 ```
 
-5. Add library to your applications dependencies using jitpack.io 
+## Installation
+Add library to your applications dependencies using jitpack.io 
 + Go to https://jitpack.io/
 + Enter https://github.com/pay-theory/pay-theory-android in the "Look up"
 + A list of versions should appear. You will use the most up-to-date version.
 
-Instructions for Gradle:
-+ In you project's root build.gradle file you will add "maven { url 'https://jitpack.io' }" 
+## Instructions for Gradle:
+1. In you project's root build.gradle file you will add "maven { url 'https://jitpack.io' }" 
 (Make sure to add it under "allprojects" and "repositories". Also make sure it is under ALL existing repositories )
 
 ```gradle
@@ -128,7 +132,7 @@ task clean(type: Delete) {
 }
 ```
 
-+ On jitpack.io click on "Get it" next to the version you are adding
+2. On jitpack.io click on "Get it" next to the version you are adding
 + jitpack will give you a line of code to copy 
 
 ```gradle
@@ -137,7 +141,7 @@ dependencies {
 }
 ```
 
-+ add the implementation to your applications build.gradle file
+3. add the implementation to your applications build.gradle file
 Code example of the build.grade file:
 
 ```gradle
@@ -190,7 +194,7 @@ dependencies {
 }
 ```
 
-6. Sync and build project so Pay Theory Library can be imported into your application
+4. Sync and build project so Pay Theory Library can be imported into your application
 
 
 ## Usage
