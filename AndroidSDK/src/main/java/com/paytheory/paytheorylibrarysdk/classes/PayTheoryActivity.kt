@@ -1,7 +1,10 @@
 package com.paytheory.paytheorylibrarysdk.classes
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -16,6 +19,7 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Error
 
 
 /**
@@ -27,6 +31,7 @@ class PayTheoryActivity : AppCompatActivity() {
 
     companion object {
         const val COLLECT_BILLING_ADDRESS = "Billing-Address"
+        const val DEFAULT_COLLECT_BILLING = "False"
         const val PAYMENT_TYPE = "Payment-Type"
         const val PAYMENT_TYPE_CARD = "CARD"
         const val PAYMENT_TYPE_ACH = "ACH"
@@ -34,9 +39,14 @@ class PayTheoryActivity : AppCompatActivity() {
         const val DEFAULT_FEE_MODE = "surcharge"
         const val PAYMENT_AMOUNT = "Payment-Amount"
         const val API_KEY = "Api-Key"
+        const val TAG_KEY = "Tag-Key"
+        const val TAG_VALUE = "Tag-Value"
         var feeMode = ""
         var paymentType = ""
         var achType: String = "CHECKING"
+        var tagsKey = " "
+        var tagsValue = " "
+
     }
     override fun onBackPressed() {
         setResult(5, intent)
@@ -45,6 +55,18 @@ class PayTheoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        try {
+
+
+        if(!isNetworkAvailable(this.applicationContext)){
+            val errorMessage = "No internet available"
+            Log.d("Pay Theory", errorMessage)
+            intent.putExtra("result", errorMessage)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
+
 
         if (intent.getStringExtra(PAYMENT_AMOUNT).isNullOrBlank()) {
             val returnIntent = Intent()
@@ -64,6 +86,15 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
+        if (!intent.hasExtra(COLLECT_BILLING_ADDRESS)) {
+            intent.putExtra(COLLECT_BILLING_ADDRESS, DEFAULT_COLLECT_BILLING)
+        }
+
+        if (intent.hasExtra(TAG_KEY) && intent.hasExtra(TAG_VALUE)) {
+            tagsKey = intent.getStringExtra(TAG_KEY).toString()
+            tagsValue = intent.getStringExtra(TAG_VALUE).toString()
+        }
+
         if (intent.hasExtra(PAYMENT_TYPE)) {
             paymentType = intent.getStringExtra(PAYMENT_TYPE).toString()
         }
@@ -234,8 +265,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         //add fee mode
                         feeMode,
                         //add tags if intent is there
-                        intent.getStringExtra("Tags-Key"),
-                        intent.getStringExtra("Tags-Value"),
+                        tagsKey,
+                        tagsValue,
                         firstName,
                         lastName,
                         addressOne,
@@ -413,8 +444,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
                         paymentType,
                         feeMode,
-                        intent.getStringExtra("Tags-Key"),
-                        intent.getStringExtra("Tags-Value"),
+                        tagsKey,
+                        tagsValue,
                     )
                     if (intent.getStringExtra("Buyer-Options") == "True") {
                         val buyerOptions = BuyerOptions(
@@ -553,8 +584,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
                         paymentType,
                         feeMode,
-                        intent.getStringExtra("Tags-Key"),
-                        intent.getStringExtra("Tags-Value"),
+                        tagsKey,
+                        tagsValue,
                         firstName,
                         lastName,
                         addressOne,
@@ -675,8 +706,8 @@ class PayTheoryActivity : AppCompatActivity() {
                         intent.getStringExtra(PAYMENT_AMOUNT)!!.toInt(),
                         paymentType,
                         feeMode,
-                        intent.getStringExtra("Tags-Key"),
-                        intent.getStringExtra("Tags-Value"),
+                        tagsKey,
+                        tagsValue,
                         firstName,
                         lastName
                     )
@@ -751,6 +782,22 @@ class PayTheoryActivity : AppCompatActivity() {
             setResult(RESULT_CANCELED, returnIntent)
             finish()
         }
+        } catch (error : Error) {
+
+            Log.d("Pay Theory", "Pay Theory Activity Failed")
+            intent.putExtra("result", error.toString())
+            setResult(RESULT_OK, intent)
+            finish()
+
+        }
+
+    }
+
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return activeNetwork?.isConnectedOrConnecting == true
     }
 
     private fun showToast(message: String) {
@@ -759,6 +806,7 @@ class PayTheoryActivity : AppCompatActivity() {
             Toast.LENGTH_LONG
         ).show()
     }
+
 
 
     private fun cardValidation(cardNumber: String): Boolean {
@@ -809,6 +857,27 @@ class PayTheoryActivity : AppCompatActivity() {
             }
         }
     }
+
+//    private fun returnResponse(message: String): String {
+//        var response = ""
+//        val creditCardView = findViewById<CreditCardEditText>(R.id.creditCardEditText)
+//
+//        if (intent.getStringExtra(PAYMENT_TYPE) == "CARD") {
+//            response = "{ \"receipt_number\":\"N/A\", \"last_four\":\"${
+//                 creditCardView.text.toString().replace("\\s".toRegex(), "").takeLast(
+//                    4
+//                )
+//            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$message\"}"
+//        }
+//        if (payment.type == "ACH") {
+//            response = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+//                payment.achAccountNumber.toString().takeLast(
+//                    4
+//                )
+//            }\", \"state\":\"${transactionState}\", \"type\":\"$message\"}"
+//        }
+//        return response
+//    }
 }
 
 

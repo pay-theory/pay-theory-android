@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
 3. Create a button on your Activity layout.xml file that will initiate the payment page
 
-```kotlin
+```xml
 <Button
     android:id="@+id/payment_button"
     android:layout_width="wrap_content"
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
 Code example:
 
-```kotlin
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -57,13 +57,13 @@ Code example:
 
 4. Add internet permission to your android project's manifest.xml file. 
 
-```kotlin
+```xml
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
 Code example:
 
-```kotlin
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.testingpaytheory">
@@ -371,7 +371,6 @@ class ExampleAppMainActivity : AppCompatActivity() {
     // This method is called when the PayTheoryActivity finishes
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d("Pay Theory", "Result Code $resultCode and Request Code $requestCode and Activity.RESULT_OK ${Activity.RESULT_OK} and data $data")
         if (resultCode == -1 && requestCode == 1 ) {
             // Get String data from PayTheoryActivity
             val returnString = data!!.getStringExtra("result")

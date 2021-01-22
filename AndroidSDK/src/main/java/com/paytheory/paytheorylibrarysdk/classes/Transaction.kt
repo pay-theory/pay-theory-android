@@ -105,7 +105,7 @@ class Transaction(
 
                                 Log.d("Pay Theory", "Idempotency Result: $idempotencyResponse")
 
-                                if (payment.type == "CARD") {
+                                if (payment.type == "CARD" && payment.feeMode == "service_fee") {
                                     Handler(Looper.getMainLooper()).post {
                                         confirmCard(
                                             payment.amount,
@@ -115,7 +115,7 @@ class Transaction(
                                             context
                                         )
                                     }
-                                } else {
+                                } else if (payment.type == "ACH" && payment.feeMode == "service_fee"){
                                     Handler(Looper.getMainLooper()).post {
                                         confirmACH(
                                             payment.amount,
@@ -124,6 +124,8 @@ class Transaction(
                                             context
                                         )
                                     }
+                                } else {
+                                    userConfirmation = true
                                 }
 
                                 while (userConfirmation == null) {
@@ -203,6 +205,14 @@ class Transaction(
         return transactionResponse
     }
 
+
+
+
+
+
+
+
+
     fun challenge(): String {
         val request = Request.Builder()
             .url("https://dev.tags.api.paytheorystudy.com/challenge")
@@ -226,6 +236,12 @@ class Transaction(
         }
     }
 
+
+
+
+
+
+
     fun googleApi(): Boolean {
         //Call google play services to verify google play is available
         return if (GoogleApiAvailability.getInstance()
@@ -238,6 +254,11 @@ class Transaction(
             false
         }
     }
+
+
+
+
+
 
     suspend fun attestation(nonce: String): String? {
         if (Looper.myLooper() == null) {
@@ -253,6 +274,10 @@ class Transaction(
         attestationResponse = attestationTask.result.jwsResult
         return attestationTask.result.jwsResult
     }
+
+
+
+
 
     fun payTheoryIdempotency(nonce: String, attestation: String?): String {
         val jsonObject = JSONObject()
@@ -325,6 +350,9 @@ class Transaction(
         }
     }
 
+
+
+
     fun confirmCard(
         paymentAmount: Int,
         convenienceFee: String,
@@ -365,6 +393,9 @@ class Transaction(
         val alert = builder.create()
         alert.show()
     }
+
+
+
 
     fun confirmACH(
         paymentAmount: Int,
@@ -419,6 +450,10 @@ class Transaction(
     }
 
     fun payment(idempotency: String): String {
+
+        try {
+
+
         val paymentBody = JSONObject()
         val buyerOptionsAddress = JSONObject()
         val buyerOptionsJson = JSONObject()
@@ -507,22 +542,61 @@ class Transaction(
         val paymentJsonData: String? = paymentResponse.body?.string()
         val paymentJsonObject = JSONObject(paymentJsonData)
 
-        if (paymentJsonObject.getString("state") != "error") {
+        Log.d("Pay Theory", "Payment Response: $paymentJsonData")
 
-            transactionResponse = paymentJsonObject.toString()
+        transactionResponse = if (paymentJsonObject.getString("state") != "error" && paymentResponse.isSuccessful) {
 
+            if (payment.type == "CARD") {
+                transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                    payment.cardNumber.toString().takeLast(
+                        4
+                    )
+                }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"created_at\":\"${paymentJsonObject.getString("created_at")
+                }\", \"amount\": ${paymentJsonObject.getString("amount")}, \"convenience_fee\": ${paymentJsonObject.getString("service_fee")
+                }, \"state\":\"${paymentJsonObject.getString("state")}\", \"tags\": { \"${payment.tagsKey}\" : \"${payment.tagsValue}\"} }"
+            }
+            if (payment.type == "ACH") {
+                transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                    payment.achAccountNumber.toString().takeLast(
+                        4
+                    )
+                }\", \"created_at\":\"${paymentJsonObject.getString("created_at")
+                }\", \"amount\": ${paymentJsonObject.getString("amount")}, \"convenience_fee\": ${paymentJsonObject.getString("service_fee")
+                }, \"state\":\"${paymentJsonObject.getString("state")}\", \"tags\": { \"${payment.tagsKey}\" : \"${payment.tagsValue}\"} }"
+            }
+            transactionResponse
+
+        } else if (paymentJsonObject.getString("state") == "error") {
+            returnResponse(paymentJsonObject.getString("reason"))
         } else {
-            Log.d("Pay Theory", "Identity Call Request Failed / Payment Request Failed")
-            val failError = "Identity Call Request Failed / Payment Request Failed"
+            Log.d("Pay Theory", "Payment Request Failed")
+            returnResponse("Server Error")
+        }
 
-            transactionResponse = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+        } catch (error: Error){
+            transactionResponse = returnResponse(error.toString())
+        }
+        return transactionResponse
+    }
+
+    private fun returnResponse(message: String): String {
+        var response = ""
+
+        if (payment.type == "CARD") {
+            response = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
                 payment.cardNumber.toString().takeLast(
                     4
                 )
-            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$failError\"}"
-            return transactionResponse
+            }\", \"brand\":\"${getCardType(payment.cardNumber.toString())}\", \"state\":\"${transactionState}\", \"type\":\"$message\"}"
         }
-        return transactionResponse
+        if (payment.type == "ACH") {
+            response = "{ \"receipt_number\":\"$idempotency\", \"last_four\":\"${
+                payment.achAccountNumber.toString().takeLast(
+                    4
+                )
+            }\", \"state\":\"${transactionState}\", \"type\":\"$message\"}"
+        }
+        return response
     }
 }
 
