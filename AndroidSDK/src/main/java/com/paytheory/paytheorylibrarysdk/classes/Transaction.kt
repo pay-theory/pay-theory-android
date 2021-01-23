@@ -37,6 +37,7 @@ class Transaction(
     private var idempotencyResponse: String? = null
     private var idempotencyResponseData: String = ""
     private var idempotencySignatureData: String = ""
+    private var idempotencyChallengeData: String = ""
     private var idempotencyCredIdData: String = ""
     private var token = ""
     private var idempotency = ""
@@ -133,7 +134,7 @@ class Transaction(
                                 }
                                 if (userConfirmation == true) {
                                     transactionResponse = async {
-                                        payment(idempotency)
+                                        payment(challengeResult, idempotency)
                                     }.await()
                                     Log.d(
                                         "Pay Theory",
@@ -449,7 +450,7 @@ class Transaction(
         return "Payment Cancelled"
     }
 
-    fun payment(idempotency: String): String {
+    fun payment(challengeResult: String, idempotency: String): String {
 
         try {
 
@@ -513,6 +514,7 @@ class Transaction(
                 val tagsJson = JSONObject()
                 tagsJson.put("key", "pt-platform:android $idempotency")
                 buyerOptionsJson.put("personal_address", buyerOptionsAddress)
+                paymentBody.put("challenge", challengeResult)
                 paymentBody.put("response", idempotencyResponseData)
                 paymentBody.put("credId", idempotencyCredIdData)
                 paymentBody.put("signature", idempotencySignatureData)
