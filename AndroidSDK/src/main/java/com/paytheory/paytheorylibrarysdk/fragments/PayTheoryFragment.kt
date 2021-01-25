@@ -23,7 +23,13 @@ import com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
  * Flexible display that adds inputs dynamically as needed
  */
 class PayTheoryFragment : Fragment() {
-
+    companion object {
+        val API_KEY = "api_key"
+        val AMOUNT = "amount"
+        val USE_ACH = "ach_enabled"
+        val ACCOUNT_NAME_ENABLED = "account_name_enabled"
+        val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
+    }
 
     private var api_key: String = ""
     private var amount: Int = 0
@@ -42,12 +48,26 @@ class PayTheoryFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        this.api_key = arguments!!.getString("api_key")!!
-        this.amount = arguments!!.getInt("amount")
+        this.api_key = arguments!!.getString(API_KEY)!!
+        this.amount = arguments!!.getInt(AMOUNT)
 
-        enableAccountName()
-        enableBillingAddress()
-        enableACH()
+        val achEnabled = arguments!!.getBoolean(USE_ACH)
+        val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
+        val billingAddressEnabled = arguments!!.getBoolean(BILLING_ADDRESS_ENABLED)
+
+        if (achEnabled) {
+            enableAccountName()
+            enableACH()
+        } else {
+            if (accountNameEnabled) {
+                enableAccountName()
+            }
+            enableCC()
+        }
+
+        if (billingAddressEnabled) {
+            enableBillingAddress()
+        }
 
         val btn = activity!!.findViewById<Button>(R.id.submitButton)
 

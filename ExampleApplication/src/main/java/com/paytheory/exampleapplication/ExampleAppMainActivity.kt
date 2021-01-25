@@ -7,6 +7,7 @@ import android.system.Os.link
 import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import com.paytheory.paytheorylibrarysdk.fragments.PayTheoryFragment
 
 
 class ExampleAppMainActivity : FragmentActivity() {
@@ -16,12 +17,13 @@ class ExampleAppMainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val payTheoryManager = this.supportFragmentManager
-        val payTheoryFragment = payTheoryManager.findFragmentById(R.id.payTheoryFragment)
+
+        val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment)
 
         val payTheoryArgs = Bundle()
-        payTheoryArgs.putString("api_key", "my-api-key")
-        payTheoryArgs.putInt("amount",5000)
+        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237")
+        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT,5000)
+        payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
 
         payTheoryFragment!!.arguments = payTheoryArgs
     }

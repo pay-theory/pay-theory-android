@@ -1,16 +1,13 @@
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import io.reactivex.Observable
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface IdempotencyApiService {
-    @Headers("Content-Type: application/json","X-API-Key: pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237")
-
     @POST("idempotency")
-    fun postIdempotency(@Body idempotencyPostData: IdempotencyPostData): Observable<IdempotencyResponse> // body data
+    fun postIdempotency(
+        @HeaderMap headers: Map<String, String>,
+        @Body idempotencyPostData: IdempotencyPostData): Observable<IdempotencyResponse> // body data
 }
 
 data class IdempotencyPostData(

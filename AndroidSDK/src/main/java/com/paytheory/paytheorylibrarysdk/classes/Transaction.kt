@@ -1,6 +1,6 @@
 package com.paytheory.paytheorylibrarysdk.classes
 
-import ChallengeResponse
+import com.paytheory.paytheorylibrarysdk.classes.api.ChallengeResponse
 import IdempotencyPostData
 import IdempotencyResponse
 import PaymentPostData
@@ -14,6 +14,7 @@ import com.google.android.gms.safetynet.SafetyNet
 import com.paytheory.paytheorylibrarysdk.classes.api.ApiService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import retrofit2.http.Headers
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -55,13 +56,20 @@ class Transaction(
         }
     }
 
+    private fun buildApiHeaders(): Map<String,String> {
+        val headerMap = mutableMapOf<String, String>()
+        headerMap["Content-Type"] = "application/json"
+        headerMap["X-API-Key"] = apiKey
+        return headerMap
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
     private fun challengeApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
             UtilMethods.showLoading(context)
 
-            val observable = ApiService.challengeApiCall().doChallenge()
+            val observable = ApiService.challengeApiCall().doChallenge(buildApiHeaders())
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -97,7 +105,9 @@ class Transaction(
         if(UtilMethods.isConnectedToInternet(context)){
             UtilMethods.showLoading(context)
 
-            val observable = ApiService.idempotencyApiCall().postIdempotency(IdempotencyPostData(attestationResult, challengeResult, 5000))
+            val observable = ApiService.idempotencyApiCall().postIdempotency(
+                buildApiHeaders(),
+                IdempotencyPostData(attestationResult, challengeResult, 5000))
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -123,6 +133,7 @@ class Transaction(
             val idempotency: IdempotencyResponse = idempotencyList.first()
             val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
             val observable = ApiService.paymentApiCall().postIdempotency(
+                buildApiHeaders(),
                 PaymentPostData(
                     payment,
                     idempotency.response,
