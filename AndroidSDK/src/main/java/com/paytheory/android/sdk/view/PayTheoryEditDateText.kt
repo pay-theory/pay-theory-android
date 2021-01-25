@@ -1,4 +1,4 @@
-package com.paytheory.sdk.view
+package com.paytheory.android.sdk.view
 
 import android.content.Context
 
@@ -8,7 +8,7 @@ import android.view.View
 /**
  * PayTheory Edit Date Text is an extended EditText class providing a date autofill
  */
-class PayTheoryEditDateText : PayTheoryEditText{
+class PayTheoryEditDateText : PayTheoryEditText {
 
     constructor(context: Context) : super(context){
         init()

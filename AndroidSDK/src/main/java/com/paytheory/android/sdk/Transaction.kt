@@ -1,4 +1,4 @@
-package com.paytheory.sdk
+package com.paytheory.android.sdk
 
 import IdempotencyPostData
 import IdempotencyResponse
@@ -6,17 +6,12 @@ import PaymentPostData
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.paytheory.sdk.api.ApiService
-import com.paytheory.sdk.api.ChallengeResponse
+import com.paytheory.android.sdk.api.ApiService
+import com.paytheory.android.sdk.api.ChallengeResponse
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import retrofit2.HttpException
 import java.util.*
 import kotlin.collections.ArrayList
 

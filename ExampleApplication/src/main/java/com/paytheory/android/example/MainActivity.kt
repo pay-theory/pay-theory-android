@@ -1,16 +1,15 @@
-package com.paytheory.exampleapplication
+package com.paytheory.android.example
 
 import android.os.Bundle
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.paytheory.sdk.Payable
-import com.paytheory.sdk.PaymentError
-import com.paytheory.sdk.PaymentFailure
-import com.paytheory.sdk.PaymentResult
-import com.paytheory.sdk.fragments.PayTheoryFragment
+import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PaymentError
+import com.paytheory.android.sdk.PaymentResult
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 
-class ExampleAppMainActivity : FragmentActivity() , Payable  {
+class MainActivity : FragmentActivity() , Payable {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

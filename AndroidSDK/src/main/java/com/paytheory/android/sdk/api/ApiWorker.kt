@@ -1,4 +1,4 @@
-package com.paytheory.sdk.api
+package com.paytheory.android.sdk.api
 
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient

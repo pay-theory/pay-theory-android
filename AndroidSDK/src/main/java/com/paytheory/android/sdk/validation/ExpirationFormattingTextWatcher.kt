@@ -1,8 +1,8 @@
-package com.paytheory.sdk.validation
+package com.paytheory.android.sdk.validation
 
 import android.text.Editable
 import android.text.TextWatcher
-import com.paytheory.sdk.view.PayTheoryEditText
+import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.util.*
 
 

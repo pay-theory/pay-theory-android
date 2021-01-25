@@ -1,4 +1,4 @@
-package com.paytheory.sdk.fragments
+package com.paytheory.android.sdk.fragments
 
 import ACHPaymentData
 import CCPaymentData
@@ -12,11 +12,11 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.paytheory.android.sdk.R
-import com.paytheory.sdk.Transaction
-import com.paytheory.sdk.validation.CVVFormattingTextWatcher
-import com.paytheory.sdk.validation.CreditCardFormattingTextWatcher
-import com.paytheory.sdk.validation.ExpirationFormattingTextWatcher
-import com.paytheory.sdk.view.PayTheoryEditText
+import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
+import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
+import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
+import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
  * PayTheoryFragment populates with required text inputs.

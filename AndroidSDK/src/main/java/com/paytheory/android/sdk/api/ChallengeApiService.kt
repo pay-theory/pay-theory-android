@@ -1,4 +1,4 @@
-package com.paytheory.sdk.api
+package com.paytheory.android.sdk.api
 
 import com.google.gson.annotations.SerializedName
 import io.reactivex.Observable

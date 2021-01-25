@@ -1,8 +1,8 @@
-package com.paytheory.sdk.api
+package com.paytheory.android.sdk.api
 
 import IdempotencyApiService
 import PaymentApiService
-import com.paytheory.sdk.Constants
+import com.paytheory.android.sdk.Constants
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 

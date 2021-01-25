@@ -1,5 +1,5 @@
 
-package com.paytheory.sdk
+package com.paytheory.android.sdk
 
 import android.content.Context
 import android.net.ConnectivityManager

@@ -1,4 +1,4 @@
-package com.paytheory.sdk.view
+package com.paytheory.android.sdk.view
 
 import android.content.Context
 

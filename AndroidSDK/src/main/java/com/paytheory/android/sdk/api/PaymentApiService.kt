@@ -1,9 +1,8 @@
 import com.google.gson.annotations.SerializedName
-import com.paytheory.sdk.PaymentResult
+import com.paytheory.android.sdk.PaymentResult
 import io.reactivex.Observable
 import retrofit2.http.Body
 import retrofit2.http.HeaderMap
-import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface PaymentApiService {
