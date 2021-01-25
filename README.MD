@@ -43,7 +43,7 @@ add Pay Theory Fragment to your layout
         />
 
 </SomeLayout>
-...
+```
 
 ### Activity
 
