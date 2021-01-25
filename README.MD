@@ -50,7 +50,8 @@ add Pay Theory Fragment to your layout
 retrieve the fragment from your activity's onCreate and initialize
 
 ```Kotlin
-        val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment)
+        val payTheoryFragment = this.supportFragmentManager
+                .findFragmentById(R.id.payTheoryFragment)
 
         val payTheoryArgs = Bundle()
         payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-API-Key")
