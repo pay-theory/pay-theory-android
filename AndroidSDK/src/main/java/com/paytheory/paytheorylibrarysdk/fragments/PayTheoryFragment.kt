@@ -1,6 +1,7 @@
 package com.paytheory.paytheorylibrarysdk.fragments
 
-import PaymentData
+import ACHPaymentData
+import CCPaymentData
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -46,7 +47,7 @@ class PayTheoryFragment : Fragment() {
 
         enableAccountName()
         enableBillingAddress()
-        enableCC()
+        enableACH()
 
         val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -62,8 +63,7 @@ class PayTheoryFragment : Fragment() {
         // ach fields
         val achAccount = activity!!.findViewById<PayTheoryEditText>(R.id.ach_account_number)
         val achRouting = activity!!.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
-        val hasACH = (achAccount.visibility == View.VISIBLE
-                && achRouting.visibility == View.VISIBLE)
+
 
         // buyer options
         val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
@@ -72,7 +72,12 @@ class PayTheoryFragment : Fragment() {
         val billingCity = activity!!.findViewById<PayTheoryEditText>(R.id.billing_city)
         val billingState = activity!!.findViewById<PayTheoryEditText>(R.id.billing_state)
         val billingZip = activity!!.findViewById<PayTheoryEditText>(R.id.billing_zip)
+
+        val hasACH = (achAccount.visibility == View.VISIBLE
+                && achRouting.visibility == View.VISIBLE)
+
         val hasAccountName = accountName.visibility == View.VISIBLE
+
         val hasBillingAddress = (billingAddress1.visibility == View.VISIBLE
                 && billingAddress2.visibility == View.VISIBLE
                 && billingCity.visibility == View.VISIBLE
@@ -111,33 +116,40 @@ class PayTheoryFragment : Fragment() {
                 buyerOptions["region"] = billingState.text.toString()
                 buyerOptions["postal_code"] = billingZip.text.toString()
             }
+
+
             if (hasCC) {
-                val cardNumber = ccNumber.text.toString().replace("\\s".toRegex(), "")
-                val cvv = ccCVV.text.toString()
                 val expirationString = ccExpiration.text.toString()
-                val expirationMonth = expirationString.split("/").first()
-                val expirationYear = expirationString.split("/").last()
-
-                val payment = PaymentData(
-                    cardNumber,
-                    cvv,
-                    expirationMonth,
-                    expirationYear,
-                    "PAYMENT_CARD"
+                val payment = CCPaymentData(
+                    ccNumber.text.toString().replace("\\s".toRegex(), ""),
+                    ccCVV.text.toString(),
+                    expirationString.split("/").first(),
+                    expirationString.split("/").last()
                 )
-
-                val payTheory = Transaction(
-                    this.activity!!,
-                    api_key,
-                    payment,
-                    tags,
-                    buyerOptions
-                )
-
-                payTheory.init()
+                makePayment(payment,tags,buyerOptions)
             }
 
+            if (hasACH) {
+                val payment = ACHPaymentData(
+                    achAccount.text.toString(),
+                    achRouting.text.toString())
+                makePayment(payment,tags,buyerOptions)
+            }
         }
+    }
+
+    private fun makePayment(payment: Any, tags: Map<String,String>, buyerOptions: Map<String,String>) {
+        val payTheoryTransaction =
+            Transaction(
+                this.activity!!,
+                api_key,
+                payment!!,
+                tags,
+                buyerOptions
+            )
+
+
+        payTheoryTransaction?.init()
     }
 
     private fun showToast(message: String) {

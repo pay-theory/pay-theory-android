@@ -3,35 +3,17 @@ package com.paytheory.paytheorylibrarysdk.classes
 import ChallengeResponse
 import IdempotencyPostData
 import IdempotencyResponse
-import PaymentData
 import PaymentPostData
 import PaymentResponse
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.safetynet.SafetyNet
-import com.google.android.gms.safetynet.SafetyNetApi
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.gson.annotations.SerializedName
 import com.paytheory.paytheorylibrarysdk.classes.api.ApiService
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.annotations.NonNull
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -43,7 +25,7 @@ import kotlin.collections.ArrayList
 class Transaction(
     private val context: Context,
     private val apiKey: String,
-    private val payment: PaymentData,
+    private val payment: Any,
     private val tags: Map<String,String> = HashMap<String,String>(),
     private val buyerOptions: Map<String,String> = HashMap<String,String>()
 ) {
