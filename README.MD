@@ -49,6 +49,7 @@ add Pay Theory Fragment to your layout
 
 retrieve the fragment from your activity's onCreate and initialize
 
+Kotlin
 ```Kotlin
         val payTheoryFragment = this.supportFragmentManager
                 .findFragmentById(R.id.payTheoryFragment)
@@ -60,6 +61,7 @@ retrieve the fragment from your activity's onCreate and initialize
         payTheoryFragment!!.arguments = payTheoryArgs
 ```
 
+Java
 ```Java
        Fragment payTheoryFragment = this.getSupportFragmentManager()
                 .findFragmentById(R.id.payTheoryFragment);
@@ -87,6 +89,7 @@ retrieve the fragment from your activity's onCreate and initialize
 
 React to events by implementing the Payable interface
 
+Kotlin
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
@@ -103,6 +106,7 @@ class MainActivity : AppCompatActivity() , Payable {
 }
 ```
 
+Java
 ```Java
 public class MainActivity extends AppCompatActivity implements Payable {
 
