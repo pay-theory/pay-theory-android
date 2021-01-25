@@ -5,4 +5,16 @@
         <item>CHECKING</item>
         <item>SAVINGS</item>
     </string-array>
+    <string name="name_on_account">Name on account</string>
+    <string name="billing_address">Address</string>
+    <string name="billing_address_cont">Address Cont.</string>
+    <string name="city">City</string>
+    <string name="state">State</string>
+    <string name="billing_zipcode">Zip</string>
+    <string name="card_number">Card number</string>
+    <string name="cvv">CVV</string>
+    <string name="expiration">Expiration</string>
+    <string name="bank_account_number">Bank Account Number</string>
+    <string name="bank_routing_number">Bank Routing Number</string>
+    <string name="submit_payment">Submit Payment</string>
 </resources>

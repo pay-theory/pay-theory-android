@@ -1,0 +1,40 @@
+package com.paytheory.paytheorylibrarysdk.classes.view
+
+import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
+
+import android.util.AttributeSet
+
+/**
+ * PayTheory Edit Text is an extended EditText class providing a foundation for
+ * the different text editors needed
+ */
+open class PayTheoryEditText : androidx.appcompat.widget.AppCompatEditText{
+
+    companion object {
+        /**
+         * Custom validation function
+         * @param incoming String to validate
+         * @param validator Lambda accepting the incoming String value and returning a Boolean result
+         */
+        fun validate(incoming: String, validator: (String) -> Boolean): Boolean {
+            return validator(incoming)
+        }
+    }
+
+    constructor(context: Context) : super(context){
+        init()
+    }
+
+    constructor(context: Context, attrs : AttributeSet) : super(context,attrs){
+        init()
+    }
+
+    constructor(context: Context,  attrs: AttributeSet , defStyleAttr : Int) : super(context, attrs, defStyleAttr){
+        init()
+    }
+    private fun init() {
+
+    }
+}
