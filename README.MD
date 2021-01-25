@@ -131,15 +131,7 @@ public class MainActivity extends AppCompatActivity implements Payable {
 The payment result will come back complete or failed
 
  * complete result
-```Kotlin
-data class PaymentResult (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
-    @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?,)
-```
- * failed result
+ 
 ```Kotlin
 data class PaymentResult (
     @SerializedName("receipt_number") val receipt_number: String,
@@ -151,6 +143,16 @@ data class PaymentResult (
     @SerializedName("tags") val tags: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
     @SerializedName("updated_at") val updated_at: String?)
+```
+ * failed result
+
+```Kotlin
+data class PaymentResult (
+    @SerializedName("receipt_number") val receipt_number: String,
+    @SerializedName("last_four") val last_four: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("state") val state: String,
+    @SerializedName("type") val type: String?,)
 ```
 
  * errors will arrive as
