@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/payTheoryFragment"
-        android:name="com.paytheory.paytheorylibrarysdk.fragments.PayTheoryFragment"
+        android:name="com.paytheory.sdk.fragments.PayTheoryFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />

@@ -1,20 +1,22 @@
-package com.paytheory.paytheorylibrarysdk.classes
+package com.paytheory.sdk
 
-import com.paytheory.paytheorylibrarysdk.classes.api.ChallengeResponse
 import IdempotencyPostData
 import IdempotencyResponse
 import PaymentPostData
-import PaymentResponse
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
-import com.paytheory.paytheorylibrarysdk.classes.api.ApiService
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.paytheory.sdk.api.ApiService
+import com.paytheory.sdk.api.ChallengeResponse
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import retrofit2.http.Headers
+import retrofit2.HttpException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,8 +29,8 @@ class Transaction(
     private val context: Context,
     private val apiKey: String,
     private val payment: Any,
-    private val tags: Map<String,String> = HashMap<String,String>(),
-    private val buyerOptions: Map<String,String> = HashMap<String,String>()
+    private val tags: Map<String, String> = HashMap<String, String>(),
+    private val buyerOptions: Map<String, String> = HashMap<String, String>()
 ) {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -56,7 +58,7 @@ class Transaction(
         }
     }
 
-    private fun buildApiHeaders(): Map<String,String> {
+    private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
         headerMap["X-API-Key"] = apiKey
@@ -67,26 +69,27 @@ class Transaction(
     @SuppressLint("CheckResult")
     private fun challengeApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
-            UtilMethods.showLoading(context)
 
             val observable = ApiService.challengeApiCall().doChallenge(buildApiHeaders())
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ challenge: ChallengeResponse ->
-                    UtilMethods.hideLoading()
 
                     challengeResult = challenge.challenge
 
                     callSafetyNet(challengeResult)
 
                 }, { error ->
-                    UtilMethods.hideLoading()
-                    UtilMethods.showLongToast(context, error.message.toString())
+                    if (context is Payable) {
+                        context.paymentError(PaymentError(error.message!!))
+                    }
                 }
                 )
         }else{
-            UtilMethods.showLongToast(context, "No Internet Connection!")
+            if (context is Payable) {
+                context.paymentError(PaymentError("No internet connection"))
+            }
         }
     }
 
@@ -96,6 +99,10 @@ class Transaction(
             .addOnSuccessListener {
                 attestationResult = it.jwsResult
                 idempotencyApiCall(context)
+            }.addOnFailureListener {
+                if (context is Payable) {
+                    context.paymentError(PaymentError(it.message!!))
+                }
             }
     }
 
@@ -103,11 +110,11 @@ class Transaction(
     @SuppressLint("CheckResult")
     private fun idempotencyApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
-            UtilMethods.showLoading(context)
 
             val observable = ApiService.idempotencyApiCall().postIdempotency(
                 buildApiHeaders(),
-                IdempotencyPostData(attestationResult, challengeResult, 5000))
+                IdempotencyPostData(attestationResult, challengeResult, 5000)
+            )
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -115,13 +122,15 @@ class Transaction(
                     idempotencyList.add(idempotency)
                     paymentApiCall(context)
                 }, { error ->
-                    UtilMethods.hideLoading()
-                    Log.e("payment",error.message.toString())
-                    UtilMethods.showLongToast(context, error.message.toString())
+                    if (context is Payable) {
+                        context.paymentError(PaymentError(error.message!!))
+                    }
                 }
                 )
         }else{
-            UtilMethods.showLongToast(context, "No Internet Connection!")
+            if (context is Payable) {
+                context.paymentError(PaymentError("No internet connection"))
+            }
         }
     }
 
@@ -129,7 +138,6 @@ class Transaction(
     @SuppressLint("CheckResult")
     private fun paymentApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
-            UtilMethods.showLoading(context)
             val idempotency: IdempotencyResponse = idempotencyList.first()
             val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
             val observable = ApiService.paymentApiCall().postIdempotency(
@@ -142,26 +150,30 @@ class Transaction(
                     challenger,
                     tags,
                     buyerOptions
-                ))
+                )
+            )
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ payment: PaymentResponse ->
-                    UtilMethods.hideLoading()
-
-                    //TODO communicate successfully payment back to host activity
-                    Log.i("payment",payment.paymentDetailReference)
-
+                .subscribe({ paymentResult: PaymentResult ->
+                    if (context is Payable) {
+                        paymentResult.created_at?.let { context.paymentComplete(paymentResult) }
+                        paymentResult.type?.let { context.paymentFailed(paymentResult) }
+                    }
                 }, { error ->
-                    UtilMethods.hideLoading()
 
-                    Log.e("payment",error.message.toString())
-                    UtilMethods.showLongToast(context, error.message.toString())
+                    if (context is Payable) {
+                        context.paymentError(PaymentError(error.message!!))
+
+                    }
                 }
                 )
         }else{
-            UtilMethods.showLongToast(context, "No Internet Connection!")
+            if (context is Payable) {
+                context.paymentError(PaymentError("No internet connection"))
+            }
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun init() {

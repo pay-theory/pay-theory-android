@@ -5,7 +5,7 @@
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical" android:id="@+id/PayTheoryEditor">
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/account_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
             android:inputType="text"
             android:autofillHints="personName"/>
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/billing_address_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             android:inputType="text"
             android:autofillHints="postalAddress" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/billing_address_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
             android:inputType="text"
             android:autofillHints="extendedAddress" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/billing_city"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
             android:inputType="text"
             android:autofillHints="addressLocality" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/billing_state"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:inputType="text"
             android:autofillHints="addressRegion" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/billing_zip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
             android:autofillHints="postalCode" />
 
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/cc_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
             android:inputType="number"
             android:autofillHints="creditCardNumber"  />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/cc_cvv"
             android:layout_width="match_parent"
             android:digits="1234567890"
@@ -84,7 +84,7 @@
             android:inputType="number"
             android:autofillHints="creditCardSecurityCode" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/cc_expiration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
             android:inputType="number"
             android:autofillHints="creditCardExpirationDate" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/ach_account_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
             android:visibility="gone"
             android:inputType="number" />
 
-        <com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+        <com.paytheory.sdk.view.PayTheoryEditText
             android:id="@+id/ach_routing_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

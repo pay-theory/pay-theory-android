@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrarysdk.classes
+package com.paytheory.sdk
 
 object Constants {
     val API_PUBLIC_BASE_PATH: String = "https://dev.tags.api.paytheorystudy.com/"

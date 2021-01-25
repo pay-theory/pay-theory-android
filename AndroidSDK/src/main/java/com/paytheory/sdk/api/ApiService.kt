@@ -1,8 +1,8 @@
-package com.paytheory.paytheorylibrarysdk.classes.api
+package com.paytheory.sdk.api
 
 import IdempotencyApiService
 import PaymentApiService
-import com.paytheory.paytheorylibrarysdk.classes.Constants
+import com.paytheory.sdk.Constants
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 

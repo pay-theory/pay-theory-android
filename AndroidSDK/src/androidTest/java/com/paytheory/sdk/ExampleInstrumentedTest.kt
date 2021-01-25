@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrarysdk
+package com.paytheory.sdk
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -1,4 +1,4 @@
-package com.paytheory.paytheorylibrarysdk.fragments
+package com.paytheory.sdk.fragments
 
 import ACHPaymentData
 import CCPaymentData
@@ -11,12 +11,12 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import com.paytheory.paytheorylibrarysdk.R
-import com.paytheory.paytheorylibrarysdk.classes.*
-import com.paytheory.paytheorylibrarysdk.classes.validation.CVVFormattingTextWatcher
-import com.paytheory.paytheorylibrarysdk.classes.validation.CreditCardFormattingTextWatcher
-import com.paytheory.paytheorylibrarysdk.classes.validation.ExpirationFormattingTextWatcher
-import com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+import com.paytheory.android.sdk.R
+import com.paytheory.sdk.Transaction
+import com.paytheory.sdk.validation.CVVFormattingTextWatcher
+import com.paytheory.sdk.validation.CreditCardFormattingTextWatcher
+import com.paytheory.sdk.validation.ExpirationFormattingTextWatcher
+import com.paytheory.sdk.view.PayTheoryEditText
 
 /**
  * PayTheoryFragment populates with required text inputs.
@@ -64,6 +64,7 @@ class PayTheoryFragment : Fragment() {
             }
             enableCC()
         }
+
 
         if (billingAddressEnabled) {
             enableBillingAddress()
@@ -163,13 +164,13 @@ class PayTheoryFragment : Fragment() {
             Transaction(
                 this.activity!!,
                 api_key,
-                payment!!,
+                payment,
                 tags,
                 buyerOptions
             )
 
 
-        payTheoryTransaction?.init()
+        payTheoryTransaction.init()
     }
 
     private fun showToast(message: String) {

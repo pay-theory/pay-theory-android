@@ -1,9 +1,9 @@
-package com.paytheory.paytheorylibrarysdk.classes.validation
+package com.paytheory.sdk.validation
 
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import com.paytheory.paytheorylibrarysdk.classes.view.PayTheoryEditText
+import com.paytheory.sdk.view.PayTheoryEditText
 
 
 class CreditCardFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {

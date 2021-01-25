@@ -1,8 +1,6 @@
-package com.paytheory.paytheorylibrarysdk.classes.view
+package com.paytheory.sdk.view
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
 
 import android.util.AttributeSet
 import android.view.View

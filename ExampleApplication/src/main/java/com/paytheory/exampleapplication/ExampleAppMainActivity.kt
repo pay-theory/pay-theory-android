@@ -1,18 +1,16 @@
 package com.paytheory.exampleapplication
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import android.system.Os.link
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.paytheory.paytheorylibrarysdk.fragments.PayTheoryFragment
+import com.paytheory.sdk.Payable
+import com.paytheory.sdk.PaymentError
+import com.paytheory.sdk.PaymentFailure
+import com.paytheory.sdk.PaymentResult
+import com.paytheory.sdk.fragments.PayTheoryFragment
 
 
-class ExampleAppMainActivity : FragmentActivity() {
-
-
+class ExampleAppMainActivity : FragmentActivity() , Payable  {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +26,23 @@ class ExampleAppMainActivity : FragmentActivity() {
         payTheoryFragment!!.arguments = payTheoryArgs
     }
 
-
     private fun showToast(message: String){
         Toast.makeText(
             this, message,
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    override fun paymentComplete(paymentResult: PaymentResult) {
+        showToast("payment successful on account XXXX${paymentResult.last_four}")
+    }
+
+    override fun paymentFailed(paymentFailure: PaymentResult) {
+        showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
+    }
+
+    override fun paymentError(paymentError: PaymentError) {
+        showToast("an error occurred ${paymentError.reason}")
     }
 
 }
