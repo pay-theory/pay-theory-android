@@ -2,6 +2,8 @@
 
 ## Register your application
 
+Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
+
 ![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/android-registration.png)
 
 For each mobile app you want to register 
@@ -10,6 +12,8 @@ For each mobile app you want to register
  * enter your application package name
 
 ### Find sigining key digest
+
+You can find you signing key digests using Android Studio
 
 ![Open Gradle](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/open-gradle)
 
