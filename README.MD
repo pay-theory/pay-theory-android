@@ -1,5 +1,9 @@
 # Pay Theory Android SDK
 
+## Requirements
+
+Written in Kotlin and requires Android 8.0 (API level 26)
+
 ## Register your application
 
 Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
