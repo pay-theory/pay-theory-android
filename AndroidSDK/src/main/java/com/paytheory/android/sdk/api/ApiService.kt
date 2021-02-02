@@ -9,7 +9,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 object ApiService {
 
     fun challengeApiCall() = Retrofit.Builder()
-        .baseUrl(Constants.API_PUBLIC_BASE_PATH)
+        .baseUrl(Constants.API_BASE_PATH)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(ApiWorker.gsonConverter)
         .client(ApiWorker.client)
