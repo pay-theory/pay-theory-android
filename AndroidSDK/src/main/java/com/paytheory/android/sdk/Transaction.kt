@@ -83,7 +83,7 @@ class Transaction(
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError("No internet connection"))
+                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
             }
         }
     }
@@ -124,7 +124,7 @@ class Transaction(
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError("No internet connection"))
+                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
             }
         }
     }
@@ -164,7 +164,7 @@ class Transaction(
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError("No internet connection"))
+                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
             }
         }
     }

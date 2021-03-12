@@ -10,9 +10,13 @@ class CreditCardFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
 
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        // no-op comment in an unused listener function
+    }
 
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        // no-op comment in an unused listener function
+    }
 
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {

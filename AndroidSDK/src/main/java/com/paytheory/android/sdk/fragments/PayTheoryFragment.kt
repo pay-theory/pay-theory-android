@@ -116,7 +116,6 @@ class PayTheoryFragment : Fragment() {
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
         }
 
-
         btn.setOnClickListener {
             val buyerOptions = HashMap<String,String>()
             val tags = HashMap<String,String>()
