@@ -11,9 +11,9 @@ Before you can use Pay Theory Android SDK you must register your app in Pay Theo
 ![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/android-registration.png)
 
 For each mobile app you want to register 
-* enter SHA-256 digest of release signing key
-* enter SHA-256 digest of debug signing key
-* enter your application package name
+*   enter SHA-256 digest of release signing key
+*   enter SHA-256 digest of debug signing key
+*   enter your application package name
 
 ### Find sigining key digest
 
@@ -108,8 +108,8 @@ Java
        payTheoryFragment.setArguments(payTheoryArgs);
 ```
 
-* by default the SDK provides a simple credit card input
-* applying optional settings allows customization
+*   by default the SDK provides a simple credit card input
+*   applying optional settings allows customization
 
 ```Kotlin
         // display an account name field
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements Payable {
 
 The payment result will come back complete or failed
 
-* complete result
+*   complete result
  
 ```Kotlin
 data class PaymentResult (
@@ -179,7 +179,7 @@ data class PaymentResult (
     @SerializedName("created_at") val created_at: String?,
     @SerializedName("updated_at") val updated_at: String?)
 ```
-* failed result
+*   failed result
 
 ```Kotlin
 data class PaymentResult (
@@ -190,7 +190,7 @@ data class PaymentResult (
     @SerializedName("type") val type: String?,)
 ```
 
-* errors will arrive as
+*   errors will arrive as
 
 ```Kotlin
 data class PaymentError (
