@@ -169,7 +169,9 @@ class Transaction(
         }
     }
 
-
+    /**
+     * Initiate transaction
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
         challengeApiCall(context)

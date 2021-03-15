@@ -30,6 +30,9 @@ Transition animation scale
 Animator duration scale
  */
 
+/**
+ * Class that is used to test the example activity
+ */
 @RunWith(AndroidJUnit4::class)
 class MainActivityTests {
 
@@ -40,6 +43,9 @@ class MainActivityTests {
         false
     )
 
+    /**
+     * Launching activity with an intent
+     */
     @Before
     fun setUp(){
         val intent = Intent()
@@ -48,7 +54,9 @@ class MainActivityTests {
 
 
 
-//    payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
+    /**
+     * Running a transaction in test environment
+     */
     @Test
     fun transaction() {
 

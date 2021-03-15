@@ -5,7 +5,10 @@ import android.text.TextWatcher
 import android.util.Log
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
-
+/**
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
+ */
 class CreditCardFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt

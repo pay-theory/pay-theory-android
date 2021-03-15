@@ -16,6 +16,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * Class that is used to test the formatting for edit text fields
+ */
 class FormattingTest {
     @get:Rule
     var mActivityTestRule: ActivityTestRule<MainActivity> = ActivityTestRule(
@@ -24,6 +27,9 @@ class FormattingTest {
         false
     )
 
+    /**
+     * Launching activity with an intent
+     */
     @Before
     fun setUp() {
         val intent = Intent()
@@ -38,6 +44,9 @@ class FormattingTest {
             View.IMPORTANT_FOR_AUTOFILL_NO
     }
 
+    /**
+     * Testing credit card number formating
+     */
     @Test
     fun card_number_formatting() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_number))
@@ -49,6 +58,9 @@ class FormattingTest {
             .check(ViewAssertions.matches(ViewMatchers.withText("4242 4242 4242 4242")))
     }
 
+    /**
+     * Testing credit card cvv formating
+     */
     @Test
     fun cvv_formatting() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_cvv))
@@ -61,6 +73,9 @@ class FormattingTest {
     }
 
 
+    /**
+     * Testing credit card expiration formating
+     */
     @Test
     fun expiration_formatting() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_expiration))
@@ -73,6 +88,9 @@ class FormattingTest {
             .check(ViewAssertions.matches(ViewMatchers.withText("04/24")))
     }
 
+    /**
+     * Testing credit card number formating
+     */
     @Test
     fun card_number_invalid() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_number))
@@ -83,6 +101,9 @@ class FormattingTest {
         assertEquals(mActivityTestRule.activity.findViewById<PayTheoryEditText>(R.id.cc_number).error, "invalid credit card number")
     }
 
+    /**
+     * Testing credit card cvv formating
+     */
     @Test
     fun cvv_invalid() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_cvv))
@@ -93,6 +114,9 @@ class FormattingTest {
         assertEquals(mActivityTestRule.activity.findViewById<PayTheoryEditText>(R.id.cc_cvv).error, "invalid CVV")
     }
 
+    /**
+     * Testing credit card expiration formating
+     */
     @Test
     fun expiration_invalid() {
         Espresso.onView(ViewMatchers.withId(R.id.cc_expiration))

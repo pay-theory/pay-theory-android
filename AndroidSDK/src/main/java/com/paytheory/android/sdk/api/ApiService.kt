@@ -6,6 +6,9 @@ import com.paytheory.android.sdk.Constants
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
+/**
+ * Object that contains functions to create api calls
+ */
 object ApiService {
 
     fun challengeApiCall() = Retrofit.Builder()
