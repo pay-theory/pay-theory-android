@@ -8,7 +8,9 @@ import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.PaymentResult
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
-
+/**
+ * Example activity class
+ */
 class MainActivity : FragmentActivity() , Payable {
 
     override fun onCreate(savedInstanceState: Bundle?) {

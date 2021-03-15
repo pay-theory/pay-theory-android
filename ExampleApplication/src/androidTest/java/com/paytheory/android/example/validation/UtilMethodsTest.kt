@@ -9,6 +9,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * Class that testing the utility methods
+ */
 class UtilMethodsTest{
     @get:Rule
     var mActivityTestRule : ActivityTestRule<MainActivity> = ActivityTestRule(
@@ -17,12 +20,18 @@ class UtilMethodsTest{
         false
     )
 
+    /**
+     * Launching activity with an intent
+     */
     @Before
     fun setUp(){
         val intent = Intent()
         mActivityTestRule.launchActivity(intent)
     }
 
+    /**
+     * testing connection to internet function
+     */
     @Test
     fun isConnectedToInternet(){
         val context = mActivityTestRule.activity.applicationContext

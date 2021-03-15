@@ -5,7 +5,10 @@ import android.text.TextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.util.*
 
-
+/**
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
+ */
 class ExpirationFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
