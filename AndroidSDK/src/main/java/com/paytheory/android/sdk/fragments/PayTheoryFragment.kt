@@ -55,20 +55,7 @@ class PayTheoryFragment : Fragment() {
         val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
         val billingAddressEnabled = arguments!!.getBoolean(BILLING_ADDRESS_ENABLED)
 
-        if (achEnabled) {
-            enableAccountName()
-            enableACH()
-        } else {
-            if (accountNameEnabled) {
-                enableAccountName()
-            }
-            enableCC()
-        }
-
-
-        if (billingAddressEnabled) {
-            enableBillingAddress()
-        }
+        enableFields(achEnabled, accountNameEnabled, billingAddressEnabled)
 
         val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -155,6 +142,27 @@ class PayTheoryFragment : Fragment() {
                     achRouting.text.toString())
                 makePayment(payment,tags,buyerOptions)
             }
+        }
+    }
+
+    private fun enableFields(
+        achEnabled: Boolean,
+        accountNameEnabled: Boolean,
+        billingAddressEnabled: Boolean
+    ) {
+        if (achEnabled) {
+            enableAccountName()
+            enableACH()
+        } else {
+            if (accountNameEnabled) {
+                enableAccountName()
+            }
+            enableCC()
+        }
+
+
+        if (billingAddressEnabled) {
+            enableBillingAddress()
         }
     }
 

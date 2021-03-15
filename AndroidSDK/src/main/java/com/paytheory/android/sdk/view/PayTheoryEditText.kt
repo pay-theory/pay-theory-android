@@ -33,6 +33,6 @@ open class PayTheoryEditText : androidx.appcompat.widget.AppCompatEditText{
         init()
     }
     private fun init() {
-
+        // no-op comment in an unused listener function
     }
 }
