@@ -6,11 +6,14 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
 
-
+/**
+ * Object that contains all utility methods
+ */
 object UtilMethods {
 
     /**
-     * @param context
+     * Checks if user is connected to internet
+     * @param context interface to global information about users application environment
      * @return true or false mentioning the device is connected or not
      * @brief checking the internet connection on run time
      */
