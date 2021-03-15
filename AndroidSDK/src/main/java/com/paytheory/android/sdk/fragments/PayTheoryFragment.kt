@@ -55,7 +55,20 @@ class PayTheoryFragment : Fragment() {
         val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
         val billingAddressEnabled = arguments!!.getBoolean(BILLING_ADDRESS_ENABLED)
 
-        enableFields(achEnabled, accountNameEnabled, billingAddressEnabled)
+        if (achEnabled) {
+            enableAccountName()
+            enableACH()
+        } else {
+            if (accountNameEnabled) {
+                enableAccountName()
+            }
+            enableCC()
+        }
+
+
+        if (billingAddressEnabled) {
+            enableBillingAddress()
+        }
 
         val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -145,27 +158,6 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
-    private fun enableFields(
-        achEnabled: Boolean,
-        accountNameEnabled: Boolean,
-        billingAddressEnabled: Boolean
-    ) {
-        if (achEnabled) {
-            enableAccountName()
-            enableACH()
-        } else {
-            if (accountNameEnabled) {
-                enableAccountName()
-            }
-            enableCC()
-        }
-
-
-        if (billingAddressEnabled) {
-            enableBillingAddress()
-        }
-    }
-
     private fun makePayment(payment: Any, tags: Map<String,String>, buyerOptions: Map<String,String>) {
         val payTheoryTransaction =
             Transaction(
@@ -178,13 +170,6 @@ class PayTheoryFragment : Fragment() {
 
 
         payTheoryTransaction.init()
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(
-            activity, message,
-            Toast.LENGTH_LONG
-        ).show()
     }
 
     private fun enableCC() {
