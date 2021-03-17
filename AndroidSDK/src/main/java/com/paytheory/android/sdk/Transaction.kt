@@ -136,6 +136,7 @@ class Transaction(
         if(UtilMethods.isConnectedToInternet(context)){
             val idempotency: IdempotencyResponse = idempotencyList.first()
             tags += "pt-number" to idempotency.idempotency
+            tags += "pay-theory-environment" to Constants.ENV
             val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
             val observable = ApiService.paymentApiCall().postIdempotency(
                 buildApiHeaders(),
