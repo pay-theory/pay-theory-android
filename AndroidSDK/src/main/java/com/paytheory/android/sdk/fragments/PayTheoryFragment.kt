@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
@@ -29,10 +30,13 @@ class PayTheoryFragment : Fragment() {
         val USE_ACH = "ach_enabled"
         val ACCOUNT_NAME_ENABLED = "account_name_enabled"
         val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
+        val TAGS = "tags"
     }
 
     private var api_key: String = ""
     private var amount: Int = 0
+    private var tags: HashMap<String,String> = hashMapOf("pay-theory-environment" to Constants.ENV)
+
     /**
      * Display requested card fields
      * @return fragment_pay_theory_credit_card layout
@@ -50,6 +54,7 @@ class PayTheoryFragment : Fragment() {
 
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
+        this.tags = arguments!!.getSerializable(TAGS) as HashMap<String, String>
 
         val achEnabled = arguments!!.getBoolean(USE_ACH)
         val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
@@ -105,7 +110,6 @@ class PayTheoryFragment : Fragment() {
 
         btn.setOnClickListener {
             val buyerOptions = HashMap<String,String>()
-            val tags = HashMap<String,String>()
 
             if (hasAccountName) {
                 val names = accountName.text.toString().split("\\s".toRegex()).toMutableList()
@@ -173,7 +177,8 @@ class PayTheoryFragment : Fragment() {
                 api_key,
                 payment,
                 tags,
-                buyerOptions
+                buyerOptions,
+                amount
             )
 
 

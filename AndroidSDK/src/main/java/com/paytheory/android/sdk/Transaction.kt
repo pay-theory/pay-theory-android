@@ -24,8 +24,9 @@ class Transaction(
     private val context: Context,
     private val apiKey: String,
     private val payment: Any,
-    private val tags: Map<String, String> = HashMap<String, String>(),
-    private val buyerOptions: Map<String, String> = HashMap<String, String>()
+    private var tags: Map<String, String> = HashMap<String, String>(),
+    private val buyerOptions: Map<String, String> = HashMap<String, String>(),
+    private val amount: Int
 ) {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -108,7 +109,7 @@ class Transaction(
 
             val observable = ApiService.idempotencyApiCall().postIdempotency(
                 buildApiHeaders(),
-                IdempotencyPostData(attestationResult, challengeResult, 5000)
+                IdempotencyPostData(attestationResult, challengeResult, amount)
             )
 
             observable.subscribeOn(Schedulers.io())
@@ -134,6 +135,7 @@ class Transaction(
     private fun paymentApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
             val idempotency: IdempotencyResponse = idempotencyList.first()
+            tags += "pt-number" to idempotency.idempotency
             val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
             val observable = ApiService.paymentApiCall().postIdempotency(
                 buildApiHeaders(),
