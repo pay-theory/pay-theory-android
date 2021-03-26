@@ -10,8 +10,17 @@ import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.ChallengeResponse
+import com.paytheory.android.sdk.api.PtTokenResponse
+import com.paytheory.android.sdk.sockets.EchoWebSocketListener
+import com.paytheory.android.sdk.sockets.WebsocketService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -35,6 +44,7 @@ class Transaction(
     private var challengeResult: String =""
     private var idempotencyList: ArrayList<IdempotencyResponse> = ArrayList<IdempotencyResponse>()
 
+    private lateinit var client: OkHttpClient
 
     private fun getCardType(number: String): String {
 
@@ -61,20 +71,16 @@ class Transaction(
         return headerMap
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("CheckResult")
-    private fun challengeApiCall(context: Context){
+    private fun ptTokenCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
 
-            val observable = ApiService.challengeApiCall().doChallenge(buildApiHeaders())
+            val observable = ApiService.ptTokenApiCall().doPtToken(buildApiHeaders())
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ challenge: ChallengeResponse ->
+                .subscribe({ ptToken: PtTokenResponse ->
 
-                    challengeResult = challenge.challenge
-
-                    callSafetyNet(challengeResult)
+                    callSafetyNet(ptToken.challengeOptions!!.challenge)
 
                 }, { error ->
                     if (context is Payable) {
@@ -89,12 +95,88 @@ class Transaction(
         }
     }
 
+    private fun initiateSocketConnection(context: Context, challenge: String) {
+        if(UtilMethods.isConnectedToInternet(context)){
+            val listener = EchoWebSocketListener()
+            GlobalScope.launch(Dispatchers.IO) {
+                client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("wss://env.secure.socket.paytheorystudy.com/?pt_token=$challenge")
+                    .build()
+
+
+                //Creates new websocket connection
+                val webSocket = client.newWebSocket(request, listener)
+                challengeCall(webSocket,context)
+//                client.dispatcher.executorService.shutdown()
+            }
+
+        }else{
+            if (context is Payable) {
+                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+            }
+        }
+    }
+
+    private fun challengeCall(webSocket: WebSocket, context: Context){
+        if(UtilMethods.isConnectedToInternet(context)){
+            val listener = EchoWebSocketListener()
+            GlobalScope.launch(Dispatchers.IO) {
+                client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("wss://env.secure.socket.paytheorystudy.com/?pt_token=$challenge")
+                    .build()
+
+
+                //Creates new websocket connection
+                val webSocket = client.newWebSocket(request, listener)
+                challengeCall(webSocket,context)
+//                client.dispatcher.executorService.shutdown()
+            }
+
+        }else{
+            if (context is Payable) {
+                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+            }
+        }
+    }
+
+
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    @SuppressLint("CheckResult")
+//    private fun challengeApiCall(context: Context){
+//        if(UtilMethods.isConnectedToInternet(context)){
+//
+//            val observable = ApiService.challengeApiCall().doChallenge(buildApiHeaders())
+//
+//            observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe({ challenge: ChallengeResponse ->
+//
+//                    challengeResult = challenge.challenge
+//
+//                    callSafetyNet(challengeResult)
+//
+//                }, { error ->
+//                    if (context is Payable) {
+//                        context.paymentError(PaymentError(error.message!!))
+//                    }
+//                }
+//                )
+//        }else{
+//            if (context is Payable) {
+//                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+//            }
+//        }
+//    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun callSafetyNet(challenge: String) {
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
             .addOnSuccessListener {
                 attestationResult = it.jwsResult
-                idempotencyApiCall(context)
+                initiateSocketConnection(context, challenge)
+//                idempotencyApiCall(context)
             }.addOnFailureListener {
                 if (context is Payable) {
                     context.paymentError(PaymentError(it.message!!))
@@ -102,82 +184,84 @@ class Transaction(
             }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("CheckResult")
-    private fun idempotencyApiCall(context: Context){
-        if(UtilMethods.isConnectedToInternet(context)){
-
-            val observable = ApiService.idempotencyApiCall().postIdempotency(
-                buildApiHeaders(),
-                IdempotencyPostData(attestationResult, challengeResult, amount)
-            )
-
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ idempotency: IdempotencyResponse ->
-                    idempotencyList.add(idempotency)
-                    paymentApiCall(context)
-                }, { error ->
-                    if (context is Payable) {
-                        context.paymentError(PaymentError(error.message!!))
-                    }
-                }
-                )
-        }else{
-            if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("CheckResult")
-    private fun paymentApiCall(context: Context){
-        if(UtilMethods.isConnectedToInternet(context)){
-            val idempotency: IdempotencyResponse = idempotencyList.first()
-            tags += "pt-number" to idempotency.idempotency
-            tags += "pay-theory-environment" to Constants.ENV
-            val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
-            val observable = ApiService.paymentApiCall().postIdempotency(
-                buildApiHeaders(),
-                PaymentPostData(
-                    payment,
-                    idempotency.response,
-                    idempotency.signature,
-                    idempotency.credId,
-                    challenger,
-                    tags,
-                    buyerOptions
-                )
-            )
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ paymentResult: PaymentResult ->
-                    if (context is Payable) {
-                        paymentResult.created_at?.let { context.paymentComplete(paymentResult) }
-                        paymentResult.type?.let { context.paymentFailed(paymentResult) }
-                    }
-                }, { error ->
-
-                    if (context is Payable) {
-                        context.paymentError(PaymentError(error.message!!))
-
-                    }
-                }
-                )
-        }else{
-            if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
-            }
-        }
-    }
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    @SuppressLint("CheckResult")
+//    private fun idempotencyApiCall(context: Context){
+//        if(UtilMethods.isConnectedToInternet(context)){
+//
+//            val observable = ApiService.idempotencyApiCall().postIdempotency(
+//                buildApiHeaders(),
+//                IdempotencyPostData(attestationResult, challengeResult, amount)
+//            )
+//
+//            observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe({ idempotency: IdempotencyResponse ->
+//                    idempotencyList.add(idempotency)
+//                    paymentApiCall(context)
+//                }, { error ->
+//                    if (context is Payable) {
+//                        context.paymentError(PaymentError(error.message!!))
+//                    }
+//                }
+//                )
+//        }else{
+//            if (context is Payable) {
+//                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+//            }
+//        }
+//    }
+//
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    @SuppressLint("CheckResult")
+//    private fun paymentApiCall(context: Context){
+//        if(UtilMethods.isConnectedToInternet(context)){
+//            val idempotency: IdempotencyResponse = idempotencyList.first()
+//            tags += "pt-number" to idempotency.idempotency
+//            tags += "pay-theory-environment" to Constants.ENV
+//            val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
+//            val observable = ApiService.paymentApiCall().postIdempotency(
+//                buildApiHeaders(),
+//                PaymentPostData(
+//                    payment,
+//                    idempotency.response,
+//                    idempotency.signature,
+//                    idempotency.credId,
+//                    challenger,
+//                    tags,
+//                    buyerOptions
+//                )
+//            )
+//            observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe({ paymentResult: PaymentResult ->
+//                    if (context is Payable) {
+//                        paymentResult.created_at?.let { context.paymentComplete(paymentResult) }
+//                        paymentResult.type?.let { context.paymentFailed(paymentResult) }
+//                    }
+//                }, { error ->
+//
+//                    if (context is Payable) {
+//                        context.paymentError(PaymentError(error.message!!))
+//
+//                    }
+//                }
+//                )
+//        }else{
+//            if (context is Payable) {
+//                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+//            }
+//        }
+//    }
 
     /**
      * Initiate transaction
      */
     @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
-        challengeApiCall(context)
+        //Call pt token first to retrieve pt token for websocket calls
+        ptTokenCall(context)
+//        challengeApiCall(context)
     }
 
 }

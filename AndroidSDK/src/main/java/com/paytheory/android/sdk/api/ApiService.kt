@@ -34,4 +34,12 @@ object ApiService {
         .client(ApiWorker.client)
         .build()
         .create(PaymentApiService::class.java)
+
+    fun ptTokenApiCall() = Retrofit.Builder()
+        .baseUrl(Constants.PT_TOKEN_URL)
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .addConverterFactory(ApiWorker.gsonConverter)
+        .client(ApiWorker.client)
+        .build()
+        .create(PtTokenApiService::class.java)
 }
