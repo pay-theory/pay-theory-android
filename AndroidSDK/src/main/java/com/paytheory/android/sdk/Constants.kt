@@ -5,8 +5,8 @@ package com.paytheory.android.sdk
  */
 object Constants {
 
-    val ENV = "demo"
-    val API_BASE_PATH: String = "https://$ENV.attested.api.paytheorystudy.com/"
+    val ENV = "dev"
+    val API_BASE_PATH: String = "https://$ENV.tags.api.paytheorystudy.com/"
     val NO_INTERNET_ERROR: String = "No internet connection"
 
 }

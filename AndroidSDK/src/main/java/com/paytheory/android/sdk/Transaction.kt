@@ -1,20 +1,30 @@
 package com.paytheory.android.sdk
 
-import IdempotencyPostData
+import ActionRequest
 import IdempotencyResponse
-import PaymentPostData
+import InstrumentRequest
+import Payment
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
+import com.google.gson.Gson
+import com.goterl.lazycode.lazysodium.utils.Key
+import com.goterl.lazycode.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.api.ApiService
-import com.paytheory.android.sdk.api.ChallengeResponse
+import com.paytheory.android.sdk.api.PTTokenResponse
+import com.paytheory.android.sdk.data.*
+import com.paytheory.android.sdk.reactors.*
+import com.paytheory.android.sdk.nacl.encryptBox
+import com.paytheory.android.sdk.nacl.generateLocalKeyPair
+import com.paytheory.android.sdk.websocket.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 import kotlin.collections.ArrayList
-
+import kotlin.collections.HashMap
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -22,12 +32,8 @@ import kotlin.collections.ArrayList
  */
 class Transaction(
     private val context: Context,
-    private val apiKey: String,
-    private val payment: Any,
-    private var tags: Map<String, String> = HashMap<String, String>(),
-    private val buyerOptions: Map<String, String> = HashMap<String, String>(),
-    private val amount: Int
-) {
+    private val apiKey: String
+): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
 
@@ -35,7 +41,31 @@ class Transaction(
     private var challengeResult: String =""
     private var idempotencyList: ArrayList<IdempotencyResponse> = ArrayList<IdempotencyResponse>()
 
+    companion object {
+        private const val CONNECTED = "connected to socket"
+        private const val DISCONNECTED = "disconnected from socket"
+        private const val HOST_TOKEN = "hostToken"
+        private const val INSTRUMENT_TOKEN = "pt-instrument"
+        private const val PAYMENT_TOKEN = "payment-token"
+        private const val INSTRUMENT_ACTION = "host:ptInstrument"
+        private const val TRANSFER_ACTION = "host:transfer"
+        private const val UNKNOWN = "unknown"
 
+        private var messageReactors: MessageReactors? = null
+        private var connectionReactors: ConnectionReactors? = null
+
+        private val webServicesProvider = WebServicesProvider()
+        private val webSocketRepository = WebsocketRepository(webServicesProvider)
+        val webSocketInteractor = WebsocketInteractor(webSocketRepository)
+        lateinit var viewModel: WebSocketViewModel
+        lateinit var keyPair: KeyPair
+        var subscribedToken = ""
+        var hostToken = ""
+        var sessionKey = ""
+        var socketPublicKey = ""
+        var activePayment: Payment? = null
+
+    }
     private fun getCardType(number: String): String {
 
         val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
@@ -61,20 +91,20 @@ class Transaction(
         return headerMap
     }
 
+    @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
-    private fun challengeApiCall(context: Context){
+    private fun ptTokenApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
 
-            val observable = ApiService.challengeApiCall().doChallenge(buildApiHeaders())
+            val observable = ApiService.ptTokenApiCall().doToken(buildApiHeaders())
 
             observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ challenge: ChallengeResponse ->
+                .subscribe({ ptTokenResponse: PTTokenResponse ->
 
-                    challengeResult = challenge.challenge
-
-                    callSafetyNet(challengeResult)
+                    challengeResult = ptTokenResponse.challengeOptions.challenge
+                    callSafetyNet(challengeResult, ptTokenResponse.ptToken)
 
                 }, { error ->
                     if (context is Payable) {
@@ -89,12 +119,17 @@ class Transaction(
         }
     }
 
+    @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun callSafetyNet(challenge: String) {
+    private fun callSafetyNet(challenge: String, ptToken: String) {
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
             .addOnSuccessListener {
                 attestationResult = it.jwsResult
-                idempotencyApiCall(context)
+                viewModel = WebSocketViewModel(webSocketInteractor, ptToken)
+                viewModel.subscribeToSocketEvents(this)
+                messageReactors = MessageReactors(viewModel, webSocketInteractor)
+                connectionReactors = ConnectionReactors(ptToken, viewModel, webSocketInteractor)
+
             }.addOnFailureListener {
                 if (context is Payable) {
                     context.paymentError(PaymentError(it.message!!))
@@ -102,84 +137,68 @@ class Transaction(
             }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("CheckResult")
-    private fun idempotencyApiCall(context: Context){
-        if(UtilMethods.isConnectedToInternet(context)){
-
-            val observable = ApiService.idempotencyApiCall().postIdempotency(
-                buildApiHeaders(),
-                IdempotencyPostData(attestationResult, challengeResult, amount)
-            )
-
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ idempotency: IdempotencyResponse ->
-                    idempotencyList.add(idempotency)
-                    paymentApiCall(context)
-                }, { error ->
-                    if (context is Payable) {
-                        context.paymentError(PaymentError(error.message!!))
-                    }
-                }
-                )
-        }else{
-            if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("CheckResult")
-    private fun paymentApiCall(context: Context){
-        if(UtilMethods.isConnectedToInternet(context)){
-            val idempotency: IdempotencyResponse = idempotencyList.first()
-            tags += "pt-number" to idempotency.idempotency
-            tags += "pay-theory-environment" to Constants.ENV
-            val challenger = String(Base64.getDecoder().decode(idempotency.challenge))
-            val observable = ApiService.paymentApiCall().postIdempotency(
-                buildApiHeaders(),
-                PaymentPostData(
-                    payment,
-                    idempotency.response,
-                    idempotency.signature,
-                    idempotency.credId,
-                    challenger,
-                    tags,
-                    buyerOptions
-                )
-            )
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ paymentResult: PaymentResult ->
-                    if (context is Payable) {
-                        paymentResult.created_at?.let { context.paymentComplete(paymentResult) }
-                        paymentResult.type?.let { context.paymentFailed(paymentResult) }
-                    }
-                }, { error ->
-
-                    if (context is Payable) {
-                        context.paymentError(PaymentError(error.message!!))
-
-                    }
-                }
-                )
-        }else{
-            if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
-            }
-        }
-    }
 
     /**
      * Initiate transaction
      */
+    @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
-        challengeApiCall(context)
+        ptTokenApiCall(context)
     }
 
+    @ExperimentalCoroutinesApi
+    fun transact(payment: Payment,
+                 tags: Map<String, String> = HashMap<String, String>(),
+                 buyerOptions: Map<String, String> = HashMap<String, String>(),
+                 amount: Int) {
+        activePayment = payment
+        keyPair = generateLocalKeyPair()
+        val instrumentRequest = InstrumentRequest(hostToken, payment, System.currentTimeMillis())
+        val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+
+        val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(socketPublicKey))
+
+        val actionRequest = ActionRequest(
+            INSTRUMENT_ACTION,
+            boxed,
+            localPublicKey)
+        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+        //socketAction("host:idempotency", sessionKey, socket, { apiKey, payment, hostToken, sessionKey, timing: getTiming() }), [IDEMPOTENCY, socketAction])
+        //{ action, sessionKey: window.btoa(sessionKey), encoded: encryption.encrypt(boxed, encoded), publicKey: encryption.encodeKey(keyPair.publicKey) }
+    }
+
+    @ExperimentalCoroutinesApi
+    private val messengerConnections = arrayOf(
+        CONNECTED,
+        DISCONNECTED
+    )
+
+    private fun discoverMessageType(message: String): String  {
+        return when {
+            message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
+            message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
+            message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
+            else -> UNKNOWN
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun receiveMessage(message: String) {
+        if (messengerConnections.indexOf(message) > -1) when (message) {
+            CONNECTED -> connectionReactors!!.onConnected()
+            DISCONNECTED -> connectionReactors!!.onDisconnected()
+            else -> messageReactors!!.onUnknown(message,apiKey)
+        } else {
+            when (discoverMessageType(message)) {
+                HOST_TOKEN -> messageReactors!!.onHostToken(message, apiKey)
+                INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
+                PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message, apiKey)
+                TRANSFER_ACTION -> messageReactors!!.onTransfer(message, apiKey)
+                else -> messageReactors!!.onUnknown(message,apiKey)
+            }
+        }
+    }
 }
 
 
