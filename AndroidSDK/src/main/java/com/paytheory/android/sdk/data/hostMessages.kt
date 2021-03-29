@@ -56,6 +56,7 @@ data class InstrumentRequest (
 data class HostTokenRequest (
     @SerializedName("ptToken") val ptToken: String,
     @SerializedName("origin") val origin: String,
+    @SerializedName("attestation") val attestation: String,
     @SerializedName("timing") val timing: Long
 )
 data class Address (

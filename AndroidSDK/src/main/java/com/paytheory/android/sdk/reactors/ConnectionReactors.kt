@@ -9,11 +9,15 @@ import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
-class ConnectionReactors(private val ptToken: String, private val viewModel: WebSocketViewModel, private val websocketInteractor: WebsocketInteractor) {
+class ConnectionReactors(
+    private val ptToken: String,
+    private val attestation: String,
+    private val viewModel: WebSocketViewModel,
+    private val websocketInteractor: WebsocketInteractor) {
     @ExperimentalCoroutinesApi
     fun onConnected() {
         val hostTokenRequest =
-            HostTokenRequest(ptToken, "native", System.currentTimeMillis())
+            HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
         val encoded =
             Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
         val actionRequest = ActionRequest("host:hostToken", encoded)

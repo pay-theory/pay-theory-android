@@ -36,9 +36,6 @@ class Transaction(
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
 
-    private var attestationResult: String =""
-    private var challengeResult: String =""
-    private var idempotencyList: ArrayList<IdempotencyResponse> = ArrayList<IdempotencyResponse>()
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -101,12 +98,7 @@ class Transaction(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ ptTokenResponse: PTTokenResponse ->
 
-                    challengeResult = ptTokenResponse.challengeOptions.challenge
-                    viewModel = WebSocketViewModel(webSocketInteractor, ptTokenResponse.ptToken)
-                    connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, viewModel, webSocketInteractor)
-                    messageReactors = MessageReactors(viewModel, webSocketInteractor)
-                    viewModel.subscribeToSocketEvents(this)
-                    //callSafetyNet(challengeResult)
+                    callSafetyNet(ptTokenResponse)
 
                 }, { error ->
                     if (context is Payable) {
@@ -123,11 +115,15 @@ class Transaction(
 
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun callSafetyNet(challenge: String) {
+    private fun callSafetyNet(ptTokenResponse: PTTokenResponse) {
+        val challenge = ptTokenResponse.challengeOptions.challenge
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
             .addOnSuccessListener {
-                attestationResult = it.jwsResult
+                val attestationResult = it.jwsResult
 
+                viewModel = WebSocketViewModel(webSocketInteractor, ptTokenResponse.ptToken)
+                connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor)
+                messageReactors = MessageReactors(viewModel, webSocketInteractor)
                 viewModel.subscribeToSocketEvents(this)
 
             }.addOnFailureListener {
