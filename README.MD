@@ -112,14 +112,24 @@ Java
 *   applying optional settings allows customization
 
 ```Kotlin
-        // display an account name field
+        // applying api-key
+        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")   
+     
+        // collect amount of payment (REQUIRED)
+        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
+
+        // display an account name field (OPTIONAL)
         payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
 
-        // display billing address fields
+        // display billing address fields (OPTIONAL)
         payTheoryArgs.putBoolean(PayTheoryFragment.BILLING_ADDRESS_ENABLED,true)
 
-        // collect ACH bank details instead of credit card
+        // collect ACH bank details instead of credit card (OPTIONAL)
         payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
+
+        // create custom tags per transaction (OPTIONAL)
+        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
+        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
 ```
 
 React to events by implementing the Payable interface

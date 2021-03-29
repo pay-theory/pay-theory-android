@@ -21,11 +21,11 @@ class MainActivity : FragmentActivity() , Payable {
 
         val payTheoryArgs = Bundle()
 
-        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "")
+        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")
         payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
         payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
 
-        val tags: HashMap<String, String> = hashMapOf("test tag" to "testing")
+        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
         payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
 
         payTheoryFragment!!.arguments = payTheoryArgs
