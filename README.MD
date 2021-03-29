@@ -118,7 +118,7 @@ Java
         // display billing address fields
         payTheoryArgs.putBoolean(PayTheoryFragment.BILLING_ADDRESS_ENABLED,true)
 
-        // collect ACH bank details instead of credi card
+        // collect ACH bank details instead of credit card
         payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
 ```
 
