@@ -4,7 +4,6 @@ package com.paytheory.android.sdk
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.widget.Toast
 
 /**
  * Object that contains all utility methods

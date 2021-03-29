@@ -20,16 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
-/*
-Set up your test environment
-To avoid flakiness, we highly recommend that you turn off system animations on the virtual or physical devices used for testing. On your device, under Settings > Developer options, disable the following 3 settings:
-
-Window animation scale
-Transition animation scale
-Animator duration scale
- */
-
 /**
  * Class that is used to test the example activity
  */
@@ -51,8 +41,6 @@ class MainActivityTests {
         val intent = Intent()
         mActivityTestRule.launchActivity(intent)
     }
-
-
 
     /**
      * Running a transaction in test environment
@@ -110,19 +98,7 @@ class MainActivityTests {
         onView(withId(R.id.account_name))
         .check(matches(withText("Some Body")))
 
-
-//    var fragment = mActivityTestRule.activity.supportFragmentManager.findFragmentById(R.id.PayTheoryFragment)
-    
-
-
-
         Log.d("Testing", mActivityTestRule.activity.applicationContext.packageName)
-
-//                onView(withId(R.id.submitButton))
-//            .perform(click(), closeSoftKeyboard())
-//        //Read override methods and assert the value
-//        Log.d("Testing", mActivityTestRuleOne.activity.
-
 
     }
 

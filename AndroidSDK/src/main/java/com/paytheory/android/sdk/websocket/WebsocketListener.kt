@@ -9,8 +9,6 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 
-import com.paytheory.android.sdk.nacl.*
-
 @ExperimentalCoroutinesApi
 class WebSocketListener : WebSocketListener() {
 

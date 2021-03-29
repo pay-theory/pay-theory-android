@@ -1,7 +1,5 @@
 package com.paytheory.android.sdk.fragments
 
-import ACHPaymentData
-import CCPaymentData
 import Payment
 import android.os.Build
 import android.os.Bundle
@@ -9,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.paytheory.android.sdk.Constants
@@ -190,7 +187,7 @@ class PayTheoryFragment : Fragment() {
     }
 
     private fun makePayment(payment: Payment, tags: Map<String,String>, buyerOptions: Map<String,String>) {
-        payTheoryTransaction.transact(payment,tags,buyerOptions,amount)
+        payTheoryTransaction.transact(payment,tags,buyerOptions)
     }
 
     private fun enableCC() {

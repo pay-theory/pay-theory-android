@@ -3,7 +3,6 @@ package com.paytheory.android.sdk.reactors
 import ActionRequest
 import HostTokenRequest
 import com.google.gson.Gson
-import com.paytheory.android.sdk.Transaction
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi

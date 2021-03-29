@@ -1,7 +1,6 @@
 package com.paytheory.android.sdk
 
 import ActionRequest
-import IdempotencyResponse
 import InstrumentRequest
 import Payment
 import android.annotation.SuppressLint
@@ -11,7 +10,6 @@ import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
-import com.goterl.lazycode.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
 import com.paytheory.android.sdk.reactors.*
@@ -22,8 +20,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+
+//import IdempotencyResponse
+//import com.goterl.lazycode.lazysodium.utils.KeyPair
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -36,7 +36,6 @@ class Transaction(
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
 
-
     companion object {
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
@@ -46,37 +45,14 @@ class Transaction(
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val TRANSFER_ACTION = "host:transfer"
         private const val UNKNOWN = "unknown"
-//
+
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
-//
+
         private val webServicesProvider = WebServicesProvider()
         private val webSocketRepository = WebsocketRepository(webServicesProvider)
         val webSocketInteractor = WebsocketInteractor(webSocketRepository)
         lateinit var viewModel: WebSocketViewModel
-//        lateinit var keyPair: KeyPair
-//
-//        var hostToken = ""
-//        var socketPublicKey = ""
-//        var activePayment: Payment? = null
-
-    }
-    private fun getCardType(number: String): String {
-
-        val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
-        val mastercard = Regex("^5[1-5][0-9]{14}$")
-        val amx = Regex("^3[47][0-9]{13}$")
-        val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
-        val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
-
-        return when {
-            visa.matches(number) -> "Visa"
-            mastercard.matches(number) -> "Mastercard"
-            amx.matches(number) -> "American Express"
-            diners.matches(number) -> "Diners"
-            discover.matches(number) -> "Discover"
-            else -> "Unknown"
-        }
     }
 
     private fun buildApiHeaders(): Map<String, String> {
@@ -133,7 +109,6 @@ class Transaction(
             }
     }
 
-
     /**
      * Initiate transaction
      */
@@ -146,8 +121,7 @@ class Transaction(
     @ExperimentalCoroutinesApi
     fun transact(payment: Payment,
                  tags: Map<String, String> = HashMap<String, String>(),
-                 buyerOptions: Map<String, String> = HashMap<String, String>(),
-                 amount: Int) {
+                 buyerOptions: Map<String, String> = HashMap<String, String>()) {
         messageReactors!!.activePayment = payment
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis())
@@ -201,3 +175,30 @@ class Transaction(
 
 
 
+
+
+
+//DEPRECATED
+
+//        lateinit var keyPair: KeyPair
+//        var hostToken = ""
+//        var socketPublicKey = ""
+//        var activePayment: Payment? = null
+
+
+private fun getCardType(number: String): String {
+    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
+    val mastercard = Regex("^5[1-5][0-9]{14}$")
+    val amx = Regex("^3[47][0-9]{13}$")
+    val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
+    val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
+
+    return when {
+        visa.matches(number) -> "Visa"
+        mastercard.matches(number) -> "Mastercard"
+        amx.matches(number) -> "American Express"
+        diners.matches(number) -> "Diners"
+        discover.matches(number) -> "Discover"
+        else -> "Unknown"
+    }
+}

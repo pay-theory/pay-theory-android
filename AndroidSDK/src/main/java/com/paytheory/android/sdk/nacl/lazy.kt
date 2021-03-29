@@ -3,12 +3,13 @@ package com.paytheory.android.sdk.nacl
 import com.google.gson.annotations.SerializedName
 import com.goterl.lazycode.lazysodium.LazySodiumAndroid
 import com.goterl.lazycode.lazysodium.SodiumAndroid
-import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
 import com.goterl.lazycode.lazysodium.interfaces.Box
-import com.goterl.lazycode.lazysodium.interfaces.SecretBox
 import com.goterl.lazycode.lazysodium.utils.Key
 import com.goterl.lazycode.lazysodium.utils.KeyPair
 import java.util.*
+
+//import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
+//import com.goterl.lazycode.lazysodium.interfaces.SecretBox
 
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 val boxLazy = lazySodium as Box.Lazy
