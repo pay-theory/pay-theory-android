@@ -2,6 +2,7 @@ package com.paytheory.android.sdk.fragments
 
 import ACHPaymentData
 import CCPaymentData
+import Payment
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,8 +32,11 @@ class PayTheoryFragment : Fragment() {
         val ACCOUNT_NAME_ENABLED = "account_name_enabled"
         val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
         val TAGS = "tags"
+        val PAYMENT_CARD = "PAYMENT_CARD"
+        val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
+    private lateinit var payTheoryTransaction: Transaction
     private var api_key: String = ""
     private var amount: Int = 0
     private var tags: HashMap<String,String> = hashMapOf("pay-theory-environment" to Constants.ENV)
@@ -55,6 +59,14 @@ class PayTheoryFragment : Fragment() {
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
         this.tags = arguments!!.getSerializable(TAGS) as HashMap<String, String>
+
+        payTheoryTransaction =
+            Transaction(
+                this.activity!!,
+                api_key
+            )
+
+        payTheoryTransaction.init()
 
         val achEnabled = arguments!!.getBoolean(USE_ACH)
         val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
@@ -131,19 +143,26 @@ class PayTheoryFragment : Fragment() {
 
             if (hasCC) {
                 val expirationString = ccExpiration.text.toString()
-                val payment = CCPaymentData(
-                    ccNumber.text.toString().replace("\\s".toRegex(), ""),
-                    ccCVV.text.toString(),
-                    expirationString.split("/").first(),
-                    expirationString.split("/").last()
+                val payment = Payment(
+                    timing = System.currentTimeMillis(),
+                    amount = amount,
+                    type = PAYMENT_CARD,
+                    number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
+                    security_code = ccCVV.text.toString(),
+                    expiration_month = expirationString.split("/").first(),
+                    expiration_year = expirationString.split("/").last(),
                 )
                 makePayment(payment,tags,buyerOptions)
             }
 
             if (hasACH) {
-                val payment = ACHPaymentData(
-                    achAccount.text.toString(),
-                    achRouting.text.toString())
+                val payment = Payment(
+                    timing = System.currentTimeMillis(),
+                    amount = amount,
+                    type = BANK_ACCOUNT,
+                    account_number = achAccount.text.toString(),
+                    bank_code = achRouting.text.toString()
+                )
                 makePayment(payment,tags,buyerOptions)
             }
         }
@@ -170,19 +189,8 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
-    private fun makePayment(payment: Any, tags: Map<String,String>, buyerOptions: Map<String,String>) {
-        val payTheoryTransaction =
-            Transaction(
-                this.activity!!,
-                api_key,
-                payment,
-                tags,
-                buyerOptions,
-                amount
-            )
-
-
-        payTheoryTransaction.init()
+    private fun makePayment(payment: Payment, tags: Map<String,String>, buyerOptions: Map<String,String>) {
+        payTheoryTransaction.transact(payment,tags,buyerOptions,amount)
     }
 
     private fun enableCC() {
