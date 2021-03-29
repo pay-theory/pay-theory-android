@@ -17,7 +17,7 @@ class WebSocketListener : WebSocketListener() {
     val socketEventChannel: Channel<SocketUpdate> = Channel(10)
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        //TODO("Request Host Token")
+        println("socket open")
         GlobalScope.launch {
             socketEventChannel.send(SocketUpdate("connected to socket"))
         }

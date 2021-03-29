@@ -22,27 +22,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
 class MessageReactors(private val viewModel: WebSocketViewModel, private val webSocketInteractor: WebsocketInteractor) {
-    companion object {
-        private const val CONNECTED = "connected to socket"
-        private const val DISCONNECTED = "disconnected from socket"
-        private const val HOST_TOKEN = "hostToken"
-        private const val INSTRUMENT_TOKEN = "pt-instrument"
-        private const val PAYMENT_TOKEN = "payment-token"
-        private const val INSTRUMENT_ACTION = "host:ptInstrument"
-        private const val TRANSFER_ACTION = "host:transfer"
-        private const val UNKNOWN = "unknown"
+    var activePayment: Payment? = null
+    var hostToken = ""
+    var sessionKey = ""
+    var socketPublicKey = ""
 
-        private val webServicesProvider = WebServicesProvider()
-        private val webSocketRepository = WebsocketRepository(webServicesProvider)
-        val webSocketInteractor = WebsocketInteractor(webSocketRepository)
-        lateinit var viewModel: WebSocketViewModel
-        lateinit var keyPair: KeyPair
-        var subscribedToken = ""
-        var hostToken = ""
-        var sessionKey = ""
-        var socketPublicKey = ""
-        var activePayment: Payment? = null
-    }
+
     fun onHostToken(message:String, apiKey:String): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson<HostTokenMessage>(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
@@ -99,11 +84,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
     @ExperimentalCoroutinesApi
     fun onTransfer(message:String, apiKey:String): TransferMessage {
-        val transferMessage = Gson().fromJson<TransferMessage>(message, TransferMessage::class.java)
-
-        webSocketInteractor.stopSocket()
-
-        return transferMessage
+        return Gson().fromJson<TransferMessage>(message, TransferMessage::class.java)
     }
 }
 

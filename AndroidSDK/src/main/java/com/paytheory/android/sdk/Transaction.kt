@@ -14,7 +14,6 @@ import com.goterl.lazycode.lazysodium.utils.Key
 import com.goterl.lazycode.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
-import com.paytheory.android.sdk.data.*
 import com.paytheory.android.sdk.reactors.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
@@ -50,20 +49,19 @@ class Transaction(
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val TRANSFER_ACTION = "host:transfer"
         private const val UNKNOWN = "unknown"
-
+//
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
-
+//
         private val webServicesProvider = WebServicesProvider()
         private val webSocketRepository = WebsocketRepository(webServicesProvider)
         val webSocketInteractor = WebsocketInteractor(webSocketRepository)
         lateinit var viewModel: WebSocketViewModel
-        lateinit var keyPair: KeyPair
-        var subscribedToken = ""
-        var hostToken = ""
-        var sessionKey = ""
-        var socketPublicKey = ""
-        var activePayment: Payment? = null
+//        lateinit var keyPair: KeyPair
+//
+//        var hostToken = ""
+//        var socketPublicKey = ""
+//        var activePayment: Payment? = null
 
     }
     private fun getCardType(number: String): String {
@@ -104,7 +102,11 @@ class Transaction(
                 .subscribe({ ptTokenResponse: PTTokenResponse ->
 
                     challengeResult = ptTokenResponse.challengeOptions.challenge
-                    callSafetyNet(challengeResult, ptTokenResponse.ptToken)
+                    viewModel = WebSocketViewModel(webSocketInteractor, ptTokenResponse.ptToken)
+                    connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, viewModel, webSocketInteractor)
+                    messageReactors = MessageReactors(viewModel, webSocketInteractor)
+                    viewModel.subscribeToSocketEvents(this)
+                    //callSafetyNet(challengeResult)
 
                 }, { error ->
                     if (context is Payable) {
@@ -121,14 +123,12 @@ class Transaction(
 
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun callSafetyNet(challenge: String, ptToken: String) {
+    private fun callSafetyNet(challenge: String) {
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
             .addOnSuccessListener {
                 attestationResult = it.jwsResult
-                viewModel = WebSocketViewModel(webSocketInteractor, ptToken)
+
                 viewModel.subscribeToSocketEvents(this)
-                messageReactors = MessageReactors(viewModel, webSocketInteractor)
-                connectionReactors = ConnectionReactors(ptToken, viewModel, webSocketInteractor)
 
             }.addOnFailureListener {
                 if (context is Payable) {
@@ -152,12 +152,12 @@ class Transaction(
                  tags: Map<String, String> = HashMap<String, String>(),
                  buyerOptions: Map<String, String> = HashMap<String, String>(),
                  amount: Int) {
-        activePayment = payment
-        keyPair = generateLocalKeyPair()
-        val instrumentRequest = InstrumentRequest(hostToken, payment, System.currentTimeMillis())
+        messageReactors!!.activePayment = payment
+        val keyPair = generateLocalKeyPair()
+        val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis())
         val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
 
-        val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(socketPublicKey))
+        val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
         val actionRequest = ActionRequest(
             INSTRUMENT_ACTION,
@@ -185,17 +185,19 @@ class Transaction(
 
     @ExperimentalCoroutinesApi
     override fun receiveMessage(message: String) {
-        if (messengerConnections.indexOf(message) > -1) when (message) {
-            CONNECTED -> connectionReactors!!.onConnected()
-            DISCONNECTED -> connectionReactors!!.onDisconnected()
-            else -> messageReactors!!.onUnknown(message,apiKey)
-        } else {
-            when (discoverMessageType(message)) {
-                HOST_TOKEN -> messageReactors!!.onHostToken(message, apiKey)
-                INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
-                PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message, apiKey)
-                TRANSFER_ACTION -> messageReactors!!.onTransfer(message, apiKey)
-                else -> messageReactors!!.onUnknown(message,apiKey)
+        println("message $message")
+        when (message) {
+            CONNECTED -> { connectionReactors!!.onConnected() }
+            DISCONNECTED -> { connectionReactors!!.onDisconnected()
+            }
+            else -> {
+                when (discoverMessageType(message)) {
+                    HOST_TOKEN -> messageReactors!!.onHostToken(message, apiKey)
+                    INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
+                    PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message, apiKey)
+                    TRANSFER_ACTION -> messageReactors!!.onTransfer(message, apiKey)
+                    else -> messageReactors!!.onUnknown(message,apiKey)
+                }
             }
         }
     }
