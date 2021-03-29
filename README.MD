@@ -10,12 +10,12 @@ Before you can use Pay Theory Android SDK you must register your app in Pay Theo
 
 ![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/android-registration.png)
 
-For each mobile app you want to register 
+For each mobile app, you want to register 
 *   enter SHA-256 digest of release signing key
 *   enter SHA-256 digest of debug signing key
 *   enter your application package name
 
-### Find sigining key digest
+### Find signing key digest
 
 You can find you signing key digests using Android Studio
 
@@ -29,15 +29,15 @@ Select Signing Report
 
 ![Run Report](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/run-report)
 
-Right click and choose run
+Right-click and choose run
 
 ![SHA-256](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/sha-256)
 
 Copy your SHA-256 digest
 
-## Install SDK to gradle
+## Install SDK to Gradle
 
-### Install jitpack to top level gradle
+### Install jitpack to top level Gradle
 
 ```gradle
 allprojects {
@@ -49,7 +49,7 @@ allprojects {
 }
 ```
 
-### Install SDK to application level gradle
+### Install SDK to application level Gradle
 
 ```gradle
 dependencies {

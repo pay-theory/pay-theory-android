@@ -11,13 +11,10 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
-import com.goterl.lazycode.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
-import com.paytheory.android.sdk.websocket.WebServicesProvider
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
-import com.paytheory.android.sdk.websocket.WebsocketRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 

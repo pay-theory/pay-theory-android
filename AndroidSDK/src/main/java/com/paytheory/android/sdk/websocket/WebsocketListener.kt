@@ -21,12 +21,7 @@ class WebSocketListener : WebSocketListener() {
         GlobalScope.launch {
             socketEventChannel.send(SocketUpdate("connected to socket"))
         }
-
         //{ ptToken: token, origin, timing: getTiming() }
-//        webSocket.send("Hi")
-//        webSocket.send("Hi again")
-//        webSocket.send("Hi again again")
-//        webSocket.send("Hi again again again")
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {

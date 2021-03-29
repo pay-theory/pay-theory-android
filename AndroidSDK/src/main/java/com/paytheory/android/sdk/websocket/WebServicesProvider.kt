@@ -1,9 +1,5 @@
 package com.paytheory.android.sdk.websocket
 
-import com.goterl.lazycode.lazysodium.LazySodiumAndroid
-import com.goterl.lazycode.lazysodium.SodiumAndroid
-import com.goterl.lazycode.lazysodium.interfaces.SecretBox
-import com.goterl.lazycode.lazysodium.utils.Key
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import okhttp3.OkHttpClient
