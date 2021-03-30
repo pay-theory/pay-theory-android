@@ -22,9 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 import kotlin.collections.HashMap
 
-//import IdempotencyResponse
-//import com.goterl.lazycode.lazysodium.utils.KeyPair
-
 /**
  * Transaction Class is created after data validation and click listener is activated.
  * This hold all pay theory logic to process payments.
@@ -195,7 +192,30 @@ class Transaction(
 }
 
 
+
+
+
+
+
+
+
+
+
+
 //Not currently used
+
+//import IdempotencyResponse
+//import com.goterl.lazycode.lazysodium.utils.KeyPair
+
+
+
+
+//        lateinit var keyPair: KeyPair
+//        var hostToken = ""
+//        var socketPublicKey = ""
+//        var activePayment: Payment? = null
+
+
 
 //@ExperimentalCoroutinesApi
 //private val messengerConnections = arrayOf(
@@ -206,12 +226,6 @@ class Transaction(
 
 
 //DEPRECATED
-
-//        lateinit var keyPair: KeyPair
-//        var hostToken = ""
-//        var socketPublicKey = ""
-//        var activePayment: Payment? = null
-
 
 //private fun getCardType(number: String): String {
 //    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
