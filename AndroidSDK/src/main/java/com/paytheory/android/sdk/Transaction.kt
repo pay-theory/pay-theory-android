@@ -54,9 +54,6 @@ class Transaction(
         lateinit var viewModel: WebSocketViewModel
     }
 
-    /**
-     * Method used to build api headers
-     */
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
@@ -64,10 +61,6 @@ class Transaction(
         return headerMap
     }
 
-    /**
-     * Method to call pt-token endpoint
-     * @param context the applications resources
-     */
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
@@ -95,10 +88,6 @@ class Transaction(
         }
     }
 
-    /**
-     * Function to call Google's Saftey Net service
-     * @param ptTokenResponse the response object from pt-token endpoint
-     */
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     private fun callSafetyNet(ptTokenResponse: PTTokenResponse) {
@@ -153,11 +142,7 @@ class Transaction(
         //socketAction("host:idempotency", sessionKey, socket, { apiKey, payment, hostToken, sessionKey, timing: getTiming() }), [IDEMPOTENCY, socketAction])
         //{ action, sessionKey: window.btoa(sessionKey), encoded: encryption.encrypt(boxed, encoded), publicKey: encryption.encodeKey(keyPair.publicKey) }
     }
-
-    /**
-     * Function to discover message type from socket
-     * @param message the incoming message from socket
-     */
+    
     private fun discoverMessageType(message: String): String  {
         return when {
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN

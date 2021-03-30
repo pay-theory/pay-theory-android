@@ -15,9 +15,6 @@ import strikt.api.expectThat
  */
 class ApiTests {
 
-    /**
-     * Build call headers
-     */
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
@@ -46,6 +43,9 @@ class ApiTests {
         fun doToken(@HeaderMap headers: Map<String, String>): Call<PTTokenResponse>
     }
 
+    /**
+     * test pt token api creation and functions
+     */
     @Test
     fun ptTokenTest() {
         val api = ptTokenCall()

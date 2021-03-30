@@ -8,11 +8,21 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 
+/**
+ * Creates a view model of WebSocket
+ * @param interactor WebSocket interactor
+ * @param payTheoryToken token used for security
+ */
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
     var payTheoryToken: String
 ):
     ViewModel() {
+
+    /**
+     * Function to start socket
+     * @param handler WebSocket message handler
+     */
     @ExperimentalCoroutinesApi
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -31,6 +41,10 @@ class WebSocketViewModel(
         }
     }
 
+    /**
+     * Function to send messages to server
+     * @param message message to send to server
+     */
     @ExperimentalCoroutinesApi
     fun sendSocketMessage(message:String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -53,34 +67,62 @@ class WebSocketViewModel(
 
 }
 
+/**
+ * Creates WebSocket interactor to start, stop and send messages
+ * @param repository WebSocket repository
+ */
 class WebsocketInteractor constructor(private val repository: WebsocketRepository) {
 
+    /**
+     * Function to close WebSocket
+     */
     @ExperimentalCoroutinesApi
     fun stopSocket() {
         repository.closeSocket()
     }
 
+    /**
+     * Function to send messages though a WebSocket
+     */
     @ExperimentalCoroutinesApi
     fun sendMessage(message:String) {
         repository.sendMessage(message)
     }
 
+    /**
+     * Function to start WebSocket
+     * @param ptToken token used for security
+     */
     @ExperimentalCoroutinesApi
     fun startSocket(ptToken:String): Channel<SocketUpdate> = repository.startSocket(ptToken)
 
 }
 
+/**
+ * Creates WebSocket repository to start, stop and send messages
+ * @param webServicesProvider WebSocket web services provider
+ */
 class WebsocketRepository constructor(private val webServicesProvider: WebServicesProvider) {
 
+    /**
+     * Function to start WebSocket
+     * @param ptToken token used for security
+     */
     @ExperimentalCoroutinesApi
     fun startSocket(ptToken:String): Channel<SocketUpdate> =
         webServicesProvider.startSocket(ptToken)
 
+    /**
+     * Function to send messages though a WebSocket
+     */
     @ExperimentalCoroutinesApi
     fun sendMessage(message:String) {
         webServicesProvider.sendMessage(message)
     }
 
+    /**
+     * Function to close WebSocket
+     */
     @ExperimentalCoroutinesApi
     fun closeSocket() {
         webServicesProvider.stopSocket()

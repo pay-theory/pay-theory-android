@@ -73,6 +73,7 @@ class WebServicesProvider {
             _webSocketListener?.socketEventChannel?.close()
             _webSocketListener = null
         } catch (ex: Exception) {
+            println("error $ex")
         }
     }
 

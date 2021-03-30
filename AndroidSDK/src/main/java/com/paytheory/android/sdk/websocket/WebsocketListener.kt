@@ -9,6 +9,9 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 
+/**
+ * Create a WebSocket listener
+ */
 @ExperimentalCoroutinesApi
 class WebSocketListener : WebSocketListener() {
 
@@ -47,8 +50,17 @@ class WebSocketListener : WebSocketListener() {
     }
 }
 
+/**
+ * Create a exception class for WebSocket errors
+ */
 class SocketAbortedException : Exception()
 
+/**
+ * Data class that hold all WebSocket update data
+ * @param text text string
+ * @param byteString byte string
+ * @param exception throwable exception for errors
+ */
 data class SocketUpdate(
     val text: String? = null,
     val byteString: ByteString? = null,
