@@ -7,7 +7,9 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * Class that manages WebSocket actions: start, send message, stop
+ */
 class WebServicesProvider {
 
     private var _webSocket: WebSocket? = null
@@ -23,6 +25,10 @@ class WebServicesProvider {
     @ExperimentalCoroutinesApi
     private var _webSocketListener: WebSocketListener? = null
 
+    /**
+     * Function to create WebSocket and attach a WebSocket listener
+     * @param ptToken token that is added to WebSocket messages for security
+     */
     @ExperimentalCoroutinesApi
     fun startSocket(ptToken: String): Channel<SocketUpdate> =
         with(WebSocketListener()) {
@@ -30,6 +36,11 @@ class WebServicesProvider {
             this@with.socketEventChannel
         }
 
+    /**
+     * Function to create WebSocket and attach URL
+     * @param ptToken token that is added to WebSocket messages for security
+     * @param webSocketListener WebSocket listener
+     */
     @ExperimentalCoroutinesApi
     fun startSocket(webSocketListener: WebSocketListener, ptToken: String) {
         _webSocketListener = webSocketListener
@@ -42,11 +53,18 @@ class WebServicesProvider {
         socketOkHttpClient.dispatcher.executorService.shutdown()
     }
 
+    /**
+     * Function to send messages to the server of WebSocket
+     * @param message message that will be sent to server
+     */
     @ExperimentalCoroutinesApi
     fun sendMessage(message: String) {
         _webSocket?.send(message)
     }
 
+    /**
+     * Function to stop WebSocket connection
+     */
     @ExperimentalCoroutinesApi
     fun stopSocket() {
         try {

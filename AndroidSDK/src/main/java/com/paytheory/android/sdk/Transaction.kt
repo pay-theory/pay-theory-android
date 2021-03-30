@@ -28,6 +28,8 @@ import kotlin.collections.HashMap
 /**
  * Transaction Class is created after data validation and click listener is activated.
  * This hold all pay theory logic to process payments.
+ * @param context the applications rersources
+ * @param apiKey the api-key that will be used to create payment transaction
  */
 class Transaction(
     private val context: Context,
@@ -55,6 +57,9 @@ class Transaction(
         lateinit var viewModel: WebSocketViewModel
     }
 
+    /**
+     * Method used to build api headers
+     */
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
@@ -62,6 +67,10 @@ class Transaction(
         return headerMap
     }
 
+    /**
+     * Method to call pt-token endpoint
+     * @param context the applications resources
+     */
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
@@ -89,6 +98,10 @@ class Transaction(
         }
     }
 
+    /**
+     * Function to call Google's Saftey Net service
+     * @param ptTokenResponse the response object from pt-token endpoint
+     */
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     private fun callSafetyNet(ptTokenResponse: PTTokenResponse) {
@@ -110,7 +123,7 @@ class Transaction(
     }
 
     /**
-     * Initiate transaction
+     * Initiate Transaction Class and calls pt-token endpoint
      */
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
@@ -118,6 +131,12 @@ class Transaction(
         ptTokenApiCall(context)
     }
 
+    /**
+     * Final api call to complete transaction
+     * @param payment payment object to transact
+     * @param tags optional data that can be added as tags for a payment
+     * @param buyerOptions optional buyer data that call be added to a transaction
+     */
     @ExperimentalCoroutinesApi
     fun transact(payment: Payment,
                  tags: Map<String, String> = HashMap<String, String>(),
@@ -138,12 +157,10 @@ class Transaction(
         //{ action, sessionKey: window.btoa(sessionKey), encoded: encryption.encrypt(boxed, encoded), publicKey: encryption.encodeKey(keyPair.publicKey) }
     }
 
-    @ExperimentalCoroutinesApi
-    private val messengerConnections = arrayOf(
-        CONNECTED,
-        DISCONNECTED
-    )
-
+    /**
+     * Function to discover message type from socket
+     * @param message the incoming message from socket
+     */
     private fun discoverMessageType(message: String): String  {
         return when {
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
@@ -153,6 +170,10 @@ class Transaction(
         }
     }
 
+    /**
+     * Function to call next action based on incoming socket message
+     * @param message the incoming message from socket
+     */
     @ExperimentalCoroutinesApi
     override fun receiveMessage(message: String) {
         println("message $message")
@@ -174,7 +195,13 @@ class Transaction(
 }
 
 
+//Not currently used
 
+//@ExperimentalCoroutinesApi
+//private val messengerConnections = arrayOf(
+//    Transaction.CONNECTED,
+//    Transaction.DISCONNECTED
+//)
 
 
 
@@ -186,19 +213,19 @@ class Transaction(
 //        var activePayment: Payment? = null
 
 
-private fun getCardType(number: String): String {
-    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
-    val mastercard = Regex("^5[1-5][0-9]{14}$")
-    val amx = Regex("^3[47][0-9]{13}$")
-    val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
-    val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
-
-    return when {
-        visa.matches(number) -> "Visa"
-        mastercard.matches(number) -> "Mastercard"
-        amx.matches(number) -> "American Express"
-        diners.matches(number) -> "Diners"
-        discover.matches(number) -> "Discover"
-        else -> "Unknown"
-    }
-}
+//private fun getCardType(number: String): String {
+//    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
+//    val mastercard = Regex("^5[1-5][0-9]{14}$")
+//    val amx = Regex("^3[47][0-9]{13}$")
+//    val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
+//    val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
+//
+//    return when {
+//        visa.matches(number) -> "Visa"
+//        mastercard.matches(number) -> "Mastercard"
+//        amx.matches(number) -> "American Express"
+//        diners.matches(number) -> "Diners"
+//        discover.matches(number) -> "Discover"
+//        else -> "Unknown"
+//    }
+//}
