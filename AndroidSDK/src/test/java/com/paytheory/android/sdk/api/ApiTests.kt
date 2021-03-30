@@ -39,6 +39,10 @@ class ApiTests {
      * interface for pt-token call
      */
     interface TestPtToken {
+        /**
+         * function that returns pt-token call
+         * @param headers headers of pt-token call
+         */
         @GET("pt-token")
         fun doToken(@HeaderMap headers: Map<String, String>): Call<PTTokenResponse>
     }

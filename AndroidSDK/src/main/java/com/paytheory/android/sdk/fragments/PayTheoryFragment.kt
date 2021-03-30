@@ -129,57 +129,6 @@ class PayTheoryFragment : Fragment() {
 //        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
 
 
-        setOnClickListener(
-            btn,
-            hasAccountName,
-            accountName,
-            hasBillingAddress,
-            billingAddress1,
-            billingAddress2,
-            billingCity,
-            billingState,
-            billingZip,
-            hasCC,
-            ccExpiration,
-            ccNumber,
-            ccCVV,
-            hasACH,
-            achAccount,
-            achRouting
-        )
-    }
-
-    private fun getAchData(): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = activity!!.findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = activity!!.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
-        return Pair(achAccount, achRouting)
-    }
-
-    private fun getCreditCardData(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
-        val ccNumber = activity!!.findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = activity!!.findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        val ccExpiration = activity!!.findViewById<PayTheoryEditText>(R.id.cc_expiration)
-        return Triple(ccNumber, ccCVV, ccExpiration)
-    }
-
-    private fun setOnClickListener(
-        btn: Button,
-        hasAccountName: Boolean,
-        accountName: PayTheoryEditText,
-        hasBillingAddress: Boolean,
-        billingAddress1: PayTheoryEditText,
-        billingAddress2: PayTheoryEditText,
-        billingCity: PayTheoryEditText,
-        billingState: PayTheoryEditText,
-        billingZip: PayTheoryEditText,
-        hasCC: Boolean,
-        ccExpiration: PayTheoryEditText,
-        ccNumber: PayTheoryEditText,
-        ccCVV: PayTheoryEditText,
-        hasACH: Boolean,
-        achAccount: PayTheoryEditText,
-        achRouting: PayTheoryEditText
-    ) {
         btn.setOnClickListener {
             val buyerOptions = HashMap<String, String>()
 
@@ -226,6 +175,19 @@ class PayTheoryFragment : Fragment() {
                 makePayment(payment, tags, buyerOptions)
             }
         }
+    }
+
+    private fun getAchData(): Pair<PayTheoryEditText, PayTheoryEditText> {
+        val achAccount = activity!!.findViewById<PayTheoryEditText>(R.id.ach_account_number)
+        val achRouting = activity!!.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
+        return Pair(achAccount, achRouting)
+    }
+
+    private fun getCreditCardData(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
+        val ccNumber = activity!!.findViewById<PayTheoryEditText>(R.id.cc_number)
+        val ccCVV = activity!!.findViewById<PayTheoryEditText>(R.id.cc_cvv)
+        val ccExpiration = activity!!.findViewById<PayTheoryEditText>(R.id.cc_expiration)
+        return Triple(ccNumber, ccCVV, ccExpiration)
     }
 
     private fun enableFields(
