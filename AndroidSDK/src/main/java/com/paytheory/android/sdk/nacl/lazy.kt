@@ -8,33 +8,31 @@ import com.goterl.lazycode.lazysodium.utils.Key
 import com.goterl.lazycode.lazysodium.utils.KeyPair
 import java.util.*
 
-//import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
-//import com.goterl.lazycode.lazysodium.interfaces.SecretBox
-
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 val boxLazy = lazySodium as Box.Lazy
+
+/**
+ * Class used for encrypting WebSocket messages
+ * @param cipher cipher text
+ * @param nonce nonce
+ */
 class Encrypted(
     @SerializedName("cipher") val cipher: String,
     @SerializedName("nonce") val nonce: ByteArray,
 )
 
-fun String.decodeHex(): ByteArray = chunked(2)
-    .map { it.toByte(16) }
-    .toByteArray()
-
-fun generateNonce(): ByteArray {
-    val nonce = lazySodium.nonce(Box.NONCEBYTES)
-    println("nonce ${Base64.getEncoder().encodeToString(nonce)}")
-    return nonce
-}
-
+/**
+ * Function to generate KeyPair
+ */
 fun generateLocalKeyPair(): KeyPair {
     return boxLazy.cryptoBoxKeypair()
 }
-fun cryptoKeyPair(remotePublicKey: Key, privateKey: Key): KeyPair {
-    return KeyPair(remotePublicKey, privateKey)
-}
 
+/**
+ * Function to encrypt message
+ * @param message the message to be encrypted
+ * @param publicKey the key used to encrypt
+ */
 fun encryptBox(message: String, publicKey: Key): String {
     return boxLazy.cryptoBoxSealEasy(
         message,
@@ -42,9 +40,35 @@ fun encryptBox(message: String, publicKey: Key): String {
     )
 }
 
-fun unseal(cipher: String, keyPair: KeyPair): String {
-    return boxLazy.cryptoBoxSealOpenEasy(cipher, keyPair)
-}
+
+
+
+
+
+
+//NOT USED
+
+//import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
+//import com.goterl.lazycode.lazysodium.interfaces.SecretBox
+
+///**
+// * Function used to decode hex into byte array
+// */
+//fun String.decodeHex(): ByteArray = chunked(2)
+//    .map { it.toByte(16) }
+//    .toByteArray()
+//fun generateNonce(): ByteArray {
+//    val nonce = lazySodium.nonce(Box.NONCEBYTES)
+//    println("nonce ${Base64.getEncoder().encodeToString(nonce)}")
+//    return nonce
+//}
+//fun unseal(cipher: String, keyPair: KeyPair): String {
+//    return boxLazy.cryptoBoxSealOpenEasy(cipher, keyPair)
+//}
+//fun cryptoKeyPair(remotePublicKey: Key, privateKey: Key): KeyPair {
+//    return KeyPair(remotePublicKey, privateKey)
+//}
+
 
 
 

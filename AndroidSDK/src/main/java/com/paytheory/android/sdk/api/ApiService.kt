@@ -9,6 +9,9 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
  */
 object ApiService {
 
+    /**
+     * Function that creates the pt token api call
+     */
     fun ptTokenApiCall(): PTTokenApiService = Retrofit.Builder()
         .baseUrl(Constants.API_BASE_PATH)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

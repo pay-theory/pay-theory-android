@@ -18,13 +18,22 @@ import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
+/**
+ * Creates reactions based on WebSocket messages
+ * @param viewModel view model of WebSocket
+ * @param webSocketInteractor interactor for WebSocket
+ */
 class MessageReactors(private val viewModel: WebSocketViewModel, private val webSocketInteractor: WebsocketInteractor) {
     var activePayment: Payment? = null
     var hostToken = ""
     var sessionKey = ""
     var socketPublicKey = ""
 
-
+    /**
+     * Function that creates a message for a host token action
+     * @param message message to be sent
+     * @param apiKey api-key used for transaction
+     */
     fun onHostToken(message:String, apiKey:String): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson<HostTokenMessage>(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
@@ -32,10 +41,21 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         hostToken = hostTokenMessage.hostToken
         return hostTokenMessage
     }
+
+    /**
+     * Function that creates a message for a unknown action
+     * @param message message to be sent
+     * @param apiKey api-key used for transaction
+     */
     fun onUnknown(message:String, apiKey:String): Any {
         return Gson().fromJson<Any>(message, Any::class.java)
     }
 
+    /**
+     * Function that creates a message for a instrument action
+     * @param message message to be sent
+     * @param apiKey api-key used for transaction
+     */
     @ExperimentalCoroutinesApi
     fun onInstrument(message:String, apiKey:String): InstrumentMessage {
         val instrumentMessage = Gson().fromJson<InstrumentMessage>(message, InstrumentMessage::class.java)
@@ -59,6 +79,12 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
 
         return instrumentMessage
     }
+
+    /**
+     * Function that creates a message for a idempotency action
+     * @param message message to be sent
+     * @param apiKey api-key used for transaction
+     */
     @ExperimentalCoroutinesApi
     fun onIdempotency(message:String, apiKey:String): IdempotencyMessage {
         val idempotencyMessage = Gson().fromJson<IdempotencyMessage>(message, IdempotencyMessage::class.java)
@@ -79,6 +105,12 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
 
         return idempotencyMessage
     }
+
+    /**
+     * Function that creates a message for a transfer action
+     * @param message message to be sent
+     * @param apiKey api-key used for transaction
+     */
     @ExperimentalCoroutinesApi
     fun onTransfer(message:String, apiKey:String): TransferMessage {
         return Gson().fromJson<TransferMessage>(message, TransferMessage::class.java)
