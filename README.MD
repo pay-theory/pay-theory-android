@@ -127,9 +127,6 @@ Java
         // collect ACH bank details instead of credit card (OPTIONAL)
         payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
 
-        // create custom tags per transaction (OPTIONAL)
-        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
-        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
 ```
 
 React to events by implementing the Payable interface

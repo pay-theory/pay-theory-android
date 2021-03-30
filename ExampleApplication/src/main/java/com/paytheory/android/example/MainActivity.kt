@@ -25,9 +25,6 @@ class MainActivity : FragmentActivity() , Payable {
         payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
         payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
 
-        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
-        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
-
         payTheoryFragment!!.arguments = payTheoryArgs
     }
 

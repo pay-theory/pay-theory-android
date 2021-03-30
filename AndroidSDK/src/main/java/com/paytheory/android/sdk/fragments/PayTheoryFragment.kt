@@ -55,7 +55,6 @@ class PayTheoryFragment : Fragment() {
 
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
-        this.tags = arguments!!.getSerializable(TAGS) as HashMap<String, String>
 
         payTheoryTransaction =
             Transaction(
@@ -116,6 +115,22 @@ class PayTheoryFragment : Fragment() {
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
         }
+        //TODO TAGS
+
+        //MAIN ACTIVITY
+        // val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC", "testing" to "123456789")
+        // payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
+
+        //FRAGMENT
+//        if ((arguments!!.getSerializable(TAGS) as HashMap<String, String>).isNotEmpty()){
+//            tags.putAll(arguments!!.getSerializable(TAGS) as HashMap<String, String>)
+//        }
+
+        //README
+//        // create custom tags per transaction (OPTIONAL)
+//        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
+//        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
+
 
         btn.setOnClickListener {
             val buyerOptions = HashMap<String,String>()
