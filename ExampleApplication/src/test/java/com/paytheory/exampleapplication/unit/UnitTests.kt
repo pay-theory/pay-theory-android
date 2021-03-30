@@ -6,6 +6,9 @@ import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
+/**
+ * Unit tests for encryption functions
+ */
 class UnitTests {
 
 //    var arr = byteArrayOf(0x2E, 0x38)
