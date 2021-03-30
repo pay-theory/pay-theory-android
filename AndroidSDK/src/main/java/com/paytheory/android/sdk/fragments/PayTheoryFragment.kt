@@ -28,7 +28,7 @@ class PayTheoryFragment : Fragment() {
         val USE_ACH = "ach_enabled"
         val ACCOUNT_NAME_ENABLED = "account_name_enabled"
         val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
-        val TAGS = "tags"
+//        val TAGS = "tags"
         val PAYMENT_CARD = "PAYMENT_CARD"
         val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
@@ -112,22 +112,6 @@ class PayTheoryFragment : Fragment() {
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
         }
-        //TODO TAGS
-
-        //MAIN ACTIVITY
-        // val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC", "testing" to "123456789")
-        // payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
-
-        //FRAGMENT
-//        if ((arguments!!.getSerializable(TAGS) as HashMap<String, String>).isNotEmpty()){
-//            tags.putAll(arguments!!.getSerializable(TAGS) as HashMap<String, String>)
-//        }
-
-        //README
-//        // create custom tags per transaction (OPTIONAL)
-//        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
-//        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
-
 
         btn.setOnClickListener {
             val buyerOptions = HashMap<String, String>()
@@ -251,3 +235,27 @@ class PayTheoryFragment : Fragment() {
 
 
 }
+
+
+
+
+
+
+
+
+
+//TODO TAGS
+
+//MAIN ACTIVITY
+// val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC", "testing" to "123456789")
+// payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
+
+//FRAGMENT
+//        if ((arguments!!.getSerializable(TAGS) as HashMap<String, String>).isNotEmpty()){
+//            tags.putAll(arguments!!.getSerializable(TAGS) as HashMap<String, String>)
+//        }
+
+//README
+//        // create custom tags per transaction (OPTIONAL)
+//        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
+//        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)

@@ -1,9 +1,10 @@
-package com.paytheory.android.sdk.api
+package com.paytheory.exampleapplication.api
 
 import com.paytheory.android.sdk.Constants
+import com.paytheory.android.sdk.api.ApiWorker
+import com.paytheory.android.sdk.api.PTTokenResponse
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.Test
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.http.GET
@@ -44,7 +45,7 @@ class ApiTests {
          * @param headers headers of pt-token call
          */
         @GET("pt-token")
-        fun doToken(@HeaderMap headers: Map<String, String>): Call<PTTokenResponse>
+        fun doToken(@HeaderMap headers: Map<String, String>): retrofit2.Call<PTTokenResponse>
     }
 
     /**
@@ -53,7 +54,7 @@ class ApiTests {
     @Test
     fun ptTokenTest() {
         val api = ptTokenCall()
-        val call: Call<PTTokenResponse> = api!!.doToken(buildApiHeaders())
+        val call: retrofit2.Call<PTTokenResponse> = api!!.doToken(buildApiHeaders())
 
 
         expectThat(call.request()) {

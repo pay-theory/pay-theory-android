@@ -6,7 +6,7 @@ import com.goterl.lazycode.lazysodium.SodiumAndroid
 import com.goterl.lazycode.lazysodium.interfaces.Box
 import com.goterl.lazycode.lazysodium.utils.Key
 import com.goterl.lazycode.lazysodium.utils.KeyPair
-import java.util.*
+
 
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 val boxLazy = lazySodium as Box.Lazy
@@ -50,6 +50,7 @@ fun encryptBox(message: String, publicKey: Key): String {
 
 //import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
 //import com.goterl.lazycode.lazysodium.interfaces.SecretBox
+//import java.util.*
 
 ///**
 // * Function used to decode hex into byte array
