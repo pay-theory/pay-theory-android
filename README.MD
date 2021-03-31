@@ -53,7 +53,6 @@ allprojects {
 
 ```gradle
 dependencies {
-
     ...
     implementation 'com.github.pay-theory:pay-theory-android:1.1.1-alpha'
     ...
@@ -86,46 +85,49 @@ retrieve the fragment from your activity's onCreate and initialize
 
 Kotlin
 ```Kotlin
-        val payTheoryFragment = this.supportFragmentManager
-                .findFragmentById(R.id.payTheoryFragment)
+val payTheoryFragment = this.supportFragmentManager
+        .findFragmentById(R.id.payTheoryFragment)
 
-        val payTheoryArgs = Bundle()
-        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-API-Key")
-        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT,5000)
+val payTheoryArgs = Bundle()
+payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-API-Key")
+payTheoryArgs.putInt(PayTheoryFragment.AMOUNT,5000)
 
-        payTheoryFragment!!.arguments = payTheoryArgs
+payTheoryFragment!!.arguments = payTheoryArgs
 ```
 
 Java
 ```Java
-       Fragment payTheoryFragment = this.getSupportFragmentManager()
-                .findFragmentById(R.id.payTheoryFragment);
+Fragment payTheoryFragment = this.getSupportFragmentManager()
+        .findFragmentById(R.id.payTheoryFragment);
 
-       Bundle payTheoryArgs = new Bundle();
-       payTheoryArgs.putString(PayTheoryFragment.Companion.getAPI_KEY(), "My-API-Key");
-       payTheoryArgs.putInt(PayTheoryFragment.Companion.getAMOUNT(),5000);
+Bundle payTheoryArgs = new Bundle();
+payTheoryArgs.putString(PayTheoryFragment.Companion.getAPI_KEY(), "My-API-Key");
+payTheoryArgs.putInt(PayTheoryFragment.Companion.getAMOUNT(),5000);
 
-       payTheoryFragment.setArguments(payTheoryArgs);
+payTheoryFragment.setArguments(payTheoryArgs);
 ```
 
 *   by default the SDK provides a simple credit card input
 *   applying optional settings allows customization
 
 ```Kotlin
-        // applying api-key
-        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")   
-     
-        // collect amount of payment (REQUIRED)
-        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
+(REQUIRED)
+// applying api-key 
+payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")   
 
-        // display an account name field (OPTIONAL)
-        payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
+// collect amount of payment
+payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
 
-        // display billing address fields (OPTIONAL)
-        payTheoryArgs.putBoolean(PayTheoryFragment.BILLING_ADDRESS_ENABLED,true)
 
-        // collect ACH bank details instead of credit card (OPTIONAL)
-        payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
+(OPTIONAL)
+// display an account name field 
+payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
+
+// display billing address fields 
+payTheoryArgs.putBoolean(PayTheoryFragment.BILLING_ADDRESS_ENABLED,true)
+
+// collect ACH bank details instead of credit card 
+payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
 
 ```
 
@@ -201,7 +203,7 @@ data class PaymentResult (
 
 ```Kotlin
 data class PaymentError (
-    @SerializedName("reason") val reason: String,)
+    @SerializedName("reason") val reason: String)
 ```
 
 ## License

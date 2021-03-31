@@ -139,8 +139,6 @@ class Transaction(
             boxed,
             localPublicKey)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-        //socketAction("host:idempotency", sessionKey, socket, { apiKey, payment, hostToken, sessionKey, timing: getTiming() }), [IDEMPOTENCY, socketAction])
-        //{ action, sessionKey: window.btoa(sessionKey), encoded: encryption.encrypt(boxed, encoded), publicKey: encryption.encodeKey(keyPair.publicKey) }
     }
     
     private fun discoverMessageType(message: String): String  {
@@ -165,11 +163,11 @@ class Transaction(
             }
             else -> {
                 when (discoverMessageType(message)) {
-                    HOST_TOKEN -> messageReactors!!.onHostToken(message, apiKey)
+                    HOST_TOKEN -> messageReactors!!.onHostToken(message)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
-                    PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message, apiKey)
-                    TRANSFER_ACTION -> messageReactors!!.onTransfer(message, apiKey)
-                    else -> messageReactors!!.onUnknown(message,apiKey)
+                    PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
+                    TRANSFER_ACTION -> messageReactors!!.onTransfer(message)
+                    else -> messageReactors!!.onUnknown(message)
                 }
             }
         }

@@ -23,14 +23,14 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
  */
 class PayTheoryFragment : Fragment() {
     companion object {
-        val API_KEY = "api_key"
-        val AMOUNT = "amount"
-        val USE_ACH = "ach_enabled"
-        val ACCOUNT_NAME_ENABLED = "account_name_enabled"
-        val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
-//        val TAGS = "tags"
-        val PAYMENT_CARD = "PAYMENT_CARD"
-        val BANK_ACCOUNT = "BANK_ACCOUNT"
+        const val API_KEY = "api_key"
+        const val AMOUNT = "amount"
+        const val USE_ACH = "ach_enabled"
+        const val ACCOUNT_NAME_ENABLED = "account_name_enabled"
+        const val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
+        const val TAGS = "tags"
+        const val PAYMENT_CARD = "PAYMENT_CARD"
+        const val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
     private lateinit var payTheoryTransaction: Transaction

@@ -1,6 +1,5 @@
 package com.paytheory.android.sdk.nacl
 
-import com.google.gson.annotations.SerializedName
 import com.goterl.lazycode.lazysodium.LazySodiumAndroid
 import com.goterl.lazycode.lazysodium.SodiumAndroid
 import com.goterl.lazycode.lazysodium.interfaces.Box
@@ -10,16 +9,6 @@ import com.goterl.lazycode.lazysodium.utils.KeyPair
 
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 val boxLazy = lazySodium as Box.Lazy
-
-/**
- * Class used for encrypting WebSocket messages
- * @param cipher cipher text
- * @param nonce nonce
- */
-class Encrypted(
-    @SerializedName("cipher") val cipher: String,
-    @SerializedName("nonce") val nonce: ByteArray,
-)
 
 /**
  * Function to generate KeyPair
@@ -50,7 +39,24 @@ fun encryptBox(message: String, publicKey: Key): String {
 
 //import com.goterl.lazycode.lazysodium.LazySodiumAndroid.toBin
 //import com.goterl.lazycode.lazysodium.interfaces.SecretBox
+//import com.google.gson.annotations.SerializedName
 //import java.util.*
+
+
+///**
+// * Class used for encrypting WebSocket messages
+// * @param cipher cipher text
+// * @param nonce nonce
+// */
+//class Encrypted(
+//    @SerializedName("cipher") val cipher: String,
+//    @SerializedName("nonce") val nonce: ByteArray,
+//)
+
+
+
+
+
 
 ///**
 // * Function used to decode hex into byte array

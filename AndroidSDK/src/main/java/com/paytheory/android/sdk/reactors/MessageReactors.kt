@@ -34,8 +34,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
-    fun onHostToken(message:String, apiKey:String): HostTokenMessage {
-        val hostTokenMessage = Gson().fromJson<HostTokenMessage>(message, HostTokenMessage::class.java)
+    fun onHostToken(message: String): HostTokenMessage {
+        val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
         sessionKey = hostTokenMessage.sessionKey
         hostToken = hostTokenMessage.hostToken
@@ -47,8 +47,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
-    fun onUnknown(message:String, apiKey:String): Any {
-        return Gson().fromJson<Any>(message, Any::class.java)
+    fun onUnknown(message: String): Any {
+        return Gson().fromJson(message, Any::class.java)
     }
 
     /**
@@ -58,7 +58,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun onInstrument(message:String, apiKey:String): InstrumentMessage {
-        val instrumentMessage = Gson().fromJson<InstrumentMessage>(message, InstrumentMessage::class.java)
+        val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
         activePayment!!.ptInstrument = instrumentMessage.ptInstrument
 
         val keyPair = generateLocalKeyPair()
@@ -86,8 +86,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
-    fun onIdempotency(message:String, apiKey:String): IdempotencyMessage {
-        val idempotencyMessage = Gson().fromJson<IdempotencyMessage>(message, IdempotencyMessage::class.java)
+    fun onIdempotency(message: String): IdempotencyMessage {
+        val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
 
         val keyPair = generateLocalKeyPair()
         val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -112,8 +112,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message:String, apiKey:String): TransferMessage {
-        return Gson().fromJson<TransferMessage>(message, TransferMessage::class.java)
+    fun onTransfer(message: String): TransferMessage {
+        return Gson().fromJson(message, TransferMessage::class.java)
     }
 }
 
