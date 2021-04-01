@@ -5,7 +5,7 @@ package com.paytheory.android.sdk
  */
 object Constants {
 
-    val ENV = "dev"
+    val ENV = "finix"
     val API_BASE_PATH: String = "https://$ENV.tags.api.paytheorystudy.com/"
     val NO_INTERNET_ERROR: String = "No internet connection"
 
