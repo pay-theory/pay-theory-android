@@ -16,6 +16,7 @@ import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * PayTheoryFragment populates with required text inputs.
@@ -49,6 +50,7 @@ class PayTheoryFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
+    @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -145,7 +147,7 @@ class PayTheoryFragment : Fragment() {
                     expiration_month = expirationString.split("/").first(),
                     expiration_year = expirationString.split("/").last(),
                 )
-                makePayment(payment, tags, buyerOptions)
+                makePayment(payment)
             }
 
             if (hasACH) {
@@ -156,7 +158,7 @@ class PayTheoryFragment : Fragment() {
                     account_number = achAccount.text.toString(),
                     bank_code = achRouting.text.toString()
                 )
-                makePayment(payment, tags, buyerOptions)
+                makePayment(payment)
             }
         }
     }
@@ -195,8 +197,9 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
-    private fun makePayment(payment: Payment, tags: Map<String,String>, buyerOptions: Map<String,String>) {
-        payTheoryTransaction.transact(payment,tags,buyerOptions)
+    @ExperimentalCoroutinesApi
+    private fun makePayment(payment: Payment) {
+        payTheoryTransaction.transact(payment)
     }
 
     private fun enableCC() {

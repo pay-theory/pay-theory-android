@@ -32,7 +32,7 @@ class WebSocketViewModel(
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)
                     } else {
-                        onSocketError(it.exception!!)
+                        onSocketError(it.exception)
                     }
                 }
             } catch (ex: java.lang.Exception) {
@@ -60,6 +60,7 @@ class WebSocketViewModel(
         println("Error occurred : ${ex.message}")
     }
 
+    @ExperimentalCoroutinesApi
     override fun onCleared() {
         interactor.stopSocket()
         super.onCleared()
