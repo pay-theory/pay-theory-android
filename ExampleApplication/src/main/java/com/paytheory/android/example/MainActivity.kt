@@ -21,7 +21,7 @@ class MainActivity : FragmentActivity() , Payable {
 
         val payTheoryArgs = Bundle()
 
-        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "")
+        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")
         payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
         payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
 
