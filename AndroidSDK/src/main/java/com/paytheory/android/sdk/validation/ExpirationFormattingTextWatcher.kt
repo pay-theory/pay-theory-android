@@ -55,6 +55,9 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
 
         if (parts.size == 2 && parts.last().isNotEmpty()) {
             var year = parts.last().toInt()
+            if(parts.last().length < 4){
+                return false
+            }
             if (year < 100) {
                 year += 2000
             }

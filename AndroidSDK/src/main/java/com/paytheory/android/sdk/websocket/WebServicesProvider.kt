@@ -72,6 +72,10 @@ class WebServicesProvider {
             _webSocket = null
             _webSocketListener?.socketEventChannel?.close()
             _webSocketListener = null
+        } catch (ex: IllegalArgumentException) {
+            println("error closing socket ${ex.message}")
+            _webSocket = null
+            _webSocketListener = null
         } catch (ex: Exception) {
             println("error closing socket ${ex.message}")
             _webSocket = null

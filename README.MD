@@ -49,6 +49,10 @@ allprojects {
 }
 ```
 
+### Go to [Jitpack](https://jitpack.io/#pay-theory/pay-theory-android)
+
+### Click "Get it" next to your selected version
+
 ### Install SDK to application level Gradle
 
 ```gradle
@@ -111,7 +115,7 @@ payTheoryFragment.setArguments(payTheoryArgs);
 *   applying optional settings allows customization
 
 ```Kotlin
-(REQUIRED)
+(REQUIRED ARGUMENTS)
 // applying api-key 
 payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")   
 
@@ -119,7 +123,7 @@ payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")
 payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
 
 
-(OPTIONAL)
+(OPTIONAL ARGUMENTS)
 // display an account name field 
 payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
 
