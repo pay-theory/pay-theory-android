@@ -76,10 +76,6 @@ class WebServicesProvider {
             println("error closing socket ${ex.message}")
             _webSocket = null
             _webSocketListener = null
-        } catch (ex: Exception) {
-            println("error closing socket ${ex.message}")
-            _webSocket = null
-            _webSocketListener = null
         }
     }
 

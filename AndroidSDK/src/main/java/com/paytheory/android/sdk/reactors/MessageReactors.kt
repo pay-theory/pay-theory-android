@@ -43,7 +43,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
 
     /**
-     * Function that creates a message for a unknown action
+     * Function that handles incoming message for a unknown action
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
@@ -52,7 +52,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
 
     /**
-     * Function that creates a message for a instrument action
+     * Function that instrument message and creates idempotency request
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
@@ -81,7 +81,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
 
     /**
-     * Function that creates a message for a idempotency action
+     * Function that idempotency message and creates transfer request
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
@@ -107,7 +107,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
 
     /**
-     * Function that creates a message for a transfer action
+     * Function that handles incoming transfer response
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
