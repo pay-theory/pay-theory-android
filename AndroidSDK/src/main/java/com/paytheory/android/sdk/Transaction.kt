@@ -20,7 +20,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -120,13 +119,11 @@ class Transaction(
     /**
      * Final api call to complete transaction
      * @param payment payment object to transact
-     * @param tags optional data that can be added as tags for a payment
-     * @param buyerOptions optional buyer data that call be added to a transaction
      */
     @ExperimentalCoroutinesApi
-    fun transact(payment: Payment,
-                 tags: Map<String, String> = HashMap<String, String>(),
-                 buyerOptions: Map<String, String> = HashMap<String, String>()) {
+    fun transact(
+        payment: Payment
+    ) {
         messageReactors!!.activePayment = payment
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis())
