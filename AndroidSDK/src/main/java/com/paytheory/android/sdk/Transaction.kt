@@ -16,8 +16,10 @@ import com.paytheory.android.sdk.reactors.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.*
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
+
+
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
@@ -68,8 +70,8 @@ class Transaction(
 
             val observable = ApiService.ptTokenApiCall().doToken(buildApiHeaders())
 
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+
                 .subscribe({ ptTokenResponse: PTTokenResponse ->
 
                     callSafetyNet(ptTokenResponse)

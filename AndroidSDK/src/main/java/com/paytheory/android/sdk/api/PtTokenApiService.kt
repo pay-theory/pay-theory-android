@@ -1,7 +1,8 @@
 package com.paytheory.android.sdk.api
 
 import com.google.gson.annotations.SerializedName
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
+
 import retrofit2.http.*
 /**
  * Interface that handles data for pay theory challenge service
