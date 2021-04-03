@@ -5,6 +5,7 @@ import io.reactivex.Observable
 import retrofit2.http.*
 /**
  * Interface that handles data for pay theory challenge service
+ * The challenge is sent through the PT Token
  */
 interface PTTokenApiService {
     /**
