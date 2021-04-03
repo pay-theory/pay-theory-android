@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HostnameVerifier
 
 /**
  * Class that manages WebSocket actions: start, send message, stop
@@ -19,7 +20,7 @@ class WebServicesProvider {
     private val socketOkHttpClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .connectTimeout(39, TimeUnit.SECONDS)
-        .hostnameVerifier { _, _ -> true }
+        .hostnameVerifier ( hostnameVerifier = HostnameVerifier{ _, _ -> true })
         .build()
 
     @ExperimentalCoroutinesApi

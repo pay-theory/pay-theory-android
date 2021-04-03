@@ -121,7 +121,7 @@ class PayTheoryFragment : Fragment() {
             if (hasAccountName) {
                 val names = accountName.text.toString().split("\\s".toRegex()).toMutableList()
                 val firstName = names[0]
-                names.removeFirst()
+                names.removeAt(0)
                 val lastName = names.joinToString(" ")
                 buyerOptions["first_name"] = firstName
                 buyerOptions["last_name"] = lastName
@@ -145,7 +145,7 @@ class PayTheoryFragment : Fragment() {
                     number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
                     security_code = ccCVV.text.toString(),
                     expiration_month = expirationString.split("/").first(),
-                    expiration_year = expirationString.split("/").last(),
+                    expiration_year = expirationString.split("/").last()
                 )
                 makePayment(payment)
             }

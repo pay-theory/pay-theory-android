@@ -41,7 +41,7 @@ data class ChallengeOptions(
     @SerializedName("pubKeyCredParams") val pubKeyCredParams: ArrayList<PubKeyCredParam>,
     @SerializedName("authenticatorSelection") val authenticatorSelection: AuthenticatorSelection,
     @SerializedName("timeout") val timeout: Int,
-    @SerializedName("attestation") val attestation: String,
+    @SerializedName("attestation") val attestation: String
 )
 
 /**
@@ -50,7 +50,7 @@ data class ChallengeOptions(
  */
 data class Rp(
     @SerializedName("name") val name: String,
-    @SerializedName("id") val amount: String,
+    @SerializedName("id") val amount: String
 )
 
 /**
@@ -62,7 +62,7 @@ data class Rp(
 data class User(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
-    @SerializedName("displayName") val displayName: String,
+    @SerializedName("displayName") val displayName: String
 )
 
 /**
