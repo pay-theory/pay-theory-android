@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
 
     //Lazy sodium
-    api 'com.github.terl:lazysodium-android:4.3.1@aar'
+    implementation 'com.github.terl:lazysodium-android:4.3.1@aar'
 
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
