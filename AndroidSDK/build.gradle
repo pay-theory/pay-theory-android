@@ -69,7 +69,6 @@ dependencies {
 
     //Lazy sodium
     api 'com.github.terl:lazysodium-android:4.3.1@aar'
-    api 'net.java.dev.jna:jna:5.8.0@aar'
 
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
