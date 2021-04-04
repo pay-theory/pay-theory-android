@@ -49,24 +49,26 @@ allprojects {
 }
 ```
 
-### Go to [Jitpack](https://jitpack.io/#pay-theory/pay-theory-android)
-
-### Click "Get it" next to your selected version
-
 ### Install SDK to application level Gradle
 
 ```gradle
 dependencies {
     ...
-    implementation 'com.github.pay-theory:pay-theory-android:RELEASE-TAG'
+    implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-RELEASE') {
+        exclude group: 'net.java.dev.jna', module:'jna'
+    }
+    implementation 'net.java.dev.jna:jna:JNA-RELEASE@aar'
     ...
-}
 }
 ```
 
 [![](https://jitpack.io/v/pay-theory/pay-theory-android.svg)](https://jitpack.io/#pay-theory/pay-theory-android)
 
-_replace RELEASE-TAG with the release version shown above_
+_replace PAY-THEORY-RELEASE with the release version shown above_
+
+[![](https://jitpack.io/v/java-native-access/jna.svg)](https://jitpack.io/#java-native-access/jna)
+
+_replace JNA-RELEASE with the release version shown above_
 
 ## Usage
 
@@ -75,8 +77,9 @@ _replace RELEASE-TAG with the release version shown above_
 add Pay Theory Fragment to your layout
 
 ```xml
-<SomeLayout>
-
+<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <fragment
         android:id="@+id/payTheoryFragment"
         android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
@@ -84,7 +87,7 @@ add Pay Theory Fragment to your layout
         android:layout_height="wrap_content"
         />
 
-</SomeLayout>
+</LinearLayout>
 ```
 
 ### Activity
