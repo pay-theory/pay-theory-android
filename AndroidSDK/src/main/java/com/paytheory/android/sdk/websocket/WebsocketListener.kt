@@ -18,31 +18,38 @@ class WebSocketListener : WebSocketListener() {
     val socketEventChannel: Channel<SocketUpdate> = Channel(10)
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        GlobalScope.launch {
-            println("Pay Theory Connected")
-            socketEventChannel.send(SocketUpdate("connected to socket"))
+        if (!socketEventChannel.isClosedForSend) {
+            GlobalScope.launch {
+                println("Pay Theory Connected")
+                socketEventChannel.send(SocketUpdate("connected to socket"))
+            }
         }
-        //{ ptToken: token, origin, timing: getTiming() }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
-        GlobalScope.launch {
-            socketEventChannel.send(SocketUpdate(text))
+        if (!socketEventChannel.isClosedForSend) {
+            GlobalScope.launch {
+                socketEventChannel.send(SocketUpdate(text))
+            }
         }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        GlobalScope.launch {
-            println("Pay Theory Disconnected")
-            socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
+        if (!socketEventChannel.isClosedForSend) {
+            GlobalScope.launch {
+                socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
+            }
         }
         webSocket.close(NORMAL_CLOSURE_STATUS, null)
         socketEventChannel.close()
+        println("Pay Theory Disconnected")
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        GlobalScope.launch {
-            socketEventChannel.send(SocketUpdate(exception = t))
+        if (!socketEventChannel.isClosedForSend) {
+            GlobalScope.launch {
+                socketEventChannel.send(SocketUpdate(exception = t))
+            }
         }
     }
     companion object {

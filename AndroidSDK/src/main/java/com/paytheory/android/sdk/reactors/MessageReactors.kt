@@ -11,6 +11,7 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
+import com.paytheory.android.sdk.Transaction
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
@@ -33,11 +34,19 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * Function that creates a message for a host token action
      * @param message message to be sent
      */
-    fun onHostToken(message: String): HostTokenMessage {
+    @ExperimentalCoroutinesApi
+    fun onHostToken(message: String, transaction: Transaction? = null): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
         sessionKey = hostTokenMessage.sessionKey
         hostToken = hostTokenMessage.hostToken
+
+        if (transaction?.queuedRequest != null) {
+
+            val actionRequest = transaction.generateQueuedActionRequest(transaction.queuedRequest!!)
+            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+            println("Pay Theory Queued Payment Requested")
+        }
         return hostTokenMessage
     }
 
@@ -110,8 +119,9 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String): TransferMessage {
+    fun onTransfer(message: String, viewModel: WebSocketViewModel): TransferMessage {
         println("Pay Theory Payment Result")
+        viewModel.disconnect()
         return Gson().fromJson(message, TransferMessage::class.java)
     }
 }
