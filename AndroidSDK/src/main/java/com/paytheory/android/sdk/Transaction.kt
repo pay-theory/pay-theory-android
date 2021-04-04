@@ -30,7 +30,7 @@ import java.util.*
  * @param apiKey the api-key that will be used to create payment transaction
  */
 class Transaction(
-    private val context: Context,
+    val context: Context,
     private val apiKey: String,
     private val constants: Constants
 ): WebsocketMessageHandler {
@@ -195,7 +195,7 @@ class Transaction(
                     HOST_TOKEN -> messageReactors!!.onHostToken(message, this)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
                     PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
-                    TRANSFER_RESULT -> messageReactors!!.onTransfer(message,viewModel)
+                    TRANSFER_RESULT -> messageReactors!!.onTransfer(message,viewModel, this)
                     else -> messageReactors!!.onUnknown(message)
                 }
             }

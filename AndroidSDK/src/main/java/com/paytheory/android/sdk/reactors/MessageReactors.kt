@@ -11,6 +11,8 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
+import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.Transaction
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
@@ -119,10 +121,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String, viewModel: WebSocketViewModel): TransferMessage {
+    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction): TransferMessage {
         println("Pay Theory Payment Result")
         viewModel.disconnect()
-        return Gson().fromJson(message, TransferMessage::class.java)
+        val transferMessage = Gson().fromJson(message, TransferMessage::class.java)
+        if (transaction.context is Payable) {
+            transaction.context.paymentComplete(transferMessage)
+        }
+        return transferMessage
     }
 }
 
