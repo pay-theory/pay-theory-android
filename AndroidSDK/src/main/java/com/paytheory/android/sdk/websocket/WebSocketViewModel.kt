@@ -27,7 +27,6 @@ class WebSocketViewModel(
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                println("starting socket")
                 interactor.startSocket(payTheoryToken).consumeEach {
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)

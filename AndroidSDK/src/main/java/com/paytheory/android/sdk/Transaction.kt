@@ -156,7 +156,6 @@ class Transaction(
      */
     @ExperimentalCoroutinesApi
     override fun receiveMessage(message: String) {
-        println("message $message")
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
             DISCONNECTED -> { connectionReactors!!.onDisconnected()
