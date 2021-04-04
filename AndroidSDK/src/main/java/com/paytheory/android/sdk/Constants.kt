@@ -3,10 +3,12 @@ package com.paytheory.android.sdk
 /**
  * Object that contains constant variables
  */
-object Constants {
+class Constants(env: String) {
+    val API_BASE_PATH: String
+    val NO_INTERNET_ERROR: String
 
-    val ENV = "finix"
-    val API_BASE_PATH: String = "https://$ENV.tags.api.paytheorystudy.com/"
-    val NO_INTERNET_ERROR: String = "No internet connection"
-
+    init {
+         API_BASE_PATH = "https://$env.tags.api.paytheorystudy.com/"
+         NO_INTERNET_ERROR = "No internet connection"
+    }
 }

@@ -5,15 +5,17 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 
 /**
- * Object that contains functions to create api calls
+ * Class that contains functions to create api calls
  */
-object ApiService {
+class ApiService(_basePath: String) {
+
+    val basePath = _basePath
 
     /**
      * Function that creates the pt token api call
      */
     fun ptTokenApiCall(): PTTokenApiService = Retrofit.Builder()
-        .baseUrl(Constants.API_BASE_PATH)
+        .baseUrl(basePath)
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .addConverterFactory(ApiWorker.gsonConverter)
         .client(ApiWorker.client)

@@ -34,10 +34,11 @@ class PayTheoryFragment : Fragment() {
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
+    private lateinit var constants: Constants
     private lateinit var payTheoryTransaction: Transaction
     private var api_key: String = ""
     private var amount: Int = 0
-    private var tags: HashMap<String,String> = hashMapOf("pay-theory-environment" to Constants.ENV)
+    private var tags: HashMap<String,String> = java.util.HashMap()
 
     /**
      * Display requested card fields
@@ -57,11 +58,16 @@ class PayTheoryFragment : Fragment() {
 
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
+        val env = this.api_key.split("-")[2]
+        this.constants = Constants(env)
+
+        tags = hashMapOf("pay-theory-environment" to env)
 
         payTheoryTransaction =
             Transaction(
                 this.activity!!,
-                api_key
+                api_key,
+                this.constants
             )
 
         payTheoryTransaction.init()

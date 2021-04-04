@@ -31,7 +31,8 @@ import java.util.*
  */
 class Transaction(
     private val context: Context,
-    private val apiKey: String
+    private val apiKey: String,
+    private val constants: Constants
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -68,7 +69,7 @@ class Transaction(
     private fun ptTokenApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
 
-            val observable = ApiService.ptTokenApiCall().doToken(buildApiHeaders())
+            val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
 
             observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
@@ -84,7 +85,7 @@ class Transaction(
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+                context.paymentError(PaymentError(constants.NO_INTERNET_ERROR))
             }
         }
     }
