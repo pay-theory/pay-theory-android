@@ -19,6 +19,7 @@ class WebSocketListener : WebSocketListener() {
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         GlobalScope.launch {
+            println("Pay Theory Connected")
             socketEventChannel.send(SocketUpdate("connected to socket"))
         }
         //{ ptToken: token, origin, timing: getTiming() }
@@ -32,6 +33,7 @@ class WebSocketListener : WebSocketListener() {
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         GlobalScope.launch {
+            println("Pay Theory Disconnected")
             socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
         }
         webSocket.close(NORMAL_CLOSURE_STATUS, null)

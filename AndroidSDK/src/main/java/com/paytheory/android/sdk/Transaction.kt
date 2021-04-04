@@ -45,6 +45,7 @@ class Transaction(
         private const val PAYMENT_TOKEN = "payment-token"
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val TRANSFER_ACTION = "host:transfer"
+        private const val TRANSFER_RESULT = "payment-detail-reference"
         private const val UNKNOWN = "unknown"
 
         private var messageReactors: MessageReactors? = null
@@ -133,12 +134,12 @@ class Transaction(
         val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
 
         val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-
         val actionRequest = ActionRequest(
             INSTRUMENT_ACTION,
             boxed,
             localPublicKey)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+        println("Pay Theory Payment Requested")
     }
     
     private fun discoverMessageType(message: String): String  {
@@ -146,6 +147,7 @@ class Transaction(
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
             message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
             message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
+            message.indexOf(TRANSFER_RESULT) > -1 -> TRANSFER_RESULT
             else -> UNKNOWN
         }
     }
@@ -165,7 +167,7 @@ class Transaction(
                     HOST_TOKEN -> messageReactors!!.onHostToken(message)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
                     PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
-                    TRANSFER_ACTION -> messageReactors!!.onTransfer(message)
+                    TRANSFER_RESULT -> messageReactors!!.onTransfer(message)
                     else -> messageReactors!!.onUnknown(message)
                 }
             }

@@ -32,7 +32,6 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that creates a message for a host token action
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     fun onHostToken(message: String): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
@@ -45,7 +44,6 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     fun onUnknown(message: String): Any {
         return Gson().fromJson(message, Any::class.java)
@@ -58,6 +56,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun onInstrument(message:String, apiKey:String): InstrumentMessage {
+        println("Pay Theory Instrument Token")
         val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
         activePayment!!.ptInstrument = instrumentMessage.ptInstrument
 
@@ -83,10 +82,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that idempotency message and creates transfer request
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
     fun onIdempotency(message: String): IdempotencyMessage {
+        println("Pay Theory Idempotency")
         val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
 
         val keyPair = generateLocalKeyPair()
@@ -109,10 +108,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that handles incoming transfer response
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
     fun onTransfer(message: String): TransferMessage {
+        println("Pay Theory Payment Result")
         return Gson().fromJson(message, TransferMessage::class.java)
     }
 }
