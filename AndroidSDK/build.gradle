@@ -8,6 +8,10 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
+    buildFeatures {
+        prefab true
+    }
+
     defaultConfig {
         minSdkVersion 26
         targetSdkVersion 30
@@ -64,8 +68,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
 
     //Lazy sodium
-    implementation 'com.github.terl:lazysodium-android:4.3.1@aar'
-    implementation 'net.java.dev.jna:jna:5.8.0@aar'
+    api 'com.github.terl:lazysodium-android:4.3.1@aar'
+    api 'net.java.dev.jna:jna:5.8.0@aar'
 
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
