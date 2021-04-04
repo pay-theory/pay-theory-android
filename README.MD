@@ -58,11 +58,15 @@ allprojects {
 ```gradle
 dependencies {
     ...
-    implementation 'com.github.pay-theory:pay-theory-android:1.1.1-alpha'
+    implementation 'com.github.pay-theory:pay-theory-android:RELEASE-TAG'
     ...
 }
 }
 ```
+
+[![](https://jitpack.io/v/pay-theory/pay-theory-android.svg)](https://jitpack.io/#pay-theory/pay-theory-android)
+
+_replace RELEASE-TAG with the release version shown above_
 
 ## Usage
 
