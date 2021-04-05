@@ -11,14 +11,13 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
-import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.PaymentError
-import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONObject
 import java.util.*
 
 /**
@@ -121,14 +120,36 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction): TransferMessage {
+    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         println("Pay Theory Payment Result")
         viewModel.disconnect()
-        val transferMessage = Gson().fromJson(message, TransferMessage::class.java)
-        if (transaction.context is Payable) {
-            transaction.context.paymentComplete(transferMessage)
+        val responseJson = JSONObject(message)
+        if (transaction.context is Payable) when (responseJson["state"]) {
+            "SUCCEEDED" -> {
+                val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
+                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.createdAt, transferResponse.updatedAt, "Card")
+                transaction.context.paymentComplete(paymentResponse)
+            }
+            "FAILURE" -> {
+                var failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
+                    responseJson["last_four"] as String,
+                    responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
+                )
+                transaction.context.paymentFailed(failedResponse)
+            }
+            else -> {
+                val json = """
+                { 
+                    "error": ${responseJson["error"]}, 
+                 }"""
+
+                val errorResponse = Gson().fromJson(json, PaymentError::class.java)
+                transaction.context.paymentError(errorResponse)
+            }
         }
-        return transferMessage
     }
 }
 

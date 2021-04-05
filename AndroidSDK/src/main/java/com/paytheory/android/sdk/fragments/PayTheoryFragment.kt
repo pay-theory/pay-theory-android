@@ -51,11 +51,11 @@ class PayTheoryFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
+
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onStart() {
+        super.onStart()
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
         val env = this.api_key.split("-")[2]

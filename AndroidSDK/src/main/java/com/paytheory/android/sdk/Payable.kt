@@ -1,6 +1,5 @@
 package com.paytheory.android.sdk
 
-import TransferMessage
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -28,6 +27,22 @@ data class PaymentResult (
     @SerializedName("updated_at") val updated_at: String?,
     @SerializedName("type") val type: String?)
 
+
+/**
+ * Data class that represents the payment results after transaction has been processed
+ * @param receipt_number receipt/confirmation number for the transaction
+ * @param last_four last four of account number
+ * @param brand brand of card
+ * @param state current state of transaction
+ * @param type ACH or CARD
+ */
+data class PaymentResultFailure (
+    @SerializedName("receipt_number") val receipt_number: String,
+    @SerializedName("last_four") val last_four: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("state") val state: String,
+    @SerializedName("type") val type: String?)
+
 /**
  * Data class that represents the error received if payment fails
  * @param reason reason the transaction failed
@@ -48,7 +63,7 @@ interface Payable {
      * Converts paymentFailure as Payable
      * @param paymentFailure reason the transaction failed
      */
-    fun paymentFailed(paymentFailure: PaymentResult)
+    fun paymentFailed(paymentFailure: PaymentResultFailure)
     /**
      * Converts paymentError as Payable
      * @param paymentError reason the transaction failed
