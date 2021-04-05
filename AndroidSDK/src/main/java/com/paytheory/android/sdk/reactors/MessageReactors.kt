@@ -11,10 +11,7 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
-import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.PaymentError
-import com.paytheory.android.sdk.PaymentResult
-import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
@@ -130,33 +127,17 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         if (transaction.context is Payable) when (responseJson["state"]) {
             "SUCCEEDED" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                val json = """
-                { 
-                    "receipt_number": ${transferResponse.tags["pt-number"]}, 
-                    "last_four":  ${transferResponse.lastFour},
-                    "brand":  ${transferResponse.cardBrand},
-                    "state":  ${transferResponse.state},
-                    "amount":  ${transferResponse.amount},
-                    "service_fee":  ${transferResponse.serviceFee},
-                    "tags":  ${transferResponse.tags},
-                    "created_at":  "${transferResponse.createdAt}",
-                    "updated_at":  "${transferResponse.updatedAt}"
-                 }"""
-
-                var paymentResponse = Gson().fromJson(json, PaymentResult::class.java)
+                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.createdAt, transferResponse.updatedAt, "Card")
                 transaction.context.paymentComplete(paymentResponse)
             }
             "FAILURE" -> {
-                val json = """
-                { 
-                    "receipt_number": ${responseJson["receipt_number"]}, 
-                    "last_four": ${responseJson["last_four"]}, 
-                    "brand": ${responseJson["brand"]}, 
-                    "state": ${responseJson["state"]}, 
-                    "type" : ${responseJson["type"]}
-                 }"""
-
-                var failedResponse = Gson().fromJson(json, PaymentResult::class.java)
+                var failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
+                    responseJson["last_four"] as String,
+                    responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
+                )
                 transaction.context.paymentFailed(failedResponse)
             }
             else -> {
