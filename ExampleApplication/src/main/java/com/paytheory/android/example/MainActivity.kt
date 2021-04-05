@@ -28,11 +28,13 @@ class MainActivity : FragmentActivity() , Payable {
         payTheoryFragment!!.arguments = payTheoryArgs
     }
 
-    private fun showToast(message: String){
-        Toast.makeText(
-            this, message,
-            Toast.LENGTH_LONG
-        ).show()
+    private fun showToast(message: String?) {
+        runOnUiThread {
+            Toast.makeText(
+                this, message,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     override fun paymentComplete(paymentResult: PaymentResult) {

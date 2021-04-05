@@ -1,6 +1,5 @@
 package com.paytheory.android.sdk
 
-import TransferMessage
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -43,7 +42,7 @@ interface Payable {
      * Converts paymentResult as Payable
      * @param paymentResult reason the transaction failed
      */
-    fun paymentComplete(paymentResult: TransferMessage)
+    fun paymentComplete(paymentResult: PaymentResult)
     /**
      * Converts paymentFailure as Payable
      * @param paymentFailure reason the transaction failed

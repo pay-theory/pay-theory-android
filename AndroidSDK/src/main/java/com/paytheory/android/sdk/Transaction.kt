@@ -48,6 +48,7 @@ class Transaction(
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val TRANSFER_ACTION = "host:transfer"
         private const val TRANSFER_RESULT = "payment-detail-reference"
+        private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
 
         private var messageReactors: MessageReactors? = null
@@ -176,6 +177,7 @@ class Transaction(
             message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
             message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
             message.indexOf(TRANSFER_RESULT) > -1 -> TRANSFER_RESULT
+            message.indexOf(TRANSFER_RESULT_FAIL) > 3 -> TRANSFER_RESULT
             else -> UNKNOWN
         }
     }
