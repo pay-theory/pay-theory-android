@@ -9,9 +9,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.data.SharedViewModel
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
@@ -56,8 +58,22 @@ class PayTheoryFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStart() {
         super.onStart()
-        this.api_key = arguments!!.getString(API_KEY)!!
-        this.amount = arguments!!.getInt(AMOUNT)
+
+//TODO
+
+//        this.api_key = arguments!!.getString(API_KEY)!!
+//        this.amount = arguments!!.getInt(AMOUNT)
+        var model = activity?.run {
+            ViewModelProvider(this).get(SharedViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        this.api_key = model.apiKey.value.toString()
+        this.amount = model.amount.value!!
+
+
+
+
+
         val env = this.api_key.split("-")[2]
         this.constants = Constants(env)
 

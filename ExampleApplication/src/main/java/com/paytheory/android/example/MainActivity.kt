@@ -3,10 +3,12 @@ package com.paytheory.android.example
 import android.os.Bundle
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.PaymentResult
 import com.paytheory.android.sdk.PaymentResultFailure
+import com.paytheory.android.sdk.data.SharedViewModel
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -20,12 +22,24 @@ class MainActivity : FragmentActivity() , Payable {
 
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment)
 
+
+
+        val viewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
+        viewModel.setApiKey("pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87")
+        viewModel.setAmount(4030)
+        viewModel.setAccountNameField(false)
+
+
+
+
+
+
         val payTheoryArgs = Bundle()
-
-        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87")
-        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
-        payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
-
+//
+//        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87")
+//        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
+//        payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
+//
         payTheoryFragment!!.arguments = payTheoryArgs
     }
 
