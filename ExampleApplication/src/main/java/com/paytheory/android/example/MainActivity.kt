@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.PaymentResult
+import com.paytheory.android.sdk.PaymentResultFailure
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -41,7 +42,7 @@ class MainActivity : FragmentActivity() , Payable {
         showToast("payment successful on account XXXX${paymentResult.last_four}")
     }
 
-    override fun paymentFailed(paymentFailure: PaymentResult) {
+    override fun paymentFailed(paymentFailure: PaymentResultFailure) {
         showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
     }
 
