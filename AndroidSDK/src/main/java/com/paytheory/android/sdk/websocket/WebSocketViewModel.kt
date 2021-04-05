@@ -19,6 +19,21 @@ class WebSocketViewModel(
 ):
     ViewModel() {
 
+
+    var connected: Boolean = false
+
+    @ExperimentalCoroutinesApi
+    fun disconnect() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                interactor.stopSocket()
+            } catch (ex: java.lang.Exception) {
+                onSocketError(ex)
+            }
+            connected = false
+        }
+    }
+
     /**
      * Function to start socket
      * @param handler WebSocket message handler
@@ -27,18 +42,21 @@ class WebSocketViewModel(
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                println("starting socket")
                 interactor.startSocket(payTheoryToken).consumeEach {
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)
+
                     } else {
                         onSocketError(it.exception)
+                        connected = false
                     }
                 }
             } catch (ex: java.lang.Exception) {
                 onSocketError(ex)
+                connected = false
             }
         }
+        connected = true
     }
 
     /**
@@ -62,7 +80,7 @@ class WebSocketViewModel(
 
     @ExperimentalCoroutinesApi
     override fun onCleared() {
-        interactor.stopSocket()
+        disconnect()
         super.onCleared()
     }
 

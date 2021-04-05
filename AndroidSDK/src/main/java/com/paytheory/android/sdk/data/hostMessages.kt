@@ -211,7 +211,7 @@ data class IdempotencyRequest (
  */
 data class Transfer (
     @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("idempotency") val idempotency: String
 )
 
 /**

@@ -11,11 +11,13 @@ import TransferMessage
 import TransferRequest
 import com.google.gson.Gson
 import com.goterl.lazycode.lazysodium.utils.Key
+import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONObject
 import java.util.*
 
 /**
@@ -32,20 +34,26 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that creates a message for a host token action
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
-    fun onHostToken(message: String): HostTokenMessage {
+    @ExperimentalCoroutinesApi
+    fun onHostToken(message: String, transaction: Transaction? = null): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
         sessionKey = hostTokenMessage.sessionKey
         hostToken = hostTokenMessage.hostToken
+
+        if (transaction?.queuedRequest != null) {
+
+            val actionRequest = transaction.generateQueuedActionRequest(transaction.queuedRequest!!)
+            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+            println("Pay Theory Queued Payment Requested")
+        }
         return hostTokenMessage
     }
 
     /**
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     fun onUnknown(message: String): Any {
         return Gson().fromJson(message, Any::class.java)
@@ -58,6 +66,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun onInstrument(message:String, apiKey:String): InstrumentMessage {
+        println("Pay Theory Instrument Token")
         val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
         activePayment!!.ptInstrument = instrumentMessage.ptInstrument
 
@@ -83,10 +92,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that idempotency message and creates transfer request
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
     fun onIdempotency(message: String): IdempotencyMessage {
+        println("Pay Theory Idempotency")
         val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
 
         val keyPair = generateLocalKeyPair()
@@ -109,11 +118,38 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     /**
      * Function that handles incoming transfer response
      * @param message message to be sent
-     * @param apiKey api-key used for transaction
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String): TransferMessage {
-        return Gson().fromJson(message, TransferMessage::class.java)
+    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
+        println("Pay Theory Payment Result")
+        viewModel.disconnect()
+        val responseJson = JSONObject(message)
+        if (transaction.context is Payable) when (responseJson["state"]) {
+            "SUCCEEDED" -> {
+                val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
+                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.createdAt, transferResponse.updatedAt, "Card")
+                transaction.context.paymentComplete(paymentResponse)
+            }
+            "FAILURE" -> {
+                var failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
+                    responseJson["last_four"] as String,
+                    responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
+                )
+                transaction.context.paymentFailed(failedResponse)
+            }
+            else -> {
+                val json = """
+                { 
+                    "error": ${responseJson["error"]}, 
+                 }"""
+
+                val errorResponse = Gson().fromJson(json, PaymentError::class.java)
+                transaction.context.paymentError(errorResponse)
+            }
+        }
     }
 }
 

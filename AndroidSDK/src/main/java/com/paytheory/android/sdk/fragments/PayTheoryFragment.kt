@@ -34,10 +34,11 @@ class PayTheoryFragment : Fragment() {
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
+    private lateinit var constants: Constants
     private lateinit var payTheoryTransaction: Transaction
     private var api_key: String = ""
     private var amount: Int = 0
-    private var tags: HashMap<String,String> = hashMapOf("pay-theory-environment" to Constants.ENV)
+    private var tags: HashMap<String,String> = java.util.HashMap()
 
     /**
      * Display requested card fields
@@ -50,18 +51,23 @@ class PayTheoryFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
+
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onStart() {
+        super.onStart()
         this.api_key = arguments!!.getString(API_KEY)!!
         this.amount = arguments!!.getInt(AMOUNT)
+        val env = this.api_key.split("-")[2]
+        this.constants = Constants(env)
+
+        tags = hashMapOf("pay-theory-environment" to env)
 
         payTheoryTransaction =
             Transaction(
                 this.activity!!,
-                api_key
+                api_key,
+                this.constants
             )
 
         payTheoryTransaction.init()
@@ -121,7 +127,7 @@ class PayTheoryFragment : Fragment() {
             if (hasAccountName) {
                 val names = accountName.text.toString().split("\\s".toRegex()).toMutableList()
                 val firstName = names[0]
-                names.removeFirst()
+                names.removeAt(0)
                 val lastName = names.joinToString(" ")
                 buyerOptions["first_name"] = firstName
                 buyerOptions["last_name"] = lastName
@@ -145,7 +151,7 @@ class PayTheoryFragment : Fragment() {
                     number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
                     security_code = ccCVV.text.toString(),
                     expiration_month = expirationString.split("/").first(),
-                    expiration_year = expirationString.split("/").last(),
+                    expiration_year = expirationString.split("/").last()
                 )
                 makePayment(payment)
             }

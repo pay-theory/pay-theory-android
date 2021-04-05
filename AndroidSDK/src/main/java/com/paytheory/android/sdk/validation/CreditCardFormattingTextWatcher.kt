@@ -43,11 +43,9 @@ class CreditCardFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
         var stringIndex = 4
 
         while (stringIndex < s.length) {
-            Log.i("looking for index", stringIndex.toString())
             if (s.toString()[stringIndex] != ' ') {
                 s.insert(stringIndex, " ")
                 changeIndex += 1
-                Log.i("changeIndex", changeIndex.toString())
             }
 
             if (changes.size > changeIndex) {

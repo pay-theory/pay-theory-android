@@ -16,8 +16,10 @@ import com.paytheory.android.sdk.reactors.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.*
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
+
+
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
@@ -28,11 +30,14 @@ import java.util.*
  * @param apiKey the api-key that will be used to create payment transaction
  */
 class Transaction(
-    private val context: Context,
-    private val apiKey: String
+    val context: Context,
+    private val apiKey: String,
+    private val constants: Constants
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
+    var queuedRequest: Payment? = null
+    lateinit var viewModel: WebSocketViewModel
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -42,15 +47,18 @@ class Transaction(
         private const val PAYMENT_TOKEN = "payment-token"
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val TRANSFER_ACTION = "host:transfer"
+        private const val TRANSFER_RESULT = "payment-detail-reference"
+        private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
 
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
 
-        private val webServicesProvider = WebServicesProvider()
-        private val webSocketRepository = WebsocketRepository(webServicesProvider)
-        val webSocketInteractor = WebsocketInteractor(webSocketRepository)
-        lateinit var viewModel: WebSocketViewModel
+
+
+        private var webServicesProvider: WebServicesProvider? = null
+        private var webSocketRepository: WebsocketRepository? = null
+        var webSocketInteractor: WebsocketInteractor? = null
     }
 
     private fun buildApiHeaders(): Map<String, String> {
@@ -66,13 +74,17 @@ class Transaction(
     private fun ptTokenApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
 
-            val observable = ApiService.ptTokenApiCall().doToken(buildApiHeaders())
+            val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
 
-            observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+
                 .subscribe({ ptTokenResponse: PTTokenResponse ->
+                    if (queuedRequest != null) {
+                        establishViewModel(ptTokenResponse)
+                    } else {
+                        callSafetyNet(ptTokenResponse)
+                    }
 
-                    callSafetyNet(ptTokenResponse)
 
                 }, { error ->
                     if (context is Payable) {
@@ -82,7 +94,7 @@ class Transaction(
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError(Constants.NO_INTERNET_ERROR))
+                context.paymentError(PaymentError(constants.NO_INTERNET_ERROR))
             }
         }
     }
@@ -94,17 +106,26 @@ class Transaction(
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
             .addOnSuccessListener {
                 val attestationResult = it.jwsResult
-
-                viewModel = WebSocketViewModel(webSocketInteractor, ptTokenResponse.ptToken)
-                connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor)
-                messageReactors = MessageReactors(viewModel, webSocketInteractor)
-                viewModel.subscribeToSocketEvents(this)
-
+                establishViewModel(ptTokenResponse, attestationResult)
             }.addOnFailureListener {
                 if (context is Payable) {
                     context.paymentError(PaymentError(it.message!!))
                 }
             }
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String = "") {
+        webServicesProvider = WebServicesProvider()
+        webSocketRepository = WebsocketRepository(webServicesProvider!!)
+        webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
+
+        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken)
+        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
+        messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
+        viewModel.subscribeToSocketEvents(this)
+        if (queuedRequest != null)
+            messageReactors!!.activePayment = queuedRequest
     }
 
     /**
@@ -125,24 +146,38 @@ class Transaction(
         payment: Payment
     ) {
         messageReactors!!.activePayment = payment
+
+        val actionRequest =  generateQueuedActionRequest(payment)
+
+        if (viewModel.connected) {
+            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+            println("Pay Theory Payment Requested")
+        } else {
+            queuedRequest = payment
+            ptTokenApiCall(context)
+            println("Pay Theory Resetting Connection")
+        }
+    }
+
+    fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis())
         val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
 
         val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-
-        val actionRequest = ActionRequest(
+        return ActionRequest(
             INSTRUMENT_ACTION,
             boxed,
             localPublicKey)
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
     }
-    
+
     private fun discoverMessageType(message: String): String  {
         return when {
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
             message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
             message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
+            message.indexOf(TRANSFER_RESULT) > -1 -> TRANSFER_RESULT
+            message.indexOf(TRANSFER_RESULT_FAIL) > 3 -> TRANSFER_RESULT
             else -> UNKNOWN
         }
     }
@@ -153,17 +188,16 @@ class Transaction(
      */
     @ExperimentalCoroutinesApi
     override fun receiveMessage(message: String) {
-        println("message $message")
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
             DISCONNECTED -> { connectionReactors!!.onDisconnected()
             }
             else -> {
                 when (discoverMessageType(message)) {
-                    HOST_TOKEN -> messageReactors!!.onHostToken(message)
+                    HOST_TOKEN -> messageReactors!!.onHostToken(message, this)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
                     PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
-                    TRANSFER_ACTION -> messageReactors!!.onTransfer(message)
+                    TRANSFER_RESULT -> messageReactors!!.onTransfer(message,viewModel, this)
                     else -> messageReactors!!.onUnknown(message)
                 }
             }

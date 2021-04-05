@@ -20,7 +20,7 @@ object ApiWorker {
         get() {
             if (mClient == null) {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                interceptor.level = HttpLoggingInterceptor.Level.NONE
 
                 val httpBuilder = OkHttpClient.Builder()
                 httpBuilder
