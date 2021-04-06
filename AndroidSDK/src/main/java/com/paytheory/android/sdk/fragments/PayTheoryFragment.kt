@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
-import com.paytheory.android.sdk.data.SharedViewModel
+import com.paytheory.android.sdk.data.LiveDataViewModel
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
@@ -59,19 +59,16 @@ class PayTheoryFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-//TODO
-
-//        this.api_key = arguments!!.getString(API_KEY)!!
-//        this.amount = arguments!!.getInt(AMOUNT)
         var model = activity?.run {
-            ViewModelProvider(this).get(SharedViewModel::class.java)
+            ViewModelProvider(this).get(LiveDataViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        this.api_key = model.apiKey.value.toString()
-        this.amount = model.amount.value!!
-
-
-
+        //retrieve data from live data viewModel
+        this.api_key = model.selectedApiKey.value.toString()
+        this.amount = model.selectedAmount.value!!
+        val achEnabled = model.selectedAchEnabled.value!!
+        val accountNameEnabled = model.selectedAccountNameField.value!!
+        val billingAddressEnabled = model.selectedBillingAddressEnabled.value!!
 
 
         val env = this.api_key.split("-")[2]
@@ -87,10 +84,6 @@ class PayTheoryFragment : Fragment() {
             )
 
         payTheoryTransaction.init()
-
-        val achEnabled = arguments!!.getBoolean(USE_ACH)
-        val accountNameEnabled = arguments!!.getBoolean(ACCOUNT_NAME_ENABLED)
-        val billingAddressEnabled = arguments!!.getBoolean(BILLING_ADDRESS_ENABLED)
 
         enableFields(achEnabled, accountNameEnabled, billingAddressEnabled)
 

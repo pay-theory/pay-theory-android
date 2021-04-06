@@ -8,8 +8,7 @@ import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.PaymentResult
 import com.paytheory.android.sdk.PaymentResultFailure
-import com.paytheory.android.sdk.data.SharedViewModel
-import com.paytheory.android.sdk.fragments.PayTheoryFragment
+import com.paytheory.android.sdk.data.LiveDataViewModel
 
 /**
  * Example activity class
@@ -20,27 +19,11 @@ class MainActivity : FragmentActivity() , Payable {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment)
-
-
-
-        val viewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
+        val viewModel = ViewModelProvider(this).get(LiveDataViewModel::class.java)
         viewModel.setApiKey("pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87")
         viewModel.setAmount(4030)
-        viewModel.setAccountNameField(false)
+        viewModel.setAccountNameField(true)
 
-
-
-
-
-
-        val payTheoryArgs = Bundle()
-//
-//        payTheoryArgs.putString(PayTheoryFragment.API_KEY, "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87")
-//        payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
-//        payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED, false)
-//
-        payTheoryFragment!!.arguments = payTheoryArgs
     }
 
     private fun showToast(message: String?) {
