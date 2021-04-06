@@ -59,11 +59,34 @@ class PayTheoryFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        var model = activity?.run {
+
+
+//        val argumentsBundle = this.arguments
+//
+//        this.api_key = argumentsBundle!!.getString(API_KEY).toString()
+//        this.amount = argumentsBundle.getInt(AMOUNT)
+//
+//        var achEnabled = false
+//        if(argumentsBundle.getBoolean(USE_ACH)){
+//            achEnabled = argumentsBundle.getBoolean(USE_ACH)
+//        }
+//
+//        var accountNameEnabled = false
+//        if(argumentsBundle.getBoolean(ACCOUNT_NAME_ENABLED)){
+//            accountNameEnabled = argumentsBundle.getBoolean(ACCOUNT_NAME_ENABLED)
+//        }
+//
+//        var billingAddressEnabled = false
+//        if(argumentsBundle.getBoolean(BILLING_ADDRESS_ENABLED)){
+//            billingAddressEnabled = argumentsBundle.getBoolean(BILLING_ADDRESS_ENABLED)
+//        }
+
+
+        //retrieve data from live data viewModel
+                var model = activity?.run {
             ViewModelProvider(this).get(LiveDataViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        //retrieve data from live data viewModel
         this.api_key = model.selectedApiKey.value.toString()
         this.amount = model.selectedAmount.value!!
         val achEnabled = model.selectedAchEnabled.value!!

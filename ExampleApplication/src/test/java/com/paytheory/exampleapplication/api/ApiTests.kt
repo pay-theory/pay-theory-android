@@ -19,7 +19,7 @@ class ApiTests {
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = "pt-sandbox-dev-34a4a8979a9f3de0057d47eb05245255"
+        headerMap["X-API-Key"] = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
         return headerMap
     }
 
@@ -29,7 +29,7 @@ class ApiTests {
     fun ptTokenCall(): TestPtToken? {
         return Retrofit.Builder()
             .client(ApiWorker.client)
-            .baseUrl(Constants.API_BASE_PATH)
+            .baseUrl(Constants("finix").API_BASE_PATH)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(ApiWorker.gsonConverter)
             .build()

@@ -1,3 +1,4 @@
+include ':PayTheoryExampleApplication'
 include ':AndroidSDK'
 include ':ExampleApplication'
 rootProject.name = "PayTheoryLibrary"

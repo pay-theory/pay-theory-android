@@ -112,13 +112,11 @@
             android:maxLength="9"
             android:visibility="gone"
             android:inputType="number" />
-
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/submit_payment" />
     </LinearLayout>
-    <Button
-        android:id="@+id/submitButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text="@string/submit_payment" />
-
 </LinearLayout>
