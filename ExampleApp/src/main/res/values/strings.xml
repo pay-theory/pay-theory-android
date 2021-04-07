@@ -1,7 +1,7 @@
 <resources>
-    <string name="pay_theory_api_key">pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87</string>
-    <string name="app_name">ExampleApplication</string>
-    <string name="credit_card">Card</string>
-    <string name="ach">ACH</string>
-    <string name="cash">Cash</string>
+    <string name="app_name">Pay Theory Android SDK</string>
+    <string name="title_home">Pay Theory Android SDK</string>
+    <string name="title_credit_card">Card</string>
+    <string name="title_ach">ACH</string>
+    <string name="title_cash">Cash</string>
 </resources>

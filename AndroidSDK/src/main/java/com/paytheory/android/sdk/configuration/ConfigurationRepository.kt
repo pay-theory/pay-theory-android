@@ -3,6 +3,10 @@ package com.paytheory.android.sdk.configuration
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
+/**
+ * Class that creates initial configuration data
+ * @param initialConfiguration initial configuration data
+ */
 class ConfigurationRepository(initialConfiguration: ConfigurationDetail) {
     protected val configurationDetail = MutableLiveData<ConfigurationDetail>()
     val configuration: LiveData<ConfigurationDetail> get() = configurationDetail
@@ -12,7 +16,7 @@ class ConfigurationRepository(initialConfiguration: ConfigurationDetail) {
 
     /**
      * Function to set ConfigurationDetails
-     * @param configurationDetail details of configuration to be set
+     * @param updatedConfiguration details of configuration to be set
      */
     fun setConfiguration(updatedConfiguration:ConfigurationDetail) {
         configurationDetail.postValue(updatedConfiguration)

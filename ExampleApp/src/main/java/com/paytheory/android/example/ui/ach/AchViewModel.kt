@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 class AchViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is ACH fragment"
+        value = "ACH Fragment"
     }
     val text: LiveData<String> = _text
 }

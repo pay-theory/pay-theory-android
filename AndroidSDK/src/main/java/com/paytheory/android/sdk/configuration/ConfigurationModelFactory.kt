@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.Dispatchers
 
+/**
+ * Class that creates a view model provider
+ * @param repo configuration repository used to create view model provider
+ */
 class ConfigurationModelFactory(
     private val repo: ConfigurationRepository
 ): ViewModelProvider.NewInstanceFactory() {

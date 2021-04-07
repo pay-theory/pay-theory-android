@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/credit_card">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.paytheory.android.example.ui.credit.OldCardFragment"
-        android:label="@string/credit_card"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/credit_card"
+        android:name="com.paytheory.android.example.ui.credit.CreditCardFragment"
+        android:label="@string/title_credit_card"
+        tools:layout="@layout/fragment_credit" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/ach"
         android:name="com.paytheory.android.example.ui.ach.AchFragment"
-        android:label="@string/ach"
-        tools:layout="@layout/fragment_dashboard" />
+        android:label="@string/title_credit_card"
+        tools:layout="@layout/fragment_ach" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/cash"
         android:name="com.paytheory.android.example.ui.cash.CashFragment"
-        android:label="@string/cash"
-        tools:layout="@layout/fragment_notifications" />
+        android:label="@string/title_cash"
+        tools:layout="@layout/fragment_cash" />
 </navigation>

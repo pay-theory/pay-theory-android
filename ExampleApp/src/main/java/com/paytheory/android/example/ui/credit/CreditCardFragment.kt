@@ -9,10 +9,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
+import com.paytheory.android.sdk.configuration.PaymentType
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 
 class CreditCardFragment : Fragment() {
+
     private lateinit var creditCardViewModel: CreditCardViewModel
+    val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -20,15 +25,23 @@ class CreditCardFragment : Fragment() {
     ): View? {
         creditCardViewModel =
             ViewModelProvider(this).get(CreditCardViewModel::class.java)
+
+
+
+
         val root = inflater.inflate(R.layout.fragment_credit, container, false)
-        val textView: TextView = root.findViewById(R.id.textView)
-        val payTheoryFragment: Fragment? = requireActivity().supportFragmentManager.findFragmentById(R.id.payTheoryFragmentCredit)
+        val textView: TextView = root.findViewById(R.id.text_credit)
         creditCardViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
-        creditCardViewModel.arguments.observe(viewLifecycleOwner, Observer {
-            payTheoryFragment?.arguments = it
-        })
+
+        val payTheoryFragment = this.childFragmentManager
+            .findFragmentById(R.id.payTheoryFragmentCredit) as PayTheoryFragment
+
+
+        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
+
+
         return root
     }
 }

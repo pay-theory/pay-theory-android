@@ -21,10 +21,15 @@ class CashFragment : Fragment() {
     ): View? {
         cashViewModel =
                 ViewModelProvider(this).get(CashViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_notifications, container, false)
-        val textView: TextView = root.findViewById(R.id.text_notifications)
+        val root = inflater.inflate(R.layout.fragment_cash, container, false)
+        val textView: TextView = root.findViewById(R.id.text_cash)
+        val messageView: TextView = root.findViewById(R.id.text_cash_message)
         cashViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
+        })
+
+        cashViewModel.message.observe(viewLifecycleOwner, Observer {
+            messageView.text = it
         })
         return root
     }
