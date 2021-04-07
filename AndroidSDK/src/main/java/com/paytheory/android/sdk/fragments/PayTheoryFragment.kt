@@ -1,19 +1,21 @@
 package com.paytheory.android.sdk.fragments
 
 import Payment
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
-import com.paytheory.android.sdk.data.LiveDataViewModel
+import com.paytheory.android.sdk.configuration.ConfigurationDetail
+import com.paytheory.android.sdk.configuration.ConfigurationInjector
+import com.paytheory.android.sdk.configuration.ConfigurationViewModel
+import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
@@ -36,10 +38,14 @@ class PayTheoryFragment : Fragment() {
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
+    private lateinit var model: ConfigurationViewModel
     private lateinit var constants: Constants
     private lateinit var payTheoryTransaction: Transaction
     private var api_key: String = ""
     private var amount: Int = 0
+    private var paymentType: PaymentType = PaymentType.CREDIT
+    private var accountNameEnabled: Boolean = false
+    private var billingAddressEnabled: Boolean = false
     private var tags: HashMap<String,String> = java.util.HashMap()
 
     /**
@@ -51,154 +57,145 @@ class PayTheoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        model = ViewModelProvider(
+            this,
+            ConfigurationInjector(requireActivity().application, ConfigurationDetail()).provideConfigurationViewModelFactory()
+        ).get(
+            ConfigurationViewModel::class.java
+        )
+
+
+
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
 
-    @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onStart() {
-        super.onStart()
+    fun configure(
+        apiKey: String,
+        amount: Int,
+        paymentType: PaymentType = PaymentType.CREDIT,
+        requireAccountName: Boolean = true,
+        requireBillingAddress: Boolean = true) {
+        model.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,paymentType))
+        model.configuration.observe(this.viewLifecycleOwner, Observer { configurationDetail ->
+            this.api_key = configurationDetail.apiKey
+            this.amount = configurationDetail.amount
+            this.paymentType = configurationDetail.paymentType
+            this.accountNameEnabled = configurationDetail.requireAccountName
+            this.billingAddressEnabled = configurationDetail.requireAddress
+            if (this.api_key.length > 0) {
+                val env = this.api_key.split("-")[2]
+                this.constants = Constants(env)
+
+                tags = hashMapOf("pay-theory-environment" to env)
+
+                payTheoryTransaction =
+                    Transaction(
+                        this.activity!!,
+                        api_key,
+                        this.constants
+                    )
+
+                payTheoryTransaction.init()
+
+                enableFields(this.paymentType, accountNameEnabled, billingAddressEnabled)
+
+                val btn = activity!!.findViewById<Button>(R.id.submitButton)
+
+                // credit card fields
+                val (ccNumber, ccCVV, ccExpiration) = getCreditCardData()
+
+                val hasCC = (ccNumber.visibility == View.VISIBLE
+                        && ccCVV.visibility == View.VISIBLE
+                        && ccExpiration.visibility == View.VISIBLE)
+
+                // ach fields
+                val (achAccount, achRouting) = getAchData()
 
 
+                // buyer options
+                val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
+                val billingAddress1 =
+                    activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_1)
+                val billingAddress2 =
+                    activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_2)
+                val billingCity = activity!!.findViewById<PayTheoryEditText>(R.id.billing_city)
+                val billingState = activity!!.findViewById<PayTheoryEditText>(R.id.billing_state)
+                val billingZip = activity!!.findViewById<PayTheoryEditText>(R.id.billing_zip)
 
-//        val argumentsBundle = this.arguments
-//
-//        this.api_key = argumentsBundle!!.getString(API_KEY).toString()
-//        this.amount = argumentsBundle.getInt(AMOUNT)
-//
-//        var achEnabled = false
-//        if(argumentsBundle.getBoolean(USE_ACH)){
-//            achEnabled = argumentsBundle.getBoolean(USE_ACH)
-//        }
-//
-//        var accountNameEnabled = false
-//        if(argumentsBundle.getBoolean(ACCOUNT_NAME_ENABLED)){
-//            accountNameEnabled = argumentsBundle.getBoolean(ACCOUNT_NAME_ENABLED)
-//        }
-//
-//        var billingAddressEnabled = false
-//        if(argumentsBundle.getBoolean(BILLING_ADDRESS_ENABLED)){
-//            billingAddressEnabled = argumentsBundle.getBoolean(BILLING_ADDRESS_ENABLED)
-//        }
+                val hasACH = (achAccount.visibility == View.VISIBLE
+                        && achRouting.visibility == View.VISIBLE)
 
+                val hasAccountName = accountName.visibility == View.VISIBLE
 
-        //retrieve data from live data viewModel
-                var model = activity?.run {
-            ViewModelProvider(this).get(LiveDataViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        this.api_key = model.selectedApiKey.value.toString()
-        this.amount = model.selectedAmount.value!!
-        val achEnabled = model.selectedAchEnabled.value!!
-        val accountNameEnabled = model.selectedAccountNameField.value!!
-        val billingAddressEnabled = model.selectedBillingAddressEnabled.value!!
+                val hasBillingAddress = (billingAddress1.visibility == View.VISIBLE
+                        && billingAddress2.visibility == View.VISIBLE
+                        && billingCity.visibility == View.VISIBLE
+                        && billingState.visibility == View.VISIBLE
+                        && billingZip.visibility == View.VISIBLE)
 
 
-        val env = this.api_key.split("-")[2]
-        this.constants = Constants(env)
+                if (hasCC) {
+                    val ccNumberValidation: (PayTheoryEditText) -> CreditCardFormattingTextWatcher =
+                        { pt -> CreditCardFormattingTextWatcher(pt) }
+                    val cvvNumberValidation: (PayTheoryEditText) -> CVVFormattingTextWatcher =
+                        { pt -> CVVFormattingTextWatcher(pt) }
+                    val expirationValidation: (PayTheoryEditText) -> ExpirationFormattingTextWatcher =
+                        { pt -> ExpirationFormattingTextWatcher(pt) }
 
-        tags = hashMapOf("pay-theory-environment" to env)
+                    ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
+                    ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
+                    ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+                }
 
-        payTheoryTransaction =
-            Transaction(
-                this.activity!!,
-                api_key,
-                this.constants
-            )
+                btn.setOnClickListener {
+                    val buyerOptions = HashMap<String, String>()
 
-        payTheoryTransaction.init()
+                    if (hasAccountName) {
+                        val names =
+                            accountName.text.toString().split("\\s".toRegex()).toMutableList()
+                        val firstName = names[0]
+                        names.removeAt(0)
+                        val lastName = names.joinToString(" ")
+                        buyerOptions["first_name"] = firstName
+                        buyerOptions["last_name"] = lastName
+                    }
 
-        enableFields(achEnabled, accountNameEnabled, billingAddressEnabled)
-
-        val btn = activity!!.findViewById<Button>(R.id.submitButton)
-
-        // credit card fields
-        val (ccNumber, ccCVV, ccExpiration) = getCreditCardData()
-
-        val hasCC = (ccNumber.visibility == View.VISIBLE
-                && ccCVV.visibility == View.VISIBLE
-                && ccExpiration.visibility == View.VISIBLE)
-
-        // ach fields
-        val (achAccount, achRouting) = getAchData()
-
-
-        // buyer options
-        val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
-        val billingAddress1 = activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_1)
-        val billingAddress2 = activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_2)
-        val billingCity = activity!!.findViewById<PayTheoryEditText>(R.id.billing_city)
-        val billingState = activity!!.findViewById<PayTheoryEditText>(R.id.billing_state)
-        val billingZip = activity!!.findViewById<PayTheoryEditText>(R.id.billing_zip)
-
-        val hasACH = (achAccount.visibility == View.VISIBLE
-                && achRouting.visibility == View.VISIBLE)
-
-        val hasAccountName = accountName.visibility == View.VISIBLE
-
-        val hasBillingAddress = (billingAddress1.visibility == View.VISIBLE
-                && billingAddress2.visibility == View.VISIBLE
-                && billingCity.visibility == View.VISIBLE
-                && billingState.visibility == View.VISIBLE
-                && billingZip.visibility == View.VISIBLE)
+                    if (hasBillingAddress) {
+                        buyerOptions["line_1"] = billingAddress1.text.toString()
+                        buyerOptions["line_2"] = billingAddress2.text.toString()
+                        buyerOptions["city"] = billingCity.text.toString()
+                        buyerOptions["region"] = billingState.text.toString()
+                        buyerOptions["postal_code"] = billingZip.text.toString()
+                    }
 
 
-        if (hasCC) {
-            val ccNumberValidation: (PayTheoryEditText)-> CreditCardFormattingTextWatcher = { pt -> CreditCardFormattingTextWatcher(pt) }
-            val cvvNumberValidation: (PayTheoryEditText)-> CVVFormattingTextWatcher = { pt -> CVVFormattingTextWatcher(pt) }
-            val expirationValidation: (PayTheoryEditText)-> ExpirationFormattingTextWatcher = { pt -> ExpirationFormattingTextWatcher(pt) }
+                    if (hasCC) {
+                        val expirationString = ccExpiration.text.toString()
+                        val payment = Payment(
+                            timing = System.currentTimeMillis(),
+                            amount = amount,
+                            type = PAYMENT_CARD,
+                            number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
+                            security_code = ccCVV.text.toString(),
+                            expiration_month = expirationString.split("/").first(),
+                            expiration_year = expirationString.split("/").last()
+                        )
+                        makePayment(payment)
+                    }
 
-            ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
-            ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
-            ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
-        }
-
-        btn.setOnClickListener {
-            val buyerOptions = HashMap<String, String>()
-
-            if (hasAccountName) {
-                val names = accountName.text.toString().split("\\s".toRegex()).toMutableList()
-                val firstName = names[0]
-                names.removeAt(0)
-                val lastName = names.joinToString(" ")
-                buyerOptions["first_name"] = firstName
-                buyerOptions["last_name"] = lastName
+                    if (hasACH) {
+                        val payment = Payment(
+                            timing = System.currentTimeMillis(),
+                            amount = amount,
+                            type = BANK_ACCOUNT,
+                            account_number = achAccount.text.toString(),
+                            bank_code = achRouting.text.toString()
+                        )
+                        makePayment(payment)
+                    }
+                }
             }
-
-            if (hasBillingAddress) {
-                buyerOptions["line_1"] = billingAddress1.text.toString()
-                buyerOptions["line_2"] = billingAddress2.text.toString()
-                buyerOptions["city"] = billingCity.text.toString()
-                buyerOptions["region"] = billingState.text.toString()
-                buyerOptions["postal_code"] = billingZip.text.toString()
-            }
-
-
-            if (hasCC) {
-                val expirationString = ccExpiration.text.toString()
-                val payment = Payment(
-                    timing = System.currentTimeMillis(),
-                    amount = amount,
-                    type = PAYMENT_CARD,
-                    number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
-                    security_code = ccCVV.text.toString(),
-                    expiration_month = expirationString.split("/").first(),
-                    expiration_year = expirationString.split("/").last()
-                )
-                makePayment(payment)
-            }
-
-            if (hasACH) {
-                val payment = Payment(
-                    timing = System.currentTimeMillis(),
-                    amount = amount,
-                    type = BANK_ACCOUNT,
-                    account_number = achAccount.text.toString(),
-                    bank_code = achRouting.text.toString()
-                )
-                makePayment(payment)
-            }
-        }
+        })
     }
 
     private fun getAchData(): Pair<PayTheoryEditText, PayTheoryEditText> {
@@ -215,11 +212,11 @@ class PayTheoryFragment : Fragment() {
     }
 
     private fun enableFields(
-        achEnabled: Boolean,
+        paymentType: PaymentType,
         accountNameEnabled: Boolean,
         billingAddressEnabled: Boolean
     ) {
-        if (achEnabled) {
+        if (paymentType == PaymentType.BANK) {
             enableAccountName()
             enableACH()
         } else {
