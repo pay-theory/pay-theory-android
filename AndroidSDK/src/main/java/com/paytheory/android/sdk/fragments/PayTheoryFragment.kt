@@ -6,20 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
-import com.paytheory.android.sdk.configuration.ConfigurationDetail
-import com.paytheory.android.sdk.configuration.ConfigurationInjector
-import com.paytheory.android.sdk.configuration.ConfigurationViewModel
-import com.paytheory.android.sdk.configuration.PaymentType
+import com.paytheory.android.sdk.configuration.*
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
@@ -55,6 +50,7 @@ class PayTheoryFragment : Fragment() {
     private var paymentType: PaymentType = PaymentType.CREDIT
     private var accountNameEnabled: Boolean = false
     private var billingAddressEnabled: Boolean = false
+    private var feeMode : String = FeeMode.SURCHARGE
     private var tags: HashMap<String,String> = java.util.HashMap()
     private var model: ConfigurationViewModel? = null
 
@@ -86,7 +82,8 @@ class PayTheoryFragment : Fragment() {
         amount: Int,
         paymentType: PaymentType = PaymentType.CREDIT,
         requireAccountName: Boolean = true,
-        requireBillingAddress: Boolean = true) {
+        requireBillingAddress: Boolean = true,
+        feeMode: String = FeeMode.SURCHARGE) {
 
         if (model == null) {
             model = ViewModelProvider(
@@ -104,6 +101,7 @@ class PayTheoryFragment : Fragment() {
             this.paymentType = configurationDetail.paymentType
             this.accountNameEnabled = configurationDetail.requireAccountName
             this.billingAddressEnabled = configurationDetail.requireAddress
+            this.feeMode = configurationDetail.feeMode
             if (this.api_key.length > 0) {
                 val env = this.api_key.split("-")[2]
                 this.constants = Constants(env)
@@ -208,7 +206,8 @@ class PayTheoryFragment : Fragment() {
                             number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
                             security_code = ccCVV.text.toString(),
                             expiration_month = expirationString.split("/").first(),
-                            expiration_year = expirationString.split("/").last()
+                            expiration_year = expirationString.split("/").last(),
+                            fee_mode = feeMode
                         )
                         makePayment(payment)
                     }
@@ -220,7 +219,8 @@ class PayTheoryFragment : Fragment() {
                             account_type = achChooser.text.toString(),
                             type = BANK_ACCOUNT,
                             account_number = achAccount.text.toString(),
-                            bank_code = achRouting.text.toString()
+                            bank_code = achRouting.text.toString(),
+                            fee_mode = feeMode
                         )
                         makePayment(payment)
                     }

@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
+import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
@@ -40,6 +41,6 @@ class AchFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.BANK, false, false)
+        payTheoryFragment.configure(apiKey,5000, PaymentType.BANK, false, false, FeeMode.SURCHARGE)
     }
 }

@@ -1,15 +1,14 @@
 package com.paytheory.android.example.ui.credit
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
+import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
@@ -46,7 +45,7 @@ class CreditCardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
+        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE)
     }
 
 

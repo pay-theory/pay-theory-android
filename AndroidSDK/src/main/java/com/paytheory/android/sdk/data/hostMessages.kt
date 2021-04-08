@@ -1,4 +1,5 @@
 import com.google.gson.annotations.SerializedName
+import com.paytheory.android.sdk.configuration.FeeMode
 
 /**
  * Data class to store bin details
@@ -185,7 +186,8 @@ data class Payment (
     @SerializedName("expiration_year") val expiration_year: String? = null,
     @SerializedName("expiration_month") val expiration_month: String? = null,
     @SerializedName("address") val address: Address? = null,
-    @SerializedName("pt-instrument") var ptInstrument: String? = null
+    @SerializedName("pt-instrument") var ptInstrument: String? = null,
+    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE
 )
 
 /**
