@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -115,6 +117,19 @@ class PayTheoryFragment : Fragment() {
                 val (achAccount, achRouting) = getAchData()
 
 
+                val achSpinner: Spinner = activity!!.findViewById(R.id.ach_spinner)
+                // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter.createFromResource(
+                    this.context!!,
+                    R.array.achSpinner,
+                    android.R.layout.simple_spinner_item
+                ).also { adapter ->
+                    // Specify the layout to use when the list of choices appears
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    // Apply the adapter to the spinner
+                    achSpinner.adapter = adapter
+                }
+
                 // buyer options
                 val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
                 val billingAddress1 =
@@ -190,7 +205,7 @@ class PayTheoryFragment : Fragment() {
                         val payment = Payment(
                             timing = System.currentTimeMillis(),
                             amount = amount,
-                            account_type = "CHECKING",
+                            account_type = achSpinner.selectedItem.toString(),
                             type = BANK_ACCOUNT,
                             account_number = achAccount.text.toString(),
                             bank_code = achRouting.text.toString()
@@ -273,6 +288,8 @@ class PayTheoryFragment : Fragment() {
         achAccount!!.visibility = View.VISIBLE
         val achRouting: PayTheoryEditText? = view?.findViewById(R.id.ach_routing_number)
         achRouting!!.visibility = View.VISIBLE
+        val achSpinner: Spinner? = view?.findViewById(R.id.ach_spinner)
+        achSpinner!!.visibility = View.VISIBLE
     }
 
 

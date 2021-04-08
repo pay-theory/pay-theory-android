@@ -5,6 +5,14 @@
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical" android:id="@+id/PayTheoryEditor">
+
+        <Spinner
+            android:id="@+id/ach_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+             />
+
         <com.paytheory.android.sdk.view.PayTheoryEditText
             android:id="@+id/account_name"
             android:layout_width="match_parent"

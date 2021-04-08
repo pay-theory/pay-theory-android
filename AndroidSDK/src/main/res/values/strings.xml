@@ -5,6 +5,10 @@
         <item>CHECKING</item>
         <item>SAVINGS</item>
     </string-array>
+    <string-array name="achSpinner">
+        <item>Checking</item>
+        <item>Savings</item>
+    </string-array>
     <string name="name_on_account">Name on account</string>
     <string name="billing_address">Address</string>
     <string name="billing_address_cont">Address Cont.</string>
