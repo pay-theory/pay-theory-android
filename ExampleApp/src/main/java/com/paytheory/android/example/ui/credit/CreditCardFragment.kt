@@ -17,7 +17,7 @@ class CreditCardFragment : Fragment() {
 
     private lateinit var creditCardViewModel: CreditCardViewModel
     val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
-
+    private val payTheoryFragment = PayTheoryFragment()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,13 +35,15 @@ class CreditCardFragment : Fragment() {
             textView.text = it
         })
 
-        val payTheoryFragment = this.childFragmentManager
-            .findFragmentById(R.id.payTheoryFragmentCredit) as PayTheoryFragment
-
-
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
-
+        this.childFragmentManager.beginTransaction()
+            .add(R.id.payTheoryContainer, payTheoryFragment)
+            .commit()
 
         return root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
     }
 }

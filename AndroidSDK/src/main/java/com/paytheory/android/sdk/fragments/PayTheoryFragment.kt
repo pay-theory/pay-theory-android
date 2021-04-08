@@ -38,7 +38,7 @@ class PayTheoryFragment : Fragment() {
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
     }
 
-    private lateinit var model: ConfigurationViewModel
+
     private lateinit var constants: Constants
     private lateinit var payTheoryTransaction: Transaction
     private var api_key: String = ""
@@ -47,6 +47,7 @@ class PayTheoryFragment : Fragment() {
     private var accountNameEnabled: Boolean = false
     private var billingAddressEnabled: Boolean = false
     private var tags: HashMap<String,String> = java.util.HashMap()
+    private var model: ConfigurationViewModel? = null
 
     /**
      * Display requested card fields
@@ -57,14 +58,6 @@ class PayTheoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        model = ViewModelProvider(
-            this,
-            ConfigurationInjector(requireActivity().application, ConfigurationDetail()).provideConfigurationViewModelFactory()
-        ).get(
-            ConfigurationViewModel::class.java
-        )
-
-
 
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
@@ -75,8 +68,18 @@ class PayTheoryFragment : Fragment() {
         paymentType: PaymentType = PaymentType.CREDIT,
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true) {
-        model.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,paymentType))
-        model.configuration.observe(this.viewLifecycleOwner, Observer { configurationDetail ->
+
+        if (model == null) {
+            model = ViewModelProvider(
+                this,
+                ConfigurationInjector(requireActivity().application, ConfigurationDetail()).provideConfigurationViewModelFactory()
+            ).get(
+                ConfigurationViewModel::class.java
+            )
+        }
+
+        model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,paymentType))
+        model!!.configuration.observe(this.viewLifecycleOwner, Observer { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.paymentType = configurationDetail.paymentType
