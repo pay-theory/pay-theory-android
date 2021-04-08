@@ -49,7 +49,7 @@ class PayTheoryFragment : Fragment() {
 
 
     private lateinit var constants: Constants
-    private lateinit var payTheoryTransaction: Transaction
+    private var payTheoryTransaction: Transaction? = null
     private var api_key: String = ""
     private var amount: Int = 0
     private var paymentType: PaymentType = PaymentType.CREDIT
@@ -74,7 +74,9 @@ class PayTheoryFragment : Fragment() {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun onDetach() {
         super.onDetach()
-        payTheoryTransaction.disconnect()
+        if (payTheoryTransaction != null) {
+            payTheoryTransaction!!.disconnect()
+        }
         if (model !== null) {
             model!!.update(ConfigurationDetail())
         }
@@ -117,7 +119,7 @@ class PayTheoryFragment : Fragment() {
                         this.constants
                     )
 
-                payTheoryTransaction.init()
+                payTheoryTransaction!!.init()
 
 
 
@@ -266,7 +268,7 @@ class PayTheoryFragment : Fragment() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePayment(payment: Payment) {
-        payTheoryTransaction.transact(payment)
+        payTheoryTransaction!!.transact(payment)
     }
 
     private fun enableCC() {
@@ -307,27 +309,3 @@ class PayTheoryFragment : Fragment() {
 
 
 }
-
-
-
-
-
-
-
-
-
-//TODO TAGS
-
-//MAIN ACTIVITY
-// val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC", "testing" to "123456789")
-// payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
-
-//FRAGMENT
-//        if ((arguments!!.getSerializable(TAGS) as HashMap<String, String>).isNotEmpty()){
-//            tags.putAll(arguments!!.getSerializable(TAGS) as HashMap<String, String>)
-//        }
-
-//README
-//        // create custom tags per transaction (OPTIONAL)
-//        val tags: HashMap<String, String> = hashMapOf("Customer_ID" to "12345ABC")
-//        payTheoryArgs.putSerializable(PayTheoryFragment.TAGS, tags)
