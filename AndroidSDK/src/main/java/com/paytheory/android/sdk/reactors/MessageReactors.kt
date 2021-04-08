@@ -133,6 +133,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                     transferResponse.createdAt, transferResponse.updatedAt, "Card")
                 transaction.context.paymentComplete(paymentResponse)
             }
+            "PENDING" -> {
+                val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
+                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.createdAt, transferResponse.updatedAt, "ACH")
+                transaction.context.paymentComplete(paymentResponse)
+            }
             "FAILURE" -> {
                 var failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
                     responseJson["last_four"] as String,
@@ -140,6 +148,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                 )
                 transaction.context.paymentFailed(failedResponse)
             }
+
             else -> {
                 val json = """
                 { 

@@ -190,6 +190,7 @@ class PayTheoryFragment : Fragment() {
                         val payment = Payment(
                             timing = System.currentTimeMillis(),
                             amount = amount,
+                            account_type = "CHECKING",
                             type = BANK_ACCOUNT,
                             account_number = achAccount.text.toString(),
                             bank_code = achRouting.text.toString()

@@ -176,7 +176,7 @@ data class Payment (
     @SerializedName("timing") val timing: Long,
     @SerializedName("amount") val amount: Int,
     @SerializedName("currency") val currency: String = "USD",
-    @SerializedName("name") val name: String? = null,
+    @SerializedName("name") val name: String? = "",
     @SerializedName("account_number") val account_number: String? = null,
     @SerializedName("account_type") val account_type: String? = null,
     @SerializedName("bank_code") val bank_code: String? = null,
