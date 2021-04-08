@@ -6,11 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.Spinner
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.textfield.TextInputLayout
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
@@ -23,6 +25,11 @@ import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+@RequiresOptIn(message = "This API is being actively developed and may be subject to change.")
+@Retention(AnnotationRetention.BINARY)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+annotation class PayTheory
 
 /**
  * PayTheoryFragment populates with required text inputs.
@@ -64,6 +71,16 @@ class PayTheoryFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun onDetach() {
+        super.onDetach()
+        payTheoryTransaction.disconnect()
+        if (model !== null) {
+            model!!.update(ConfigurationDetail())
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun configure(
         apiKey: String,
         amount: Int,
@@ -81,7 +98,7 @@ class PayTheoryFragment : Fragment() {
         }
 
         model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,paymentType))
-        model!!.configuration.observe(this.viewLifecycleOwner, Observer { configurationDetail ->
+        model!!.configuration.observe(this.viewLifecycleOwner, { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.paymentType = configurationDetail.paymentType
@@ -102,6 +119,8 @@ class PayTheoryFragment : Fragment() {
 
                 payTheoryTransaction.init()
 
+
+
                 enableFields(this.paymentType, accountNameEnabled, billingAddressEnabled)
 
                 val btn = activity!!.findViewById<Button>(R.id.submitButton)
@@ -117,18 +136,11 @@ class PayTheoryFragment : Fragment() {
                 val (achAccount, achRouting) = getAchData()
 
 
-                val achSpinner: Spinner = activity!!.findViewById(R.id.ach_spinner)
-                // Create an ArrayAdapter using the string array and a default spinner layout
-                ArrayAdapter.createFromResource(
-                    this.context!!,
-                    R.array.achSpinner,
-                    android.R.layout.simple_spinner_item
-                ).also { adapter ->
-                    // Specify the layout to use when the list of choices appears
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    // Apply the adapter to the spinner
-                    achSpinner.adapter = adapter
-                }
+                val achChooser: AppCompatAutoCompleteTextView = activity!!.findViewById(R.id.ach_type_choice)
+
+                val items = listOf(getString(R.string.checking), getString(R.string.savings))
+                val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
+                achChooser.setAdapter(adapter)
 
                 // buyer options
                 val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
@@ -205,7 +217,7 @@ class PayTheoryFragment : Fragment() {
                         val payment = Payment(
                             timing = System.currentTimeMillis(),
                             amount = amount,
-                            account_type = achSpinner.selectedItem.toString(),
+                            account_type = achChooser.text.toString(),
                             type = BANK_ACCOUNT,
                             account_number = achAccount.text.toString(),
                             bank_code = achRouting.text.toString()
@@ -251,7 +263,8 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
-    @ExperimentalCoroutinesApi
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePayment(payment: Payment) {
         payTheoryTransaction.transact(payment)
     }
@@ -288,8 +301,8 @@ class PayTheoryFragment : Fragment() {
         achAccount!!.visibility = View.VISIBLE
         val achRouting: PayTheoryEditText? = view?.findViewById(R.id.ach_routing_number)
         achRouting!!.visibility = View.VISIBLE
-        val achSpinner: Spinner? = view?.findViewById(R.id.ach_spinner)
-        achSpinner!!.visibility = View.VISIBLE
+        val achChoice: TextInputLayout? = view?.findViewById(R.id.ach_type_choice_layout)
+        achChoice!!.visibility = View.VISIBLE
     }
 
 

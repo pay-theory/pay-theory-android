@@ -203,6 +203,13 @@ class Transaction(
             }
         }
     }
+
+    @ExperimentalCoroutinesApi
+    override fun disconnect() {
+        if (webSocketInteractor != null) {
+            webSocketInteractor!!.stopSocket()
+        }
+    }
 }
 
 

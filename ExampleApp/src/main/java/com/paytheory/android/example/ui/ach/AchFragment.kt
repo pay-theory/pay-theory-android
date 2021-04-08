@@ -1,5 +1,6 @@
 package com.paytheory.android.example.ui.ach
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +27,7 @@ class AchFragment : Fragment() {
                 ViewModelProvider(this).get(AchViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_ach, container, false)
         val textView: TextView = root.findViewById(R.id.text_ach)
-        achViewModel.text.observe(viewLifecycleOwner, Observer {
+        achViewModel.text.observe(viewLifecycleOwner, {
             textView.text = it
         })
         this.childFragmentManager.beginTransaction()
@@ -38,6 +39,7 @@ class AchFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
         payTheoryFragment.configure(apiKey,5000, PaymentType.BANK, false, false)
     }
 }

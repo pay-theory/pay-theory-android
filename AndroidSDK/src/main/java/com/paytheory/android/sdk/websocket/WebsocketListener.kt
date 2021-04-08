@@ -3,6 +3,7 @@ package com.paytheory.android.sdk.websocket
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.launch
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -35,14 +36,16 @@ class WebSocketListener : WebSocketListener() {
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
-                socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
+                try {
+                    socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
+                    println("Pay Theory Disconnected")
+                } catch (e: ClosedSendChannelException) {
+                    println("Pay Theory Already Disconnected")
+                }
             }
-        }
         webSocket.close(NORMAL_CLOSURE_STATUS, null)
         socketEventChannel.close()
-        println("Pay Theory Disconnected")
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

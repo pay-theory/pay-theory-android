@@ -1,5 +1,6 @@
 package com.paytheory.android.example.ui.credit
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,7 +32,7 @@ class CreditCardFragment : Fragment() {
 
         val root = inflater.inflate(R.layout.fragment_credit, container, false)
         val textView: TextView = root.findViewById(R.id.text_credit)
-        creditCardViewModel.text.observe(viewLifecycleOwner, Observer {
+        creditCardViewModel.text.observe(viewLifecycleOwner, {
             textView.text = it
         })
 
@@ -44,6 +45,9 @@ class CreditCardFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
         payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
     }
+
+
 }

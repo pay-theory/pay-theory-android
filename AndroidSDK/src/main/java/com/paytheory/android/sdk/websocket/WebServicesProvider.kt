@@ -20,7 +20,7 @@ class WebServicesProvider {
     private val socketOkHttpClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .connectTimeout(39, TimeUnit.SECONDS)
-        .hostnameVerifier ( hostnameVerifier = HostnameVerifier{ _, _ -> true })
+        .hostnameVerifier ( hostnameVerifier = { _, _ -> true })
         .build()
 
     @ExperimentalCoroutinesApi
@@ -68,6 +68,7 @@ class WebServicesProvider {
      */
     @ExperimentalCoroutinesApi
     fun stopSocket() {
+        println("socket stopping")
         try {
             _webSocket?.close(NORMAL_CLOSURE_STATUS, null)
             _webSocket = null

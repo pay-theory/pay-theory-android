@@ -2,16 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:id="@+id/PayTheoryFragment">
-    <LinearLayout
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:orientation="vertical" android:id="@+id/PayTheoryEditor">
-
-        <Spinner
-            android:id="@+id/ach_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-             />
 
         <com.paytheory.android.sdk.view.PayTheoryEditText
             android:id="@+id/account_name"
@@ -120,11 +110,25 @@
             android:maxLength="9"
             android:visibility="gone"
             android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ach_type_choice_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/account_type"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                android:id="@+id/ach_type_choice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
         <Button
             android:id="@+id/submitButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
             android:text="@string/submit_payment" />
-    </LinearLayout>
 </LinearLayout>
