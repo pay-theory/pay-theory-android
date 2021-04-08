@@ -8,7 +8,7 @@ Written in Kotlin and requires Android 8.0 (API level 26)
 
 Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
 
-![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/android-registration.png)
+![App Registration](https://assets.paytheory.com/android/android-registration.png)
 
 For each mobile app, you want to register 
 *   enter SHA-256 digest of release signing key
@@ -19,19 +19,19 @@ For each mobile app, you want to register
 
 You can find you signing key digests using Android Studio
 
-![Open Gradle](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/open-gradle)
+![Open Gradle](https://assets.paytheory.com/android/open-gradle)
 
 In upper right corner of Android Studio click on Gradle
 
-![Signing Report](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/signing-report)
+![Signing Report](https://assets.paytheory.com/android/signing-report)
 
 Select Signing Report
 
-![Run Report](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/run-report)
+![Run Report](https://assets.paytheory.com/android/run-report)
 
 Right-click and choose run
 
-![SHA-256](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/sha-256)
+![SHA-256](https://assets.paytheory.com/android/sha-256)
 
 Copy your SHA-256 digest
 
