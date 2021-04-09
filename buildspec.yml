@@ -8,7 +8,7 @@ phases:
       - mkdir temp
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
       - export ANDROID_SDK_ROOT=/temp
-      - cd temp/tools/bin
+      - cd /temp/cmdline-tools/bin
       - ./sdkmanager --licenses
   build:
     commands:
