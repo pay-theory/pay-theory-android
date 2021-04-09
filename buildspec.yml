@@ -3,7 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - gradlew assembleDebug
+      - ./gradlew assembleDebug
 artifacts:
   files:
     - './android/app/build/outputs/**/*.apk'
