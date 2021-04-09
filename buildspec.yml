@@ -8,8 +8,13 @@ phases:
       - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
       - mkdir temp
       - ls
-      - unzip commandlinetools-linux-6858069_latest.zip -d /temp
-      - export ANDROID_SDK_ROOT=/temp
+      - mv commandlinetools-linux-6858069_latest.zip /temp
+      - ls
+      - cd /temp
+      - pwd
+      - ls
+      - unzip commandlinetools-linux-6858069_latest.zip
+      - export ANDROID_SDK_ROOT=`pwd`
       - pwd
       - cd /temp/cmdline-tools/bin
       - yes | ./sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
