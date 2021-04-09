@@ -5,10 +5,9 @@ phases:
     commands:
       - echo Pre Build started on `date`
       - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
-      - unzip commandlinetools-linux-6858069_latest.zip
-      - sudo mv commandlinetools-linux /opt/
-      - export ANDROID_HOME=/opt/commandlinetools-linux
-      - export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+      - unzip commandlinetools-linux-6858069_latest.zip -d /temp/android
+      - export ANDROID_SDK_ROOT=/temp/android
+      - export PATH=$PATH:$ANDROID_SDK_ROOT
   build:
     commands:
       - ./gradlew assembleDebug --debug --stacktrace
