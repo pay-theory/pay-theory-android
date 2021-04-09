@@ -12,9 +12,8 @@ phases:
       - yes | ./sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
   build:
     commands:
-      - pwd
-      - cd ../../../../
-      - pwd
+      - cd ../../
+      - ls
       - ./gradlew assembleDebug
   post_build:
     commands:
