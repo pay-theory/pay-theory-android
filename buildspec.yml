@@ -6,13 +6,12 @@ phases:
       - echo Pre Build started on `date`
       - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
       - mkdir temp
-      - ls
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
       - export ANDROID_SDK_ROOT=/temp
       - export PATH=$PATH:$ANDROID_SDK_ROOT
   build:
     commands:
-      - ./gradlew assembleDebug --debug --stacktrace
+      - ./gradlew assembleDebug
   post_build:
     commands:
       - echo Build completed on `date`
