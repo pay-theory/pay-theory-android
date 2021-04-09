@@ -5,6 +5,7 @@ phases:
     commands:
       - echo Pre Build started on `date`
       - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+      - mkdir temp/android
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp/android
       - export ANDROID_SDK_ROOT=/temp/android
       - export PATH=$PATH:$ANDROID_SDK_ROOT
