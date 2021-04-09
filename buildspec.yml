@@ -1,9 +1,20 @@
 version: 0.2
 
 phases:
+  pre_build:
+    commands:
+      - echo Pre Build started on `date`
+      - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+      - tar -xvf commandlinetools-linux-6858069_latest.zip
+      - sudo mv commandlinetools-linux /opt/
+      - export ANDROID_HOME=/opt/commandlinetools-linux
+      - export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
   build:
     commands:
-      - ./gradlew assembleDebug
+      - ./gradlew assembleDebug --debug --stacktrace
+  post_build:
+    commands:
+      - echo Build completed on `date`
 artifacts:
   files:
     - './android/app/build/outputs/**/*.apk'
