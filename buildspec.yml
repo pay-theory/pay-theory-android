@@ -4,8 +4,8 @@ phases:
   pre_build:
     commands:
       - echo Pre Build started on `date`
-      - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
       - pwd
+      - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
       - mkdir temp
       - ls
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
