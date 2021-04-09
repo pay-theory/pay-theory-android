@@ -15,6 +15,12 @@ phases:
   build:
     commands:
       - pwd
+      - cd ../
+      - pwd
+      - cd ../
+      - pwd
+      - cd ../
+      - pwd
       - ./gradlew assembleDebug
   post_build:
     commands:
