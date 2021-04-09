@@ -5,7 +5,9 @@ phases:
     commands:
       - echo Pre Build started on `date`
       - wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+      - pwd
       - mkdir temp
+      - ls
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
       - export ANDROID_SDK_ROOT=/temp
       - cd /temp/cmdline-tools/bin
@@ -15,11 +17,6 @@ phases:
       - ls
       - cd ../
       - ls
-      - cd ../
-      - ls
-      - cd ../
-      - ls
-      - cd ../
       - ./gradlew assembleDebug
   post_build:
     commands:
