@@ -19,6 +19,12 @@ phases:
       - cd ../../../
       - pwd
       - ls
+      - cd /codebuild
+      - ls
+      - cd /output
+      - ls
+      - cd /src*
+      - ls
       - ./gradlew assembleDebug
   post_build:
     commands:
