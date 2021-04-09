@@ -10,6 +10,7 @@ phases:
       - ls
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
       - export ANDROID_SDK_ROOT=/temp
+      - pwd
       - cd /temp/cmdline-tools/bin
       - yes | ./sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
   build:
