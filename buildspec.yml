@@ -9,7 +9,7 @@ phases:
       - unzip commandlinetools-linux-6858069_latest.zip -d /temp
       - export ANDROID_SDK_ROOT=/temp
       - cd /temp/cmdline-tools/bin
-      - yes | ./sdkmanager --licenses
+      - yes | ./sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
   build:
     commands:
       - ./gradlew assembleDebug
