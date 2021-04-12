@@ -16,5 +16,5 @@ phases:
 
 artifacts:
   files:
-    - './android/app/build/outputs/**/*.apk'
+    - './android/AndroidSDK/build/outputs/aar/*.aar'
   discard-paths: yes
