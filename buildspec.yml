@@ -19,6 +19,5 @@ phases:
 artifacts:
   files:
     - './AndroidSDK/build/outputs/aar/*.aar'
-    - './ExampleApp/build/outputs/apk/debug/*.apk'
-    - './ExampleApplication/build/outputs/apk/debug/*.apk'
+  name: 'Pay Theory Android SDK'
   discard-paths: yes
