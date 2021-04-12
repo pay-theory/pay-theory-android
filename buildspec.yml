@@ -4,9 +4,16 @@ phases:
   install:
     runtime-versions:
       android: 29
+  pre_build:
+    commands:
+      - echo Pre Build started on `date`
   build:
     commands:
       - ./gradlew assembleDebug
+  post_build:
+    commands:
+      - echo Build completed on `date`
+
 artifacts:
   files:
     - './android/app/build/outputs/**/*.apk'
