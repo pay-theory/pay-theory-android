@@ -1,5 +1,6 @@
 package com.paytheory.android.sdk.websocket
 
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
  */
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
-    var payTheoryToken: String
+    var payTheoryToken: String,
+    private val environment: String
 ):
     ViewModel() {
 
@@ -42,7 +44,7 @@ class WebSocketViewModel(
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                interactor.startSocket(payTheoryToken).consumeEach {
+                interactor.startSocket(payTheoryToken, environment).consumeEach {
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)
 
@@ -113,7 +115,7 @@ class WebsocketInteractor constructor(private val repository: WebsocketRepositor
      * @param ptToken token used for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String): Channel<SocketUpdate> = repository.startSocket(ptToken)
+    fun startSocket(ptToken:String, environment: String): Channel<SocketUpdate> = repository.startSocket(ptToken, environment)
 
 }
 
@@ -128,8 +130,8 @@ class WebsocketRepository constructor(private val webServicesProvider: WebServic
      * @param ptToken token used for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String): Channel<SocketUpdate> =
-        webServicesProvider.startSocket(ptToken)
+    fun startSocket(ptToken:String, environment: String): Channel<SocketUpdate> =
+        webServicesProvider.startSocket(ptToken, environment)
 
     /**
      * Function to send messages though a WebSocket

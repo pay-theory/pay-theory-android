@@ -116,7 +116,8 @@ class PayTheoryFragment : Fragment() {
                     Transaction(
                         this.activity!!,
                         api_key,
-                        this.constants
+                        this.constants,
+                        env
                     )
 
                 payTheoryTransaction!!.init()

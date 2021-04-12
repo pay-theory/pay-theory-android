@@ -31,9 +31,9 @@ class WebServicesProvider {
      * @param ptToken token that is added to WebSocket messages for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken: String): Channel<SocketUpdate> =
+    fun startSocket(ptToken: String, environment: String): Channel<SocketUpdate> =
         with(WebSocketListener()) {
-            startSocket(this, ptToken)
+            startSocket(this, ptToken, environment)
             this@with.socketEventChannel
         }
 
@@ -43,10 +43,10 @@ class WebServicesProvider {
      * @param webSocketListener WebSocket listener
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(webSocketListener: WebSocketListener, ptToken: String) {
+    fun startSocket(webSocketListener: WebSocketListener, ptToken: String, environment: String) {
         _webSocketListener = webSocketListener
         _webSocket = socketOkHttpClient.newWebSocket(
-            Request.Builder().url("wss://finix.secure.socket.paytheorystudy.com/?pt_token=${ptToken}")
+            Request.Builder().url("wss://${environment}.secure.socket.paytheorystudy.com/?pt_token=${ptToken}")
                 .build(),
             webSocketListener
         )

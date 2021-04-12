@@ -76,7 +76,11 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
             hostToken,
             sessionKey,
             System.currentTimeMillis())
-        val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        } else {
+            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+        }
 
         val boxed = encryptBox(Gson().toJson(idempotencyRequest), Key.fromBase64String(socketPublicKey))
 
@@ -99,7 +103,11 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
 
         val keyPair = generateLocalKeyPair()
-        val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        } else {
+            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+        }
         val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis())
 
 

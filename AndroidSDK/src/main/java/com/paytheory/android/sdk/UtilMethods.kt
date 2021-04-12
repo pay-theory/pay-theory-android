@@ -4,6 +4,7 @@ package com.paytheory.android.sdk
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 
 /**
  * Object that contains all utility methods
@@ -21,7 +22,14 @@ object UtilMethods {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        val networkCapabilities = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            connectivityManager.activeNetwork ?: return false
+        } else {
+            val cm: ConnectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager;
+            val active: NetworkInfo? = cm?.getActiveNetworkInfo();
+            return active != null
+        }
         val actNw =
             connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
 

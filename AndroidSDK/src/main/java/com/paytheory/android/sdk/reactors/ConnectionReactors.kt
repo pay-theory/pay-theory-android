@@ -28,8 +28,14 @@ class ConnectionReactors(
     fun onConnected() {
         val hostTokenRequest =
             HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
-        val encoded =
+
+        val encoded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
+        } else {
+            android.util.Base64.encodeToString(Gson().toJson(hostTokenRequest).toByteArray(),android.util.Base64.DEFAULT)
+        }
+
+
         val actionRequest = ActionRequest("host:hostToken", encoded)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
     }

@@ -32,7 +32,8 @@ import java.util.*
 class Transaction(
     val context: Context,
     private val apiKey: String,
-    private val constants: Constants
+    private val constants: Constants,
+    private val environment: String
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -69,7 +70,6 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
         if(UtilMethods.isConnectedToInternet(context)){
@@ -100,7 +100,6 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun callSafetyNet(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
         SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
@@ -120,7 +119,7 @@ class Transaction(
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken)
+        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment)
         connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
@@ -132,7 +131,6 @@ class Transaction(
      * Initiate Transaction Class and calls pt-token endpoint
      */
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
         ptTokenApiCall(context)
     }
@@ -162,7 +160,11 @@ class Transaction(
     fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis())
-        val localPublicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        } else {
+            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+        }
 
         val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
         return ActionRequest(
