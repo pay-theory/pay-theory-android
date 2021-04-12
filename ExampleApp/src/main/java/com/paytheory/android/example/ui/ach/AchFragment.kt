@@ -17,7 +17,6 @@ class AchFragment : Fragment() {
 
     private lateinit var achViewModel: AchViewModel
     private val payTheoryFragment = PayTheoryFragment()
-    val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -40,6 +39,6 @@ class AchFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.BANK, false, false)
+        payTheoryFragment.configure(context?.resources!!.getString(R.string.api_key),5000, PaymentType.BANK, false, false)
     }
 }
