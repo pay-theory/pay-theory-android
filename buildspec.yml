@@ -17,10 +17,6 @@ phases:
       - ls
 
 artifacts:
-  commands:
-    - ./ExampleApp
-    - pwd
-    - ls
   files:
-    - './ExampleApp/build/outputs/apk/*.apk'
+    - './AndroidSDK/build/outputs/aar/*.aar'
   discard-paths: yes
