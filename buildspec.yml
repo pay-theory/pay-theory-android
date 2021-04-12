@@ -1,12 +1,12 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      android: 29
   build:
     commands:
       - ./gradlew assembleDebug
-  post_build:
-    commands:
-      - echo Build completed on `date`
 artifacts:
   files:
     - './android/app/build/outputs/**/*.apk'
