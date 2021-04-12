@@ -16,4 +16,5 @@ phases:
 artifacts:
   files:
     - './ExampleApp/build/outputs/apk/debug/*.apk'
+  name: 'AndroidSDK'
   discard-paths: yes
