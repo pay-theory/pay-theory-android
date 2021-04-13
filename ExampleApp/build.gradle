@@ -34,10 +34,15 @@ android {
 }
 
 dependencies {
+    //    implementation ('com.github.pay-theory:pay-theory-android:2.0.23-alpha') {
+//        exclude group: 'net.java.dev.jna', module:'jna'
+//    }
 
-    implementation 'net.java.dev.jna:jna:5.8.0@aar'
+
     //added to use PayTheorySDK as library
+
     implementation project(path: ':AndroidSDK')
+    implementation 'net.java.dev.jna:jna:5.8.0@aar'
 
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
