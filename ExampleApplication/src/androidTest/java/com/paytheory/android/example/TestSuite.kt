@@ -1,5 +1,6 @@
 package com.paytheory.android.example
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.paytheory.android.example.activity.MainActivityTests
 import com.paytheory.android.example.validation.FormattingTest
 import com.paytheory.android.example.validation.UtilMethodsTest

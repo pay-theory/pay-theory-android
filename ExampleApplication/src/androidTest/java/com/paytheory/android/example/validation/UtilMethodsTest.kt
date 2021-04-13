@@ -1,6 +1,7 @@
 package com.paytheory.android.example.validation
 
 import android.content.Intent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ActivityTestRule
 import com.paytheory.android.example.MainActivity
 import com.paytheory.android.sdk.UtilMethods
@@ -8,10 +9,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
 /**
  * Class that testing the utility methods
  */
+@RunWith(AndroidJUnit4::class)
 class UtilMethodsTest{
     @get:Rule
     var mActivityTestRule : ActivityTestRule<MainActivity> = ActivityTestRule(
