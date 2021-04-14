@@ -1,5 +1,7 @@
 package com.paytheory.android.example.ui.credit
 
+import Address
+import BuyerOptions
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +18,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 class CreditCardFragment : Fragment() {
 
     private lateinit var creditCardViewModel: CreditCardViewModel
-    val apiKey = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
+    val apiKey = "My-Api-Key"
     private val payTheoryFragment = PayTheoryFragment()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +47,10 @@ class CreditCardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE)
+        val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+
+        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE, buyerOptions)
     }
 
 

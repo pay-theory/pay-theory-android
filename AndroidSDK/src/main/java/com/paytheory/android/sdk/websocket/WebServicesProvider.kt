@@ -46,7 +46,7 @@ class WebServicesProvider {
     fun startSocket(webSocketListener: WebSocketListener, ptToken: String) {
         _webSocketListener = webSocketListener
         _webSocket = socketOkHttpClient.newWebSocket(
-            Request.Builder().url("wss://finix.secure.socket.paytheorystudy.com/?pt_token=${ptToken}")
+            Request.Builder().url("wss://abel.secure.socket.paytheorystudy.com/?pt_token=${ptToken}")
                 .build(),
             webSocketListener
         )

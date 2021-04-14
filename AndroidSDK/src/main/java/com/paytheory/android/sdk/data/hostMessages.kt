@@ -147,12 +147,12 @@ data class HostTokenRequest (
  * @param country billing country
  */
 data class Address (
+    @SerializedName("line1") val line1: String? = null,
+    @SerializedName("line2") val line2: String? = null,
     @SerializedName("city") val city: String? = null,
     @SerializedName("region") val region: String? = null,
     @SerializedName("postal_code") val postal_code: String? = null,
-    @SerializedName("line1") val line1: String? = null,
-    @SerializedName("line2") val line2: String? = null,
-    @SerializedName("country") val country: String? = null
+    @SerializedName("country") val country: String? = "USA"
 )
 
 /**
@@ -187,7 +187,8 @@ data class Payment (
     @SerializedName("expiration_month") val expiration_month: String? = null,
     @SerializedName("address") val address: Address? = null,
     @SerializedName("pt-instrument") var ptInstrument: String? = null,
-    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE
+    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE,
+    @SerializedName("buyer_options") var buyerOptions: BuyerOptions? = null
 )
 
 /**

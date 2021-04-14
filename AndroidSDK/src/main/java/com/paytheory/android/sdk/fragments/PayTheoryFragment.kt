@@ -88,7 +88,7 @@ class PayTheoryFragment : Fragment() {
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true,
         feeMode: String = FeeMode.SURCHARGE,
-        buyerOptions: HashMap<String, Any> = HashMap()) {
+        buyerOptions: BuyerOptions? = null) {
 
         if (model == null) {
             model = ViewModelProvider(
@@ -180,10 +180,10 @@ class PayTheoryFragment : Fragment() {
                     ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
                 }
 
-                if(buyerOptions.isEmpty()){
+                if(buyerOptions == null){
                     println("Buyer Options is empty")
                 }
-                if(buyerOptions.isNotEmpty()){
+                if(buyerOptions != null){
                     println("Buyer Options is NOT empty")
                 }
 
@@ -211,7 +211,8 @@ class PayTheoryFragment : Fragment() {
                             expiration_month = expirationString.split("/").first(),
                             expiration_year = expirationString.split("/").last(),
                             fee_mode = feeMode,
-                            address = billingAddress
+                            address = billingAddress,
+                            buyerOptions = buyerOptions
                         )
                         makePayment(payment)
                     }

@@ -1,42 +1,33 @@
 package com.paytheory.android.example
 
-import android.content.Context
+import Address
+import BuyerOptions
 import android.os.Bundle
-import android.util.AttributeSet
-import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentError
 import com.paytheory.android.sdk.PaymentResult
 import com.paytheory.android.sdk.PaymentResultFailure
+import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
-import com.paytheory.android.sdk.data.LiveDataViewModel
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
  * Example activity class
  */
 class MainActivity : FragmentActivity() , Payable {
-    val apiKey = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
+    val apiKey = "My-Api-Key"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val payTheoryFragment = this.supportFragmentManager
             .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
-        val buyerOptions = HashMap<String, Any>()
-        buyerOptions["first_name"] = "Some"
-        buyerOptions["last_name"] = "Body"
-        buyerOptions["line_1"] = "123 Testing Lane"
-        buyerOptions["line_2"] = "Apt 2"
-        buyerOptions["city"] = "Cincinnati"
-        buyerOptions["region"] = "Ohio"
-        buyerOptions["postal_code"] = "45236"
+        val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
+        payTheoryFragment.configure(apiKey,2965, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE, buyerOptions)
 
     }
 
