@@ -16,7 +16,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 class CreditCardFragment : Fragment() {
 
     private lateinit var creditCardViewModel: CreditCardViewModel
-    val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
+    val apiKey = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
     private val payTheoryFragment = PayTheoryFragment()
     override fun onCreateView(
         inflater: LayoutInflater,

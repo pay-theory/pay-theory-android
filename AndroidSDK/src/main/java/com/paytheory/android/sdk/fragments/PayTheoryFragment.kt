@@ -1,5 +1,7 @@
 package com.paytheory.android.sdk.fragments
 
+import Address
+import BuyerOptions
 import Payment
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -51,6 +53,8 @@ class PayTheoryFragment : Fragment() {
     private var accountNameEnabled: Boolean = false
     private var billingAddressEnabled: Boolean = false
     private var feeMode : String = FeeMode.SURCHARGE
+    private var billingAddress: Address = Address("","","","","","")
+    private var accountName = ""
     private var tags: HashMap<String,String> = java.util.HashMap()
     private var model: ConfigurationViewModel? = null
 
@@ -83,7 +87,8 @@ class PayTheoryFragment : Fragment() {
         paymentType: PaymentType = PaymentType.CREDIT,
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true,
-        feeMode: String = FeeMode.SURCHARGE) {
+        feeMode: String = FeeMode.SURCHARGE,
+        buyerOptions: HashMap<String, Any> = HashMap()) {
 
         if (model == null) {
             model = ViewModelProvider(
@@ -175,25 +180,22 @@ class PayTheoryFragment : Fragment() {
                     ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
                 }
 
+                if(buyerOptions.isEmpty()){
+                    println("Buyer Options is empty")
+                }
+                if(buyerOptions.isNotEmpty()){
+                    println("Buyer Options is NOT empty")
+                }
+
                 btn.setOnClickListener {
-                    val buyerOptions = HashMap<String, String>()
+
 
                     if (hasAccountName) {
-                        val names =
-                            accountName.text.toString().split("\\s".toRegex()).toMutableList()
-                        val firstName = names[0]
-                        names.removeAt(0)
-                        val lastName = names.joinToString(" ")
-                        buyerOptions["first_name"] = firstName
-                        buyerOptions["last_name"] = lastName
+                        this.accountName = accountName.text.toString()
                     }
 
                     if (hasBillingAddress) {
-                        buyerOptions["line_1"] = billingAddress1.text.toString()
-                        buyerOptions["line_2"] = billingAddress2.text.toString()
-                        buyerOptions["city"] = billingCity.text.toString()
-                        buyerOptions["region"] = billingState.text.toString()
-                        buyerOptions["postal_code"] = billingZip.text.toString()
+                        billingAddress = Address(billingCity.text.toString(),  billingState.text.toString(),billingZip.text.toString(), billingAddress1.text.toString(), billingAddress2.text.toString(), "USA" )
                     }
 
 
@@ -203,11 +205,13 @@ class PayTheoryFragment : Fragment() {
                             timing = System.currentTimeMillis(),
                             amount = amount,
                             type = PAYMENT_CARD,
+                            name = this.accountName,
                             number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
                             security_code = ccCVV.text.toString(),
                             expiration_month = expirationString.split("/").first(),
                             expiration_year = expirationString.split("/").last(),
-                            fee_mode = feeMode
+                            fee_mode = feeMode,
+                            address = billingAddress
                         )
                         makePayment(payment)
                     }
@@ -218,9 +222,11 @@ class PayTheoryFragment : Fragment() {
                             amount = amount,
                             account_type = achChooser.text.toString(),
                             type = BANK_ACCOUNT,
+                            name = this.accountName,
                             account_number = achAccount.text.toString(),
                             bank_code = achRouting.text.toString(),
-                            fee_mode = feeMode
+                            fee_mode = feeMode,
+                            address = billingAddress
                         )
                         makePayment(payment)
                     }

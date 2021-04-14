@@ -19,12 +19,23 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : FragmentActivity() , Payable {
-    val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
+    val apiKey = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val payTheoryFragment = this.supportFragmentManager
             .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
+
+        val buyerOptions = HashMap<String, Any>()
+        buyerOptions["first_name"] = "Some"
+        buyerOptions["last_name"] = "Body"
+        buyerOptions["line_1"] = "123 Testing Lane"
+        buyerOptions["line_2"] = "Apt 2"
+        buyerOptions["city"] = "Cincinnati"
+        buyerOptions["region"] = "Ohio"
+        buyerOptions["postal_code"] = "45236"
+
+
         payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false)
 
     }

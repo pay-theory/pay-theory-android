@@ -18,7 +18,7 @@ class AchFragment : Fragment() {
 
     private lateinit var achViewModel: AchViewModel
     private val payTheoryFragment = PayTheoryFragment()
-    val apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
+    val apiKey = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,

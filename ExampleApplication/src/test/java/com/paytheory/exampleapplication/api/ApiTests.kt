@@ -19,7 +19,7 @@ class ApiTests {
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87"
+        headerMap["X-API-Key"] = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
         return headerMap
     }
 
@@ -29,7 +29,7 @@ class ApiTests {
     fun ptTokenCall(): TestPtToken? {
         return Retrofit.Builder()
             .client(ApiWorker.client)
-            .baseUrl(Constants("finix").API_BASE_PATH)
+            .baseUrl(Constants("abel").API_BASE_PATH)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(ApiWorker.gsonConverter)
             .build()
@@ -62,7 +62,7 @@ class ApiTests {
                 it.method == "GET"
             }
             assertThat("has correct URL") {
-                it.url == "https://dev.tags.api.paytheorystudy.com/pt-token".toHttpUrlOrNull()
+                it.url == "https://abel.tags.api.paytheorystudy.com/pt-token".toHttpUrlOrNull()
             }
             assertThat("Content-Type is correct") {
                 it.headers["Content-Type"] == "application/json"
