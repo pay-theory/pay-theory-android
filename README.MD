@@ -8,7 +8,7 @@ Written in Kotlin and requires Android 8.0 (API level 26)
 
 Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
 
-![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/android-registration.png)
+![App Registration](https://assets.paytheory.com/android/android-registration.png)
 
 For each mobile app, you want to register 
 *   enter SHA-256 digest of release signing key
@@ -19,19 +19,19 @@ For each mobile app, you want to register
 
 You can find you signing key digests using Android Studio
 
-![Open Gradle](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/open-gradle)
+![Open Gradle](https://assets.paytheory.com/android/open-gradle)
 
 In upper right corner of Android Studio click on Gradle
 
-![Signing Report](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/signing-report)
+![Signing Report](https://assets.paytheory.com/android/signing-report)
 
 Select Signing Report
 
-![Run Report](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/run-report)
+![Run Report](https://assets.paytheory.com/android/run-report)
 
 Right-click and choose run
 
-![SHA-256](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/sha-256)
+![SHA-256](https://assets.paytheory.com/android/sha-256)
 
 Copy your SHA-256 digest
 
@@ -43,8 +43,8 @@ Copy your SHA-256 digest
 allprojects {
     repositories {
         google()
-        jcenter()
         maven { url 'https://jitpack.io' }
+        jcenter()
     }
 }
 ```
@@ -74,71 +74,102 @@ _replace JNA-RELEASE with the release version shown above_
 
 ### Layout
 
-add Pay Theory Fragment to your layout
+add a fragment container to your layout to hold the Pay Theory Fragment
 
 ```xml
-<LinearLayout 
+<androidx.fragment.app.FragmentContainerView
+    android:id="@+id/payTheoryContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <fragment
-        android:id="@+id/payTheoryFragment"
-        android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
-
-</LinearLayout>
+    android:layout_height="wrap_content"
+/>
 ```
 
-### Activity
+### Code
 
-retrieve the fragment from your activity's onCreate and initialize
+create a PayTheoryFragment and set your API key
 
 Kotlin
 ```Kotlin
-val payTheoryFragment = this.supportFragmentManager
-        .findFragmentById(R.id.payTheoryFragment)
-
-val payTheoryArgs = Bundle()
-payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-API-Key")
-payTheoryArgs.putInt(PayTheoryFragment.AMOUNT,5000)
-
-payTheoryFragment!!.arguments = payTheoryArgs
+    private val payTheoryFragment = PayTheoryFragment()
+    private val apiKey = "YOUR-API-KEY"
 ```
 
 Java
 ```Java
-Fragment payTheoryFragment = this.getSupportFragmentManager()
-        .findFragmentById(R.id.payTheoryFragment);
+   private final PayTheoryFragment payTheoryFragment = new PayTheoryFragment();
+   private final String apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87";
+```
 
-Bundle payTheoryArgs = new Bundle();
-payTheoryArgs.putString(PayTheoryFragment.Companion.getAPI_KEY(), "My-API-Key");
-payTheoryArgs.putInt(PayTheoryFragment.Companion.getAMOUNT(),5000);
+from onCreateView add PayTheoryFragment to the view
 
-payTheoryFragment.setArguments(payTheoryArgs);
+Kotlin
+```Kotlin
+override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
+
+        this.childFragmentManager.beginTransaction()
+            .add(R.id.payTheoryContainer, payTheoryFragment)
+            .commit()
+
+        return root
+    }
+```
+
+Java
+```Java
+public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+      
+
+      this.getChildFragmentManager().beginTransaction().add(R.id.payTheoryContainer, (Fragment)this.payTheoryFragment).commit();
+      
+      return root;
+   }
+```
+
+once you have an amount established configure Pay Theory
+
+Kotlin
+```Kotlin
+    
+    val amount = 5000
+    payTheoryFragment.configure(apiKey,amount)
+
+```
+
+Java
+```Java
+    
+    int amount = 5000;
+    this.payTheoryFragment.configure(this.apiKey, amount)
+
 ```
 
 *   by default the SDK provides a simple credit card input
 *   applying optional settings allows customization
 
 ```Kotlin
-(REQUIRED ARGUMENTS)
-// applying api-key 
-payTheoryArgs.putString(PayTheoryFragment.API_KEY, "My-Api-Key")   
 
-// collect amount of payment
-payTheoryArgs.putInt(PayTheoryFragment.AMOUNT, 4200)
+    // use ACH bank account
+    payTheoryFragment.configure(apiKey, amount, PaymentType.BANK)
 
+    // use ACH bank account and require billing address
+    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true, requireBillingAddress:true)
 
-(OPTIONAL ARGUMENTS)
-// display an account name field 
-payTheoryArgs.putBoolean(PayTheoryFragment.ACCOUNT_NAME_ENABLED,true)
+    // use credit card account
+    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT)
 
-// display billing address fields 
-payTheoryArgs.putBoolean(PayTheoryFragment.BILLING_ADDRESS_ENABLED,true)
+    // use credit card and require account name
+    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true)
 
-// collect ACH bank details instead of credit card 
-payTheoryArgs.putBoolean(PayTheoryFragment.USE_ACH,true)
+    // use credit card and require billing address
+    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true, requireBillingAddress:true)
+
+    // coming soon
+    // use cash
+    // payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
 
 ```
 
