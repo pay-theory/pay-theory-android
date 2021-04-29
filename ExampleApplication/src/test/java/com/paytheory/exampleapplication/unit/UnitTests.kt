@@ -1,16 +1,16 @@
-package com.paytheory.exampleapplication.unit
-
-import com.goterl.lazycode.lazysodium.utils.Key
-import com.paytheory.android.sdk.nacl.encryptBox
-import com.paytheory.android.sdk.nacl.generateLocalKeyPair
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Test
-
-/**
- * Unit tests for encryption functions
- */
-class UnitTests {
-
+//package com.paytheory.exampleapplication.unit
+//
+//import com.goterl.lazycode.lazysodium.utils.Key
+//import com.paytheory.android.sdk.nacl.encryptBox
+//import com.paytheory.android.sdk.nacl.generateLocalKeyPair
+//import org.hamcrest.MatcherAssert.assertThat
+//import org.junit.Test
+//
+///**
+// * Unit tests for encryption functions
+// */
+//class UnitTests {
+//
 //    var arr = byteArrayOf(0x2E, 0x38)
 //    var keyPair = generateLocalKeyPair()
 //    var publicKey: Key = keyPair.publicKey
@@ -30,7 +30,7 @@ class UnitTests {
 //        assertThat("box is correct object", encryptedString.javaClass.name ==  "String")
 //    }
 //
-
-
-
-}
+//
+//
+//
+//}

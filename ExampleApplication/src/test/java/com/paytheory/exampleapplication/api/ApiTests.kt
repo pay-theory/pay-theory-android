@@ -19,7 +19,7 @@ class ApiTests {
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = "pt-sandbox-abel-cc3dfd66a18dd51dca3930eede3b8489"
+        headerMap["X-API-Key"] = "pt-sandbox-abel-123456789124564789456123"
         return headerMap
     }
 
@@ -62,7 +62,7 @@ class ApiTests {
                 it.method == "GET"
             }
             assertThat("has correct URL") {
-                it.url == "https://abel.tags.api.paytheorystudy.com/pt-token".toHttpUrlOrNull()
+                it.url == "https://abel.token.service.paytheorystudy.com/token".toHttpUrlOrNull()
             }
             assertThat("Content-Type is correct") {
                 it.headers["Content-Type"] == "application/json"
