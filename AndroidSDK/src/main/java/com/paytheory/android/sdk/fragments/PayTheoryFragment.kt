@@ -183,13 +183,6 @@ class PayTheoryFragment : Fragment() {
                     ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
                 }
 
-                if(buyerOptions == null){
-                    println("Buyer Options is empty")
-                }
-                if(buyerOptions != null){
-                    println("Buyer Options is NOT empty")
-                }
-
                 btn.setOnClickListener {
 
 

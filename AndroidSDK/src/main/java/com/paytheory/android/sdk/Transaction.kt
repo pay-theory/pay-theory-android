@@ -26,7 +26,7 @@ import java.util.*
 /**
  * Transaction Class is created after data validation and click listener is activated.
  * This hold all pay theory logic to process payments.
- * @param context the applications rersources
+ * @param context the applications resources
  * @param apiKey the api-key that will be used to create payment transaction
  */
 class Transaction(
