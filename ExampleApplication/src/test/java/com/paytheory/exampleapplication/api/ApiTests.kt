@@ -1,5 +1,6 @@
 package com.paytheory.exampleapplication.api
 
+import android.util.Log
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.api.ApiWorker
 import com.paytheory.android.sdk.api.PTTokenResponse
@@ -44,7 +45,7 @@ class ApiTests {
          * function that returns pt-token call
          * @param headers headers of pt-token call
          */
-        @GET("pt-token")
+        @GET("token")
         fun doToken(@HeaderMap headers: Map<String, String>): retrofit2.Call<PTTokenResponse>
     }
 

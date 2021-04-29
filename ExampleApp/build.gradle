@@ -39,8 +39,10 @@ dependencies {
 //    }
 
 
-    //added to use PayTheorySDK as library
 
+
+    
+    //added to use PayTheorySDK as library
     implementation project(path: ':AndroidSDK')
     implementation 'net.java.dev.jna:jna:5.8.0@aar'
 
