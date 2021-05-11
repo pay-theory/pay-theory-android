@@ -89,7 +89,12 @@ class Transaction(
 
                 }, { error ->
                     if (context is Payable) {
-                        context.paymentError(PaymentError(error.message!!))
+                        if(error.message == "HTTP 403 "){
+                            context.paymentError(PaymentError("Access Denied"))
+                        }
+                        else {
+                            context.paymentError(PaymentError(error.message!!))
+                        }
                     }
                 }
                 )
