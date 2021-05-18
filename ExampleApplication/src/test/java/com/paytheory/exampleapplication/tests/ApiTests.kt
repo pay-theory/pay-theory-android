@@ -1,4 +1,4 @@
-package com.paytheory.exampleapplication.api
+package com.paytheory.exampleapplication.tests
 
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.api.*
