@@ -5,6 +5,8 @@ import com.paytheory.android.sdk.reactors.ConnectionReactors
 import com.paytheory.android.sdk.reactors.MessageReactors
 import com.paytheory.android.sdk.websocket.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import okhttp3.Response
+import okhttp3.WebSocket
 import okio.ByteString
 import org.junit.Test
 import org.mockito.Mockito
@@ -12,11 +14,11 @@ import org.mockito.Mockito
 /**
  * Class that is used to test websockets
  */
-class WebsocketTests {
+class WebsocketTests  {
 
     private var messageReactors: MessageReactors? = null
     private var connectionReactors: ConnectionReactors? = null
-
+    val socketException = SocketAbortedException()
 
     lateinit var viewModel: WebSocketViewModel
     private var webServicesProvider: WebServicesProvider? = null
@@ -63,8 +65,7 @@ class WebsocketTests {
      */
     @ExperimentalCoroutinesApi
     @Test
-    fun socketClassesTests() {
-        val socketException = SocketAbortedException()
+    fun webServicesProviderTests() {
 
         val socketUpdate = SocketUpdate("test text", Mockito.mock(ByteString::class.java), socketException)
 
@@ -90,5 +91,51 @@ class WebsocketTests {
         assert(socketUpdate.byteString is ByteString)
 
         }
+
+    /**
+     *
+     */
+    @ExperimentalCoroutinesApi
+    @Test
+    fun webSocketViewModelTests() {
+
+        webServicesProvider = WebServicesProvider()
+        webSocketRepository = WebsocketRepository(webServicesProvider!!)
+        webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
+
+        val viewModel = WebSocketViewModel(webSocketInteractor!!, "test token", "paytheory")
+
+        viewModel.subscribeToSocketEvents(Mockito.mock(WebsocketMessageHandler::class.java))
+        viewModel.sendSocketMessage("test message")
+
+        assert(viewModel.connected)
+
+        viewModel.disconnect()
+
+        assert(WebServicesProvider.NORMAL_CLOSURE_STATUS == 1000)
+
+    }
+
+    /**
+     *
+     */
+    @ExperimentalCoroutinesApi
+    @Test
+    fun webSocketListenerTests() {
+
+        val webSocketListener = WebSocketListener()
+        val webSocket = Mockito.mock(WebSocket::class.java)
+        val response = Mockito.mock(Response::class.java)
+        webSocketListener.onOpen(webSocket, response)
+
+        webSocketListener.onMessage(webSocket, "test text")
+
+        webSocketListener.onClosing(webSocket, 1, "test reason")
+
+        webSocketListener.onFailure(webSocket, socketException, response)
+
+        //need assert
+
+    }
 }
 

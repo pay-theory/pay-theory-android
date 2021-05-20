@@ -12,6 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.HeaderMap
 import strikt.api.expectThat
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Unit tests for HTTP calls
@@ -81,13 +83,13 @@ class ApiTests {
 
         val apiService = ApiService(constants.API_BASE_PATH)
 
-//        val api = apiService.ptTokenApiCall()
-
-//        val call: io.reactivex.rxjava3.core.Observable<PTTokenResponse> = api.doToken(buildApiHeaders())
-
-
+        val ptTokenApiService = apiService.ptTokenApiCall()
 
         assert( apiService.basePath == constants.API_BASE_PATH)
+
+        val call = ptTokenApiService.doToken(buildApiHeaders())
+
+        //Need assert
     }
 
 

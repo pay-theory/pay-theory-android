@@ -17,7 +17,12 @@
 ////    private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 ////    val boxLazy = lazySodium as Box.Lazy
 ////    val keyPair = boxLazy.cryptoBoxKeypair()
+//
+////    Error: java.lang.UnsatisfiedLinkError: Native library (com/sun/jna/win32-x86-64/jnidispatch.dll) not found in resource path (C:\Users\abeld\AppData\Local\Temp\classpath1211720529.jar)
+////    java.lang.NoClassDefFoundError: Could not initialize class com.paytheory.android.sdk.nacl.LazyKt
+//
 //    val keyPair = generateLocalKeyPair()
+//
 //    /**
 //     *
 //     */

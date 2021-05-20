@@ -10,6 +10,6 @@ import org.junit.runners.Suite
  */
 @RunWith(Suite::class)
 @Suite.SuiteClasses(ApiTests::class, BuildConfigTests::class, ConfigurationTests::class,
-    ConstantsTests::class, NaclTests::class, PayableTests::class,
+    ConstantsTests::class, PayableTests::class,
     ReactorTests::class, UtilMethodsTests::class, ValidationTests::class, ViewTests::class, WebsocketTests::class )
 class TestSuite
