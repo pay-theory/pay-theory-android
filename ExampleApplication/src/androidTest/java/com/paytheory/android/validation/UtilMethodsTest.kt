@@ -1,4 +1,4 @@
-package com.paytheory.android.example.validation
+package com.paytheory.android.validation
 
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -41,6 +41,6 @@ class UtilMethodsTest{
 
         val util = UtilMethods.isConnectedToInternet(context)
 
-        assertTrue(util)
+        assert(util)
     }
 }

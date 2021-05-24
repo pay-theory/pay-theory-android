@@ -15,11 +15,6 @@ import org.mockito.Mockito
  */
 class ValidationTests {
 
-
-//    fun String.toEditable(): Editable {
-//        return Editable.Factory.getInstance().newEditable(this)
-//    }
-
     /**
      *
      */
@@ -33,8 +28,7 @@ class ValidationTests {
         textWatcher.beforeTextChanged(Mockito.mock(CharSequence::class.java), 0,0,0)
         textWatcher.afterTextChanged(editable)
 
-        assert(editText is PayTheoryEditText)
-        assert(textWatcher is CreditCardFormattingTextWatcher)
+        editText.text?.let { assert(it.equals("4242424242424242") ) }
     }
 
     /**
@@ -50,8 +44,7 @@ class ValidationTests {
         textWatcher.beforeTextChanged(Mockito.mock(CharSequence::class.java), 0,0,0)
         textWatcher.afterTextChanged(editable)
 
-        assert(editText is PayTheoryEditText)
-        assert(textWatcher is CVVFormattingTextWatcher)
+        editText.text?.let { assert(it.equals("042") ) }
     }
 
     /**
@@ -67,7 +60,6 @@ class ValidationTests {
         textWatcher.beforeTextChanged(Mockito.mock(CharSequence::class.java), 0,0,0)
         textWatcher.afterTextChanged(editable)
 
-        assert(editText is PayTheoryEditText)
-        assert(textWatcher is ExpirationFormattingTextWatcher)
+        editText.text?.let { assert(it.equals("042024") ) }
     }
 }

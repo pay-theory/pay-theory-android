@@ -83,12 +83,7 @@ class WebsocketTests  {
 
 
         assert(WebServicesProvider.NORMAL_CLOSURE_STATUS == 1000)
-        assert(webServicesProvider is WebServicesProvider)
-        assert(socketException is SocketAbortedException)
-        assert(socketUpdate is SocketUpdate)
-        assert(socketUpdate.exception is SocketAbortedException)
         assert(socketUpdate.text == "test text")
-        assert(socketUpdate.byteString is ByteString)
 
         }
 

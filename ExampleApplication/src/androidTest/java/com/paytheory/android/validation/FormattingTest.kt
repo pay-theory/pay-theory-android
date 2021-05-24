@@ -1,4 +1,4 @@
-package com.paytheory.android.example.validation
+package com.paytheory.android.validation
 
 import android.content.Intent
 import android.view.View

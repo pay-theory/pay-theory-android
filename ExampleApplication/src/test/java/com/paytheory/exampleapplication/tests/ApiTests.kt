@@ -3,16 +3,13 @@ package com.paytheory.exampleapplication.tests
 import com.paytheory.android.sdk.Constants
 import com.paytheory.android.sdk.api.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
 import org.junit.Test
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.HeaderMap
 import strikt.api.expectThat
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
@@ -23,56 +20,35 @@ class ApiTests {
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = "pt-sandbox-abel-123456789124564789456123"
+        headerMap["X-API-Key"] = "pt-sandbox-test-123456789124564789456123"
         return headerMap
     }
 
-    /**
-     * interface for pt-token call
-     */
-    interface TestPtToken {
-        /**
-         * function that returns pt-token call
-         * @param headers headers of pt-token call
-         */
-        @GET("token")
-        fun doToken(@HeaderMap headers: Map<String, String>): Call<PTTokenResponse>
-    }
-
-    /**
-     * function that creates api client
-     */
-    private fun ptTokenCall(): TestPtToken? {
-        return Retrofit.Builder()
-            .baseUrl(Constants("abel").API_BASE_PATH)
-            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-            .addConverterFactory(ApiWorker.gsonConverter)
-            .client(ApiWorker.client)
-            .build()
-            .create(TestPtToken::class.java)
-    }
-
-    /**
-     * test pt token api creation and functions
-     */
-    @Test
-    fun ptTokenTest() {
-        val api = ptTokenCall()
-        val call = api!!.doToken(buildApiHeaders())
-
-
-        expectThat(call.request()) {
-            assertThat("is GET method") {
-                it.method == "GET"
-            }
-            assertThat("has correct URL") {
-                it.url == "https://abel.token.service.paytheorystudy.com/token".toHttpUrlOrNull()
-            }
-            assertThat("Content-Type is correct") {
-                it.headers["Content-Type"] == "application/json"
-            }
-        }
-    }
+//    /**
+//     * test pt token api creation and functions
+//     */
+//    @Test
+//    fun ptTokenTest() {
+//        val apiService = ApiService("test")
+//
+//        val api = apiService.ptTokenApiCall()
+//        api.doToken(buildApiHeaders())
+//
+//        val call = api!!.doToken(buildApiHeaders())
+//
+//
+//        expectThat(call.request()) {
+//            assertThat("is GET method") {
+//                it.method == "GET"
+//            }
+//            assertThat("has correct URL") {
+//                it.url == "https://test.token.service.paytheorystudy.com/token".toHttpUrlOrNull()
+//            }
+//            assertThat("Content-Type is correct") {
+//                it.headers["Content-Type"] == "application/json"
+//            }
+//        }
+//    }
 
     /**
      * test api service
@@ -83,13 +59,8 @@ class ApiTests {
 
         val apiService = ApiService(constants.API_BASE_PATH)
 
-        val ptTokenApiService = apiService.ptTokenApiCall()
-
         assert( apiService.basePath == constants.API_BASE_PATH)
 
-        val call = ptTokenApiService.doToken(buildApiHeaders())
-
-        //Need assert
     }
 
 
@@ -105,8 +76,6 @@ class ApiTests {
         assert(interceptors.size == 1)
         assert(apiWorker.client.readTimeoutMillis == 20000)
         assert(apiWorker.client.connectTimeoutMillis == 15000)
-        assert(apiWorker.client is OkHttpClient)
-        assert(apiWorker.gsonConverter is GsonConverterFactory)
     }
 
     /**
