@@ -1,18 +1,22 @@
 version: 0.2
-
+env:
+  shell: bash
 phases:
   install:
     runtime-versions:
       android: 29
   pre_build:
+    on-failure: ABORT
     commands:
       - echo Pre Build started on `date`
   build:
+    on-failure: ABORT
     commands:
       - ./gradlew assembleDebug
       - ./gradlew assembleDebugAndroidTest
-      - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r ExampleApplication/report.xml
+      - ./codacy.sh
   post_build:
+    on-failure: ABORT
     commands:
       - echo Build completed on `date`
 artifacts:
