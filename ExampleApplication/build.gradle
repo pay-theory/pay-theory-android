@@ -44,14 +44,12 @@ android {
             returnDefaultValues = true
         }
     }
-
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
 
     reports {
         xml.enabled = true
-        xml.destination file("report.xml")
     }
 
     def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
@@ -66,6 +64,12 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'crea
     ]))
 }
 
+task copy(type: Copy) {
+    mkdir 'jacocoReport'
+    from "build/reports/coverage/debug"
+    include "*.xml"
+    into "$projectDir/jacocoReport" // Into the project root, one level above the app folder
+}
 
 dependencies {
 
