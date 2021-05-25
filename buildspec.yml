@@ -11,6 +11,7 @@ phases:
     commands:
       - ./gradlew assembleDebug
       - ./gradlew assembleDebugAndroidTest
+      - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r ExampleApplication/report.xml
   post_build:
     commands:
       - echo Build completed on `date`
