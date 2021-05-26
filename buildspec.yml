@@ -23,6 +23,7 @@ phases:
       - echo Build completed on `date`
 artifacts:
   files:
-    - './ExampleApplication/build/outputs/apk/debug/*.apk'
-  name: 'AndroidSDK'
+    - './ExampleApplication/apk/androidTest/debug/*.apk'
   discard-paths: yes
+
+
