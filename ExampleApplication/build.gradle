@@ -71,6 +71,19 @@ task copy(type: Copy) {
     into "$projectDir/jacocoReport" // Into the project root, one level above the app folder
 }
 
+task buildWithReport {
+    dependsOn 'clean'
+    dependsOn 'build'
+    dependsOn 'publish'
+    dependsOn 'jacocoTestReport'
+    dependsOn 'copy'
+    tasks.findByName('build').mustRunAfter 'clean'
+    tasks.findByName('publish').mustRunAfter 'build'
+    tasks.findByName('jacocoTestReport').mustRunAfter 'publish'
+    tasks.findByName('copy').mustRunAfter 'jacocoTestReport'
+}
+
+
 dependencies {
 
     //added to use PayTheorySDK as library
