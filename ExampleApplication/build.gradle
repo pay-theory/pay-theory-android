@@ -64,11 +64,16 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'crea
     ]))
 }
 
-task copy(type: Copy) {
+task copyReport(type: Copy) {
     mkdir 'jacocoReport'
     from "build/reports/coverage/debug"
     include "*.xml"
     into "$projectDir/jacocoReport" // Into the project root, one level above the app folder
+}
+task copyApk(type: Copy) {
+    mkdir 'apk'
+    from "build/outputs/apk"
+    into "$projectDir/apk" // Into the project root, one level above the app folder
 }
 
 task buildWithReport {
@@ -76,11 +81,13 @@ task buildWithReport {
     dependsOn 'build'
     dependsOn 'publish'
     dependsOn 'jacocoTestReport'
-    dependsOn 'copy'
+    dependsOn 'copyReport'
+    dependsOn 'copyApk'
     tasks.findByName('build').mustRunAfter 'clean'
     tasks.findByName('publish').mustRunAfter 'build'
     tasks.findByName('jacocoTestReport').mustRunAfter 'publish'
-    tasks.findByName('copy').mustRunAfter 'jacocoTestReport'
+    tasks.findByName('copyReport').mustRunAfter 'jacocoTestReport'
+    tasks.findByName('copyApk').mustRunAfter 'copyReport'
 }
 
 
