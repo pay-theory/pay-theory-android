@@ -14,7 +14,8 @@ phases:
     commands:
       - ./gradlew assembleDebug
       - ./gradlew assembleDebugAndroidTest
-      - ./codacy.sh
+      - COMMIT_ID=$(git rev-parse --verify HEAD)
+      - ./codacy.sh COMMIT_ID
   post_build:
     on-failure: ABORT
     commands:
