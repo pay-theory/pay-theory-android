@@ -248,6 +248,35 @@ data class PaymentError (
     @SerializedName("reason") val reason: String)
 ```
 
+## Testing
+There are two different ways you are able to run testing:
+
+Unit testing
+The following commands can be ran in the command prompt:
+
+Windows
+```
+gradlew unitTesting
+```
+
+Linux
+```
+./gradlew unitTesting
+```
+
+Unit and UI testing (Requires an android device or emulator)
+The following commands can be ran in the command prompt:
+
+Windows
+```
+gradlew completeTesting
+```
+
+Linux
+```
+./gradlew completeTesting
+```
+
 ## License
 
 MIT © [pay theory](https://github.com/pay-theory)

@@ -46,8 +46,7 @@ android {
     }
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
-
+task unitTests(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
     reports {
         xml.enabled = true
     }
@@ -64,6 +63,24 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'crea
     ]))
 }
 
+task fullTests(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+    reports {
+        xml.enabled = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/code-coverage/connected/*coverage.ec"
+    ]))
+}
+
+
 task copyReport(type: Copy) {
     mkdir 'jacocoReport'
     from "build/reports/coverage/debug"
@@ -76,17 +93,31 @@ task copyApk(type: Copy) {
     into "$projectDir/apk" // Into the project root, one level above the app folder
 }
 
-task buildWithReport {
+task unitTesting {
     dependsOn 'clean'
     dependsOn 'build'
     dependsOn 'publish'
-    dependsOn 'jacocoTestReport'
+    dependsOn 'unitTests'
     dependsOn 'copyReport'
     dependsOn 'copyApk'
     tasks.findByName('build').mustRunAfter 'clean'
     tasks.findByName('publish').mustRunAfter 'build'
-    tasks.findByName('jacocoTestReport').mustRunAfter 'publish'
-    tasks.findByName('copyReport').mustRunAfter 'jacocoTestReport'
+    tasks.findByName('unitTests').mustRunAfter 'publish'
+    tasks.findByName('copyReport').mustRunAfter 'unitTests'
+    tasks.findByName('copyApk').mustRunAfter 'copyReport'
+}
+
+task completeTesting {
+    dependsOn 'clean'
+    dependsOn 'build'
+    dependsOn 'publish'
+    dependsOn 'fullTests'
+    dependsOn 'copyReport'
+    dependsOn 'copyApk'
+    tasks.findByName('build').mustRunAfter 'clean'
+    tasks.findByName('publish').mustRunAfter 'build'
+    tasks.findByName('fullTests').mustRunAfter 'publish'
+    tasks.findByName('copyReport').mustRunAfter 'fullTests'
     tasks.findByName('copyApk').mustRunAfter 'copyReport'
 }
 

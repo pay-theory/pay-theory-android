@@ -15,7 +15,6 @@ phases:
       - ./gradlew assembleDebug
       - ./gradlew assembleDebugAndroidTest
       - COMMIT_ID=$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - echo $COMMIT_ID
       - ./codacy.sh $COMMIT_ID
   post_build:
     on-failure: ABORT
