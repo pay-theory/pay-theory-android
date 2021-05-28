@@ -252,6 +252,7 @@ data class PaymentError (
 There are two different ways you are able to run testing:
 
 Unit testing
+
 The following commands can be ran in the command prompt:
 
 Windows
@@ -265,6 +266,7 @@ Linux
 ```
 
 Unit and UI testing (Requires an android device or emulator)
+
 The following commands can be ran in the command prompt:
 
 Windows
