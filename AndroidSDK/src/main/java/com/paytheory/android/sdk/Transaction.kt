@@ -172,7 +172,7 @@ class Transaction(
     fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis(), payment.buyerOptions)
-        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val localPublicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         } else {
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)

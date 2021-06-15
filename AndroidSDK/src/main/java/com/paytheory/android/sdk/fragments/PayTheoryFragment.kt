@@ -120,10 +120,12 @@ class PayTheoryFragment : Fragment() {
             this.billingAddressEnabled = configurationDetail.requireAddress
             this.feeMode = configurationDetail.feeMode
             if (this.api_key.length > 0) {
-                val index: Int = this.api_key.indexOf("-", this.api_key.indexOf("-") + 1)
-                val env = this.api_key.substring(0,index)
+                val startIndex: Int = api_key.indexOf('-')
+                val env: String = api_key.substring(0, startIndex)
+                val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
+                val stage: String = api_key.substring(startIndex+1, endIndex)
 
-                this.constants = Constants(env)
+                this.constants = Constants(env, stage)
 
                 tags = hashMapOf("pay-theory-environment" to env)
 

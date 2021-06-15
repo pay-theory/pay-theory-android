@@ -3,12 +3,12 @@ package com.paytheory.android.sdk
 /**
  * Object that contains constant variables
  */
-class Constants(env: String) {
+class Constants(env: String, stage: String) {
     val API_BASE_PATH: String
     val NO_INTERNET_ERROR: String
 
     init {
-         API_BASE_PATH = "https://$env.token.service.paytheorystudy.com/"
+         API_BASE_PATH = "https://$env.token.service.$stage.com/"
          NO_INTERNET_ERROR = "No internet connection"
     }
 }
