@@ -33,7 +33,8 @@ class Transaction(
     val context: Context,
     private val apiKey: String,
     private val constants: Constants,
-    private val environment: String
+    private val environment: String,
+    private val stage: String
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -126,7 +127,7 @@ class Transaction(
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment)
+        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment, stage)
         connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
