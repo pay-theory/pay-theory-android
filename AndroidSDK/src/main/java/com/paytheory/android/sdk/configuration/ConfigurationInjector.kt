@@ -14,6 +14,9 @@ class ConfigurationInjector (application: Application, private val configuration
         return ConfigurationRepository(configurationDetail)
     }
 
+    /**
+     * Create and return configuration model factory
+     */
     fun provideConfigurationViewModelFactory(): ConfigurationModelFactory =
         ConfigurationModelFactory(
             getConfigurationRepository()

@@ -165,6 +165,10 @@ class Transaction(
         }
     }
 
+    /**
+     * Generate instrument action request
+     * @param payment payment object to transact
+     */
     fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
         val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis(), payment.buyerOptions)
