@@ -23,6 +23,7 @@ import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+
 @RequiresOptIn(message = "This API is being actively developed and may be subject to change.")
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
@@ -82,6 +83,15 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
+    /**
+     * Create configurations to execute a payment
+     * @param apiKey Pay Theory API-Key
+     * @param amount Amount of transaction
+     * @param paymentType Type of payment method
+     * @param requireBillingAddress Boolean if billing address is required
+     * @param feeMode Type of fee mode that will be processed
+     * @param buyerOptions Optional details about the buyer
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun configure(
         apiKey: String,
@@ -110,7 +120,9 @@ class PayTheoryFragment : Fragment() {
             this.billingAddressEnabled = configurationDetail.requireAddress
             this.feeMode = configurationDetail.feeMode
             if (this.api_key.length > 0) {
-                val env = this.api_key.split("-")[2]
+                val index: Int = this.api_key.indexOf("-", this.api_key.indexOf("-") + 1)
+                val env = this.api_key.substring(0,index)
+
                 this.constants = Constants(env)
 
                 tags = hashMapOf("pay-theory-environment" to env)
