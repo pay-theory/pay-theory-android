@@ -35,6 +35,7 @@ class WebsocketTests  {
             "6InB0LXNhbmRib3gtemlwcHNsaXAtOTcwY2M1ZDliNjI5MWI1MzU0YTYzYTFhNDUzYmE5NDIifQ.Ik3IHpMoAcpSMqEeXTeAkBX6s" +
             "9pn8BAemNnq9NrBYHA"
     var environment = "test"
+    var stage = "paytheorystudy"
 
 
 
@@ -72,12 +73,12 @@ class WebsocketTests  {
         val webSocketListener = WebSocketListener()
         val webServicesProvider = WebServicesProvider()
 
-        webServicesProvider.startSocket(ptToken, environment)
+        webServicesProvider.startSocket(ptToken, environment, stage)
         webServicesProvider.sendMessage("test message")
         webServicesProvider.stopSocket()
 
 
-        webServicesProvider.startSocket(webSocketListener, ptToken, environment)
+        webServicesProvider.startSocket(webSocketListener, ptToken, environment, stage)
         webServicesProvider.sendMessage("test message")
         webServicesProvider.stopSocket()
 

@@ -134,7 +134,8 @@ class PayTheoryFragment : Fragment() {
                         this.activity!!,
                         api_key,
                         this.constants,
-                        env
+                        env,
+                        stage
                     )
 
                 payTheoryTransaction!!.init()

@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
     var payTheoryToken: String,
-    private val environment: String
+    private val environment: String,
+    private val stage: String
 ):
     ViewModel() {
 
@@ -44,7 +45,7 @@ class WebSocketViewModel(
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                interactor.startSocket(payTheoryToken, environment).consumeEach {
+                interactor.startSocket(payTheoryToken, environment, stage).consumeEach {
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)
 
@@ -115,7 +116,7 @@ class WebsocketInteractor constructor(private val repository: WebsocketRepositor
      * @param ptToken token used for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String, environment: String): Channel<SocketUpdate> = repository.startSocket(ptToken, environment)
+    fun startSocket(ptToken:String, environment: String, stage: String): Channel<SocketUpdate> = repository.startSocket(ptToken, environment, stage)
 
 }
 
@@ -130,8 +131,8 @@ class WebsocketRepository constructor(private val webServicesProvider: WebServic
      * @param ptToken token used for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String, environment: String): Channel<SocketUpdate> =
-        webServicesProvider.startSocket(ptToken, environment)
+    fun startSocket(ptToken:String, environment: String, stage: String): Channel<SocketUpdate> =
+        webServicesProvider.startSocket(ptToken, environment, stage)
 
     /**
      * Function to send messages though a WebSocket
