@@ -46,7 +46,7 @@ class WebServicesProvider {
     fun startSocket(webSocketListener: WebSocketListener, ptToken: String, environment: String, stage: String) {
         _webSocketListener = webSocketListener
         _webSocket = socketOkHttpClient.newWebSocket(
-            Request.Builder().url("wss://${environment}.secure.socket.${stage}.com/?pt_token=${ptToken}")
+            Request.Builder().url("wss://${environment}.secure.socket.${stage}.com/${environment}?pt_token=${ptToken}")
                 .build(),
             webSocketListener
         )
