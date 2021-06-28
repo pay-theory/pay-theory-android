@@ -12,7 +12,7 @@ class ReactorTests {
      */
     @Test
     fun connectionReactorsTest() {
-
+        //TODO
     }
 
     /**
@@ -20,7 +20,7 @@ class ReactorTests {
      */
     @Test
     fun messageReactorsTest() {
-
+        //TODO
     }
 
 }

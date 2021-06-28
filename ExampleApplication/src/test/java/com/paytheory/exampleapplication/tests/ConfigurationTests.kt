@@ -9,7 +9,9 @@ import org.junit.Test
 import org.mockito.Mockito
 import kotlin.coroutines.CoroutineContext
 
-
+/**
+ * Class to test configuration class
+ */
 class ConfigurationTests {
 
     @get:Rule
@@ -18,12 +20,18 @@ class ConfigurationTests {
     val configData = ConfigurationDetail("test api key", 1234, false,
         false, PaymentType.CASH, FeeMode.SERVICE_FEE)
 
+    /**
+     * Function to test configuration detail
+     */
     @Test
     fun configurationDetailTest() {
         assert(configData.apiKey == "test api key" && configData.amount == 1234 && !configData.requireAccountName
                 && !configData.requireAddress && configData.paymentType == PaymentType.CASH && configData.feeMode == "service_fee")
     }
 
+    /**
+     * Function to test configuration injector
+     */
     @Test
     fun configurationInjectorTest() {
 
@@ -34,6 +42,9 @@ class ConfigurationTests {
         assert(configInjector is ConfigurationInjector && configRepo is ConfigurationModelFactory)
     }
 
+    /**
+     * Function to test configuration repository
+     */
     @Test
     fun configurationRepositoryTest() {
         val configRepo = ConfigurationRepository(configData)
@@ -49,6 +60,9 @@ class ConfigurationTests {
             true, PaymentType.CREDIT, FeeMode.SURCHARGE))
     }
 
+    /**
+     * Function to test configuration factory
+     */
     @Test
     fun configurationModelFactoryTest() {
         val configFactor = ConfigurationModelFactory(ConfigurationRepository(configData))
@@ -56,6 +70,9 @@ class ConfigurationTests {
         assert(configFactor is ConfigurationModelFactory)
     }
 
+    /**
+     * Function to test configuration view model
+     */
     @Test
     fun configurationViewModelTest() {
         val configViewModel = ConfigurationViewModel(ConfigurationRepository(configData), Dispatchers.Main)

@@ -229,18 +229,24 @@ class PayTheoryFragment : Fragment() {
                     }
 
                     if (hasACH) {
-                        val payment = Payment(
-                            timing = System.currentTimeMillis(),
-                            amount = amount,
-                            account_type = achChooser.text.toString(),
-                            type = BANK_ACCOUNT,
-                            name = this.accountName,
-                            account_number = achAccount.text.toString(),
-                            bank_code = achRouting.text.toString(),
-                            fee_mode = feeMode,
-                            address = billingAddress
-                        )
-                        makePayment(payment)
+                        if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings"){
+                            val payment = Payment(
+                                timing = System.currentTimeMillis(),
+                                amount = amount,
+                                account_type = achChooser.text.toString(),
+                                type = BANK_ACCOUNT,
+                                name = this.accountName,
+                                account_number = achAccount.text.toString(),
+                                bank_code = achRouting.text.toString(),
+                                fee_mode = feeMode,
+                                address = billingAddress
+                            )
+                            makePayment(payment)
+                        }
+                        else {
+                            achChooser.error = "Account type required."
+                        }
+
                     }
                 }
             }

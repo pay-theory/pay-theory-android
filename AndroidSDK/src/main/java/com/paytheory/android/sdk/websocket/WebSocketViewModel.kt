@@ -25,6 +25,9 @@ class WebSocketViewModel(
 
     var connected: Boolean = false
 
+    /**
+     * Function to disconnect WebSocket
+     */
     @ExperimentalCoroutinesApi
     fun disconnect() {
         viewModelScope.launch(Dispatchers.IO) {
