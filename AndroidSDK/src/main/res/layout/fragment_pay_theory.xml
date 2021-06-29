@@ -80,25 +80,37 @@
                             android:inputType="number"
                             android:autofillHints="creditCardNumber"  />
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cc_cvv"
-                            android:layout_width="match_parent"
-                            android:digits="1234567890"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/cvv"
-                            android:visibility="gone"
-                            android:inputType="number"
-                            android:autofillHints="creditCardSecurityCode" />
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cc_expiration"
+
+
+                        <LinearLayout
+                            android:id="@+id/cvv_and_expiration"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:digits="1234567890/"
-                            android:hint="@string/expiration"
                             android:visibility="gone"
-                            android:inputType="number"
-                            android:autofillHints="creditCardExpirationDate" />
+                            android:orientation="horizontal">
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/cc_cvv"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints="creditCardSecurityCode"
+                                    android:digits="1234567890"
+                                    android:hint="@string/cvv"
+                                    android:inputType="number"
+                                    android:visibility="gone"
+                                    android:layout_weight="1"/>
+
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/cc_expiration"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints="creditCardExpirationDate"
+                                    android:digits="1234567890/"
+                                    android:hint="@string/expiration"
+                                    android:inputType="number"
+                                    android:visibility="gone"
+                                    android:layout_weight="1"/>
+                        </LinearLayout>
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/ach_account_number"

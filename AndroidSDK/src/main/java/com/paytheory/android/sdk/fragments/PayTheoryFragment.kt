@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -119,7 +120,7 @@ class PayTheoryFragment : Fragment() {
             this.accountNameEnabled = configurationDetail.requireAccountName
             this.billingAddressEnabled = configurationDetail.requireAddress
             this.feeMode = configurationDetail.feeMode
-            if (this.api_key.length > 0) {
+            if (this.api_key.isNotEmpty()) {
                 val startIndex: Int = api_key.indexOf('-')
                 val env: String = api_key.substring(0, startIndex)
                 val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
@@ -300,6 +301,8 @@ class PayTheoryFragment : Fragment() {
         ccCVV!!.visibility = View.VISIBLE
         val ccExpiration: PayTheoryEditText? = view?.findViewById(R.id.cc_expiration)
         ccExpiration!!.visibility = View.VISIBLE
+        val cvvAndExpiration: LinearLayout? = view?.findViewById(R.id.cvv_and_expiration)
+        cvvAndExpiration!!.visibility = View.VISIBLE
     }
 
     private fun enableBillingAddress() {
