@@ -150,7 +150,6 @@ payTheoryFragment.configure(apiKey,amountOfPayment, PaymentType.CREDIT, false, f
 
 React to events by implementing the Payable interface
 
-Kotlin
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
