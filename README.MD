@@ -37,7 +37,7 @@ Copy your SHA-256 digest
 
 ## Install SDK to Gradle
 
-### Install jitpack to top level Gradle
+### Install jitpack to project level Gradle
 
 ```gradle
 allprojects {
@@ -70,81 +70,56 @@ _replace PAY-THEORY-RELEASE with the release version shown above_
 
 _replace JNA-RELEASE with the release version shown above_
 
+### Update minimum sdk version to 21 in application level Gradle
+
+```Kotlin
+defaultConfig {
+    applicationId "com.example.testapp"
+    minSdkVersion 21
+    targetSdkVersion 30
+    versionCode 1
+    versionName "1.0"
+
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+}
+```
+
 ## Usage
 
 ### Layout
 
-add a fragment container to your layout to hold the Pay Theory Fragment
+add the Pay Theory Fragment container to your layout xml file
 
 ```xml
-<androidx.fragment.app.FragmentContainerView
-    android:id="@+id/payTheoryContainer"
+<fragment
+    android:id="@+id/payTheoryFragment"
+    android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-/>
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
 ```
 
 ### Code
 
-create a PayTheoryFragment and set your API key
+set your API key
 
-Kotlin
 ```Kotlin
-    private val payTheoryFragment = PayTheoryFragment()
-    private val apiKey = "YOUR-API-KEY"
+private val apiKey = "YOUR-API-KEY"
 ```
 
-Java
-```Java
-   private final PayTheoryFragment payTheoryFragment = new PayTheoryFragment();
-   private final String apiKey = "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87";
-```
+inside your onCreate method set PayTheoryFragment
 
-from onCreateView add PayTheoryFragment to the view
-
-Kotlin
 ```Kotlin
-override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-
-        this.childFragmentManager.beginTransaction()
-            .add(R.id.payTheoryContainer, payTheoryFragment)
-            .commit()
-
-        return root
-    }
+val payTheoryFragment = this.supportFragmentManager
+    .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-Java
-```Java
-public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-      
+inside your onCreate method configure Pay Theory
 
-      this.getChildFragmentManager().beginTransaction().add(R.id.payTheoryContainer, (Fragment)this.payTheoryFragment).commit();
-      
-      return root;
-   }
-```
-
-once you have an amount established configure Pay Theory
-
-Kotlin
 ```Kotlin
-    
-    val amount = 5000
-    payTheoryFragment.configure(apiKey,amount)
-
-```
-
-Java
-```Java
-    
-    int amount = 5000;
-    this.payTheoryFragment.configure(this.apiKey, amount)
-
+val amountOfPayment = 5236
+payTheoryFragment.configure(apiKey,amountOfPayment, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
 ```
 
 *   by default the SDK provides a simple credit card input
@@ -187,26 +162,6 @@ class MainActivity : AppCompatActivity() , Payable {
     }
 
     override fun paymentError(paymentError: PaymentError) {
-    }
-...
-}
-```
-
-Java
-```Java
-public class MainActivity extends AppCompatActivity implements Payable {
-
-...
-    @Override
-    public void paymentComplete(@NotNull PaymentResult paymentResult) {
-    }
-
-    @Override
-    public void paymentError(@NotNull PaymentError paymentError) {
-    }
-
-    @Override
-    public void paymentFailed(@NotNull PaymentResult paymentResult) {
     }
 ...
 }
