@@ -188,7 +188,9 @@ data class Payment (
     @SerializedName("address") val address: Address? = null,
     @SerializedName("pt-instrument") var ptInstrument: String? = null,
     @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE,
-    @SerializedName("buyer_options") var buyerOptions: BuyerOptions? = null
+    @SerializedName("buyer_options") var buyerOptions: BuyerOptions? = null,
+    @SerializedName("buyerContact") val buyerContact: String? = null,
+    @SerializedName("buyer") val buyer: String? = null
 )
 
 /**

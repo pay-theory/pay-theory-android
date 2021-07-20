@@ -19,6 +19,7 @@ import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.Transaction
 import com.paytheory.android.sdk.configuration.*
 import com.paytheory.android.sdk.validation.CVVFormattingTextWatcher
+import com.paytheory.android.sdk.validation.CashFormattingTextWatcher
 import com.paytheory.android.sdk.validation.CreditCardFormattingTextWatcher
 import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
@@ -44,6 +45,7 @@ class PayTheoryFragment : Fragment() {
         const val TAGS = "tags"
         const val PAYMENT_CARD = "PAYMENT_CARD"
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
+        const val CASH = "CASH"
     }
 
 
@@ -148,21 +150,33 @@ class PayTheoryFragment : Fragment() {
                 val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
                 // credit card fields
-                val (ccNumber, ccCVV, ccExpiration) = getCreditCardData()
+                val (ccNumber, ccCVV, ccExpiration) = getCreditCardFields()
 
                 val hasCC = (ccNumber.visibility == View.VISIBLE
                         && ccCVV.visibility == View.VISIBLE
                         && ccExpiration.visibility == View.VISIBLE)
 
-                // ach fields
-                val (achAccount, achRouting) = getAchData()
 
+                // ach fields
+                val (achAccount, achRouting) = getAchFields()
 
                 val achChooser: AppCompatAutoCompleteTextView = activity!!.findViewById(R.id.ach_type_choice)
 
                 val items = listOf(getString(R.string.checking), getString(R.string.savings))
+
                 val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
                 achChooser.setAdapter(adapter)
+
+                val hasACH = (achAccount.visibility == View.VISIBLE
+                        && achRouting.visibility == View.VISIBLE)
+
+                // cash fields
+                val cashEmail = activity!!.findViewById<PayTheoryEditText>(R.id.cash_email_address)
+                val cashBuyer = activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer)
+
+
+                val hasCASH = (cashEmail.visibility == View.VISIBLE
+                        && cashBuyer.visibility == View.VISIBLE)
 
                 // buyer options
                 val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
@@ -173,9 +187,6 @@ class PayTheoryFragment : Fragment() {
                 val billingCity = activity!!.findViewById<PayTheoryEditText>(R.id.billing_city)
                 val billingState = activity!!.findViewById<PayTheoryEditText>(R.id.billing_state)
                 val billingZip = activity!!.findViewById<PayTheoryEditText>(R.id.billing_zip)
-
-                val hasACH = (achAccount.visibility == View.VISIBLE
-                        && achRouting.visibility == View.VISIBLE)
 
                 val hasAccountName = accountName.visibility == View.VISIBLE
 
@@ -198,6 +209,14 @@ class PayTheoryFragment : Fragment() {
                     ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
                     ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
                 }
+
+                if (hasCASH) {
+                    val cashEmailValidation: (PayTheoryEditText) -> CashFormattingTextWatcher =
+                        { pt -> CashFormattingTextWatcher(pt)}
+
+                    cashEmail.addTextChangedListener(cashEmailValidation(cashEmail))
+                }
+
 
                 btn.setOnClickListener {
 
@@ -229,6 +248,22 @@ class PayTheoryFragment : Fragment() {
                         makePayment(payment)
                     }
 
+                    if (hasCASH) {
+                        val email = cashEmail.text.toString()
+                        val buyer = cashBuyer.text.toString()
+
+                        val payment = Payment(
+                            timing = System.currentTimeMillis(),
+                            amount = amount,
+                            type = CASH,
+                            buyer = buyer,
+                            fee_mode = feeMode,
+                            address = billingAddress,
+                            buyerContact = email
+                        )
+                        makePayment(payment)
+                    }
+
                     if (hasACH) {
                         if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings"){
                             val payment = Payment(
@@ -254,13 +289,13 @@ class PayTheoryFragment : Fragment() {
         })
     }
 
-    private fun getAchData(): Pair<PayTheoryEditText, PayTheoryEditText> {
+    private fun getAchFields(): Pair<PayTheoryEditText, PayTheoryEditText> {
         val achAccount = activity!!.findViewById<PayTheoryEditText>(R.id.ach_account_number)
         val achRouting = activity!!.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
         return Pair(achAccount, achRouting)
     }
 
-    private fun getCreditCardData(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
+    private fun getCreditCardFields(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
         val ccNumber = activity!!.findViewById<PayTheoryEditText>(R.id.cc_number)
         val ccCVV = activity!!.findViewById<PayTheoryEditText>(R.id.cc_cvv)
         val ccExpiration = activity!!.findViewById<PayTheoryEditText>(R.id.cc_expiration)
@@ -275,11 +310,16 @@ class PayTheoryFragment : Fragment() {
         if (paymentType == PaymentType.BANK) {
             enableAccountName()
             enableACH()
-        } else {
+        }
+        if (paymentType == PaymentType.CREDIT) {
             if (accountNameEnabled) {
                 enableAccountName()
             }
             enableCC()
+        }
+        if (paymentType == PaymentType.CASH) {
+            enableAccountName()
+            enableCash()
         }
 
 
@@ -330,6 +370,14 @@ class PayTheoryFragment : Fragment() {
         achRouting!!.visibility = View.VISIBLE
         val achChoice: TextInputLayout? = view?.findViewById(R.id.ach_type_choice_layout)
         achChoice!!.visibility = View.VISIBLE
+    }
+
+    private fun enableCash(){
+        val cashEmail: PayTheoryEditText? = view?.findViewById(R.id.cash_email_address)
+        cashEmail!!.visibility = View.VISIBLE
+
+        val cashBuyer: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer)
+        cashBuyer!!.visibility = View.VISIBLE
     }
 
 

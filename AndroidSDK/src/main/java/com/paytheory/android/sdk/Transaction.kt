@@ -53,6 +53,9 @@ class Transaction(
         private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
 
+        private const val BARCODE_ACTION = "host:barcode"
+        private const val BARCODE_TOKEN = "BarcodeUid"
+
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
 
@@ -172,16 +175,25 @@ class Transaction(
      */
     fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
-        val instrumentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis(), payment.buyerOptions)
+
+        val paymentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis(), payment.buyerOptions)
+
         val localPublicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         } else {
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
         }
 
-        val boxed = encryptBox(Gson().toJson(instrumentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+        val boxed = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+
+        var requestAction = INSTRUMENT_ACTION
+
+        if (payment.type == "CASH"){
+            requestAction = BARCODE_ACTION
+        }
+
         return ActionRequest(
-            INSTRUMENT_ACTION,
+            requestAction,
             boxed,
             localPublicKey)
     }
@@ -191,6 +203,7 @@ class Transaction(
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
             message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
             message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
+            message.indexOf(BARCODE_TOKEN) > -1 -> TRANSFER_RESULT
             message.indexOf(TRANSFER_RESULT) > -1 -> TRANSFER_RESULT
             message.indexOf(TRANSFER_RESULT_FAIL) > 3 -> TRANSFER_RESULT
             else -> UNKNOWN
