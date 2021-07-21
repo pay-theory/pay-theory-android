@@ -17,6 +17,9 @@ import kotlin.collections.ArrayList
  */
 class ApiTests {
 
+    val partner = "abel"
+    val stage = "paytheorystudy"
+
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
         headerMap["Content-Type"] = "application/json"
@@ -55,7 +58,7 @@ class ApiTests {
      */
     @Test
     fun apiServiceTest() {
-        val constants = Constants("abel")
+        val constants = Constants(partner,stage)
 
         val apiService = ApiService(constants.API_BASE_PATH)
 

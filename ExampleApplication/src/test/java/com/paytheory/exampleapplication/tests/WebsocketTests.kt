@@ -36,7 +36,11 @@ class WebsocketTests  {
             "9pn8BAemNnq9NrBYHA"
     var environment = "test"
     var stage = "paytheorystudy"
-
+    val testToken = "test token"
+    val env = "paytheory"
+    val testMessage = "test message"
+    val testReason= "test reason"
+    val testText = "test text"
 
 
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String = "") {
@@ -44,7 +48,7 @@ class WebsocketTests  {
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment)
+        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment, stage)
         connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
     }
@@ -68,23 +72,23 @@ class WebsocketTests  {
     @Test
     fun webServicesProviderTests() {
 
-        val socketUpdate = SocketUpdate("test text", Mockito.mock(ByteString::class.java), socketException)
+        val socketUpdate = SocketUpdate(testText, Mockito.mock(ByteString::class.java), socketException)
 
         val webSocketListener = WebSocketListener()
         val webServicesProvider = WebServicesProvider()
 
         webServicesProvider.startSocket(ptToken, environment, stage)
-        webServicesProvider.sendMessage("test message")
+        webServicesProvider.sendMessage(testMessage)
         webServicesProvider.stopSocket()
 
 
         webServicesProvider.startSocket(webSocketListener, ptToken, environment, stage)
-        webServicesProvider.sendMessage("test message")
+        webServicesProvider.sendMessage(testMessage)
         webServicesProvider.stopSocket()
 
 
         assert(WebServicesProvider.NORMAL_CLOSURE_STATUS == 1000)
-        assert(socketUpdate.text == "test text")
+        assert(socketUpdate.text == testText)
 
         }
 
@@ -99,10 +103,10 @@ class WebsocketTests  {
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
-        val viewModel = WebSocketViewModel(webSocketInteractor!!, "test token", "paytheory")
+        val viewModel = WebSocketViewModel(webSocketInteractor!!, testToken, env, stage)
 
         viewModel.subscribeToSocketEvents(Mockito.mock(WebsocketMessageHandler::class.java))
-        viewModel.sendSocketMessage("test message")
+        viewModel.sendSocketMessage(testMessage)
 
         assert(viewModel.connected)
 
@@ -124,9 +128,9 @@ class WebsocketTests  {
         val response = Mockito.mock(Response::class.java)
         webSocketListener.onOpen(webSocket, response)
 
-        webSocketListener.onMessage(webSocket, "test text")
+        webSocketListener.onMessage(webSocket, testMessage)
 
-        webSocketListener.onClosing(webSocket, 1, "test reason")
+        webSocketListener.onClosing(webSocket, 1,testReason )
 
         webSocketListener.onFailure(webSocket, socketException, response)
 

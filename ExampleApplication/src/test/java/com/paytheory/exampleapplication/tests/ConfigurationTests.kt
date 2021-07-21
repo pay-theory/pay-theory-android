@@ -14,19 +14,26 @@ import kotlin.coroutines.CoroutineContext
  */
 class ConfigurationTests {
 
+    val apiKey = "test api key"
+    val amountOne = 1234
+    val amountTwo = 4321
+    val requireAccountName = false
+    val requireAddress = false
+    val feeMode = "service_fee"
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    val configData = ConfigurationDetail("test api key", 1234, false,
-        false, PaymentType.CASH, FeeMode.SERVICE_FEE)
+    val configData = ConfigurationDetail(apiKey, amountOne, requireAccountName,
+        requireAddress, PaymentType.CASH, FeeMode.SERVICE_FEE)
 
     /**
      * Function to test configuration detail
      */
     @Test
     fun configurationDetailTest() {
-        assert(configData.apiKey == "test api key" && configData.amount == 1234 && !configData.requireAccountName
-                && !configData.requireAddress && configData.paymentType == PaymentType.CASH && configData.feeMode == "service_fee")
+        assert(configData.apiKey == apiKey && configData.amount == amountOne && !configData.requireAccountName
+                && !configData.requireAddress && configData.paymentType == PaymentType.CASH && configData.feeMode == feeMode)
     }
 
     /**
@@ -50,14 +57,14 @@ class ConfigurationTests {
         val configRepo = ConfigurationRepository(configData)
 
         assert(configRepo is ConfigurationRepository)
-        assert(configRepo.configuration.value == ConfigurationDetail("test api key", 1234, false,
-            false, PaymentType.CASH, FeeMode.SERVICE_FEE))
+        assert(configRepo.configuration.value == ConfigurationDetail(apiKey, amountOne, requireAccountName,
+            requireAddress, PaymentType.CASH, FeeMode.SERVICE_FEE))
 
-        configRepo.setConfiguration(ConfigurationDetail("testing api key", 4321, true,
-            true, PaymentType.CREDIT, FeeMode.SURCHARGE))
+        configRepo.setConfiguration(ConfigurationDetail(apiKey, amountTwo, requireAccountName,
+            requireAddress, PaymentType.CREDIT, FeeMode.SURCHARGE))
 
-        assert(configRepo.configuration.value == ConfigurationDetail("testing api key", 4321, true,
-            true, PaymentType.CREDIT, FeeMode.SURCHARGE))
+        assert(configRepo.configuration.value == ConfigurationDetail(apiKey, amountTwo, requireAccountName,
+            requireAddress, PaymentType.CREDIT, FeeMode.SURCHARGE))
     }
 
     /**
@@ -84,8 +91,8 @@ class ConfigurationTests {
         assert(!configViewModel.configuration.value!!.requireAddress)
         assert(!configViewModel.configuration.value!!.requireAccountName)
 
-        configViewModel.update(ConfigurationDetail("testing api key", 4321, true,
-            true, PaymentType.CREDIT, FeeMode.SURCHARGE))
+        configViewModel.update(ConfigurationDetail(apiKey, amountTwo, requireAccountName,
+            requireAddress, PaymentType.CREDIT, FeeMode.SURCHARGE))
 
         assert(configViewModel.configuration.value!!.requireAddress)
         assert(configViewModel.configuration.value!!.requireAccountName)

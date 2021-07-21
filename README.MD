@@ -211,12 +211,12 @@ Unit testing
 The following commands can be ran in the command prompt:
 
 Windows
-```
+```powershell
 gradlew unitTesting
 ```
 
 Linux
-```
+```shell
 ./gradlew unitTesting
 ```
 
@@ -225,12 +225,12 @@ Unit and UI testing (Requires an android device or emulator)
 The following commands can be ran in the command prompt:
 
 Windows
-```
+```powershell
 gradlew completeTesting
 ```
 
 Linux
-```
+```shell
 ./gradlew completeTesting
 ```
 
