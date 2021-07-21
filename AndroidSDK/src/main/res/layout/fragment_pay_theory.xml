@@ -148,6 +148,14 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
+                            android:id="@+id/cash_buyer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/buyer"
+                            android:visibility="gone"
+                            android:inputType="text" />
+
+                        <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cash_buyer_contact"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -155,13 +163,6 @@
                             android:visibility="gone"
                             android:inputType="text" />
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cash_buyer"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/buyer"
-                            android:visibility="gone"
-                            android:inputType="text" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/submitButton"
