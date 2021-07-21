@@ -15,6 +15,6 @@
     <string name="savings">Savings</string>
     <string name="checking">Checking</string>
     <string name="account_type">Account Type</string>
-    <string name="email_address">Email Address</string>
+    <string name="cash_buyer_contact">Phone or Email</string>
     <string name="buyer">Full Name</string>
 </resources>

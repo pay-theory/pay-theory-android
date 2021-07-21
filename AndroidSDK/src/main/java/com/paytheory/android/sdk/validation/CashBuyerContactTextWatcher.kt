@@ -7,7 +7,7 @@ import android.util.Patterns
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 
-class CashFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
+class CashBuyerContactTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -21,7 +21,7 @@ class CashFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     override fun afterTextChanged(s: Editable) {
         var isValid = isValidEmail(s.toString())
         if(!isValid){
-            ptText!!.error = "invalid email address"
+            ptText!!.error = "Invalid email or phone number"
         }
     }
 
@@ -29,7 +29,7 @@ class CashFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
         return if (TextUtils.isEmpty(target)) {
             false
         } else {
-            Patterns.EMAIL_ADDRESS.matcher(target).matches()
+            Patterns.EMAIL_ADDRESS.matcher(target).matches() || Patterns.PHONE.matcher(target).matches()
         }
     }
 

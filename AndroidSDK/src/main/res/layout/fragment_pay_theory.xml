@@ -148,10 +148,10 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cash_email_address"
+                            android:id="@+id/cash_buyer_contact"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/email_address"
+                            android:hint="@string/cash_buyer_contact"
                             android:visibility="gone"
                             android:inputType="text" />
 
