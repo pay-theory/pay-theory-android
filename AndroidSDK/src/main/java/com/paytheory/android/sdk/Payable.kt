@@ -51,12 +51,24 @@ data class PaymentError (
     @SerializedName("reason") val reason: String)
 
 /**
+ * Data class to store resulting barcode data
+ * @param
+ */
+data class BarcodeResult (
+    @SerializedName("BarcodeUid") val barcodeUid: String,
+    @SerializedName("barcodeUrl") val barcodeUrl: String,
+    @SerializedName("barcode") val barcode: String,
+    @SerializedName("barcodeFee") val barcodeFee: String,
+    @SerializedName("Merchant") val merchant: String,
+)
+
+/**
  * Interface that handles a transaction completion, failure, and errors
  */
 interface Payable {
     /**
      * Converts paymentResult as Payable
-     * @param paymentResult reason the transaction failed
+     * @param paymentResult result of the completed transaction
      */
     fun paymentComplete(paymentResult: PaymentResult)
     /**
@@ -66,7 +78,12 @@ interface Payable {
     fun paymentFailed(paymentFailure: PaymentResultFailure)
     /**
      * Converts paymentError as Payable
-     * @param paymentError reason the transaction failed
+     * @param paymentError reason the transaction error
      */
     fun paymentError(paymentError: PaymentError)
+    /**
+     * Converts barcodeResult as Payable
+     * @param barcodeResult result of the completed barcode transaction
+     */
+    fun barcodeComplete(barcodeResult: BarcodeResult)
 }

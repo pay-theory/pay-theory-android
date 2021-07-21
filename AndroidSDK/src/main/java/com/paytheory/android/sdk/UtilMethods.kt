@@ -26,8 +26,8 @@ object UtilMethods {
             connectivityManager.activeNetwork ?: return false
         } else {
             val cm: ConnectivityManager =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager;
-            val active: NetworkInfo? = cm?.getActiveNetworkInfo();
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val active: NetworkInfo? = cm.activeNetworkInfo
             return active != null
         }
         val actNw =

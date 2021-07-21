@@ -5,10 +5,7 @@ import BuyerOptions
 import android.os.Bundle
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.PaymentError
-import com.paytheory.android.sdk.PaymentResult
-import com.paytheory.android.sdk.PaymentResultFailure
+import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
@@ -17,7 +14,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : FragmentActivity() , Payable {
-    val apiKey = "learn-paytheorylab-653b8fa6baca2d1584b7e79f5bc399df"
+    val apiKey = "My-Api-Key"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,6 +49,10 @@ class MainActivity : FragmentActivity() , Payable {
 
     override fun paymentError(paymentError: PaymentError) {
         showToast("an error occurred ${paymentError.reason}")
+    }
+
+    override fun barcodeComplete(barcodeResult: BarcodeResult) {
+        showToast("barcode request successful $barcodeResult")
     }
 
 }

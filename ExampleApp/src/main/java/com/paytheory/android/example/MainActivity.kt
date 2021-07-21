@@ -8,10 +8,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.PaymentError
-import com.paytheory.android.sdk.PaymentResult
-import com.paytheory.android.sdk.PaymentResultFailure
+import com.paytheory.android.sdk.*
 
 class MainActivity : AppCompatActivity(), Payable {
 
@@ -51,6 +48,10 @@ class MainActivity : AppCompatActivity(), Payable {
 
     override fun paymentError(paymentError: PaymentError) {
         showToast("an error occurred ${paymentError.reason}")
+    }
+
+    override fun barcodeComplete(barcodeResult: BarcodeResult) {
+        showToast("barcode request successful $barcodeResult")
     }
 
 }

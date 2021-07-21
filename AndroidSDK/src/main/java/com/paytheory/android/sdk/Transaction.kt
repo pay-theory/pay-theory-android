@@ -48,13 +48,13 @@ class Transaction(
         private const val INSTRUMENT_TOKEN = "pt-instrument"
         private const val PAYMENT_TOKEN = "payment-token"
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
+        private const val BARCODE_ACTION = "host:barcode"
+        private const val BARCODE_RESULT = "BarcodeUid"
         private const val TRANSFER_ACTION = "host:transfer"
         private const val TRANSFER_RESULT = "payment-detail-reference"
         private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
 
-        private const val BARCODE_ACTION = "host:barcode"
-        private const val BARCODE_TOKEN = "BarcodeUid"
 
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
@@ -176,7 +176,8 @@ class Transaction(
     fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         val keyPair = generateLocalKeyPair()
 
-        val paymentRequest = InstrumentRequest(messageReactors!!.hostToken, payment, System.currentTimeMillis(), payment.buyerOptions)
+        val paymentRequest = InstrumentRequest(messageReactors!!.hostToken, messageReactors!!.sessionKey,payment,
+            System.currentTimeMillis(), payment.buyerOptions)
 
         val localPublicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -203,7 +204,7 @@ class Transaction(
             message.indexOf(HOST_TOKEN) > -1 -> HOST_TOKEN
             message.indexOf(INSTRUMENT_TOKEN) > -1 -> INSTRUMENT_TOKEN
             message.indexOf(PAYMENT_TOKEN) > -1 -> PAYMENT_TOKEN
-            message.indexOf(BARCODE_TOKEN) > -1 -> TRANSFER_RESULT
+            message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
             message.indexOf(TRANSFER_RESULT) > -1 -> TRANSFER_RESULT
             message.indexOf(TRANSFER_RESULT_FAIL) > 3 -> TRANSFER_RESULT
             else -> UNKNOWN
@@ -225,6 +226,7 @@ class Transaction(
                     HOST_TOKEN -> messageReactors!!.onHostToken(message, this)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
                     PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
+                    BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
                     TRANSFER_RESULT -> messageReactors!!.onTransfer(message,viewModel, this)
                     else -> messageReactors!!.onUnknown(message)
                 }

@@ -1,6 +1,7 @@
 package com.paytheory.android.sdk.reactors
 
 import ActionRequest
+import BarcodeMessage
 import HostTokenMessage
 import IdempotencyMessage
 import IdempotencyRequest
@@ -168,5 +169,34 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
             }
         }
     }
-}
+
+    /**
+     * Function that handles incoming barcode response
+     * @param message message to be sent
+     */
+    @ExperimentalCoroutinesApi
+    fun onBarcode(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
+        println("Pay Theory Barcode Result")
+        viewModel.disconnect()
+        val responseJson = JSONObject(message)
+        if (transaction.context is Payable && responseJson["BarcodeUid"] != null) {
+
+                val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
+                var barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,
+                    transferResponse.barcode, transferResponse.barcodeFee, transferResponse.merchant)
+                transaction.context.barcodeComplete(barcodeResponse)
+            }
+
+//        if (transaction.context !is Payable || responseJson["BarcodeUid"] == null){
+//                val json = """
+//                {
+//                    "error": ${responseJson["error"]},
+//                 }"""
+//
+//                val errorResponse = Gson().fromJson(json, PaymentError::class.java)
+//                transaction.context.paymentError(errorResponse)
+//            }
+        }
+    }
+
 

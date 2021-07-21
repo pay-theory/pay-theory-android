@@ -60,6 +60,18 @@ data class TransferMessage (
 )
 
 /**
+ * Data class to store resulting barcode data
+ * @param
+ */
+data class BarcodeMessage (
+    @SerializedName("BarcodeUid") val barcodeUid: String,
+    @SerializedName("barcodeUrl") val barcodeUrl: String,
+    @SerializedName("barcode") val barcode: String,
+    @SerializedName("barcodeFee") val barcodeFee: String,
+    @SerializedName("Merchant") val merchant: String,
+)
+
+/**
  * Data class to idempotency message details
  * @param paymentToken token for payment details
  * @param idempotency token for payment details
@@ -118,6 +130,7 @@ data class BuyerOptions (
  */
 data class InstrumentRequest (
     @SerializedName("hostToken") val hostToken: String,
+    @SerializedName("sessionKey") val sessionKey: String,
     @SerializedName("payment") val payment: Payment,
     @SerializedName("timing") val timing: Long,
     @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
