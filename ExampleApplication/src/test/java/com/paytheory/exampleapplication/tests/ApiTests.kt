@@ -19,6 +19,15 @@ class ApiTests {
 
     val partner = "abel"
     val stage = "paytheorystudy"
+    val testChallenge ="test challenge"
+    val name = "Some Body"
+    val amount = "1000"
+    val userId = "12345"
+    val userName = "Some Body"
+    val displayName = "Some One"
+    val timeout = 12345
+    val attestation = "test attestation"
+
 
     private fun buildApiHeaders(): Map<String, String> {
         val headerMap = mutableMapOf<String, String>()
@@ -90,9 +99,8 @@ class ApiTests {
         val arrayList = ArrayList<PubKeyCredParam>()
         arrayList.add(PubKeyCredParam(12345, "test"))
 
-        val challengeOptions = ChallengeOptions("test challenge", Rp("Some Body", "1000"), User("12345", "Some Body",
-            "Some One"), arrayList, authenticatorSelection,
-            12345, "test attestation")
+        val challengeOptions = ChallengeOptions(testChallenge, Rp(name, amount), User(userId, userName, displayName), arrayList, authenticatorSelection,
+            timeout, attestation)
 
         val ptTokenResponse = PTTokenResponse("test pt token", "test origin", challengeOptions)
 

@@ -8,5 +8,8 @@ interface WebsocketMessageHandler {
      * Function that handles a received message
      */
     fun receiveMessage(message:String)
+    /**
+     * Function that handles a disconnect
+     */
     fun disconnect()
 }

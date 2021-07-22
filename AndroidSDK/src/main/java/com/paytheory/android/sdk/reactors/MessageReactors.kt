@@ -179,7 +179,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         println("Pay Theory Barcode Result")
         viewModel.disconnect()
         val responseJson = JSONObject(message)
-        if (transaction.context is Payable && responseJson["BarcodeUid"] != null) {
+        if (transaction.context is Payable && responseJson["BarcodeUid"].toString().isNotBlank()) {
 
                 val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
                 var barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,

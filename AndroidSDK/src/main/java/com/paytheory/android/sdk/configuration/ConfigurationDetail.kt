@@ -7,6 +7,9 @@ enum class PaymentType {
     CREDIT, BANK, CASH
 }
 
+/**
+ * Object that holds the fee mode values
+ */
 object FeeMode {
     val SURCHARGE = "surcharge"
     val SERVICE_FEE = "service_fee"

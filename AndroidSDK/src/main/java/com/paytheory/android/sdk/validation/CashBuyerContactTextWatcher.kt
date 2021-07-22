@@ -6,7 +6,9 @@ import android.text.TextWatcher
 import android.util.Patterns
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
-
+/**
+ * Text watcher class to validate buyer contact edit text field
+ */
 class CashBuyerContactTextWatcher(pt: PayTheoryEditText) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt
 
@@ -25,7 +27,7 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText) : TextWatcher {
         }
     }
 
-    private fun isValidEmail(target: CharSequence?): Boolean {
+    private fun isValidEmail(target: CharSequence): Boolean {
         return if (TextUtils.isEmpty(target)) {
             false
         } else {
