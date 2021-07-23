@@ -10,6 +10,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.paytheory.android.sdk.*
 
+/**
+ * Example Activity
+ */
 class MainActivity : AppCompatActivity(), Payable {
 
 

@@ -14,7 +14,9 @@ import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
-
+/**
+ * Example Fragment
+ */
 class CreditCardFragment : Fragment() {
 
     private lateinit var creditCardViewModel: CreditCardViewModel

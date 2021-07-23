@@ -17,16 +17,21 @@ import kotlin.collections.ArrayList
  */
 class ApiTests {
 
-    val partner = "abel"
-    val stage = "paytheorystudy"
-    val testChallenge ="test challenge"
-    val name = "Some Body"
-    val amount = "1000"
-    val userId = "12345"
-    val userName = "Some Body"
-    val displayName = "Some One"
-    val timeout = 12345
-    val attestation = "test attestation"
+    private val partner = "abel"
+    private val stage = "paytheorystudy"
+    private val testChallenge ="test challenge"
+    private val name = "Some Body"
+    private val amount = "1000"
+    private val userId = "12345"
+    private val userName = "Some Body"
+    private val displayName = "Some One"
+    private val timeout = 12345
+    private val attestation = "test attestation"
+    private val testOrigin = "test origin"
+    private val authenticatorAttatchment = "test authenticator attachment"
+    private val userVerification = "test user verification"
+    private val testToken = "test pt token"
+    private val type = "public key"
 
 
     private fun buildApiHeaders(): Map<String, String> {
@@ -35,32 +40,6 @@ class ApiTests {
         headerMap["X-API-Key"] = "pt-sandbox-test-123456789124564789456123"
         return headerMap
     }
-
-//    /**
-//     * test pt token api creation and functions
-//     */
-//    @Test
-//    fun ptTokenTest() {
-//        val apiService = ApiService("test")
-//
-//        val api = apiService.ptTokenApiCall()
-//        api.doToken(buildApiHeaders())
-//
-//        val call = api!!.doToken(buildApiHeaders())
-//
-//
-//        expectThat(call.request()) {
-//            assertThat("is GET method") {
-//                it.method == "GET"
-//            }
-//            assertThat("has correct URL") {
-//                it.url == "https://test.token.service.paytheorystudy.com/token".toHttpUrlOrNull()
-//            }
-//            assertThat("Content-Type is correct") {
-//                it.headers["Content-Type"] == "application/json"
-//            }
-//        }
-//    }
 
     /**
      * test api service
@@ -95,23 +74,51 @@ class ApiTests {
      */
     @Test
     fun ptTokenApiServiceTest() {
-        val authenticatorSelection = AuthenticatorSelection("test authenticator attachment", "test user verification")
+        val authenticatorSelection = AuthenticatorSelection(authenticatorAttatchment, userVerification)
         val arrayList = ArrayList<PubKeyCredParam>()
-        arrayList.add(PubKeyCredParam(12345, "test"))
+        arrayList.add(PubKeyCredParam(12345, type))
 
         val challengeOptions = ChallengeOptions(testChallenge, Rp(name, amount), User(userId, userName, displayName), arrayList, authenticatorSelection,
             timeout, attestation)
 
-        val ptTokenResponse = PTTokenResponse("test pt token", "test origin", challengeOptions)
+        val ptTokenResponse = PTTokenResponse(testToken, testOrigin, challengeOptions)
 
-        assert(challengeOptions.challenge == "test challenge")
-        assert(challengeOptions.rp.amount == "1000" && challengeOptions.rp.name == "Some Body")
-        assert(challengeOptions.user.id == "12345" && challengeOptions.user.displayName == "Some One" && challengeOptions.user.name == "Some Body")
-        assert(challengeOptions.pubKeyCredParams[0].alg == 12345 && challengeOptions.pubKeyCredParams[0].type == "test")
-        assert(challengeOptions.authenticatorSelection.authenticatorAttachment == "test authenticator attachment" && challengeOptions.authenticatorSelection.userVerification == "test user verification")
+        assert(challengeOptions.challenge == testChallenge)
+        assert(challengeOptions.rp.amount == amount && challengeOptions.rp.name == name)
+        assert(challengeOptions.user.id == userId && challengeOptions.user.displayName == displayName && challengeOptions.user.name == userName)
+        assert(challengeOptions.pubKeyCredParams[0].alg == 12345 && challengeOptions.pubKeyCredParams[0].type == type)
+        assert(challengeOptions.authenticatorSelection.authenticatorAttachment == authenticatorAttatchment && challengeOptions.authenticatorSelection.userVerification == userVerification)
         assert(challengeOptions.timeout == 12345)
-        assert(challengeOptions.attestation == "test attestation")
-        assert(ptTokenResponse.challengeOptions == challengeOptions && ptTokenResponse.origin == "test origin" && ptTokenResponse.ptToken == "test pt token")
+        assert(challengeOptions.attestation == attestation)
+        assert(ptTokenResponse.challengeOptions == challengeOptions && ptTokenResponse.origin == testOrigin && ptTokenResponse.ptToken == testToken)
 
     }
 }
+
+
+
+//    /**
+//     * test pt token api creation and functions
+//     */
+//    @Test
+//    fun ptTokenTest() {
+//        val apiService = ApiService("test")
+//
+//        val api = apiService.ptTokenApiCall()
+//        api.doToken(buildApiHeaders())
+//
+//        val call = api!!.doToken(buildApiHeaders())
+//
+//
+//        expectThat(call.request()) {
+//            assertThat("is GET method") {
+//                it.method == "GET"
+//            }
+//            assertThat("has correct URL") {
+//                it.url == "https://test.token.service.paytheorystudy.com/token".toHttpUrlOrNull()
+//            }
+//            assertThat("Content-Type is correct") {
+//                it.headers["Content-Type"] == "application/json"
+//            }
+//        }
+//    }

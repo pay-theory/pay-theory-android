@@ -25,7 +25,9 @@ import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-
+/**
+ * Pay Theory Class
+ */
 @RequiresOptIn(message = "This API is being actively developed and may be subject to change.")
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

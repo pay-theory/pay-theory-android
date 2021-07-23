@@ -5,6 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
+/**
+ * Example ViewModel
+ */
 class CreditCardViewModel(application: Application) : AndroidViewModel(application) {
     private val _text = MutableLiveData<String>().apply {
         value = "Credit card Fragment"

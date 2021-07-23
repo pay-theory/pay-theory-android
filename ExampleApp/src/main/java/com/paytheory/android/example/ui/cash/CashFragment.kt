@@ -10,6 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
 
+/**
+ * Example Fragment
+ */
 class CashFragment : Fragment() {
 
     private lateinit var cashViewModel: CashViewModel
