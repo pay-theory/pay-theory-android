@@ -223,7 +223,6 @@ data class PaymentError (
 
 ## Testing
 A Java version between 8 and 16 is required to execute Gradle commands.
-There are two different ways you are able to run testing:
 
 Unit testing
 
