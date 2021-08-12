@@ -224,7 +224,7 @@ data class PaymentError (
 ## Testing
 A Java version between 8 and 16 is required to execute Gradle commands.
 
-Unit testing
+### Unit testing
 
 The following commands can be ran in the command prompt:
 
@@ -238,7 +238,7 @@ Linux
 ./gradlew unitTesting
 ```
 
-Unit and UI testing (Requires an android device or emulator)
+### Unit and UI testing (Requires an android device or emulator)
 
 The following commands can be ran in the command prompt:
 
