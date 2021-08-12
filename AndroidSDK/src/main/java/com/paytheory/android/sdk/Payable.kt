@@ -25,7 +25,8 @@ data class PaymentResult (
     @SerializedName("tags") val tags: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
     @SerializedName("updated_at") val updated_at: String?,
-    @SerializedName("type") val type: String?)
+    @SerializedName("type") val type: String?
+)
 
 
 /**
@@ -41,14 +42,16 @@ data class PaymentResultFailure (
     @SerializedName("last_four") val last_four: String,
     @SerializedName("brand") val brand: String,
     @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?)
+    @SerializedName("type") val type: String?
+)
 
 /**
  * Data class that represents the error received if payment fails
  * @param reason reason the transaction failed
  */
 data class PaymentError (
-    @SerializedName("reason") val reason: String)
+    @SerializedName("reason") val reason: String
+)
 
 /**
  * Data class to store resulting barcode data

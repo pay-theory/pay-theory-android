@@ -22,6 +22,7 @@ class CreditCardFragment : Fragment() {
     private lateinit var creditCardViewModel: CreditCardViewModel
     val apiKey = "My-Api-Key"
     private val payTheoryFragment = PayTheoryFragment()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,9 +30,6 @@ class CreditCardFragment : Fragment() {
     ): View? {
         creditCardViewModel =
             ViewModelProvider(this).get(CreditCardViewModel::class.java)
-
-
-
 
         val root = inflater.inflate(R.layout.fragment_credit, container, false)
         val textView: TextView = root.findViewById(R.id.text_credit)

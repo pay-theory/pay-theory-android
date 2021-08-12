@@ -37,7 +37,7 @@ Copy your SHA-256 digest
 
 ## Install SDK to Gradle
 
-### Install jitpack to project level Gradle
+### Install jitpack to project level build.gradle file
 
 ```gradle
 allprojects {
@@ -49,7 +49,7 @@ allprojects {
 }
 ```
 
-### Install SDK to application level Gradle
+### Install SDK to application level build.gradle file
 
 ```gradle
 dependencies {
@@ -70,7 +70,7 @@ _replace PAY-THEORY-RELEASE with the release version shown above_
 
 _replace JNA-RELEASE with the release version shown above_
 
-### Update minimum sdk version to 21 in application level Gradle
+### Update minimum sdk version to 21 in application level build.gradle file
 
 ```Kotlin
 defaultConfig {
@@ -79,7 +79,6 @@ defaultConfig {
     targetSdkVersion 30
     versionCode 1
     versionName "1.0"
-
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 }
 ```
@@ -102,20 +101,20 @@ add the Pay Theory Fragment container to your layout xml file
 
 ### Code
 
-set your API key
+*   set your API key
 
 ```Kotlin
 private val apiKey = "YOUR-API-KEY"
 ```
 
-inside your onCreate method set PayTheoryFragment
+*   inside your onCreate method set PayTheoryFragment
 
 ```Kotlin
 val payTheoryFragment = this.supportFragmentManager
     .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-inside your onCreate method configure Pay Theory
+*   inside your onCreate method configure Pay Theory
 
 ```Kotlin
 val amountOfPayment = 5236
@@ -127,24 +126,26 @@ payTheoryFragment.configure(apiKey,amountOfPayment, PaymentType.CREDIT, false, f
 
 ```Kotlin
 
-    // use ACH bank account
-    payTheoryFragment.configure(apiKey, amount, PaymentType.BANK)
+// use ACH bank account
+payTheoryFragment.configure(apiKey, amount, PaymentType.BANK)
 
-    // use ACH bank account and require billing address
-    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true, requireBillingAddress:true)
+// use ACH bank account and require account name
+payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true)
 
-    // use credit card account
-    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT)
+// use ACH bank account and require account name and billing address
+payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true)
 
-    // use credit card and require account name
-    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true)
+// use credit card account
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT)
 
-    // use credit card and require billing address
-    payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName:true, requireBillingAddress:true)
+// use credit card and require account name
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true)
 
-    // coming soon
-    // use cash
-    // payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
+// use credit card and require account name and billing address
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true)
+
+// use cash
+payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
 
 ```
 
@@ -157,20 +158,24 @@ class MainActivity : AppCompatActivity() , Payable {
     override fun paymentComplete(paymentResult: PaymentResult) {
     }
 
+    override fun barcodeComplete(barcodeResult: BarcodeResult) {
+    }
+
     override fun paymentFailed(paymentFailure: PaymentResult) {
     }
 
     override fun paymentError(paymentError: PaymentError) {
     }
 ...
+
 }
 ```
 
-## PaymentResult
+## Results
 
-The payment result will come back complete or failed
+The payment or barcode results will come back complete or failed
 
-*   complete result
+*   complete ach/card payment result
  
 ```Kotlin
 data class PaymentResult (
@@ -182,20 +187,34 @@ data class PaymentResult (
     @SerializedName("service_fee") val service_fee: String?,
     @SerializedName("tags") val tags: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
-    @SerializedName("updated_at") val updated_at: String?)
+    @SerializedName("updated_at") val updated_at: String?
+)
 ```
-*   failed result
+
+*   complete cash barcode result
+```Kotlin
+data class BarcodeResult (
+    @SerializedName("BarcodeUid") val barcodeUid: String,
+    @SerializedName("barcodeUrl") val barcodeUrl: String,
+    @SerializedName("barcode") val barcode: String,
+    @SerializedName("barcodeFee") val barcodeFee: String,
+    @SerializedName("Merchant") val merchant: String,
+)
+```
+
+*   failed ach/card payment result
 
 ```Kotlin
-data class PaymentResult (
+data class PaymentResultFailure (
     @SerializedName("receipt_number") val receipt_number: String,
     @SerializedName("last_four") val last_four: String,
     @SerializedName("brand") val brand: String,
     @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?,)
+    @SerializedName("type") val type: String?
+)
 ```
 
-*   errors will arrive as
+*   other errors will arrive as
 
 ```Kotlin
 data class PaymentError (
@@ -203,7 +222,7 @@ data class PaymentError (
 ```
 
 ## Testing
-A Java version between 8 and 16 is required to execute Gradle.
+A Java version between 8 and 16 is required to execute Gradle commands.
 There are two different ways you are able to run testing:
 
 Unit testing
