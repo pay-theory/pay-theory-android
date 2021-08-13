@@ -15,8 +15,6 @@ import com.paytheory.android.sdk.*
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -45,16 +43,15 @@ class MainActivity : AppCompatActivity(), Payable {
         showToast("payment successful on account XXXX${paymentResult.last_four}")
     }
 
-    override fun paymentFailed(paymentFailure: PaymentResultFailure) {
-        showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
-    }
-
-    override fun paymentError(paymentError: PaymentError) {
-        showToast("an error occurred ${paymentError.reason}")
-    }
-
     override fun barcodeComplete(barcodeResult: BarcodeResult) {
         showToast("barcode request successful $barcodeResult")
     }
 
+    override fun paymentFailed(paymentFailure: PaymentResultFailure) {
+        showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
+    }
+
+    override fun transactionError(transactionError: TransactionError) {
+        showToast("an error occurred ${transactionError.reason}")
+    }
 }

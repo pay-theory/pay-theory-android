@@ -1,14 +1,14 @@
 package com.paytheory.android.example.ui.credit
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
 /**
  * Example ViewModel
  */
-class CreditCardViewModel(application: Application) : AndroidViewModel(application) {
+class CreditCardViewModel: ViewModel() {
+
     private val _text = MutableLiveData<String>().apply {
         value = "Credit card Fragment"
     }

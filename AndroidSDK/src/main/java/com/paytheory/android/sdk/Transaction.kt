@@ -18,8 +18,6 @@ import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
-
-
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
@@ -50,7 +48,6 @@ class Transaction(
         private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val BARCODE_ACTION = "host:barcode"
         private const val BARCODE_RESULT = "BarcodeUid"
-        private const val TRANSFER_ACTION = "host:transfer"
         private const val TRANSFER_RESULT = "payment-detail-reference"
         private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
@@ -94,17 +91,17 @@ class Transaction(
                 }, { error ->
                     if (context is Payable) {
                         if(error.message == "HTTP 403 "){
-                            context.paymentError(PaymentError("Access Denied"))
+                            context.transactionError(TransactionError("Access Denied"))
                         }
                         else {
-                            context.paymentError(PaymentError(error.message!!))
+                            context.transactionError(TransactionError(error.message!!))
                         }
                     }
                 }
                 )
         }else{
             if (context is Payable) {
-                context.paymentError(PaymentError(constants.NO_INTERNET_ERROR))
+                context.transactionError(TransactionError(constants.NO_INTERNET_ERROR))
             }
         }
     }
@@ -119,7 +116,7 @@ class Transaction(
                 establishViewModel(ptTokenResponse, attestationResult)
             }.addOnFailureListener {
                 if (context is Payable) {
-                    context.paymentError(PaymentError(it.message!!))
+                    context.transactionError(TransactionError(it.message!!))
                 }
             }
     }

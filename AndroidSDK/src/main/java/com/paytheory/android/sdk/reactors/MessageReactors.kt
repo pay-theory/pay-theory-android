@@ -136,7 +136,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         if (transaction.context is Payable) when (responseJson["state"]) {
             "SUCCEEDED" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
                     transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
                     transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
                     transferResponse.createdAt, transferResponse.updatedAt, "Card")
@@ -144,14 +144,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
             }
             "PENDING" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                var paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
                     transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
                     transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
                     transferResponse.createdAt, transferResponse.updatedAt, "ACH")
                 transaction.context.paymentComplete(paymentResponse)
             }
             "FAILURE" -> {
-                var failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
+                val failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
                     responseJson["last_four"] as String,
                     responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
                 )
@@ -164,8 +164,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                     "error": ${responseJson["error"]}, 
                  }"""
 
-                val errorResponse = Gson().fromJson(json, PaymentError::class.java)
-                transaction.context.paymentError(errorResponse)
+                val errorResponse = Gson().fromJson(json, TransactionError::class.java)
+                transaction.context.transactionError(errorResponse)
             }
         }
     }
@@ -178,25 +178,23 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     fun onBarcode(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         println("Pay Theory Barcode Result")
         viewModel.disconnect()
+
         val responseJson = JSONObject(message)
         if (transaction.context is Payable && responseJson["BarcodeUid"].toString().isNotBlank()) {
+            val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
+            val mapUrl = "https://pay.vanilladirect.com/pages/locations"
+            val barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,
+                transferResponse.barcode, transferResponse.barcodeFee, transferResponse.merchant, mapUrl)
+            transaction.context.barcodeComplete(barcodeResponse)
 
-                val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
-                var barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,
-                    transferResponse.barcode, transferResponse.barcodeFee, transferResponse.merchant)
-                transaction.context.barcodeComplete(barcodeResponse)
-            }
+        } else if (transaction.context is Payable) {
+            val json = """
+                { 
+                    "error": "Cannot Create Barcode", 
+                 }"""
 
-//        if (transaction.context !is Payable || responseJson["BarcodeUid"] == null){
-//                val json = """
-//                {
-//                    "error": ${responseJson["error"]},
-//                 }"""
-//
-//                val errorResponse = Gson().fromJson(json, PaymentError::class.java)
-//                transaction.context.paymentError(errorResponse)
-//            }
+            val errorResponse = Gson().fromJson(json, TransactionError::class.java)
+            transaction.context.transactionError(errorResponse)
+        }
         }
     }
-
-

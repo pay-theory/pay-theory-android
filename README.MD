@@ -214,11 +214,12 @@ data class PaymentResultFailure (
 )
 ```
 
-*   other errors will arrive as
+*   error processing card, ach, or barcode results
 
 ```Kotlin
-data class PaymentError (
-    @SerializedName("reason") val reason: String)
+data class TransactionError (
+    @SerializedName("reason") val reason: String
+)
 ```
 
 ## Testing
