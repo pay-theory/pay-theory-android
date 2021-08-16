@@ -115,15 +115,70 @@ val payTheoryFragment = this.supportFragmentManager
 ```
 
 *   inside your onCreate method configure Pay Theory
+*   applying optional settings allows customization
 
 ```Kotlin
-val amountOfPayment = 5236
-payTheoryFragment.configure(apiKey,amountOfPayment, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
+val amount = 5236
+val apiKey = "PT-API-Key"
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
 ```
 
 *   by default the SDK provides a simple credit card input
-*   applying optional settings allows customization
 
+React to events by implementing the Payable interface
+
+```Kotlin
+class MainActivity : AppCompatActivity() , Payable {
+
+...
+    override fun paymentComplete(paymentResult: PaymentResult) {
+    }
+
+    override fun barcodeComplete(barcodeResult: BarcodeResult) {
+    }
+
+    override fun paymentFailed(paymentFailure: PaymentResult) {
+    }
+
+    override fun paymentError(paymentError: PaymentError) {
+    }
+...
+
+}
+```
+## Fee Mode
+*   optionally set the fee mode. By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE)
+```
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
+```
+
+## Buyer Options
+*   optionally pass additional customer data to Pay Theory
+```Kotlin
+val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+    Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE, buyerOptions)
+```
+## Custom Tags
+To track payments with custom tags simply add the following when initializing the SDK:
+-   **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
+-   **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+
+```Kotlin
+// using credit card, require account name, require billing address, buyer options and tags
+val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
+payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+
+// using bank account, require account name, require billing address, buyer options and tags
+val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
+payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+```
+
+### Example Configurations
 ```Kotlin
 
 // use ACH bank account
@@ -147,28 +202,6 @@ payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountNa
 // use cash
 payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
 
-```
-
-React to events by implementing the Payable interface
-
-```Kotlin
-class MainActivity : AppCompatActivity() , Payable {
-
-...
-    override fun paymentComplete(paymentResult: PaymentResult) {
-    }
-
-    override fun barcodeComplete(barcodeResult: BarcodeResult) {
-    }
-
-    override fun paymentFailed(paymentFailure: PaymentResult) {
-    }
-
-    override fun paymentError(paymentError: PaymentError) {
-    }
-...
-
-}
 ```
 
 ## Results

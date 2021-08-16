@@ -99,17 +99,20 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onIdempotency(message: String): IdempotencyMessage {
+    fun onIdempotency(message: String, tags: HashMap<String, String>?): IdempotencyMessage {
         println("Pay Theory Idempotency")
         val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
 
+        tags!!["pt-number"] = idempotencyMessage.idempotency
         val keyPair = generateLocalKeyPair()
         val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         } else {
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
         }
-        val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis())
+        val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis(),
+            tags
+        )
 
 
         val boxed = encryptBox(Gson().toJson(transferRequest), Key.fromBase64String(socketPublicKey))

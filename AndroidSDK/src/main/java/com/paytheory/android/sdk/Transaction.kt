@@ -20,6 +20,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -31,8 +32,9 @@ class Transaction(
     val context: Context,
     private val apiKey: String,
     private val constants: Constants,
-    private val environment: String,
-    private val stage: String
+    private val partner: String,
+    private val stage: String,
+    private val tags: HashMap<String, String>?
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -127,7 +129,7 @@ class Transaction(
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, environment, stage)
+        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage)
         connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
@@ -222,7 +224,7 @@ class Transaction(
                 when (discoverMessageType(message)) {
                     HOST_TOKEN -> messageReactors!!.onHostToken(message, this)
                     INSTRUMENT_TOKEN -> messageReactors!!.onInstrument(message, apiKey)
-                    PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message)
+                    PAYMENT_TOKEN -> messageReactors!!.onIdempotency(message, tags)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
                     TRANSFER_RESULT -> messageReactors!!.onTransfer(message,viewModel, this)
                     else -> messageReactors!!.onUnknown(message)

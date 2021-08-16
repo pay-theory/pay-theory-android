@@ -61,7 +61,7 @@ class PayTheoryFragment : Fragment() {
     private var feeMode : String = FeeMode.SURCHARGE
     private var billingAddress: Address = Address("","","","","","")
     private var accountName = ""
-    private var tags: HashMap<String,String> = java.util.HashMap()
+    private var tags: HashMap<String,String> = hashMapOf()
     private var model: ConfigurationViewModel? = null
 
     /**
@@ -105,7 +105,9 @@ class PayTheoryFragment : Fragment() {
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true,
         feeMode: String = FeeMode.SURCHARGE,
-        buyerOptions: BuyerOptions? = null) {
+        buyerOptions: BuyerOptions? = null,
+        tags: HashMap<String, String> = hashMapOf()
+        ) {
 
         if (model == null) {
             model = ViewModelProvider(
@@ -126,21 +128,24 @@ class PayTheoryFragment : Fragment() {
             this.feeMode = configurationDetail.feeMode
             if (this.api_key.isNotEmpty()) {
                 val startIndex: Int = api_key.indexOf('-')
-                val env: String = api_key.substring(0, startIndex)
+                val partner: String = api_key.substring(0, startIndex)
                 val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
                 val stage: String = api_key.substring(startIndex+1, endIndex)
+                this.constants = Constants(partner, stage)
 
-                this.constants = Constants(env, stage)
+                var initialTags = hashMapOf("pay-theory-environment" to partner)
+                tags.putAll(initialTags)
+                this.tags = tags
 
-                tags = hashMapOf("pay-theory-environment" to env)
 
                 payTheoryTransaction =
                     Transaction(
                         this.activity!!,
                         api_key,
                         this.constants,
-                        env,
-                        stage
+                        partner,
+                        stage,
+                        this.tags
                     )
 
                 payTheoryTransaction!!.init()

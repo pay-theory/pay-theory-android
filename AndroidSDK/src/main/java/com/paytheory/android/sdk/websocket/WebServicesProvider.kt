@@ -31,9 +31,9 @@ class WebServicesProvider {
      * @param ptToken token that is added to WebSocket messages for security
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(ptToken: String, environment: String, stage: String): Channel<SocketUpdate> =
+    fun startSocket(ptToken: String, partner: String, stage: String): Channel<SocketUpdate> =
         with(WebSocketListener()) {
-            startSocket(this, ptToken, environment, stage)
+            startSocket(this, ptToken, partner, stage)
             this@with.socketEventChannel
         }
 
@@ -43,10 +43,10 @@ class WebServicesProvider {
      * @param webSocketListener WebSocket listener
      */
     @ExperimentalCoroutinesApi
-    fun startSocket(webSocketListener: WebSocketListener, ptToken: String, environment: String, stage: String) {
+    fun startSocket(webSocketListener: WebSocketListener, ptToken: String, partner: String, stage: String) {
         _webSocketListener = webSocketListener
         _webSocket = socketOkHttpClient.newWebSocket(
-            Request.Builder().url("wss://${environment}.secure.socket.${stage}.com/${environment}?pt_token=${ptToken}")
+            Request.Builder().url("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptToken}")
                 .build(),
             webSocketListener
         )
