@@ -48,9 +48,6 @@ class CashFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
-            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
-
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CASH, false, false, FeeMode.SERVICE_FEE, buyerOptions)
+        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false)
     }
 }

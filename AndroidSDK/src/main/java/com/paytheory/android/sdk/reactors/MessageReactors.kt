@@ -1,20 +1,12 @@
 package com.paytheory.android.sdk.reactors
 
-import ActionRequest
 import BarcodeMessage
 import HostTokenMessage
-import IdempotencyMessage
-import IdempotencyRequest
-import InstrumentMessage
 import Payment
-import Transfer
 import TransferMessage
-import TransferRequest
+import TransferPartTwoMessage
 import com.google.gson.Gson
-import com.goterl.lazycode.lazysodium.utils.Key
 import com.paytheory.android.sdk.*
-import com.paytheory.android.sdk.nacl.encryptBox
-import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,23 +25,62 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     var socketPublicKey = ""
 
     /**
-     * Function that creates a message for a host token action
-     * @param message message to be sent
+     * Handles incoming host token message
+     * @param message message received from host token call
      */
     @ExperimentalCoroutinesApi
-    fun onHostToken(message: String, transaction: Transaction? = null): HostTokenMessage {
+    fun transferPartOne(message: String, transaction: Transaction? = null): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
         sessionKey = hostTokenMessage.sessionKey
         hostToken = hostTokenMessage.hostToken
 
         if (transaction?.queuedRequest != null) {
-
-            val actionRequest = transaction.generateQueuedActionRequest(transaction.queuedRequest!!)
+            transaction.queuedRequest!!.sessionKey = hostTokenMessage.sessionKey
+            val actionRequest = transaction.transferPartOne(transaction.queuedRequest!!, sessionKey)
             transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Queued Payment Requested")
+            println("Pay Theory Transfer Part One Requested")
         }
         return hostTokenMessage
+    }
+
+    /**
+     * Confirmation of payment
+     * @param
+     */
+    @ExperimentalCoroutinesApi
+    fun confirmPayment(message: String, transaction: Transaction? = null){
+
+        val transferPartTwoMessage = Gson().fromJson(message, TransferPartTwoMessage::class.java)
+
+        //get user confirmation of payment
+        if (transaction != null) {
+            if (transaction.context is Payable){
+                transaction.context.confirmation(message, transaction)
+            }
+        }
+
+    }
+
+    /**
+     * Creates transfer part two request
+     * @param message message received from transfer part one
+     */
+    @ExperimentalCoroutinesApi
+    fun transferPartTwo(message: String, transaction: Transaction? = null): TransferPartTwoMessage? {
+        val transferPartTwoMessage = Gson().fromJson(message, TransferPartTwoMessage::class.java)
+
+//        //get user confirmation of payment
+//        transaction.context.paymentConfirmation()
+
+
+        if (transaction?.queuedRequest != null) {
+            val actionRequest = transaction.transferPartTwo(transferPartTwoMessage)
+            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+            println("Pay Theory Transfer Part Two Requested")
+        }
+
+        return transferPartTwoMessage
     }
 
     /**
@@ -65,74 +96,74 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      * @param apiKey api-key used for transaction
      */
-    @ExperimentalCoroutinesApi
-    fun onInstrument(message:String, apiKey:String): InstrumentMessage {
-        println("Pay Theory Instrument Token")
-        val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
-        activePayment!!.ptInstrument = instrumentMessage.ptInstrument
-
-        val keyPair = generateLocalKeyPair()
-        val idempotencyRequest = IdempotencyRequest(apiKey,
-            activePayment!!,
-            hostToken,
-            sessionKey,
-            System.currentTimeMillis())
-        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
-
-        val boxed = encryptBox(Gson().toJson(idempotencyRequest), Key.fromBase64String(socketPublicKey))
-
-        val actionRequest = ActionRequest(
-            "host:idempotency",
-            boxed,
-            localPublicKey)
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-
-        return instrumentMessage
-    }
+//    @ExperimentalCoroutinesApi
+//    fun onInstrument(message:String, apiKey:String): InstrumentMessage {
+//        println("Pay Theory Instrument Token")
+//        val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
+//        activePayment!!.ptInstrument = instrumentMessage.ptInstrument
+//
+//        val keyPair = generateLocalKeyPair()
+//        val idempotencyRequest = IdempotencyRequest(apiKey,
+//            activePayment!!,
+//            hostToken,
+//            sessionKey,
+//            System.currentTimeMillis())
+//        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+//        } else {
+//            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+//        }
+//
+//        val boxed = encryptBox(Gson().toJson(idempotencyRequest), Key.fromBase64String(socketPublicKey))
+//
+//        val actionRequest = ActionRequest(
+//            "host:idempotency",
+//            boxed,
+//            localPublicKey)
+//        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+//
+//        return instrumentMessage
+//    }
 
     /**
      * Function that idempotency message and creates transfer request
      * @param message message to be sent
      */
-    @ExperimentalCoroutinesApi
-    fun onIdempotency(message: String, tags: HashMap<String, String>?): IdempotencyMessage {
-        println("Pay Theory Idempotency")
-        val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
-
-        tags!!["pt-number"] = idempotencyMessage.idempotency
-        val keyPair = generateLocalKeyPair()
-        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
-        val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis(),
-            tags
-        )
-
-
-        val boxed = encryptBox(Gson().toJson(transferRequest), Key.fromBase64String(socketPublicKey))
-
-        val actionRequest = ActionRequest(
-            "host:transfer",
-            boxed,
-            localPublicKey)
-
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-
-        return idempotencyMessage
-    }
+//    @ExperimentalCoroutinesApi
+//    fun onIdempotency(message: String, tags: HashMap<String, String>?): IdempotencyMessage {
+//        println("Pay Theory Idempotency")
+//        val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
+//
+//        tags!!["pt-number"] = idempotencyMessage.idempotency
+//        val keyPair = generateLocalKeyPair()
+//        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+//        } else {
+//            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+//        }
+//        val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis(),
+//            tags
+//        )
+//
+//
+//        val boxed = encryptBox(Gson().toJson(transferRequest), Key.fromBase64String(socketPublicKey))
+//
+//        val actionRequest = ActionRequest(
+//            "host:transfer",
+//            boxed,
+//            localPublicKey)
+//
+//        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+//
+//        return idempotencyMessage
+//    }
 
     /**
      * Function that handles incoming transfer response
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
+    fun completeTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         println("Pay Theory Payment Result")
         viewModel.disconnect()
         val responseJson = JSONObject(message)

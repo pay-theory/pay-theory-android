@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONObject
 import java.util.*
 
 /**
@@ -21,22 +22,36 @@ class ConnectionReactors(
     private val viewModel: WebSocketViewModel,
     private val websocketInteractor: WebsocketInteractor) {
 
+    companion object {
+        private const val HOST_ACTION = "host:hostToken"
+    }
+
     /**
-     * Function that will send socket message when connected
+     * Called when websocket had connected successfully. Creates host token action request.
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
-        val hostTokenRequest =
-            HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
+        val requestData = JSONObject()
+        requestData.put("ptToken",ptToken)
+        requestData.put("origin","native")
+        requestData.put("attestation",attestation)
+        requestData.put("timing", System.currentTimeMillis().toString())
 
-        val encoded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
+        val encodedBody = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())
         } else {
-            android.util.Base64.encodeToString(Gson().toJson(hostTokenRequest).toByteArray(),android.util.Base64.DEFAULT)
+            android.util.Base64.encodeToString(Gson().toJson(requestData).toByteArray(),android.util.Base64.DEFAULT)
         }
 
+//        val hostTokenRequest = HostTokenRequest("host:hostToken", encodedBody)
 
-        val actionRequest = ActionRequest("host:hostToken", encoded)
+//        val encoded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
+//        } else {
+//            android.util.Base64.encodeToString(Gson().toJson(hostTokenRequest).toByteArray(),android.util.Base64.DEFAULT)
+//        }
+
+        val actionRequest = ActionRequest(HOST_ACTION, encodedBody)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
     }
 

@@ -52,7 +52,7 @@ class CreditCardFragment : Fragment() {
 
         val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,8500, PaymentType.CREDIT, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
     }
 
 

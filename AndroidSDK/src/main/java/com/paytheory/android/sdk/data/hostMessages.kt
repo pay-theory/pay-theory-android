@@ -106,6 +106,16 @@ data class HostTokenMessage (
 )
 
 /**
+ * Data class for the transfer part two
+ */
+data class TransferPartTwoMessage (
+    @SerializedName("bin") val bin: Bin,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("payment") val payment: Payment,
+    @SerializedName("payment-token") val paymentToken: String,
+    @SerializedName("payment_intent_id") val paymentIntentId: String,
+)
+/**
  * Data class to store buyer option details
  * @param first_name first name of buyer
  * @param last_name last name of buyer
@@ -137,17 +147,39 @@ data class InstrumentRequest (
 )
 
 /**
+ * Data class for transfer part one request
+ * @param hostToken token with transaction details
+ */
+data class TransferPartOneRequest (
+    @SerializedName("hostToken") val hostToken: String,
+    @SerializedName("sessionKey") val sessionKey: String,
+    @SerializedName("payment") val payment: Payment,
+    @SerializedName("timing") val timing: Long,
+    @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+)
+
+///**
+// * Data class for encoded values sent for host token action
+// * @param ptToken token with transaction details
+// * @param origin origin of application
+// * @param attestation token used for security
+// * @param timing calculated timing
+// */
+//data class Encoded (
+//    @SerializedName("ptToken") val ptToken: String,
+//    @SerializedName("origin") val origin: String,
+//    @SerializedName("attestation") val attestation: String,
+//    @SerializedName("timing") val timing: Long
+//)
+
+/**
  * Data class to store host token message data
- * @param ptToken token with transaction details
- * @param origin origin of application
- * @param attestation token used for security
- * @param timing calculated timing
+ * @param action action taken to call hostToken
+ * @param encoded encoded values (ptToken, origin, attestation, timing)
  */
 data class HostTokenRequest (
-    @SerializedName("ptToken") val ptToken: String,
-    @SerializedName("origin") val origin: String,
-    @SerializedName("attestation") val attestation: String,
-    @SerializedName("timing") val timing: Long
+    @SerializedName("action") val action: String,
+    @SerializedName("encoded") val encoded: String
 )
 
 /**
@@ -191,6 +223,8 @@ data class Payment (
     @SerializedName("amount") val amount: Int,
     @SerializedName("currency") val currency: String = "USD",
     @SerializedName("name") val name: String? = "",
+    @SerializedName("merchant") val merchant: String? = null,
+    @SerializedName("service_fee") val service_fee: String? = null,
     @SerializedName("account_number") val account_number: String? = null,
     @SerializedName("account_type") val account_type: String? = null,
     @SerializedName("bank_code") val bank_code: String? = null,
@@ -199,11 +233,11 @@ data class Payment (
     @SerializedName("expiration_year") val expiration_year: String? = null,
     @SerializedName("expiration_month") val expiration_month: String? = null,
     @SerializedName("address") val address: Address? = null,
-    @SerializedName("pt-instrument") var ptInstrument: String? = null,
     @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE,
     @SerializedName("buyer_options") var buyerOptions: BuyerOptions? = null,
+    @SerializedName("buyer") val buyer: String? = null,
     @SerializedName("buyerContact") val buyerContact: String? = null,
-    @SerializedName("buyer") val buyer: String? = null
+    @SerializedName("sessionKey") var sessionKey: String? = null,
 )
 
 /**
@@ -253,5 +287,6 @@ data class TransferRequest (
 data class ActionRequest (
     @SerializedName("action") val action: String,
     @SerializedName("encoded") val encoded: String,
-    @SerializedName("publicKey") val publicKey: String? = null
+    @SerializedName("publicKey") val publicKey: String? = null,
+    @SerializedName("sessionKey") val sessionKey: String? = null
 )

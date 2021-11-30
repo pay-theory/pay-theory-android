@@ -1,7 +1,9 @@
 package com.paytheory.android.example
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -21,8 +23,7 @@ class MainActivity : AppCompatActivity(), Payable {
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
         val navController = findNavController(R.id.nav_host_fragment)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         val appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.credit_card, R.id.ach, R.id.cash))
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -53,5 +54,33 @@ class MainActivity : AppCompatActivity(), Payable {
 
     override fun transactionError(transactionError: TransactionError) {
         showToast("an error occurred ${transactionError.reason}")
+    }
+
+    override fun confirmation(message: String, transaction: Transaction) {
+        print(message)
+
+        val alertDialog: AlertDialog? = this?.let {
+            val builder = AlertDialog.Builder(it)
+            builder?.setMessage("Are you sure you want to make a payment on VISA card beginning with 424242")
+                ?.setTitle("Confirm transaction")
+
+            builder.apply {
+                setPositiveButton("Yes"
+                ) { dialog, id ->
+                    // User clicked yes
+                    transaction.transferPartTwo(message)
+                }
+                setNegativeButton("No"
+                ) { dialog, id ->
+                    // User clicked no
+                    transaction.disconnect()
+
+                }
+            }
+            builder.create()
+            builder.show()
+        }
+
+
     }
 }

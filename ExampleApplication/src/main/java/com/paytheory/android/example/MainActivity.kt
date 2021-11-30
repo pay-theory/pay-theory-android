@@ -2,29 +2,35 @@ package com.paytheory.android.example
 
 import Address
 import BuyerOptions
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.PaymentType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
+
 /**
  * Example activity class
  */
 class MainActivity : FragmentActivity() , Payable {
     val apiKey = "My-Api-Key"
+    var payTheoryFragment : PayTheoryFragment? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val payTheoryFragment = this.supportFragmentManager
+        payTheoryFragment = this.supportFragmentManager
             .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
         val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-        payTheoryFragment.configure(apiKey,2965, PaymentType.CASH, false, false, FeeMode.SURCHARGE, buyerOptions)
+        val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
+
+        payTheoryFragment!!.configure(apiKey,8500, PaymentType.CREDIT, false, false, false, FeeMode.SURCHARGE, buyerOptions, tags)
 
     }
 
@@ -52,4 +58,33 @@ class MainActivity : FragmentActivity() , Payable {
     override fun transactionError(transactionError: TransactionError) {
         showToast("an error occurred ${transactionError.reason}")
     }
+
+    override fun confirmation(message: String, transaction: Transaction) {
+        print(message)
+
+        val alertDialog: AlertDialog? = this?.let {
+            val builder = AlertDialog.Builder(it)
+            builder?.setMessage("Are you sure you want to make a payment on VISA card beginning with 424242")
+                ?.setTitle("Confirm transaction")
+
+            builder.apply {
+                setPositiveButton("Yes"
+                ) { dialog, id ->
+                    // User clicked yes
+                    transaction.transferPartTwo(message)
+                }
+                setNegativeButton("No"
+                ) { dialog, id ->
+                    // User clicked no
+                    transaction.disconnect()
+
+                }
+            }
+            builder.create()
+            builder.show()
+        }
+
+
+    }
+
 }

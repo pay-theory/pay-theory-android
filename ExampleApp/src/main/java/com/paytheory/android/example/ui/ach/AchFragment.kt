@@ -48,6 +48,6 @@ class AchFragment : Fragment() {
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
         val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
 
-        payTheoryFragment.configure(apiKey,5000, PaymentType.BANK, false, false, FeeMode.SURCHARGE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,5500, PaymentType.BANK, false, false, false, FeeMode.SURCHARGE, buyerOptions, tags)
     }
 }

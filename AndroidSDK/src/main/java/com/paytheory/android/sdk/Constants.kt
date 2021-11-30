@@ -8,7 +8,7 @@ class Constants(partner: String, stage: String) {
     val NO_INTERNET_ERROR: String
 
     init {
-         API_BASE_PATH = "https://$partner.token.service.$stage.com/$partner/"
+         API_BASE_PATH = "https://$partner.rest.$stage.com/token-service/"
          NO_INTERNET_ERROR = "No internet connection"
     }
 }

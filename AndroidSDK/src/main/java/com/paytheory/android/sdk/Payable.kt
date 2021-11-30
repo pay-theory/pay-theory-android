@@ -67,6 +67,19 @@ data class BarcodeResult (
 )
 
 /**
+ * Payment confirmation data
+ * @param
+ */
+data class TransactionConfirmation (
+    @SerializedName("BarcodeUid") val barcodeUid: String,
+    @SerializedName("barcodeUrl") val barcodeUrl: String,
+    @SerializedName("barcode") val barcode: String,
+    @SerializedName("barcodeFee") val barcodeFee: String,
+    @SerializedName("Merchant") val merchant: String,
+    @SerializedName("MapUrl") val mapUrl : String
+)
+
+/**
  * Interface that handles a transaction completion, failure, and errors
  */
 interface Payable {
@@ -75,16 +88,25 @@ interface Payable {
      * @param paymentResult result of the completed transaction
      */
     fun paymentComplete(paymentResult: PaymentResult)
+
     /**
      * Converts paymentFailure as Payable
      * @param paymentFailure reason the transaction failed
      */
     fun paymentFailed(paymentFailure: PaymentResultFailure)
+
     /**
      * Converts transactionError as Payable
      * @param transactionError reason the transaction error
      */
     fun transactionError(transactionError: TransactionError)
+
+    /**
+     * method to handle confirmation of payment
+     * @param transactionConfirmation confirmation data
+     */
+    fun confirmation(message: String, transaction: Transaction)
+
     /**
      * Converts barcodeResult as Payable
      * @param barcodeResult result of the completed barcode transaction

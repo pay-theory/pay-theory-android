@@ -104,6 +104,7 @@ class PayTheoryFragment : Fragment() {
         paymentType: PaymentType = PaymentType.CREDIT,
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true,
+        requireConfirmation: Boolean = false,
         feeMode: String = FeeMode.SURCHARGE,
         buyerOptions: BuyerOptions? = null,
         tags: HashMap<String, String> = hashMapOf()
@@ -339,6 +340,10 @@ class PayTheoryFragment : Fragment() {
     private fun makePayment(payment: Payment) {
         payTheoryTransaction!!.transact(payment)
     }
+
+//    fun confirmed() {
+//        payTheoryTransaction!!.confirm(payment)
+//    }
 
     private fun enableCC() {
         val ccNumber: PayTheoryEditText? = view?.findViewById(R.id.cc_number)
