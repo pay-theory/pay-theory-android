@@ -1,6 +1,5 @@
 package com.paytheory.android.example
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -59,19 +58,19 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun confirmation(message: String, transaction: Transaction) {
         print(message)
 
-        val alertDialog: AlertDialog? = this?.let {
+        this.let {
             val builder = AlertDialog.Builder(it)
             builder?.setMessage("Are you sure you want to make a payment on VISA card beginning with 424242")
                 ?.setTitle("Confirm transaction")
 
             builder.apply {
                 setPositiveButton("Yes"
-                ) { dialog, id ->
+                ) { _, _ ->
                     // User clicked yes
-                    transaction.transferPartTwo(message)
+                    transaction.completeTransfer(message)
                 }
                 setNegativeButton("No"
-                ) { dialog, id ->
+                ) { _, _ ->
                     // User clicked no
                     transaction.disconnect()
 
@@ -80,6 +79,9 @@ class MainActivity : AppCompatActivity(), Payable {
             builder.create()
             builder.show()
         }
+
+
+    }
 
 
     }
