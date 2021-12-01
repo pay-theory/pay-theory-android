@@ -1,8 +1,13 @@
 package com.paytheory.android.sdk
 
 import ActionRequest
+import CashRequest
+import InstrumentData
 import Payment
-import TransferPartTwoMessage
+import PaymentData
+import TransferBody
+import TransferPartOneRequest
+import TransferPartTwoRequest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
@@ -19,7 +24,6 @@ import com.paytheory.android.sdk.websocket.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -43,24 +47,19 @@ class Transaction(
     lateinit var viewModel: WebSocketViewModel
     var publicKey: String? = null
     var sessionKey:String? = null
+    var hostToken:String? = null
 
     companion object {
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
         private const val HOST_TOKEN_RESULT = "hostToken"
-//        private const val INSTRUMENT_TOKEN = "pt-instrument"
-//        private const val PAYMENT_TOKEN = "payment-token"
         private const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
         private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
-//        private const val INSTRUMENT_ACTION = "host:ptInstrument"
         private const val BARCODE_ACTION = "host:barcode"
         private const val BARCODE_RESULT = "BarcodeUid"
         private const val TRANSFER_PART_ONE_RESULT = "payment"
         private const val COMPLETED_TRANSFER = "payment-detail-reference"
-//        private const val TRANSFER_RESULT_FAIL = "type"
         private const val UNKNOWN = "unknown"
-        const val PAYMENT_CARD = "PAYMENT_CARD"
-        const val BANK_ACCOUNT = "BANK_ACCOUNT"
         const val CASH = "CASH"
 
         private var messageReactors: MessageReactors? = null
@@ -164,7 +163,7 @@ class Transaction(
     ) {
         messageReactors!!.activePayment = payment
 
-        val actionRequest =  transferPartOne(payment)
+        val actionRequest =  generateQueuedActionRequest(payment)
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
@@ -177,102 +176,72 @@ class Transaction(
     }
 
     /**
-     * Generate transfer part one action request
+     * Generate the initial action request
      * @param payment payment object to transact
      */
-    fun transferPartOne(payment: Payment, sessionKey:String): ActionRequest {
+    fun generateQueuedActionRequest(payment: Payment): ActionRequest {
 
+        //generate public key
         val keyPair = generateLocalKeyPair()
-
-//        val paymentRequest = InstrumentRequest(messageReactors!!.hostToken, messageReactors!!.sessionKey,payment,
-//            System.currentTimeMillis(), payment.buyerOptions)
-
         publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         } else {
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
         }
 
-        val instrumentData = JSONObject()
-
-
-        if (payment.type == PAYMENT_CARD) {
-            instrumentData.put("name", payment.name)
-            instrumentData.put("number", payment.number)
-            instrumentData.put("security_code", payment.security_code)
-            instrumentData.put("type", payment.type)
-            instrumentData.put("expiration_year", payment.expiration_year)
-            instrumentData.put("expiration_month", payment.expiration_month)
-            instrumentData.put("address", payment.address)
-        } else if (payment.type == BANK_ACCOUNT) {
-            instrumentData.put("account_number", payment.account_number)
-            instrumentData.put("account_type", payment.account_type)
-            instrumentData.put("bank_code", payment.bank_code)
-            instrumentData.put("name", payment.name)
-            instrumentData.put("type", payment.type)
-        } else if (payment.type == CASH){
-            val encryptedRequestData = encryptBox(Gson().toJson("TODO"), Key.fromBase64String(messageReactors!!.socketPublicKey)) //TODO
+        //if payment type is "CASH" return cash ActionRequest
+        if (payment.type == CASH){
+            var requestAction = BARCODE_ACTION
+            var paymentRequest = CashRequest(messageReactors!!.hostToken, messageReactors!!.sessionKey,payment,
+                System.currentTimeMillis(), payment.buyerOptions)
+            var encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
-                BARCODE_ACTION,
-                encryptedRequestData,
-                publicKey)
-        } else {
-            //TODO return failure
+                requestAction,
+                encryptedBody,
+                publicKey,
+                sessionKey
+            )
         }
+        //if payment type is not "CASH" return transfer ActionRequest
+        else {
+            var requestAction = TRANSFER_PART_ONE_ACTION
 
-        val paymentData = JSONObject()
-        paymentData.put("fee_mode", payment.fee_mode)
-        paymentData.put("currency", payment.currency)
-        paymentData.put("amount", payment.amount)
+            var paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode, payment.buyerOptions)
 
-        val buyerOptionsData = JSONObject()
-        paymentData.put("buyer_options", payment.buyerOptions)
+            var instrumentData = InstrumentData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
+                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-        val requestData = JSONObject()
-        requestData.put("hostToken", messageReactors!!.hostToken)
-        requestData.put("instrument_data",instrumentData)
-        requestData.put("payment_data", paymentData)
-        requestData.put("confirmation_needed", false) //TODO get confirmation boolean
-        requestData.put("buyer_options", buyerOptionsData)
-        requestData.put("tags", tags)
-        requestData.put("sessionKey", sessionKey)
-        requestData.put("timing", System.currentTimeMillis().toString())
+            var paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, false,payment.buyerOptions,
+                tags, sessionKey, System.currentTimeMillis())
 
-        val encryptedRequestData = encryptBox(Gson().toJson(requestData), Key.fromBase64String(messageReactors!!.socketPublicKey))
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
-        var requestAction = TRANSFER_PART_ONE_ACTION
-
-
-        return ActionRequest(
-            requestAction,
-            encryptedRequestData,
-            publicKey,
-            sessionKey
-        )
+            return ActionRequest(
+                requestAction,
+                encryptedBody,
+                publicKey,
+                sessionKey
+            )
+        }
     }
 
     /**
      * Generate transfer part one action request
      * @param payment payment object to transact
      */
-    fun transferPartTwo(message: String): ActionRequest {
+    fun completeTransfer(message: String): ActionRequest {
 
-        val payment = Gson().fromJson(message, TransferPartTwoMessage::class.java)
+        val transferBody = Gson().fromJson(message, TransferBody::class.java)
 
-        val requestData = JSONObject()
+        var requestBody = TransferPartTwoRequest(transferBody, tags, sessionKey, System.currentTimeMillis())
 
-        requestData.put("transfer", payment)
-        requestData.put("tags",tags)
-        requestData.put("sessionKey", messageReactors!!.sessionKey)
-        requestData.put("timing", System.currentTimeMillis().toString())
-
-        val encryptedRequestData = encryptBox(Gson().toJson(requestData), Key.fromBase64String(messageReactors!!.socketPublicKey))
+        val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
         var requestAction = TRANSFER_PART_TWO_ACTION
 
         return ActionRequest(
             requestAction,
-            encryptedRequestData,
+            encryptedBody,
             publicKey,
             messageReactors!!.sessionKey
         )
@@ -300,7 +269,7 @@ class Transaction(
             }
             else -> {
                 when (discoverMessageType(message)) {
-                    HOST_TOKEN_RESULT -> messageReactors!!.transferPartOne(message, this)
+                    HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
 //                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.transferPartTwo(message,this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
@@ -323,33 +292,6 @@ class Transaction(
 
 
 
-
-
-
-
-
-
-
-//Not currently used
-
-//import IdempotencyResponse
-//import com.goterl.lazycode.lazysodium.utils.KeyPair
-
-
-
-
-//        lateinit var keyPair: KeyPair
-//        var hostToken = ""
-//        var socketPublicKey = ""
-//        var activePayment: Payment? = null
-
-
-
-//@ExperimentalCoroutinesApi
-//private val messengerConnections = arrayOf(
-//    Transaction.CONNECTED,
-//    Transaction.DISCONNECTED
-//)
 
 
 

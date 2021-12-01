@@ -4,7 +4,7 @@ import BarcodeMessage
 import HostTokenMessage
 import Payment
 import TransferMessage
-import TransferPartTwoMessage
+import android.util.Log
 import com.google.gson.Gson
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
@@ -25,24 +25,24 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     var socketPublicKey = ""
 
     /**
-     * Handles incoming host token message
-     * @param message message received from host token call
+     * Called when host token message received from websocket
+     * @param
      */
     @ExperimentalCoroutinesApi
-    fun transferPartOne(message: String, transaction: Transaction? = null): HostTokenMessage {
+    fun onHostToken(message: String, transaction: Transaction): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
         socketPublicKey = hostTokenMessage.publicKey
         sessionKey = hostTokenMessage.sessionKey
         hostToken = hostTokenMessage.hostToken
 
-        if (transaction?.queuedRequest != null) {
-            transaction.queuedRequest!!.sessionKey = hostTokenMessage.sessionKey
-            val actionRequest = transaction.transferPartOne(transaction.queuedRequest!!, sessionKey)
-            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Transfer Part One Requested")
-        }
+        transaction.sessionKey = hostTokenMessage.sessionKey
+        transaction.publicKey = hostTokenMessage.publicKey
+        transaction.hostToken = hostTokenMessage.hostToken
+
+        Log.d("PayTheory-onHostToken", hostTokenMessage.toString())
         return hostTokenMessage
     }
+
 
     /**
      * Confirmation of payment
@@ -50,37 +50,12 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun confirmPayment(message: String, transaction: Transaction? = null){
-
-        val transferPartTwoMessage = Gson().fromJson(message, TransferPartTwoMessage::class.java)
-
         //get user confirmation of payment
         if (transaction != null) {
             if (transaction.context is Payable){
                 transaction.context.confirmation(message, transaction)
             }
         }
-
-    }
-
-    /**
-     * Creates transfer part two request
-     * @param message message received from transfer part one
-     */
-    @ExperimentalCoroutinesApi
-    fun transferPartTwo(message: String, transaction: Transaction? = null): TransferPartTwoMessage? {
-        val transferPartTwoMessage = Gson().fromJson(message, TransferPartTwoMessage::class.java)
-
-//        //get user confirmation of payment
-//        transaction.context.paymentConfirmation()
-
-
-        if (transaction?.queuedRequest != null) {
-            val actionRequest = transaction.transferPartTwo(transferPartTwoMessage)
-            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Transfer Part Two Requested")
-        }
-
-        return transferPartTwoMessage
     }
 
     /**

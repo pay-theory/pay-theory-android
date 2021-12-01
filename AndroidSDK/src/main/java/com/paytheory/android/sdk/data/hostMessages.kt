@@ -14,22 +14,6 @@ data class Bin (
 )
 
 /**
- * Data class to store payment details
- * @param currency currency type of transaction amount
- * @param amount amount of payment
- * @param fee_mode fee mode that will be used for transaction
- * @param merchant merchant UID
- * @param service_fee service fee amount
- */
-data class PreparedPayment(
-    @SerializedName("currency") val currency: String,
-    @SerializedName("amount") val amount: Int,
-    @SerializedName("fee_mode") val fee_mode: String,
-    @SerializedName("merchant") val merchant: String,
-    @SerializedName("service_fee") val service_fee: Int
-)
-
-/**
  * Data class to store resulting transaction data
  * @param paymentDetailReference payment reference id
  * @param paymentSourceId payment source id
@@ -72,28 +56,6 @@ data class BarcodeMessage (
 )
 
 /**
- * Data class to idempotency message details
- * @param paymentToken token for payment details
- * @param idempotency token for payment details
- * @param bin payment card details
- * @param payment object that contains payment information
- */
-data class IdempotencyMessage (
-    @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("bin") val bin: Bin,
-    @SerializedName("payment") val payment: PreparedPayment
-)
-
-/**
- * Data class to store instrument message details
- * @param ptInstrument token that contains transaction details
- */
-data class InstrumentMessage (
-    @SerializedName("pt-instrument") val ptInstrument: String
-)
-
-/**
  * Data class to store host token message details
  * @param hostToken token with transaction details
  * @param publicKey encryption key to encode/decode messages
@@ -105,16 +67,6 @@ data class HostTokenMessage (
     @SerializedName("sessionKey") val sessionKey: String
 )
 
-/**
- * Data class for the transfer part two
- */
-data class TransferPartTwoMessage (
-    @SerializedName("bin") val bin: Bin,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("payment_intent_id") val paymentIntentId: String,
-)
 /**
  * Data class to store buyer option details
  * @param first_name first name of buyer
@@ -132,54 +84,84 @@ data class BuyerOptions (
 )
 
 /**
- * Data class to store instrument message details
+ * Data class to store cash request
  * @param hostToken token with transaction details
  * @param payment object that contains payment details
  * @param timing calculated timing
  * @param buyerOptions optional buyer options data
  */
-data class InstrumentRequest (
+data class CashRequest (
     @SerializedName("hostToken") val hostToken: String,
     @SerializedName("sessionKey") val sessionKey: String,
     @SerializedName("payment") val payment: Payment,
     @SerializedName("timing") val timing: Long,
     @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+)
+
+/**
+ * Payment data
+ * @param currency currency type of transaction amount
+ * @param amount amount of payment
+ * @param fee_mode fee mode that will be used for transaction
+ * @param buyerOptions optional buyer options data
+ */
+data class PaymentData(
+    @SerializedName("currency") val currency: String?,
+    @SerializedName("amount") val amount: Int,
+    @SerializedName("fee_mode") val fee_mode: String?,
+    @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+)
+
+/**
+ * Instrument data
+ * @param type type of payment
+ * @param name account holder name
+ * @param account_number account number
+ * @param account_type type of account
+ * @param bank_code routing number
+ * @param number card number
+ * @param security_code card security code
+ * @param expiration_year card expiration year
+ * @param expiration_month card expiration month
+ * @param address billing address
+ */
+data class InstrumentData (
+    @SerializedName("name") val name: String? = "",
+    @SerializedName("number") val number: String? = null,
+    @SerializedName("security_code") val security_code: String? = null,
+    @SerializedName("type") val type: String,
+    @SerializedName("expiration_year") val expiration_year: String? = null,
+    @SerializedName("expiration_month") val expiration_month: String? = null,
+    @SerializedName("address") val address: Address? = null,
+    @SerializedName("account_number") val account_number: String? = null,
+    @SerializedName("account_type") val account_type: String? = null,
+    @SerializedName("bank_code") val bank_code: String? = null,
 )
 
 /**
  * Data class for transfer part one request
  * @param hostToken token with transaction details
  */
-data class TransferPartOneRequest (
-    @SerializedName("hostToken") val hostToken: String,
-    @SerializedName("sessionKey") val sessionKey: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+data class TransferPartOneRequest(
+    @SerializedName("hostToken") val hostToken: String?,
+    @SerializedName("instrument_data") val instrumentData: InstrumentData,
+    @SerializedName("payment_data") val paymentData: PaymentData,
+    @SerializedName("confirmation_needed") val confirmationNeeded: Boolean,
+    @SerializedName("buyer_options") val buyerOptions: BuyerOptions? = null,
+    @SerializedName("tags") val tags: HashMap<String, String>?,
+    @SerializedName("sessionKey") val sessionKey: String?,
+    @SerializedName("timing") val timing: Long
+
 )
 
-///**
-// * Data class for encoded values sent for host token action
-// * @param ptToken token with transaction details
-// * @param origin origin of application
-// * @param attestation token used for security
-// * @param timing calculated timing
-// */
-//data class Encoded (
-//    @SerializedName("ptToken") val ptToken: String,
-//    @SerializedName("origin") val origin: String,
-//    @SerializedName("attestation") val attestation: String,
-//    @SerializedName("timing") val timing: Long
-//)
-
 /**
- * Data class to store host token message data
- * @param action action taken to call hostToken
- * @param encoded encoded values (ptToken, origin, attestation, timing)
+ * Data class for the transfer part two
  */
-data class HostTokenRequest (
-    @SerializedName("action") val action: String,
-    @SerializedName("encoded") val encoded: String
+data class TransferPartTwoRequest(
+    @SerializedName("transfer") val transferBody: TransferBody?,
+    @SerializedName("tags") val tags: HashMap<String, String>?,
+    @SerializedName("sessionKey") val sessionKey: String?,
+    @SerializedName("timing") val timing: Long
 )
 
 /**
@@ -241,42 +223,16 @@ data class Payment (
 )
 
 /**
- * Data class to store idempotency message data
- * @param apiKey api-key that will be used to transact
- * @param payment payment details
- * @param hostToken token used for security
- * @param sessionKey encryption key
- * @param timing calculated timing
+ * Data class to store transfer body
  */
-data class IdempotencyRequest (
-    @SerializedName("apiKey") val apiKey: String,
+data class TransferBody (
+    @SerializedName("bin") val bin: Bin,
+    @SerializedName("idempotency") val idempotency: String,
     @SerializedName("payment") val payment: Payment,
-    @SerializedName("hostToken") val hostToken: String,
-    @SerializedName("sessionKey") val sessionKey: String,
-    @SerializedName("timing") val timing: Long
-)
-
-/**
- * Data class to store transfer message data
- * @param paymentToken token of payment data
- * @param idempotency token of payment data
- */
-data class Transfer (
     @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("idempotency") val idempotency: String
+    @SerializedName("payment_intent_id") val paymentIntentId: String,
 )
 
-/**
- * Data class to store transfer message data
- * @param transfer token with transfer data
- * @param timing calculated timing
- * @param tags custom tags added to transaction
- */
-data class TransferRequest (
-    @SerializedName("transfer") val transfer: Transfer,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("tags") var tags: Map<String,String> = HashMap<String,String>()
-)
 
 /**
  * Data class to store action message data

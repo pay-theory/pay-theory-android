@@ -1,7 +1,6 @@
 package com.paytheory.android.sdk.reactors
 
 import ActionRequest
-import HostTokenRequest
 import com.google.gson.Gson
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
@@ -27,7 +26,7 @@ class ConnectionReactors(
     }
 
     /**
-     * Called when websocket had connected successfully. Creates host token action request.
+     * Called on websocket connection, creates the host token action request
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
@@ -42,14 +41,6 @@ class ConnectionReactors(
         } else {
             android.util.Base64.encodeToString(Gson().toJson(requestData).toByteArray(),android.util.Base64.DEFAULT)
         }
-
-//        val hostTokenRequest = HostTokenRequest("host:hostToken", encodedBody)
-
-//        val encoded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
-//        } else {
-//            android.util.Base64.encodeToString(Gson().toJson(hostTokenRequest).toByteArray(),android.util.Base64.DEFAULT)
-//        }
 
         val actionRequest = ActionRequest(HOST_ACTION, encodedBody)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
