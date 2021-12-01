@@ -39,6 +39,7 @@ class Transaction(
     private val constants: Constants,
     private val partner: String,
     private val stage: String,
+    private val requireConfirmation: Boolean,
     private val tags: HashMap<String, String>?
 ): WebsocketMessageHandler {
 
@@ -211,7 +212,7 @@ class Transaction(
             var instrumentData = InstrumentData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-            var paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, false,payment.buyerOptions,
+            var paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, requireConfirmation, payment.buyerOptions,
                 tags, sessionKey, System.currentTimeMillis())
 
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
@@ -229,7 +230,7 @@ class Transaction(
      * Generate transfer part one action request
      * @param payment payment object to transact
      */
-    fun completeTransfer(message: String): ActionRequest {
+    fun completeTransfer(message: String) {
 
         val transferBody = Gson().fromJson(message, TransferBody::class.java)
 
@@ -237,22 +238,21 @@ class Transaction(
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
-        var requestAction = TRANSFER_PART_TWO_ACTION
+        var actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
 
-        return ActionRequest(
-            requestAction,
-            encryptedBody,
-            publicKey,
-            messageReactors!!.sessionKey
-        )
+        if (viewModel.connected) {
+            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+        } else{
+            //TODO websocket not connected
+        }
     }
 
     private fun discoverMessageType(message: String): String  {
         return when {
-            message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
-            message.indexOf(TRANSFER_PART_ONE_RESULT) > -1 -> TRANSFER_PART_ONE_RESULT
             message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
+            message.indexOf(TRANSFER_PART_ONE_RESULT) > -1 -> TRANSFER_PART_ONE_RESULT
+            message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
             else -> UNKNOWN
         }
     }

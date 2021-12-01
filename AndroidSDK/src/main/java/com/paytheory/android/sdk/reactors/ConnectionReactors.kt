@@ -1,11 +1,11 @@
 package com.paytheory.android.sdk.reactors
 
 import ActionRequest
+import HostTokenRequest
 import com.google.gson.Gson
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
 import java.util.*
 
 /**
@@ -30,11 +30,13 @@ class ConnectionReactors(
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
-        val requestData = JSONObject()
-        requestData.put("ptToken",ptToken)
-        requestData.put("origin","native")
-        requestData.put("attestation",attestation)
-        requestData.put("timing", System.currentTimeMillis().toString())
+//        val requestData = JSONObject()
+//        requestData.put("ptToken",ptToken)
+//        requestData.put("origin","native")
+//        requestData.put("attestation",attestation)
+//        requestData.put("timing", System.currentTimeMillis())
+
+        var requestData = HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
 
         val encodedBody = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())

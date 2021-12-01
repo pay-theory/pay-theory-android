@@ -146,6 +146,7 @@ class PayTheoryFragment : Fragment() {
                         this.constants,
                         partner,
                         stage,
+                        requireConfirmation,
                         this.tags
                     )
 

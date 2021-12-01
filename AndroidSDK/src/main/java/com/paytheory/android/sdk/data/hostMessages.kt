@@ -68,6 +68,16 @@ data class HostTokenMessage (
 )
 
 /**
+ * Data class to store host token request
+ */
+data class HostTokenRequest(
+    @SerializedName("ptToken") val ptToken: String,
+    @SerializedName("origin") val origin: String,
+    @SerializedName("attestation") val attestation: String,
+    @SerializedName("timing") val timing: Long
+)
+
+/**
  * Data class to store buyer option details
  * @param first_name first name of buyer
  * @param last_name last name of buyer

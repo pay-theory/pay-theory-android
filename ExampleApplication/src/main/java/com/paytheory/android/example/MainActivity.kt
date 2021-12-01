@@ -2,9 +2,12 @@ package com.paytheory.android.example
 
 import Address
 import BuyerOptions
+import android.app.Dialog
 import android.os.Bundle
+import android.view.Window
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
@@ -17,11 +20,20 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  */
 class MainActivity : FragmentActivity() , Payable {
     val apiKey = "My-Api-Key"
-    var payTheoryFragment : PayTheoryFragment? = null
+    var dialog : Dialog? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        payTheoryFragment = this.supportFragmentManager
+
+        //Create confirmation view
+        dialog = Dialog(this)
+        dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog!!.setCancelable(false)
+        dialog!!.setContentView(R.layout.confirmation_layout)
+
+
+        var payTheoryFragment = this.supportFragmentManager
             .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
         val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
@@ -29,7 +41,7 @@ class MainActivity : FragmentActivity() , Payable {
 
         val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
 
-        payTheoryFragment!!.configure(apiKey,8500, PaymentType.CREDIT, false, false, false, FeeMode.SURCHARGE, buyerOptions, tags)
+        payTheoryFragment!!.configure(apiKey,8500, PaymentType.CREDIT, false, false, true, FeeMode.SURCHARGE, buyerOptions, tags)
 
     }
 
@@ -61,29 +73,25 @@ class MainActivity : FragmentActivity() , Payable {
     override fun confirmation(message: String, transaction: Transaction) {
         print(message)
 
-        this.let {
-            val builder = AlertDialog.Builder(it)
-            builder?.setMessage("Are you sure you want to make a payment on VISA card beginning with 424242")
-                ?.setTitle("Confirm transaction")
+        var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        confirmationTextView.text  = "Are you sure you want to make a payment on VISA card beginning with 424242"
 
-            builder.apply {
-                setPositiveButton("Yes"
-                ) { _, _ ->
-                    // User clicked yes
-                    transaction.completeTransfer(message)
-                }
-                setNegativeButton("No"
-                ) { _, _ ->
-                    // User clicked no
-                    transaction.disconnect()
+        val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
+        val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
 
-                }
-            }
-            builder.create()
-            builder.show()
+        yesBtn.setOnClickListener {
+            dialog!!.dismiss()
+            transaction.completeTransfer(message)
         }
 
+        noBtn.setOnClickListener {
+            dialog!!.dismiss()
+            transaction.disconnect()
+        }
 
+        runOnUiThread {
+            dialog!!.show()
+        }
     }
 
 }
