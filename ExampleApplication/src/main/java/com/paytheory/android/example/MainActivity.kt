@@ -33,6 +33,7 @@ class MainActivity : FragmentActivity() , Payable {
         dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog!!.setCancelable(false)
         dialog!!.setContentView(R.layout.confirmation_layout)
+        dialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         //Create PayTheoryFragment
         var payTheoryFragment = this.supportFragmentManager
@@ -88,12 +89,14 @@ class MainActivity : FragmentActivity() , Payable {
         Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
         var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        if (paymentConfirmation.bin.card_brand == "ACH") {
-            confirmationTextView.text = "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
-                    " with a fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} on account ending in ${paymentConfirmation.bin.last_four}?"
+        confirmationTextView.text = if (paymentConfirmation.bin.card_brand == "ACH") {
+            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
+                    "on account ending in ${paymentConfirmation.bin.last_four}?"
         } else {
-            confirmationTextView.text  = "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
-                    " with a fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} on ${paymentConfirmation.bin.card_brand} account beginning with ${paymentConfirmation.bin.first_six}?"
+            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
+                    "on ${paymentConfirmation.bin.card_brand} account beginning with ${paymentConfirmation.bin.first_six}?"
         }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button

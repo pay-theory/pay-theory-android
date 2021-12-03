@@ -1,29 +1,40 @@
 package com.paytheory.android.example
 
 import PaymentConfirmation
+import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
+import android.view.Window
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.paytheory.android.sdk.*
 
 /**
  * Example Activity
  */
 class MainActivity : AppCompatActivity(), Payable {
+    var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Create confirmation view
+        dialog = Dialog(this)
+        dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog!!.setCancelable(false)
+        dialog!!.setContentView(R.layout.confirmation_layout)
+        dialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
-
         val navController = findNavController(R.id.nav_host_fragment)
-
         val appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.credit_card, R.id.ach, R.id.cash))
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -56,34 +67,38 @@ class MainActivity : AppCompatActivity(), Payable {
         showToast("an error occurred ${transactionError.reason}")
     }
 
-    override fun confirmation(message: PaymentConfirmation, transaction: Transaction) {
-        print(message)
+    //Demo function to display payment confirmation message to user
+    override fun confirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
+        Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
-        this.let {
-            val builder = AlertDialog.Builder(it)
-            builder?.setMessage("Are you sure you want to make a payment on VISA card beginning with 424242")
-                ?.setTitle("Confirm transaction")
-
-            builder.apply {
-                setPositiveButton("Yes"
-                ) { _, _ ->
-                    // User clicked yes
-                    transaction.completeTransfer(message)
-                }
-                setNegativeButton("No"
-                ) { _, _ ->
-                    // User clicked no
-                    transaction.disconnect()
-
-                }
-            }
-            builder.create()
-            builder.show()
+        var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        confirmationTextView.text = if (paymentConfirmation.bin.card_brand == "ACH") {
+            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
+                    "on account ending in ${paymentConfirmation.bin.last_four}?"
+        } else {
+            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
+                    "on ${paymentConfirmation.bin.card_brand} account beginning with ${paymentConfirmation.bin.first_six}?"
         }
 
+        val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
+        val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
 
+        yesBtn.setOnClickListener {
+            dialog!!.dismiss()
+            transaction.completeTransfer(paymentConfirmation)
+        }
+
+        noBtn.setOnClickListener {
+            dialog!!.dismiss()
+            showToast("payment canceled on account beginning with ${paymentConfirmation.bin.first_six}")
+            transaction.disconnect()
+        }
+
+        runOnUiThread {
+            dialog!!.show()
+        }
     }
 
-
-    }
 }

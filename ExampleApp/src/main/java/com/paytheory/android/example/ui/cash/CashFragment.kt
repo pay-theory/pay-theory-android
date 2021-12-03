@@ -48,6 +48,11 @@ class CashFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false)
+        val buyerOptions = BuyerOptions("Test", "Cash", "test@gmail.com", "513-123-4567",
+            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+
+        val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-cash-payment")
+
+        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
     }
 }

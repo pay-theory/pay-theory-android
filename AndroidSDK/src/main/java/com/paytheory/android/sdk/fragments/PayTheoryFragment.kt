@@ -206,6 +206,7 @@ class PayTheoryFragment : Fragment() {
                         && billingZip.visibility == View.VISIBLE)
 
 
+                //if card payment fields are active add text watcher validation
                 if (hasCC) {
                     val ccNumberValidation: (PayTheoryEditText) -> CreditCardFormattingTextWatcher =
                         { pt -> CreditCardFormattingTextWatcher(pt) }
@@ -219,6 +220,7 @@ class PayTheoryFragment : Fragment() {
                     ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
                 }
 
+                //if cash payment fields are active add text watcher validation
                 if (hasCASH) {
                     val cashBuyerContactValidation: (PayTheoryEditText) -> CashBuyerContactTextWatcher =
                         { pt -> CashBuyerContactTextWatcher(pt)}
@@ -238,7 +240,7 @@ class PayTheoryFragment : Fragment() {
                         billingAddress = Address(billingCity.text.toString(),  billingState.text.toString(),billingZip.text.toString(), billingAddress1.text.toString(), billingAddress2.text.toString(), "USA" )
                     }
 
-
+                    //Create card payment
                     if (hasCC) {
                         val expirationString = ccExpiration.text.toString()
                         val payment = Payment(
@@ -257,6 +259,7 @@ class PayTheoryFragment : Fragment() {
                         makePayment(payment)
                     }
 
+                    //Create cash payment
                     if (hasCASH) {
                         val contact = cashBuyerContact.text.toString()
                         val buyer = cashBuyer.text.toString()
@@ -274,26 +277,30 @@ class PayTheoryFragment : Fragment() {
                         makePayment(payment)
                     }
 
+                    //Create bank payment
                     if (hasACH) {
-                        if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings"){
-                            val payment = Payment(
-                                timing = System.currentTimeMillis(),
-                                amount = amount,
-                                account_type = achChooser.text.toString(),
-                                type = BANK_ACCOUNT,
-                                name = this.accountName,
-                                account_number = achAccount.text.toString(),
-                                bank_code = achRouting.text.toString(),
-                                fee_mode = feeMode,
-                                address = billingAddress,
-                                buyerOptions = buyerOptions
-                            )
-                            makePayment(payment)
+                        if(achRouting.text.toString().length == 9){
+                            if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings"){
+                                val payment = Payment(
+                                    timing = System.currentTimeMillis(),
+                                    amount = amount,
+                                    account_type = achChooser.text.toString(),
+                                    type = BANK_ACCOUNT,
+                                    name = this.accountName,
+                                    account_number = achAccount.text.toString(),
+                                    bank_code = achRouting.text.toString(),
+                                    fee_mode = feeMode,
+                                    address = billingAddress,
+                                    buyerOptions = buyerOptions
+                                )
+                                makePayment(payment)
+                            }
+                            else {
+                                achChooser.error = "Account type required."
+                            }
+                        } else {
+                            achRouting.error = "Routing number must be 9 digits."
                         }
-                        else {
-                            achChooser.error = "Account type required."
-                        }
-
                     }
                 }
             }

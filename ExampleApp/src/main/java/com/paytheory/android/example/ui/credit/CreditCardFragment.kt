@@ -47,12 +47,12 @@ class CreditCardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+        val buyerOptions = BuyerOptions("Test", "Card", "test@gmail.com", "513-123-4567",
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-        val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
+        val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-card-payment")
 
-        payTheoryFragment.configure(apiKey,8500, PaymentType.CREDIT, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,8500, PaymentType.CREDIT, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
     }
 
 
