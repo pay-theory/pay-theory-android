@@ -1,5 +1,6 @@
 package com.paytheory.android.example
 
+import PaymentConfirmation
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity(), Payable {
         showToast("an error occurred ${transactionError.reason}")
     }
 
-    override fun confirmation(message: String, transaction: Transaction) {
+    override fun confirmation(message: PaymentConfirmation, transaction: Transaction) {
         print(message)
 
         this.let {

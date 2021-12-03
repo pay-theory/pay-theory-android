@@ -1,5 +1,6 @@
 package com.paytheory.android.sdk
 
+import PaymentConfirmation
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -105,7 +106,7 @@ interface Payable {
      * method to handle confirmation of payment
      * @param transactionConfirmation confirmation data
      */
-    fun confirmation(message: String, transaction: Transaction)
+    fun confirmation(message: PaymentConfirmation, transaction: Transaction)
 
     /**
      * Converts barcodeResult as Payable

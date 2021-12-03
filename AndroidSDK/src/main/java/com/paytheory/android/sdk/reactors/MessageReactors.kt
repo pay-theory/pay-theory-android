@@ -3,6 +3,7 @@ package com.paytheory.android.sdk.reactors
 import BarcodeMessage
 import HostTokenMessage
 import Payment
+import PaymentConfirmation
 import TransferMessage
 import android.util.Log
 import com.google.gson.Gson
@@ -50,10 +51,13 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun confirmPayment(message: String, transaction: Transaction? = null){
+
+        var paymentConfirmation = Gson().fromJson(message, PaymentConfirmation::class.java)
+
         //get user confirmation of payment
         if (transaction != null) {
             if (transaction.context is Payable){
-                transaction.context.confirmation(message, transaction)
+                transaction.context.confirmation(paymentConfirmation, transaction)
             }
         }
     }
@@ -62,8 +66,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
-    fun onUnknown(message: String): Any {
-        return Gson().fromJson(message, Any::class.java)
+    fun onUnknown(message: String, transaction: Transaction? = null) {
+        print("Error calling WebSocket: $message")
+        //fail if unknown websocket message
+        if (transaction != null) {
+            if (transaction.context is Payable){
+                transaction.context.transactionError(TransactionError("Error processing payment"))
+            }
+        }
     }
 
     /**

@@ -4,8 +4,8 @@ import ActionRequest
 import CashRequest
 import InstrumentData
 import Payment
+import PaymentConfirmation
 import PaymentData
-import TransferBody
 import TransferPartOneRequest
 import TransferPartTwoRequest
 import android.annotation.SuppressLint
@@ -227,14 +227,12 @@ class Transaction(
     }
 
     /**
-     * Generate transfer part one action request
-     * @param payment payment object to transact
+     * Generate transfer part two action request
+     * @param
      */
-    fun completeTransfer(message: String) {
+    fun completeTransfer(message: PaymentConfirmation) {
 
-        val transferBody = Gson().fromJson(message, TransferBody::class.java)
-
-        var requestBody = TransferPartTwoRequest(transferBody, tags, sessionKey, System.currentTimeMillis())
+        var requestBody = TransferPartTwoRequest(message, tags, sessionKey, System.currentTimeMillis())
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
@@ -271,10 +269,9 @@ class Transaction(
                 when (discoverMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
-//                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.transferPartTwo(message,this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
                     COMPLETED_TRANSFER -> messageReactors!!.completeTransfer(message,viewModel, this)
-                    else -> messageReactors!!.onUnknown(message)
+                    else -> messageReactors!!.onUnknown(message, this)
                 }
             }
         }

@@ -2,8 +2,10 @@ package com.paytheory.android.example
 
 import Address
 import BuyerOptions
+import PaymentConfirmation
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
@@ -32,19 +34,23 @@ class MainActivity : FragmentActivity() , Payable {
         dialog!!.setCancelable(false)
         dialog!!.setContentView(R.layout.confirmation_layout)
 
-
+        //Create PayTheoryFragment
         var payTheoryFragment = this.supportFragmentManager
             .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
+        //BuyerOptions configuration
         val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
+        //tags configuration
         val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
 
-        payTheoryFragment!!.configure(apiKey,8500, PaymentType.CREDIT, false, false, true, FeeMode.SURCHARGE, buyerOptions, tags)
+        //PayTheoryFragment configuration
+        payTheoryFragment!!.configure(apiKey,8000, PaymentType.CREDIT, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
     }
 
+    //Demo function to display payment response
     private fun showToast(message: String?) {
         runOnUiThread {
             Toast.makeText(
@@ -54,6 +60,7 @@ class MainActivity : FragmentActivity() , Payable {
         }
     }
 
+    //Inherited from Payable interface
     override fun paymentComplete(paymentResult: PaymentResult) {
         showToast("payment successful on account XXXX${paymentResult.last_four}")
     }
@@ -70,18 +77,20 @@ class MainActivity : FragmentActivity() , Payable {
         showToast("an error occurred ${transactionError.reason}")
     }
 
-    override fun confirmation(message: String, transaction: Transaction) {
-        print(message)
+    //Demo function to display payment confirmation message to user
+    override fun confirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
+        Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
         var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text  = "Are you sure you want to make a payment on VISA card beginning with 424242"
+        confirmationTextView.text  = "Are you sure you want to make a payment of ${paymentConfirmation}on ${paymentConfirmation.bin.card_brand}" +
+                " card beginning with ${paymentConfirmation.bin.first_six}?"
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
         val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
 
         yesBtn.setOnClickListener {
             dialog!!.dismiss()
-            transaction.completeTransfer(message)
+            transaction.completeTransfer(paymentConfirmation)
         }
 
         noBtn.setOnClickListener {

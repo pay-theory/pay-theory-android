@@ -168,7 +168,7 @@ data class TransferPartOneRequest(
  * Data class for the transfer part two
  */
 data class TransferPartTwoRequest(
-    @SerializedName("transfer") val transferBody: TransferBody?,
+    @SerializedName("transfer") val transferBody: PaymentConfirmation,
     @SerializedName("tags") val tags: HashMap<String, String>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long
@@ -233,18 +233,6 @@ data class Payment (
 )
 
 /**
- * Data class to store transfer body
- */
-data class TransferBody (
-    @SerializedName("bin") val bin: Bin,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("payment_intent_id") val paymentIntentId: String,
-)
-
-
-/**
  * Data class to store action message data
  * @param action type of action that will occur
  * @param encoded encoded message with transaction details
@@ -255,4 +243,15 @@ data class ActionRequest (
     @SerializedName("encoded") val encoded: String,
     @SerializedName("publicKey") val publicKey: String? = null,
     @SerializedName("sessionKey") val sessionKey: String? = null
+)
+
+/**
+ * Data class to store payment confirmation details
+ */
+data class PaymentConfirmation (
+    @SerializedName("bin") val bin: Bin,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("payment") val payment: Payment,
+    @SerializedName("payment-token") val paymentToken: String,
+    @SerializedName("payment_intent_id") val paymentIntentId: String,
 )
