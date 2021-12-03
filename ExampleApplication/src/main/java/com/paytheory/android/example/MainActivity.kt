@@ -43,10 +43,16 @@ class MainActivity : FragmentActivity() , Payable {
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
         //tags configuration
-        val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
+        val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
 
-        //PayTheoryFragment configuration
-        payTheoryFragment!!.configure(apiKey,8000, PaymentType.CREDIT, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        //PayTheoryFragment configuration for card payments
+        payTheoryFragment.configure(apiKey,8500, PaymentType.CREDIT, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+
+        //PayTheoryFragment configuration for bank account payments
+//        payTheoryFragment.configure(apiKey,5600, PaymentType.BANK, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+
+        //PayTheoryFragment configuration for cash payments
+//        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
     }
 
@@ -82,8 +88,13 @@ class MainActivity : FragmentActivity() , Payable {
         Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
         var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text  = "Are you sure you want to make a payment of ${paymentConfirmation}on ${paymentConfirmation.bin.card_brand}" +
-                " card beginning with ${paymentConfirmation.bin.first_six}?"
+        if (paymentConfirmation.bin.card_brand == "ACH") {
+            confirmationTextView.text = "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " with a fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} on account ending in ${paymentConfirmation.bin.last_four}?"
+        } else {
+            confirmationTextView.text  = "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
+                    " with a fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} on ${paymentConfirmation.bin.card_brand} account beginning with ${paymentConfirmation.bin.first_six}?"
+        }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
         val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
@@ -95,6 +106,7 @@ class MainActivity : FragmentActivity() , Payable {
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
+            showToast("payment canceled on account beginning with ${paymentConfirmation.bin.first_six}")
             transaction.disconnect()
         }
 

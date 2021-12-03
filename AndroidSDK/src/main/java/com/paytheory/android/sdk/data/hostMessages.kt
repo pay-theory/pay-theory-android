@@ -100,12 +100,13 @@ data class BuyerOptions (
  * @param timing calculated timing
  * @param buyerOptions optional buyer options data
  */
-data class CashRequest (
-    @SerializedName("hostToken") val hostToken: String,
-    @SerializedName("sessionKey") val sessionKey: String,
+data class CashRequest(
+    @SerializedName("hostToken") val hostToken: String?,
+    @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("payment") val payment: Payment,
     @SerializedName("timing") val timing: Long,
-    @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+    @SerializedName("buyer_options") val buyerOptions: BuyerOptions? = null,
+    @SerializedName("tags") val tags: HashMap<String, String>?
 )
 
 /**
@@ -119,7 +120,7 @@ data class PaymentData(
     @SerializedName("currency") val currency: String?,
     @SerializedName("amount") val amount: Int,
     @SerializedName("fee_mode") val fee_mode: String?,
-    @SerializedName("buyerOptions") val buyerOptions: BuyerOptions? = null
+    @SerializedName("buyer_options") val buyerOptions: BuyerOptions? = null
 )
 
 /**

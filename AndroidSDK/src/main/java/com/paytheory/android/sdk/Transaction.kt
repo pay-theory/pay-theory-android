@@ -193,8 +193,7 @@ class Transaction(
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             var requestAction = BARCODE_ACTION
-            var paymentRequest = CashRequest(messageReactors!!.hostToken, messageReactors!!.sessionKey,payment,
-                System.currentTimeMillis(), payment.buyerOptions)
+            var paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.buyerOptions, tags)
             var encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
                 requestAction,

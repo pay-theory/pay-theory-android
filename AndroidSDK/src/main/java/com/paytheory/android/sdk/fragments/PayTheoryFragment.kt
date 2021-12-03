@@ -258,7 +258,7 @@ class PayTheoryFragment : Fragment() {
                     }
 
                     if (hasCASH) {
-                        val email = cashBuyerContact.text.toString()
+                        val contact = cashBuyerContact.text.toString()
                         val buyer = cashBuyer.text.toString()
 
                         val payment = Payment(
@@ -268,7 +268,8 @@ class PayTheoryFragment : Fragment() {
                             buyer = buyer,
                             fee_mode = feeMode,
                             address = billingAddress,
-                            buyerContact = email
+                            buyerContact = contact,
+                            buyerOptions = buyerOptions
                         )
                         makePayment(payment)
                     }
@@ -284,7 +285,8 @@ class PayTheoryFragment : Fragment() {
                                 account_number = achAccount.text.toString(),
                                 bank_code = achRouting.text.toString(),
                                 fee_mode = feeMode,
-                                address = billingAddress
+                                address = billingAddress,
+                                buyerOptions = buyerOptions
                             )
                             makePayment(payment)
                         }
