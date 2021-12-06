@@ -1,5 +1,4 @@
 *.iml
-/.idea
 /local.properties
 .DS_Store
 /build
@@ -11,3 +10,4 @@ local.properties
 /PayTheorySDK/bintray.gradle
 /.gradle/
 /build/
+/.idea/
