@@ -30,13 +30,8 @@ class ConnectionReactors(
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
-//        val requestData = JSONObject()
-//        requestData.put("ptToken",ptToken)
-//        requestData.put("origin","native")
-//        requestData.put("attestation",attestation)
-//        requestData.put("timing", System.currentTimeMillis())
 
-        var requestData = HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
+        val requestData = HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
 
         val encodedBody = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())

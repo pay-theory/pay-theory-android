@@ -1,4 +1,5 @@
 import com.google.gson.annotations.SerializedName
+import com.paytheory.android.sdk.PaymentConfirmation
 import com.paytheory.android.sdk.configuration.FeeMode
 
 /**
@@ -208,7 +209,6 @@ data class Address (
  * @param expiration_year card expiration year
  * @param expiration_month card expiration month
  * @param address billing address
- * @param ptInstrument token with payment details
  */
 data class Payment (
     @SerializedName("type") val type: String,
@@ -244,15 +244,4 @@ data class ActionRequest (
     @SerializedName("encoded") val encoded: String,
     @SerializedName("publicKey") val publicKey: String? = null,
     @SerializedName("sessionKey") val sessionKey: String? = null
-)
-
-/**
- * Data class to store payment confirmation details
- */
-data class PaymentConfirmation (
-    @SerializedName("bin") val bin: Bin,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("payment_intent_id") val paymentIntentId: String,
 )

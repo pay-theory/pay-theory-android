@@ -39,12 +39,6 @@ annotation class PayTheory
  */
 class PayTheoryFragment : Fragment() {
     companion object {
-        const val API_KEY = "api_key"
-        const val AMOUNT = "amount"
-        const val USE_ACH = "ach_enabled"
-        const val ACCOUNT_NAME_ENABLED = "account_name_enabled"
-        const val BILLING_ADDRESS_ENABLED = "billing_address_enabled"
-        const val TAGS = "tags"
         const val PAYMENT_CARD = "PAYMENT_CARD"
         const val BANK_ACCOUNT = "BANK_ACCOUNT"
         const val CASH = "CASH"
@@ -55,7 +49,7 @@ class PayTheoryFragment : Fragment() {
     private var payTheoryTransaction: Transaction? = null
     private var api_key: String = ""
     private var amount: Int = 0
-    private var paymentType: PaymentType = PaymentType.CREDIT
+    private var transactionType: TransactionType = TransactionType.CARD
     private var accountNameEnabled: Boolean = false
     private var billingAddressEnabled: Boolean = false
     private var feeMode : String = FeeMode.SURCHARGE
@@ -92,7 +86,7 @@ class PayTheoryFragment : Fragment() {
      * Create configurations to execute a payment
      * @param apiKey Pay Theory API-Key
      * @param amount Amount of transaction
-     * @param paymentType Type of payment method
+     * @param transactionType Type of payment method
      * @param requireBillingAddress Boolean if billing address is required
      * @param feeMode Type of fee mode that will be processed
      * @param buyerOptions Optional details about the buyer
@@ -101,7 +95,7 @@ class PayTheoryFragment : Fragment() {
     fun configure(
         apiKey: String,
         amount: Int,
-        paymentType: PaymentType = PaymentType.CREDIT,
+        transactionType: TransactionType = TransactionType.CARD,
         requireAccountName: Boolean = true,
         requireBillingAddress: Boolean = true,
         requireConfirmation: Boolean = false,
@@ -119,11 +113,11 @@ class PayTheoryFragment : Fragment() {
             )
         }
 
-        model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,paymentType))
+        model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,transactionType))
         model!!.configuration.observe(this.viewLifecycleOwner, { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
-            this.paymentType = configurationDetail.paymentType
+            this.transactionType = configurationDetail.transactionType
             this.accountNameEnabled = configurationDetail.requireAccountName
             this.billingAddressEnabled = configurationDetail.requireAddress
             this.feeMode = configurationDetail.feeMode
@@ -134,7 +128,7 @@ class PayTheoryFragment : Fragment() {
                 val stage: String = api_key.substring(startIndex+1, endIndex)
                 this.constants = Constants(partner, stage)
 
-                var initialTags = hashMapOf("pay-theory-environment" to partner)
+                val initialTags = hashMapOf("pay-theory-environment" to partner)
                 tags.putAll(initialTags)
                 this.tags = tags
 
@@ -154,7 +148,7 @@ class PayTheoryFragment : Fragment() {
 
 
 
-                enableFields(this.paymentType, accountNameEnabled, billingAddressEnabled)
+                enableFields(this.transactionType, accountNameEnabled, billingAddressEnabled)
 
                 val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -321,21 +315,21 @@ class PayTheoryFragment : Fragment() {
     }
 
     private fun enableFields(
-        paymentType: PaymentType,
+        transactionType: TransactionType,
         accountNameEnabled: Boolean,
         billingAddressEnabled: Boolean
     ) {
-        if (paymentType == PaymentType.BANK) {
+        if (transactionType == TransactionType.BANK) {
             enableAccountName()
             enableACH()
         }
-        if (paymentType == PaymentType.CREDIT) {
+        if (transactionType == TransactionType.CARD) {
             if (accountNameEnabled) {
                 enableAccountName()
             }
             enableCC()
         }
-        if (paymentType == PaymentType.CASH) {
+        if (transactionType == TransactionType.CASH) {
             enableCash()
         }
 
@@ -350,10 +344,6 @@ class PayTheoryFragment : Fragment() {
     private fun makePayment(payment: Payment) {
         payTheoryTransaction!!.transact(payment)
     }
-
-//    fun confirmed() {
-//        payTheoryTransaction!!.confirm(payment)
-//    }
 
     private fun enableCC() {
         val ccNumber: PayTheoryEditText? = view?.findViewById(R.id.cc_number)

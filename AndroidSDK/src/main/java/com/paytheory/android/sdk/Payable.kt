@@ -1,6 +1,7 @@
 package com.paytheory.android.sdk
 
-import PaymentConfirmation
+import Bin
+import Payment
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -68,16 +69,14 @@ data class BarcodeResult (
 )
 
 /**
- * Payment confirmation data
- * @param
+ * Data class to store payment confirmation details
  */
-data class TransactionConfirmation (
-    @SerializedName("BarcodeUid") val barcodeUid: String,
-    @SerializedName("barcodeUrl") val barcodeUrl: String,
-    @SerializedName("barcode") val barcode: String,
-    @SerializedName("barcodeFee") val barcodeFee: String,
-    @SerializedName("Merchant") val merchant: String,
-    @SerializedName("MapUrl") val mapUrl : String
+data class PaymentConfirmation (
+    @SerializedName("bin") val bin: Bin,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("payment") val payment: Payment,
+    @SerializedName("payment-token") val paymentToken: String,
+    @SerializedName("payment_intent_id") val paymentIntentId: String,
 )
 
 /**
@@ -104,9 +103,9 @@ interface Payable {
 
     /**
      * method to handle confirmation of payment
-     * @param transactionConfirmation confirmation data
+     * @param confirmationData confirmation data
      */
-    fun confirmation(message: PaymentConfirmation, transaction: Transaction)
+    fun paymentConfirmation(confirmationData: PaymentConfirmation, transaction: Transaction)
 
     /**
      * Converts barcodeResult as Payable

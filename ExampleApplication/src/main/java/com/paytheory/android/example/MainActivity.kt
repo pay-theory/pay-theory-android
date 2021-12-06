@@ -2,7 +2,6 @@ package com.paytheory.android.example
 
 import Address
 import BuyerOptions
-import PaymentConfirmation
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +12,7 @@ import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.PaymentType
+import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 
@@ -36,8 +35,7 @@ class MainActivity : FragmentActivity() , Payable {
         dialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         //Create PayTheoryFragment
-        var payTheoryFragment = this.supportFragmentManager
-            .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
+        val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
         //BuyerOptions configuration
         val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
@@ -46,14 +44,15 @@ class MainActivity : FragmentActivity() , Payable {
         //tags configuration
         val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
 
+
         //PayTheoryFragment configuration for card payments
-        payTheoryFragment.configure(apiKey,8500, PaymentType.CREDIT, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,8500, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
         //PayTheoryFragment configuration for bank account payments
-//        payTheoryFragment.configure(apiKey,5600, PaymentType.BANK, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+//        payTheoryFragment.configure(apiKey,5600, TransactionType.BANK, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
         //PayTheoryFragment configuration for cash payments
-//        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+//        payTheoryFragment.configure(apiKey,7500, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
     }
 
@@ -85,10 +84,10 @@ class MainActivity : FragmentActivity() , Payable {
     }
 
     //Demo function to display payment confirmation message to user
-    override fun confirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
+    override fun paymentConfirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
         Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
-        var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (paymentConfirmation.bin.card_brand == "ACH") {
             "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
                     " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +

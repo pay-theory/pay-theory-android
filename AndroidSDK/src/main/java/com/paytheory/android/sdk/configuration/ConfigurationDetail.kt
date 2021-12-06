@@ -3,8 +3,8 @@ package com.paytheory.android.sdk.configuration
 /**
  * Enum class that contains the types of payments
  */
-enum class PaymentType {
-    CREDIT, BANK, CASH
+enum class TransactionType {
+    CARD, BANK, CASH
 }
 
 /**
@@ -20,13 +20,13 @@ object FeeMode {
  * @param amount amount of transaction
  * @param requireAccountName value represents if account name field will be active
  * @param requireAddress value represents if address field will be active
- * @param paymentType the type of payment that will be transacted
+ * @param transactionType the type of transaction requested
  */
 data class ConfigurationDetail(
     val apiKey: String = "",
     val amount: Int = 0,
     val requireAccountName: Boolean = true,
     val requireAddress: Boolean = true,
-    val paymentType: PaymentType = PaymentType.CREDIT,
+    val transactionType: TransactionType = TransactionType.CARD,
     val feeMode: String = FeeMode.SURCHARGE
 )

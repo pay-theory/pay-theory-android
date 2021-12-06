@@ -4,7 +4,6 @@ import ActionRequest
 import CashRequest
 import InstrumentData
 import Payment
-import PaymentConfirmation
 import PaymentData
 import TransferPartOneRequest
 import TransferPartTwoRequest
@@ -103,6 +102,9 @@ class Transaction(
                         if(error.message == "HTTP 403 "){
                             context.transactionError(TransactionError("Access Denied"))
                         }
+                        else if(error.message == "Unable to resolve host \"my.rest.api.com\": No address associated with hostname"){
+                            context.transactionError(TransactionError("Access Denied"))
+                        }
                         else {
                             context.transactionError(TransactionError(error.message!!))
                         }
@@ -192,9 +194,9 @@ class Transaction(
 
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
-            var requestAction = BARCODE_ACTION
-            var paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.buyerOptions, tags)
-            var encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+            val requestAction = BARCODE_ACTION
+            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.buyerOptions, tags)
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -204,14 +206,14 @@ class Transaction(
         }
         //if payment type is not "CASH" return transfer ActionRequest
         else {
-            var requestAction = TRANSFER_PART_ONE_ACTION
+            val requestAction = TRANSFER_PART_ONE_ACTION
 
-            var paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode, payment.buyerOptions)
+            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode, payment.buyerOptions)
 
-            var instrumentData = InstrumentData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
+            val instrumentData = InstrumentData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-            var paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, requireConfirmation, payment.buyerOptions,
+            val paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, requireConfirmation, payment.buyerOptions,
                 tags, sessionKey, System.currentTimeMillis())
 
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
@@ -229,18 +231,24 @@ class Transaction(
      * Generate transfer part two action request
      * @param
      */
+    @ExperimentalCoroutinesApi
     fun completeTransfer(message: PaymentConfirmation) {
 
-        var requestBody = TransferPartTwoRequest(message, tags, sessionKey, System.currentTimeMillis())
+        val requestBody = TransferPartTwoRequest(message, tags, sessionKey, System.currentTimeMillis())
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
-        var actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
+        val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else{
-            //TODO websocket not connected
+            if (context is Payable) {
+                context.transactionError(TransactionError("Connection failed"))
+            }
+            else{
+                return
+            }
         }
     }
 

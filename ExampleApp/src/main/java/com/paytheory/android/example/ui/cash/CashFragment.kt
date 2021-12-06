@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
 import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.PaymentType
+import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -53,6 +53,6 @@ class CashFragment : Fragment() {
 
         val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-cash-payment")
 
-        payTheoryFragment.configure(apiKey,7500, PaymentType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,2501, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
     }
 }

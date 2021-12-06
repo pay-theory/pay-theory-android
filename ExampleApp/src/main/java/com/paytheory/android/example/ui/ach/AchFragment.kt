@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.example.R
 import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.PaymentType
+import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -48,6 +48,6 @@ class AchFragment : Fragment() {
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
         val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-bank-payment")
 
-        payTheoryFragment.configure(apiKey,5600, PaymentType.BANK, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,5600, TransactionType.BANK, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
     }
 }

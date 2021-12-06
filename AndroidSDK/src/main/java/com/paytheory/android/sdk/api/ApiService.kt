@@ -1,11 +1,11 @@
 package com.paytheory.android.sdk.api
 
-import com.paytheory.android.sdk.Constants
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 
 /**
  * Class that contains functions to create api calls
+ * @param _basePath base path for pt token call
  */
 class ApiService(_basePath: String) {
 

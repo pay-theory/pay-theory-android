@@ -1,6 +1,5 @@
 package com.paytheory.android.example
 
-import PaymentConfirmation
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -68,10 +67,10 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     //Demo function to display payment confirmation message to user
-    override fun confirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
+    override fun paymentConfirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
         Log.d("Pay Theory Demo", paymentConfirmation.toString())
 
-        var confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (paymentConfirmation.bin.card_brand == "ACH") {
             "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
                     " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +

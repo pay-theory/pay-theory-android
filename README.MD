@@ -35,9 +35,11 @@ Right-click and choose run
 
 Copy your SHA-256 digest
 
-## Install SDK to Gradle
+## Installation
 
-### Install jitpack to project level build.gradle file
+PayTheory is available through jitpack for android projects
+
+### Add jitpack to project level build.gradle file
 
 ```gradle
 allprojects {
@@ -49,7 +51,7 @@ allprojects {
 }
 ```
 
-### Install SDK to application level build.gradle file
+### Add the following lines to your application level build.gradle file
 
 ```gradle
 dependencies {
@@ -85,47 +87,56 @@ defaultConfig {
 
 ## Usage
 
-### Layout
+### Fragment
 
-add the Pay Theory Fragment container to your layout xml file
+add PayTheoryFragment to your activity's xml layout file
 
+[Click here to see example](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/res/layout/activity_main.xml)
 ```xml
-<fragment
-    android:id="@+id/payTheoryFragment"
-    android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+       xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+       android:id="@+id/container"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:paddingTop="?attr/actionBarSize">
+
+    <fragment
+        android:id="@+id/payTheoryFragment"
+        android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 ### Code
 
-*   set your API key
+Add this line to for your API key
 
 ```Kotlin
 private val apiKey = "YOUR-API-KEY"
 ```
 
-*   inside your onCreate method set PayTheoryFragment
+Add this line inside your onCreate method set PayTheoryFragment
 
 ```Kotlin
-val payTheoryFragment = this.supportFragmentManager
-    .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
+val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-*   inside your onCreate method configure Pay Theory
-*   applying optional settings allows customization
+Inside your onCreate method configure Pay Theory
+ * by default the SDK provides a simple credit card input (additional configurations available)
 
 ```Kotlin
-val amount = 5236
-val apiKey = "PT-API-Key"
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
+payTheoryFragment.configure(apiKey,8500)
 ```
 
-*   by default the SDK provides a simple credit card input
 
-React to events by implementing the Payable interface
+Add Payable interface and methods for transaction responses
 
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
@@ -142,71 +153,106 @@ class MainActivity : AppCompatActivity() , Payable {
 
     override fun paymentError(paymentError: PaymentError) {
     }
+
+    override fun paymentConfirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
+    }
 ...
 
 }
 ```
-## Fee Mode
-*   optionally set the fee mode. By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory
+## Additional PayTheoryFragment Configurations
+
+Here is an example of how all the configurations are used:
 ```Kotlin
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE)
-```
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
+
+val buyerOptions = BuyerOptions(firstName, lastName, email, phoneNumber, Address(addressLineOne, addressLineTwo, addressCity, addressState, addressZip, addressCountry))
+
+val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
+
+payTheoryFragment.configure(
+    apiKey,                         // String : Pay Theory api key
+    amount,                         // Int : amount of the transaction in total cents 
+    TransactionType.CARD,           // String : requested transaction type (TransactionType.CARD, TransactionType.BANK, TransactionType.CASH) : defaults to TransactionType.CREDIT
+    false,                          // Boolean : set account name field to be displayed : defaults to true
+    false,                          // Boolean : set address fields to be displayed : defaults to true
+    false,                          // Boolean : require payment confirmation before completing payment : defaults to false
+    FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.SURCHARGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.SURCHARGE
+    buyerOptions,                   // BuyerOptions : buyer data sent to Pay Theory : defaults to empty object
+    tags,                           // HashMap<String, String> : set optional tags for Pay Theory : defaults to empty hash map
+)
 ```
 
-## Buyer Options
-*   optionally pass additional customer data to Pay Theory
+### Transaction Type
+Optionally set the transaction type
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD)
+```
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, TransactionType.CASH)
+```
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, TransactionType.BANK)
+```
+
+### Fee Mode
+Optionally set the fee mode. By default FeeMode.SURCHARGE mode is used FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE)
+```
+
+```Kotlin
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SERVICE_FEE)
+```
+
+### Buyer Options
+Optionally pass additional customer data to Pay Theory. Use BuyerOptions and Address data model from Pay Theory SDK
 ```Kotlin
 val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
     Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE, buyerOptions)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE, buyerOptions)
 ```
-## Custom Tags
+### Custom Tags
 To track payments with custom tags simply add the following when initializing the SDK:
--   **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
--   **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+- **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
+- **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+- **payment-parameters-name**: A specific payment parameter that has been created in Pay Theory Portals.
 
 ```Kotlin
-// using credit card, require account name, require billing address, buyer options and tags
-val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
-
-// using bank account, require account name, require billing address, buyer options and tags
-val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+val tags = hashMapOf("pay-theory-account-code" to accountCode, "pay-theory-reference" to payTheoryReference, "payment-parameters-name" to paymentParameter)
+payTheoryFragment.configure(apiKey,2501, TransactionType.CARD, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 ```
 
 ### Example Configurations
 ```Kotlin
 
 // use ACH bank account
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK)
+payTheoryFragment.configure(apiKey, amount, TransactionType.BANK)
 
 // use ACH bank account and require account name
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true)
+payTheoryFragment.configure(apiKey, amount, TransactionType.BANK, requireAccountName = true)
 
 // use ACH bank account and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true)
+payTheoryFragment.configure(apiKey, amount, TransactionType.BANK, requireAccountName = true, requireBillingAddress = true)
 
 // use credit card account
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD)
 
 // use credit card and require account name
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, requireAccountName = true)
 
 // use credit card and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, requireAccountName = true, requireBillingAddress = true)
 
 // use cash
-payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CASH)
 
 ```
 
 ## Results
 
-The payment or barcode results will come back complete or failed
+The transaction results will come back through as these classes:
 
 *   complete ach/card payment result
  
@@ -220,7 +266,8 @@ data class PaymentResult (
     @SerializedName("service_fee") val service_fee: String?,
     @SerializedName("tags") val tags: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
-    @SerializedName("updated_at") val updated_at: String?
+    @SerializedName("updated_at") val updated_at: String?,
+    @SerializedName("type") val type: String?
 )
 ```
 
@@ -232,6 +279,18 @@ data class BarcodeResult (
     @SerializedName("barcode") val barcode: String,
     @SerializedName("barcodeFee") val barcodeFee: String,
     @SerializedName("Merchant") val merchant: String,
+    @SerializedName("MapUrl") val mapUrl : String
+)
+```
+
+*   payment confirmation data
+```Kotlin
+data class PaymentConfirmation (
+    @SerializedName("bin") val bin: Bin,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("payment") val payment: Payment,
+    @SerializedName("payment-token") val paymentToken: String,
+    @SerializedName("payment_intent_id") val paymentIntentId: String,
 )
 ```
 
@@ -260,7 +319,7 @@ A Java version between 8 and 16 is required to execute Gradle commands.
 
 ### Unit testing
 
-The following commands can be ran in the command prompt:
+Run this line in the command prompt:
 
 Windows
 ```powershell
@@ -274,7 +333,7 @@ Linux
 
 ### Unit and UI testing (Requires an android device or emulator)
 
-The following commands can be ran in the command prompt:
+Run this line in the command prompt:
 
 Windows
 ```powershell
