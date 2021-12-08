@@ -2,8 +2,8 @@
 buildscript {
     ext.kotlin_version = '1.6.0'
     repositories {
-        google()
         mavenCentral()
+        google()
         jcenter()
     }
     dependencies {
@@ -35,6 +35,7 @@ allprojects {
         }
     }
     repositories {
+        mavenCentral()
         google()
         maven { url "https://jitpack.io" }
         maven { url 'https://dl.bintray.com/terl/lazysodium-maven' }
