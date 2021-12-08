@@ -59,7 +59,7 @@ dependencies {
     implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-RELEASE') {
         exclude group: 'net.java.dev.jna', module:'jna'
     }
-    implementation 'net.java.dev.jna:jna:JNA-RELEASE@aar'
+    implementation 'net.java.dev.jna:jna:JNA-RELEASE'
     ...
 }
 ```

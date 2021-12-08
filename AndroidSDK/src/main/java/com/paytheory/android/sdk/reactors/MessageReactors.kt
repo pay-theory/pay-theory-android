@@ -17,6 +17,7 @@ import org.json.JSONObject
  * @param viewModel view model of WebSocket
  * @param webSocketInteractor interactor for WebSocket
  */
+@ExperimentalCoroutinesApi
 class MessageReactors(private val viewModel: WebSocketViewModel, private val webSocketInteractor: WebsocketInteractor) {
     var activePayment: Payment? = null
     var hostToken = ""
@@ -47,7 +48,6 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * Confirmation of payment
      * @param
      */
-    @ExperimentalCoroutinesApi
     fun confirmPayment(message: String, transaction: Transaction? = null){
 
         val paymentConfirmation = Gson().fromJson(message, PaymentConfirmation::class.java)
@@ -66,7 +66,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     fun onUnknown(message: String, transaction: Transaction? = null) {
         print("Error calling WebSocket: $message")
-        //fail if unknown websocket message
+        /* fail if unknown websocket message */
         if (transaction != null) {
             if (transaction.context is Payable){
                 transaction.context.transactionError(TransactionError("Error processing payment"))

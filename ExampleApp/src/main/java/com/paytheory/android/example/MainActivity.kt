@@ -67,18 +67,18 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     //Demo function to display payment confirmation message to user
-    override fun paymentConfirmation(paymentConfirmation: PaymentConfirmation, transaction: Transaction) {
-        Log.d("Pay Theory Demo", paymentConfirmation.toString())
+    override fun paymentConfirmation(confirmationData: PaymentConfirmation, transaction: Transaction) {
+        Log.d("Pay Theory Demo", confirmationData.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text = if (paymentConfirmation.bin.card_brand == "ACH") {
-            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
-                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
-                    "on account ending in ${paymentConfirmation.bin.last_four}?"
+        confirmationTextView.text = if (confirmationData.bin.card_brand == "ACH") {
+            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
+                    "on account ending in ${confirmationData.bin.last_four}?"
         } else {
-            "Are you sure you want to make a payment of $${paymentConfirmation.payment.amount.toFloat()/100}" +
-                    " including the fee of $${paymentConfirmation.payment.service_fee!!.toFloat()/100} " +
-                    "on ${paymentConfirmation.bin.card_brand} account beginning with ${paymentConfirmation.bin.first_six}?"
+            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
+                    "on ${confirmationData.bin.card_brand} account beginning with ${confirmationData.bin.first_six}?"
         }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
@@ -86,12 +86,12 @@ class MainActivity : AppCompatActivity(), Payable {
 
         yesBtn.setOnClickListener {
             dialog!!.dismiss()
-            transaction.completeTransfer(paymentConfirmation)
+            transaction.completeTransfer(confirmationData)
         }
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
-            showToast("payment canceled on account beginning with ${paymentConfirmation.bin.first_six}")
+            showToast("payment canceled on account beginning with ${confirmationData.bin.first_six}")
             transaction.disconnect()
         }
 

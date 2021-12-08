@@ -1,5 +1,6 @@
 package com.paytheory.android.sdk.websocket
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
@@ -13,6 +14,7 @@ import okio.ByteString
 /**
  * Create a WebSocket listener
  */
+@DelicateCoroutinesApi
 @ExperimentalCoroutinesApi
 class WebSocketListener : WebSocketListener() {
 

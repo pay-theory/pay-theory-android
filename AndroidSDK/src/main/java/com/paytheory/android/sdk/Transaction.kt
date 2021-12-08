@@ -32,7 +32,6 @@ import kotlin.collections.HashMap
  * @param context the applications resources
  * @param apiKey the api-key that will be used to create payment transaction
  */
-@ExperimentalCoroutinesApi
 class Transaction(
     val context: Context,
     private val apiKey: String,
@@ -135,13 +134,13 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String = "") {
+    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
         webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
         viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage)
-        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult, viewModel, webSocketInteractor!!)
+        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
         if (queuedRequest != null)
@@ -183,7 +182,7 @@ class Transaction(
      * Generate the initial action request
      * @param payment payment object to transact
      */
-    fun generateQueuedActionRequest(payment: Payment): ActionRequest {
+    private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
 
         //generate public key
         val keyPair = generateLocalKeyPair()
@@ -232,7 +231,6 @@ class Transaction(
      * Generate transfer part two action request
      * @param
      */
-    @ExperimentalCoroutinesApi
     fun completeTransfer(message: PaymentConfirmation) {
 
         val requestBody = TransferPartTwoRequest(message, tags, sessionKey, System.currentTimeMillis())

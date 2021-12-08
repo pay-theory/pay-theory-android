@@ -2,7 +2,6 @@ package com.paytheory.android.sdk.validation
 
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
@@ -72,7 +71,7 @@ class CreditCardFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
         }
 
         val checksum = digits
-            .map { it.toInt() - '0'.toInt() }
+            .map { it.code - '0'.code }
             .reversed()
             .mapIndexed { index, value ->
                 if (index % 2 == 1 && value < 9) value * 2 % 9 else value

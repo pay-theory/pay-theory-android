@@ -15,6 +15,7 @@ import java.util.*
  * @param viewModel viewModel for WebSocket
  * @param websocketInteractor interactor for the WebSocket
  */
+@ExperimentalCoroutinesApi
 class ConnectionReactors(
     private val ptToken: String,
     private val attestation: String,
