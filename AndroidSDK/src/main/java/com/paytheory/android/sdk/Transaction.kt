@@ -32,6 +32,7 @@ import kotlin.collections.HashMap
  * @param context the applications resources
  * @param apiKey the api-key that will be used to create payment transaction
  */
+@ExperimentalCoroutinesApi
 class Transaction(
     val context: Context,
     private val apiKey: String,
@@ -266,7 +267,6 @@ class Transaction(
      * Function to call next action based on incoming socket message
      * @param message the incoming message from socket
      */
-    @ExperimentalCoroutinesApi
     override fun receiveMessage(message: String) {
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
@@ -284,7 +284,6 @@ class Transaction(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun disconnect() {
         if (webSocketInteractor != null) {
             webSocketInteractor!!.stopSocket()

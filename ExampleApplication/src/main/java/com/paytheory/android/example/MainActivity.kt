@@ -9,7 +9,7 @@ import android.view.Window
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
 import com.paytheory.android.sdk.configuration.TransactionType
@@ -19,7 +19,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 /**
  * Example activity class
  */
-class MainActivity : FragmentActivity() , Payable {
+class MainActivity : AppCompatActivity() , Payable {
     val apiKey = "My-Api-Key"
     var dialog : Dialog? = null
 

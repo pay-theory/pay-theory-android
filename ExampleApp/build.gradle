@@ -34,10 +34,6 @@ android {
 }
 
 dependencies {
-    //use PayTheorySDK from jitpack
-//    implementation ('com.github.pay-theory:pay-theory-android:2.0.23-alpha') {
-//        exclude group: 'net.java.dev.jna', module:'jna'
-//    }
 
     //use PayTheorySDK as local library
     implementation project(path: ':AndroidSDK')

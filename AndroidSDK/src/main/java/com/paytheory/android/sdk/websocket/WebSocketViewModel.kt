@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
  * @param interactor WebSocket interactor
  * @param payTheoryToken token used for security
  */
+@ExperimentalCoroutinesApi
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
     var payTheoryToken: String,
@@ -83,7 +84,6 @@ class WebSocketViewModel(
         println("Error occurred : ${ex.message}")
     }
 
-    @ExperimentalCoroutinesApi
     override fun onCleared() {
         disconnect()
         super.onCleared()
