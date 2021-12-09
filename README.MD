@@ -140,8 +140,6 @@ payTheoryFragment.configure(apiKey,8500)
 
 Add Payable interface and methods for transaction responses
 
- * [Click here to see example configurations for our transaction responses](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/java/com/paytheory/android/example/MainActivity.kt)
-
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
@@ -164,6 +162,8 @@ class MainActivity : AppCompatActivity() , Payable {
 
 }
 ```
+[Click here to see how our demo handles transaction responses](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/java/com/paytheory/android/example/MainActivity.kt)
+
 ## Additional PayTheoryFragment Configurations
 
 Here is an example on how to use PayTheoryFragment class method configure():
