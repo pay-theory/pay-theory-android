@@ -39,40 +39,46 @@ Copy your SHA-256 digest
 
 PayTheory is available through jitpack for android projects
 
-### Add jitpack to project level build.gradle file
+### Project level build.gradle file
+- Add maven jitpack url
+- Add jcenter() or mavenCentral()
 
 ```gradle
 allprojects {
     repositories {
         google()
         maven { url 'https://jitpack.io' }
+        mavenCentral()
         jcenter()
     }
 }
 ```
 
-### Add the following lines to your application level build.gradle file
+### Application level build.gradle file
+
+- Add implementation for pay-theory-android sdk
+- Add implementation for java jna
 
 ```gradle
 dependencies {
     ...
-    implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-RELEASE') {
+    implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-VERSION') {
         exclude group: 'net.java.dev.jna', module:'jna'
     }
-    implementation 'net.java.dev.jna:jna:JNA-RELEASE'
+    implementation 'net.java.dev.jna:jna:JNA-VERSION@aar'
     ...
 }
 ```
 
 [![](https://jitpack.io/v/pay-theory/pay-theory-android.svg)](https://jitpack.io/#pay-theory/pay-theory-android)
 
-_replace PAY-THEORY-RELEASE with the release version shown above_
+_replace PAY-THEORY-VERSION with the release version shown above_
 
 [![](https://jitpack.io/v/java-native-access/jna.svg)](https://jitpack.io/#java-native-access/jna)
 
-_replace JNA-RELEASE with the release version shown above_
+_replace JNA-VERSION with the release version shown above_
 
-### Update minimum sdk version to 21 in application level build.gradle file
+### Update minimum sdk version to 21 or higher in application level build.gradle file
 
 ```Kotlin
 defaultConfig {
@@ -94,24 +100,20 @@ add PayTheoryFragment to your activity's xml layout file
 [Click here to see example](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/res/layout/activity_main.xml)
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
-       xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:app="http://schemas.android.com/apk/res-auto"
-       android:id="@+id/container"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:paddingTop="?attr/actionBarSize">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
     <fragment
         android:id="@+id/payTheoryFragment"
         android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
 ```
 
 ### Code
@@ -137,6 +139,8 @@ payTheoryFragment.configure(apiKey,8500)
 
 
 Add Payable interface and methods for transaction responses
+
+ * [Click here to see example configurations for our transaction responses](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/java/com/paytheory/android/example/MainActivity.kt)
 
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
