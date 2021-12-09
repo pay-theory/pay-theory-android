@@ -37,7 +37,7 @@ Copy your SHA-256 digest
 
 ## Installation
 
-PayTheory is available through jitpack for android projects
+pay-theory-android is available through jitpack for android projects
 
 ### Project level build.gradle file
 - Add maven jitpack url
@@ -56,7 +56,7 @@ allprojects {
 
 ### Application level build.gradle file
 
-- Add implementation for pay-theory-android sdk
+- Add implementation for pay-theory-android
 - Add implementation for java jna
 
 ```gradle
@@ -97,7 +97,7 @@ defaultConfig {
 
 add PayTheoryFragment to your activity's xml layout file
 
-[Click here to see example](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/res/layout/activity_main.xml)
+[Click here to see example](https://github.com/pay-theory/pay-theory-android/blob/premain/ExampleApplication/src/main/res/layout/activity_main.xml)
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() , Payable {
 ```
 ## Additional PayTheoryFragment Configurations
 
-Here is an example of how all the configurations are used:
+Here is an example on how to use PayTheoryFragment class method configure():
 ```Kotlin
 
 val buyerOptions = BuyerOptions(firstName, lastName, email, phoneNumber, Address(addressLineOne, addressLineTwo, addressCity, addressState, addressZip, addressCountry))
