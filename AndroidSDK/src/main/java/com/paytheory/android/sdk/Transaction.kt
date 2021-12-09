@@ -13,7 +13,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.android.gms.safetynet.SafetyNet
 import com.google.gson.Gson
-import com.goterl.lazycode.lazysodium.utils.Key
+import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
 import com.paytheory.android.sdk.reactors.*

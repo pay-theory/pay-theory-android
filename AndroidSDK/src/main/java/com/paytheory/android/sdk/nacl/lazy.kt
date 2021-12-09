@@ -1,10 +1,10 @@
 package com.paytheory.android.sdk.nacl
 
-import com.goterl.lazycode.lazysodium.LazySodiumAndroid
-import com.goterl.lazycode.lazysodium.SodiumAndroid
-import com.goterl.lazycode.lazysodium.interfaces.Box
-import com.goterl.lazycode.lazysodium.utils.Key
-import com.goterl.lazycode.lazysodium.utils.KeyPair
+import com.goterl.lazysodium.LazySodiumAndroid
+import com.goterl.lazysodium.SodiumAndroid
+import com.goterl.lazysodium.interfaces.Box
+import com.goterl.lazysodium.utils.Key
+import com.goterl.lazysodium.utils.KeyPair
 
 
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
