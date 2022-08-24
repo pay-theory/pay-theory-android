@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() , Payable {
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
         //BuyerOptions configuration
-        val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+        val buyerOptions = BuyerOptions("Abel", "Collins", "abel@paytheory.com", "513-123-4567",
             Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
         //tags configuration
@@ -46,13 +46,14 @@ class MainActivity : AppCompatActivity() , Payable {
 
 
         //PayTheoryFragment configuration for card payments
-        payTheoryFragment.configure(apiKey,8500, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        payTheoryFragment.configure(apiKey,1000, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
         //PayTheoryFragment configuration for bank account payments
-//        payTheoryFragment.configure(apiKey,5600, TransactionType.BANK, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+
+        //payTheoryFragment.configure(apiKey,5600, TransactionType.BANK, false, false, false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
         //PayTheoryFragment configuration for cash payments
-//        payTheoryFragment.configure(apiKey,7500, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+        //payTheoryFragment.configure(apiKey,7500, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
 
     }
 

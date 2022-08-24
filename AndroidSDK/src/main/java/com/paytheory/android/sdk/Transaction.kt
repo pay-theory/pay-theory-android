@@ -99,10 +99,7 @@ class Transaction(
 
                 }, { error ->
                     if (context is Payable) {
-                        if(error.message == "HTTP 403 "){
-                            context.transactionError(TransactionError("Access Denied"))
-                        }
-                        else if(error.message == "Unable to resolve host \"my.rest.api.com\": No address associated with hostname"){
+                        if(error.message == "HTTP 404 "){
                             context.transactionError(TransactionError("Access Denied"))
                         }
                         else {
