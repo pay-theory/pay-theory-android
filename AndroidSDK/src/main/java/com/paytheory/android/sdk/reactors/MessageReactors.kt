@@ -1,6 +1,7 @@
 package com.paytheory.android.sdk.reactors
 
 import BarcodeMessage
+import HostToken
 import HostTokenMessage
 import Payment
 import TransferMessage
@@ -31,13 +32,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     @ExperimentalCoroutinesApi
     fun onHostToken(message: String, transaction: Transaction): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
-        socketPublicKey = hostTokenMessage.publicKey
-        sessionKey = hostTokenMessage.sessionKey
-        hostToken = hostTokenMessage.hostToken
+//        val hostTokenBody = Gson().fromJson(hostTokenMessage.body, HostToken::class.java)
+        socketPublicKey = hostTokenMessage.body.publicKey
+        sessionKey = hostTokenMessage.body.sessionKey
+        hostToken = hostTokenMessage.body.hostToken
 
-        transaction.sessionKey = hostTokenMessage.sessionKey
-        transaction.publicKey = hostTokenMessage.publicKey
-        transaction.hostToken = hostTokenMessage.hostToken
+        transaction.publicKey = hostTokenMessage.body.publicKey
+        transaction.sessionKey = hostTokenMessage.body.sessionKey
+        transaction.hostToken = hostTokenMessage.body.hostToken
 
         Log.d("PayTheory-onHostToken", hostTokenMessage.toString())
         return hostTokenMessage
@@ -86,17 +88,17 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         if (transaction.context is Payable) when (responseJson["state"]) {
             "SUCCEEDED" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                val paymentResponse = PaymentResult(transferResponse.metadata["pt-number"].toString(),
                     transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
-                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.metadata,
                     transferResponse.createdAt, transferResponse.updatedAt, "Card")
                 transaction.context.paymentComplete(paymentResponse)
             }
             "PENDING" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
+                val paymentResponse = PaymentResult(transferResponse.metadata["pt-number"].toString(),
                     transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
-                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
+                    transferResponse.amount, transferResponse.serviceFee, transferResponse.metadata,
                     transferResponse.createdAt, transferResponse.updatedAt, "ACH")
                 transaction.context.paymentComplete(paymentResponse)
             }

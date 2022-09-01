@@ -13,7 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  * @param state current state of transaction
  * @param amount amount of the transaction
  * @param service_fee service fee amount
- * @param tags custom tags that can be added to transaction
+ * @param metadata custom metadata that can be added to transaction
  * @param created_at creation time
  * @param updated_at updated time
  * @param type ACH or CARD
@@ -25,7 +25,7 @@ data class PaymentResult (
     @SerializedName("state") val state: String,
     @SerializedName("amount") val amount: Int?,
     @SerializedName("service_fee") val service_fee: String?,
-    @SerializedName("tags") val tags: Map<String,String>?,
+    @SerializedName("metadata") val metadata: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
     @SerializedName("updated_at") val updated_at: String?,
     @SerializedName("type") val type: String?

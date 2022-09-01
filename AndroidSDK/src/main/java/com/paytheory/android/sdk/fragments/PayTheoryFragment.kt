@@ -1,7 +1,7 @@
 package com.paytheory.android.sdk.fragments
 
 import Address
-import BuyerOptions
+import PayorInfo
 import Payment
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -55,7 +55,7 @@ class PayTheoryFragment : Fragment() {
     private var feeMode : String = FeeMode.SURCHARGE
     private var billingAddress: Address = Address("","","","","","")
     private var accountName = ""
-    private var tags: HashMap<String,String> = hashMapOf()
+    private var metadata: HashMap<String,String> = hashMapOf()
     private var model: ConfigurationViewModel? = null
 
     /**
@@ -89,7 +89,7 @@ class PayTheoryFragment : Fragment() {
      * @param transactionType Type of payment method
      * @param requireBillingAddress Boolean if billing address is required
      * @param feeMode Type of fee mode that will be processed
-     * @param buyerOptions Optional details about the buyer
+     * @param payorInfo Optional details about the buyer
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun configure(
@@ -100,8 +100,8 @@ class PayTheoryFragment : Fragment() {
         requireBillingAddress: Boolean = true,
         requireConfirmation: Boolean = false,
         feeMode: String = FeeMode.SURCHARGE,
-        buyerOptions: BuyerOptions? = null,
-        tags: HashMap<String, String> = hashMapOf()
+        payorInfo: PayorInfo? = null,
+        metadata: HashMap<String, String> = hashMapOf()
         ) {
 
         if (model == null) {
@@ -114,7 +114,7 @@ class PayTheoryFragment : Fragment() {
         }
 
         model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,transactionType))
-        model!!.configuration.observe(this.viewLifecycleOwner, { configurationDetail ->
+        model!!.configuration.observe(this.viewLifecycleOwner) { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.transactionType = configurationDetail.transactionType
@@ -125,12 +125,12 @@ class PayTheoryFragment : Fragment() {
                 val startIndex: Int = api_key.indexOf('-')
                 val partner: String = api_key.substring(0, startIndex)
                 val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
-                val stage: String = api_key.substring(startIndex+1, endIndex)
+                val stage: String = api_key.substring(startIndex + 1, endIndex)
                 this.constants = Constants(partner, stage)
 
                 val initialTags = hashMapOf("pay-theory-environment" to partner)
-                tags.putAll(initialTags)
-                this.tags = tags
+                metadata.putAll(initialTags)
+                this.metadata = metadata
 
 
                 payTheoryTransaction =
@@ -141,7 +141,7 @@ class PayTheoryFragment : Fragment() {
                         partner,
                         stage,
                         requireConfirmation,
-                        this.tags
+                        this.metadata
                     )
 
                 payTheoryTransaction!!.init()
@@ -163,7 +163,8 @@ class PayTheoryFragment : Fragment() {
                 // ach fields
                 val (achAccount, achRouting) = getAchFields()
 
-                val achChooser: AppCompatAutoCompleteTextView = activity!!.findViewById(R.id.ach_type_choice)
+                val achChooser: AppCompatAutoCompleteTextView =
+                    activity!!.findViewById(R.id.ach_type_choice)
 
                 val items = listOf(getString(R.string.checking), getString(R.string.savings))
 
@@ -174,7 +175,8 @@ class PayTheoryFragment : Fragment() {
                         && achRouting.visibility == View.VISIBLE)
 
                 // cash fields
-                val cashBuyerContact = activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
+                val cashBuyerContact =
+                    activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
                 val cashBuyer = activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer)
 
 
@@ -217,9 +219,13 @@ class PayTheoryFragment : Fragment() {
                 //if cash payment fields are active add text watcher validation
                 if (hasCASH) {
                     val cashBuyerContactValidation: (PayTheoryEditText) -> CashBuyerContactTextWatcher =
-                        { pt -> CashBuyerContactTextWatcher(pt)}
+                        { pt -> CashBuyerContactTextWatcher(pt) }
 
-                    cashBuyerContact.addTextChangedListener(cashBuyerContactValidation(cashBuyerContact))
+                    cashBuyerContact.addTextChangedListener(
+                        cashBuyerContactValidation(
+                            cashBuyerContact
+                        )
+                    )
                 }
 
 
@@ -231,7 +237,14 @@ class PayTheoryFragment : Fragment() {
                     }
 
                     if (hasBillingAddress) {
-                        billingAddress = Address(billingCity.text.toString(),  billingState.text.toString(),billingZip.text.toString(), billingAddress1.text.toString(), billingAddress2.text.toString(), "USA" )
+                        billingAddress = Address(
+                            billingCity.text.toString(),
+                            billingState.text.toString(),
+                            billingZip.text.toString(),
+                            billingAddress1.text.toString(),
+                            billingAddress2.text.toString(),
+                            "USA"
+                        )
                     }
 
                     //Create card payment
@@ -248,7 +261,7 @@ class PayTheoryFragment : Fragment() {
                             expiration_year = expirationString.split("/").last(),
                             fee_mode = feeMode,
                             address = billingAddress,
-                            buyerOptions = buyerOptions
+                            payorInfo = payorInfo
                         )
                         makePayment(payment)
                     }
@@ -266,15 +279,15 @@ class PayTheoryFragment : Fragment() {
                             fee_mode = feeMode,
                             address = billingAddress,
                             buyerContact = contact,
-                            buyerOptions = buyerOptions
+                            payorInfo = payorInfo
                         )
                         makePayment(payment)
                     }
 
                     //Create bank payment
                     if (hasACH) {
-                        if(achRouting.text.toString().length == 9){
-                            if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings"){
+                        if (achRouting.text.toString().length == 9) {
+                            if (achChooser.text.toString() == "Checking" || achChooser.text.toString() == "Savings") {
                                 val payment = Payment(
                                     timing = System.currentTimeMillis(),
                                     amount = amount,
@@ -285,11 +298,10 @@ class PayTheoryFragment : Fragment() {
                                     bank_code = achRouting.text.toString(),
                                     fee_mode = feeMode,
                                     address = billingAddress,
-                                    buyerOptions = buyerOptions
+                                    payorInfo = payorInfo
                                 )
                                 makePayment(payment)
-                            }
-                            else {
+                            } else {
                                 achChooser.error = "Account type required."
                             }
                         } else {
@@ -298,7 +310,7 @@ class PayTheoryFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
     }
 
     private fun getAchFields(): Pair<PayTheoryEditText, PayTheoryEditText> {

@@ -2,7 +2,8 @@ package com.paytheory.android.sdk
 
 import ActionRequest
 import CashRequest
-import InstrumentData
+import PayTheoryData
+import PaymentMethodData
 import Payment
 import PaymentData
 import TransferPartOneRequest
@@ -39,7 +40,7 @@ class Transaction(
     private val partner: String,
     private val stage: String,
     private val requireConfirmation: Boolean,
-    private val tags: HashMap<String, String>?
+    private val metadata: HashMap<String, String>?
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -192,7 +193,7 @@ class Transaction(
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
-            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.buyerOptions, tags)
+            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
                 requestAction,
@@ -205,13 +206,15 @@ class Transaction(
         else {
             val requestAction = TRANSFER_PART_ONE_ACTION
 
-            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode, payment.buyerOptions)
+            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
 
-            val instrumentData = InstrumentData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
+            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-            val paymentRequest = TransferPartOneRequest(this.hostToken, instrumentData, paymentData, requireConfirmation, payment.buyerOptions,
-                tags, sessionKey, System.currentTimeMillis())
+            val payTheoryData = PayTheoryData(this.metadata?.getValue("pay-theory-account-code"), this.metadata?.getValue("pay-theory-reference"), payment.send_receipt, payment.receipt_description)
+
+            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, requireConfirmation, payment.payorInfo, payTheoryData,
+                metadata, sessionKey, System.currentTimeMillis())
 
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
@@ -230,7 +233,7 @@ class Transaction(
      */
     fun completeTransfer(message: PaymentConfirmation) {
 
-        val requestBody = TransferPartTwoRequest(message, tags, sessionKey, System.currentTimeMillis())
+        val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 

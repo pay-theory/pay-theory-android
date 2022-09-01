@@ -169,9 +169,9 @@ class MainActivity : AppCompatActivity() , Payable {
 Here is an example on how to use PayTheoryFragment class method configure():
 ```Kotlin
 
-val buyerOptions = BuyerOptions(firstName, lastName, email, phoneNumber, Address(addressLineOne, addressLineTwo, addressCity, addressState, addressZip, addressCountry))
+val payorInfo = PayorInfo(firstName, lastName, email, phoneNumber, Address(addressLineOne, addressLineTwo, addressCity, addressState, addressZip, addressCountry))
 
-val tags = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
+val metadata = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
 
 payTheoryFragment.configure(
     apiKey,                         // String : Pay Theory api key
@@ -181,8 +181,8 @@ payTheoryFragment.configure(
     false,                          // Boolean : set address fields to be displayed : defaults to true
     false,                          // Boolean : require payment confirmation before completing payment : defaults to false
     FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.SURCHARGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.SURCHARGE
-    buyerOptions,                   // BuyerOptions : buyer data sent to Pay Theory : defaults to empty object
-    tags,                           // HashMap<String, String> : set optional tags for Pay Theory : defaults to empty hash map
+    payorInfo,                   // PayorInfo : buyer data sent to Pay Theory : defaults to empty object
+    metadata,                           // HashMap<String, String> : set optional metadata for Pay Theory : defaults to empty hash map
 )
 ```
 
@@ -210,22 +210,22 @@ payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, 
 ```
 
 ### Buyer Options
-Optionally pass additional customer data to Pay Theory. Use BuyerOptions and Address data model from Pay Theory SDK
+Optionally pass additional customer data to Pay Theory. Use PayorInfo and Address data model from Pay Theory SDK
 ```Kotlin
-val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
+val payorInfo = PayorInfo("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
     Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE, buyerOptions)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE, payorInfo)
 ```
 ### Custom Tags
-To track payments with custom tags simply add the following when initializing the SDK:
+To track payments with custom metadata simply add the following when initializing the SDK:
 - **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
 - **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
 - **payment-parameters-name**: A specific payment parameter that has been created in Pay Theory Portals.
 
 ```Kotlin
-val tags = hashMapOf("pay-theory-account-code" to accountCode, "pay-theory-reference" to payTheoryReference, "payment-parameters-name" to paymentParameter)
-payTheoryFragment.configure(apiKey,2501, TransactionType.CARD, false, false,  false, FeeMode.SERVICE_FEE, buyerOptions, tags)
+val metadata = hashMapOf("pay-theory-account-code" to accountCode, "pay-theory-reference" to payTheoryReference, "payment-parameters-name" to paymentParameter)
+payTheoryFragment.configure(apiKey,2501, TransactionType.CARD, false, false,  false, FeeMode.SERVICE_FEE, payorInfo, metadata)
 ```
 
 ### Example Configurations
@@ -268,7 +268,7 @@ data class PaymentResult (
     @SerializedName("state") val state: String,
     @SerializedName("amount") val amount: Int?,
     @SerializedName("service_fee") val service_fee: String?,
-    @SerializedName("tags") val tags: Map<String,String>?,
+    @SerializedName("metadata") val metadata: Map<String,String>?,
     @SerializedName("created_at") val created_at: String?,
     @SerializedName("updated_at") val updated_at: String?,
     @SerializedName("type") val type: String?
