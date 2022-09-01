@@ -55,6 +55,9 @@ class PayTheoryFragment : Fragment() {
     private var feeMode : String = FeeMode.SURCHARGE
     private var billingAddress: Address = Address("","","","","","")
     private var accountName = ""
+    private var requireConfirmation: Boolean = false
+    private var sendReceipt: Boolean = false
+    private var receiptDescription: String = ""
     private var metadata: HashMap<String,String> = hashMapOf()
     private var model: ConfigurationViewModel? = null
 
@@ -101,6 +104,8 @@ class PayTheoryFragment : Fragment() {
         requireConfirmation: Boolean = false,
         feeMode: String = FeeMode.SURCHARGE,
         payorInfo: PayorInfo? = null,
+        sendReceipt: Boolean = false,
+        receiptDescription: String = "",
         metadata: HashMap<String, String> = hashMapOf()
         ) {
 
@@ -113,21 +118,25 @@ class PayTheoryFragment : Fragment() {
             )
         }
 
-        model!!.update(ConfigurationDetail(apiKey,amount,requireAccountName,requireBillingAddress,transactionType))
+        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,requireConfirmation, feeMode, sendReceipt, receiptDescription))
         model!!.configuration.observe(this.viewLifecycleOwner) { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.transactionType = configurationDetail.transactionType
             this.accountNameEnabled = configurationDetail.requireAccountName
-            this.billingAddressEnabled = configurationDetail.requireAddress
+            this.billingAddressEnabled = configurationDetail.requireBillingAddress
+            this.requireConfirmation = configurationDetail.requireConfirmation
             this.feeMode = configurationDetail.feeMode
+            this.sendReceipt = configurationDetail.sendReceipt
+            this.receiptDescription = configurationDetail.receiptDescription
+
+            //ensure api key is not empty
             if (this.api_key.isNotEmpty()) {
                 val startIndex: Int = api_key.indexOf('-')
                 val partner: String = api_key.substring(0, startIndex)
                 val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
                 val stage: String = api_key.substring(startIndex + 1, endIndex)
                 this.constants = Constants(partner, stage)
-
                 val initialTags = hashMapOf("pay-theory-environment" to partner)
                 metadata.putAll(initialTags)
                 this.metadata = metadata
@@ -136,11 +145,13 @@ class PayTheoryFragment : Fragment() {
                 payTheoryTransaction =
                     Transaction(
                         this.activity!!,
-                        api_key,
-                        this.constants,
                         partner,
                         stage,
-                        requireConfirmation,
+                        api_key,
+                        this.constants,
+                        this.requireConfirmation,
+                        this.sendReceipt,
+                        this.receiptDescription,
                         this.metadata
                     )
 

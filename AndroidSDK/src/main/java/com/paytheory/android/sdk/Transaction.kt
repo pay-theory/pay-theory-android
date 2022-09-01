@@ -35,11 +35,13 @@ import kotlin.collections.HashMap
  */
 class Transaction(
     val context: Context,
-    private val apiKey: String,
-    private val constants: Constants,
     private val partner: String,
     private val stage: String,
+    private val apiKey: String,
+    private val constants: Constants,
     private val requireConfirmation: Boolean,
+    private val sendReceipt: Boolean,
+    private val receiptDescription: String,
     private val metadata: HashMap<String, String>?
 ): WebsocketMessageHandler {
 
@@ -211,7 +213,7 @@ class Transaction(
             val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-            val payTheoryData = PayTheoryData(this.metadata?.getValue("pay-theory-account-code"), this.metadata?.getValue("pay-theory-reference"), payment.send_receipt, payment.receipt_description)
+            val payTheoryData = PayTheoryData(this.metadata?.getValue("pay-theory-account-code"), this.metadata?.getValue("pay-theory-reference"), this.sendReceipt, this.receiptDescription)
 
             val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, requireConfirmation, payment.payorInfo, payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())

@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "abel-paytheorylab-5f75e94a66dc5f88a8f207f34f670ee7"
+    val apiKey = "My-Api-Key"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() , Payable {
 
 
         //PayTheoryFragment configuration for card payments
-        payTheoryFragment.configure(apiKey,1000, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, payorInfo, metadata)
+        payTheoryFragment.configure(apiKey,1000, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, payorInfo, true, "Test on Android SDK", metadata)
 
         //PayTheoryFragment configuration for bank account payments
 

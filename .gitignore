@@ -11,3 +11,7 @@ local.properties
 /.gradle/
 /build/
 /.idea/
+/ExampleApp/.idea/gradle.xml
+/ExampleApp/.idea/misc.xml
+/ExampleApp/.idea/modules.xml
+/ExampleApp/.idea/vcs.xml
