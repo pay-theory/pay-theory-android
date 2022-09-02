@@ -47,18 +47,25 @@ class PayTheoryFragment : Fragment() {
 
     private lateinit var constants: Constants
     private var payTheoryTransaction: Transaction? = null
-    private var api_key: String = ""
-    private var amount: Int = 0
+    private var apiKey: String? = null
+    private var amount: Int? = null
     private var transactionType: TransactionType = TransactionType.CARD
-    private var accountNameEnabled: Boolean = false
-    private var billingAddressEnabled: Boolean = false
-    private var feeMode : String = FeeMode.INTERCHANGE
-    private var billingAddress: Address = Address("","","","","","")
-    private var accountName = ""
+    private var requireAccountName: Boolean = false
+    private var requireBillingAddress: Boolean = false
     private var confirmation: Boolean = false
+    private var feeMode: String = FeeMode.INTERCHANGE
+    private var metadata: HashMap<Any, Any> = hashMapOf()
+    private var payorInfo: PayorInfo = PayorInfo()
+    private var payorId: String? = null
+    private var accountCode: String? = null
+    private var reference: String? = null
+    private var paymentParameters: String? = null
+    private var invoiceId: String? = null
     private var sendReceipt: Boolean = false
-    private var receiptDescription: String = ""
-    private var metadata: HashMap<Any,Any> = hashMapOf()
+    private var receiptDescription: String? = null
+    
+    private var billingAddress: Address = Address()
+    private var accountName: String? = null
     private var model: ConfigurationViewModel? = null
 
     /**
@@ -123,32 +130,42 @@ class PayTheoryFragment : Fragment() {
             )
         }
 
-        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,confirmation, feeMode, sendReceipt, receiptDescription))
+        // update Configuration Details object with payment data
+        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,confirmation, feeMode, metadata, payorInfo, payorId, accountCode, reference, paymentParameters, invoiceId, sendReceipt, receiptDescription))
         model!!.configuration.observe(this.viewLifecycleOwner) { configurationDetail ->
-            this.api_key = configurationDetail.apiKey
+            // set private variables for Pay Theory Fragment
+            this.apiKey = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.transactionType = configurationDetail.transactionType
-            this.accountNameEnabled = configurationDetail.requireAccountName
-            this.billingAddressEnabled = configurationDetail.requireBillingAddress
+            this.requireAccountName = configurationDetail.requireAccountName
+            this.requireBillingAddress = configurationDetail.requireBillingAddress
             this.confirmation = configurationDetail.confirmation
             this.feeMode = configurationDetail.feeMode
+            this.metadata = configurationDetail.metadata
+            this.payorInfo = configurationDetail.payorInfo
+            this.payorId = configurationDetail.payorId
+            this.accountCode = configurationDetail.accountCode
+            this.reference = configurationDetail.reference
+            this.paymentParameters = configurationDetail.paymentParameters
+            this.invoiceId = configurationDetail.invoiceId
             this.sendReceipt = configurationDetail.sendReceipt
             this.receiptDescription = configurationDetail.receiptDescription
 
             //ensure api key is not empty
-            if (this.api_key.isNotEmpty()) {
-                val startIndex: Int = api_key.indexOf('-')
-                val partner: String = api_key.substring(0, startIndex)
-                val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
-                val stage: String = api_key.substring(startIndex + 1, endIndex)
+            if (this.apiKey!!.isNotEmpty()) {
+                val startIndex: Int = apiKey.indexOf('-')
+                val partner: String = apiKey.substring(0, startIndex)
+                val endIndex = apiKey.indexOf('-', apiKey.indexOf('-') + 1)
+                val stage: String = apiKey.substring(startIndex + 1, endIndex)
                 this.constants = Constants(partner, stage)
 
-                val allTags = hashMapOf< String, Any>()
+                //add all tags
+                val allTags = hashMapOf<Any, Any>()
                 if (this.sendReceipt) {
-                    val recieptTag = hashMapOf("pay-theory-receipt" to this.sendReceipt)
-                    val receiptDescriptionTag = hashMapOf("pay-theory-receipt-description" to this.receiptDescription)
-                    metadata.putAll(recieptTag)
-                    metadata.putAll(receiptDescriptionTag)
+                    val receiptTag = hashMapOf<Any, Any>("pay-theory-receipt" to this.sendReceipt)
+                    val receiptDescriptionTag = hashMapOf<Any, Any>("pay-theory-receipt-description" to this.receiptDescription)
+                    allTags.putAll(receiptTag)
+                    allTags.putAll(receiptDescriptionTag)
                 }
                 val addtionalTags = hashMapOf("pay-theory-environment" to partner)
                 metadata.putAll(addtionalTags)
@@ -160,7 +177,7 @@ class PayTheoryFragment : Fragment() {
                         this.activity!!,
                         partner,
                         stage,
-                        api_key,
+                        apiKey,
                         this.constants,
                         this.confirmation,
                         this.sendReceipt,
@@ -172,7 +189,7 @@ class PayTheoryFragment : Fragment() {
 
 
 
-                enableFields(this.transactionType, accountNameEnabled, billingAddressEnabled)
+                enableFields(this.transactionType, requireAccountName, requireBillingAddress)
 
                 val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -352,15 +369,15 @@ class PayTheoryFragment : Fragment() {
 
     private fun enableFields(
         transactionType: TransactionType,
-        accountNameEnabled: Boolean,
-        billingAddressEnabled: Boolean
+        requireAccountName: Boolean,
+        requireBillingAddress: Boolean
     ) {
         if (transactionType == TransactionType.BANK) {
             enableAccountName()
             enableACH()
         }
         if (transactionType == TransactionType.CARD) {
-            if (accountNameEnabled) {
+            if (requireAccountName) {
                 enableAccountName()
             }
             enableCC()
@@ -370,7 +387,7 @@ class PayTheoryFragment : Fragment() {
         }
 
 
-        if (billingAddressEnabled) {
+        if (requireBillingAddress) {
             enableBillingAddress()
         }
     }

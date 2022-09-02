@@ -25,31 +25,20 @@ object FeeMode {
  * @param transactionType the type of transaction requested
  */
 data class ConfigurationDetail(
-    val apiKey: String = "",
-    val amount: Int = 0,
-    val transactionType: TransactionType = TransactionType.CARD,
-    val requireAccountName: Boolean = false,
-    val requireBillingAddress: Boolean = false,
-    val confirmation: Boolean = false,
-    val feeMode: String = FeeMode.INTERCHANGE,
-    val sendReceipt: Boolean = false,
-    val receiptDescription: String = ""
-
-//            TODO
-//    apiKey: String,
-//    amount: Int,
-//    transactionType: TransactionType,
-//    requireAccountName: Boolean = false,
-//    requireBillingAddress: Boolean = false,
-//    confirmation: Boolean = false,
-//    feeMode: String = FeeMode.INTERCHANGE,
-//    metadata: HashMap<Any, Any> = hashMapOf(),
-//    payorInfo: PayorInfo = PayorInfo(),
-//    payorId: String? = null,
-//    accountCode: String? = null,
-//    reference: String? = null,
-//    paymentParameters: String? = null,
-//    invoiceId: String? = null,
-//    sendReceipt: Boolean = false,
-//    receiptDescription: String = ""
+    var apiKey: String,
+    var amount: Int,
+    var transactionType: TransactionType,
+    var requireAccountName: Boolean = false,
+    var requireBillingAddress: Boolean = false,
+    var confirmation: Boolean = false,
+    var feeMode: String = FeeMode.INTERCHANGE,
+    var metadata: HashMap<Any, Any> = hashMapOf(),
+    var payorInfo: PayorInfo = PayorInfo(),
+    var payorId: String? = null, //TODO
+    var accountCode: String? = null, //TODO
+    var reference: String? = null, //TODO
+    var paymentParameters: String? = null, //TODO
+    var invoiceId: String? = null, //TODO
+    var sendReceipt: Boolean = false,
+    var receiptDescription: String = ""
 )
