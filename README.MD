@@ -180,7 +180,7 @@ payTheoryFragment.configure(
     false,                          // Boolean : set account name field to be displayed : defaults to true
     false,                          // Boolean : set address fields to be displayed : defaults to true
     false,                          // Boolean : require payment confirmation before completing payment : defaults to false
-    FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.SURCHARGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.SURCHARGE
+    FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.INTERCHANGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.INTERCHANGE
     payorInfo,                   // PayorInfo : buyer data sent to Pay Theory : defaults to empty object
     metadata,                           // HashMap<String, String> : set optional metadata for Pay Theory : defaults to empty hash map
 )
@@ -199,10 +199,10 @@ payTheoryFragment.configure(apiKey, amount, TransactionType.BANK)
 ```
 
 ### Fee Mode
-Optionally set the fee mode. By default FeeMode.SURCHARGE mode is used FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+Optionally set the fee mode. By default FeeMode.INTERCHANGE mode is used FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
 
 ```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.INTERCHANGE)
 ```
 
 ```Kotlin
@@ -215,7 +215,7 @@ Optionally pass additional customer data to Pay Theory. Use PayorInfo and Addres
 val payorInfo = PayorInfo("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
     Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
 
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SURCHARGE, payorInfo)
+payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.INTERCHANGE, payorInfo)
 ```
 ### Custom Tags
 To track payments with custom metadata simply add the following when initializing the SDK:

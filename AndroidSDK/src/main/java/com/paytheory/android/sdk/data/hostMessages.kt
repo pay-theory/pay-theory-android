@@ -117,7 +117,7 @@ data class CashRequest(
     @SerializedName("payment") val payment: Payment,
     @SerializedName("timing") val timing: Long,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
-    @SerializedName("metadata") val metadata: HashMap<String, String>?
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?
 )
 
 /**
@@ -182,7 +182,7 @@ data class TransferPartOneRequest(
     @SerializedName("confirmation_needed") val confirmationNeeded: Boolean,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
     @SerializedName("pay_theory_data") val payTheoryData: PayTheoryData,
-    @SerializedName("metadata") val metadata: HashMap<String, String>?,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long
 
@@ -193,7 +193,7 @@ data class TransferPartOneRequest(
  */
 data class TransferPartTwoRequest(
     @SerializedName("transfer") val transferBody: PaymentConfirmation,
-    @SerializedName("metadata") val metadata: HashMap<String, String>?,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long
 )
@@ -248,7 +248,7 @@ data class Payment (
     @SerializedName("expiration_year") val expiration_year: String? = null,
     @SerializedName("expiration_month") val expiration_month: String? = null,
     @SerializedName("address") val address: Address? = null,
-    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.SURCHARGE,
+    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.INTERCHANGE,
     @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
     @SerializedName("buyer") val buyer: String? = null,
     @SerializedName("buyerContact") val buyerContact: String? = null,

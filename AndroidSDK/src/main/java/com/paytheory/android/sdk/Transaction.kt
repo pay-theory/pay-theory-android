@@ -39,10 +39,10 @@ class Transaction(
     private val stage: String,
     private val apiKey: String,
     private val constants: Constants,
-    private val requireConfirmation: Boolean,
+    private val confirmation: Boolean,
     private val sendReceipt: Boolean,
     private val receiptDescription: String,
-    private val metadata: HashMap<String, String>?
+    private val metadata: HashMap<Any, Any>?
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -215,7 +215,7 @@ class Transaction(
 
             val payTheoryData = PayTheoryData(this.metadata?.getValue("pay-theory-account-code"), this.metadata?.getValue("pay-theory-reference"), this.sendReceipt, this.receiptDescription)
 
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, requireConfirmation, payment.payorInfo, payTheoryData,
+            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
 
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))

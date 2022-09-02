@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "My-Api-Key"
+    val apiKey = "abel-paytheorylab-5f75e94a66dc5f88a8f207f34f670ee7"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,15 +38,46 @@ class MainActivity : AppCompatActivity() , Payable {
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
         //PayorInfo configuration
-        val payorInfo = PayorInfo("Abel", "Collins", "abel@paytheory.com", "513-123-4567",
-            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+        val payorInfo = PayorInfo(
+            "Abel",
+            "Collins",
+            "abel@paytheory.com",
+            "513-123-4567",
+            Address(
+                "123 Testing Lane",
+                "Apt 2",
+                "Cincinnati",
+                "OH",
+                "45236",
+                "USA")
+        )
 
         //metadata configuration
-        val metadata = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
+        val metadata: HashMap<Any,Any> = hashMapOf(
+            "pay-theory-account-code" to "test-acccount-code",
+            "pay-theory-reference" to "android-test",
+            "payment-parameters-name" to "expires-in-30-days" //TODO
+        )
 
 
         //PayTheoryFragment configuration for card payments
-        payTheoryFragment.configure(apiKey,1000, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, payorInfo, true, "Test on Android SDK", metadata)
+        payTheoryFragment.configure(
+            apiKey = apiKey,
+            amount = 1000,
+            transactionType = TransactionType.CARD,
+            requireAccountName = false,
+            requireBillingAddress = false,
+            confirmation = true,
+            feeMode = FeeMode.SERVICE_FEE,
+            metadata = metadata,
+            payorInfo = payorInfo,
+            payorId = "payor-1234", //TODO
+            accountCode = "test-account-code", //TODO
+            reference = "android-test", //TODO
+            paymentParameters = "expires-in-30-days", //TODO
+            invoiceId = "pt_inv_XXXXXXXXX", //TODO
+            sendReceipt = true,
+            receiptDescription = "Test on Android SDK")
 
         //PayTheoryFragment configuration for bank account payments
 

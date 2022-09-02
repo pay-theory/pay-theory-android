@@ -52,13 +52,13 @@ class PayTheoryFragment : Fragment() {
     private var transactionType: TransactionType = TransactionType.CARD
     private var accountNameEnabled: Boolean = false
     private var billingAddressEnabled: Boolean = false
-    private var feeMode : String = FeeMode.SURCHARGE
+    private var feeMode : String = FeeMode.INTERCHANGE
     private var billingAddress: Address = Address("","","","","","")
     private var accountName = ""
-    private var requireConfirmation: Boolean = false
+    private var confirmation: Boolean = false
     private var sendReceipt: Boolean = false
     private var receiptDescription: String = ""
-    private var metadata: HashMap<String,String> = hashMapOf()
+    private var metadata: HashMap<Any,Any> = hashMapOf()
     private var model: ConfigurationViewModel? = null
 
     /**
@@ -98,15 +98,20 @@ class PayTheoryFragment : Fragment() {
     fun configure(
         apiKey: String,
         amount: Int,
-        transactionType: TransactionType = TransactionType.CARD,
-        requireAccountName: Boolean = true,
-        requireBillingAddress: Boolean = true,
-        requireConfirmation: Boolean = false,
-        feeMode: String = FeeMode.SURCHARGE,
-        payorInfo: PayorInfo? = null,
+        transactionType: TransactionType,
+        requireAccountName: Boolean = false,
+        requireBillingAddress: Boolean = false,
+        confirmation: Boolean = false,
+        feeMode: String = FeeMode.INTERCHANGE,
+        metadata: HashMap<Any, Any> = hashMapOf(),
+        payorInfo: PayorInfo = PayorInfo(),
+        payorId: String? = null, //TODO
+        accountCode: String? = null, //TODO
+        reference: String? = null, //TODO
+        paymentParameters: String? = null, //TODO
+        invoiceId: String? = null, //TODO
         sendReceipt: Boolean = false,
-        receiptDescription: String = "",
-        metadata: HashMap<String, String> = hashMapOf()
+        receiptDescription: String = ""
         ) {
 
         if (model == null) {
@@ -118,14 +123,14 @@ class PayTheoryFragment : Fragment() {
             )
         }
 
-        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,requireConfirmation, feeMode, sendReceipt, receiptDescription))
+        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,confirmation, feeMode, sendReceipt, receiptDescription))
         model!!.configuration.observe(this.viewLifecycleOwner) { configurationDetail ->
             this.api_key = configurationDetail.apiKey
             this.amount = configurationDetail.amount
             this.transactionType = configurationDetail.transactionType
             this.accountNameEnabled = configurationDetail.requireAccountName
             this.billingAddressEnabled = configurationDetail.requireBillingAddress
-            this.requireConfirmation = configurationDetail.requireConfirmation
+            this.confirmation = configurationDetail.confirmation
             this.feeMode = configurationDetail.feeMode
             this.sendReceipt = configurationDetail.sendReceipt
             this.receiptDescription = configurationDetail.receiptDescription
@@ -137,8 +142,16 @@ class PayTheoryFragment : Fragment() {
                 val endIndex = api_key.indexOf('-', api_key.indexOf('-') + 1)
                 val stage: String = api_key.substring(startIndex + 1, endIndex)
                 this.constants = Constants(partner, stage)
-                val initialTags = hashMapOf("pay-theory-environment" to partner)
-                metadata.putAll(initialTags)
+
+                val allTags = hashMapOf< String, Any>()
+                if (this.sendReceipt) {
+                    val recieptTag = hashMapOf("pay-theory-receipt" to this.sendReceipt)
+                    val receiptDescriptionTag = hashMapOf("pay-theory-receipt-description" to this.receiptDescription)
+                    metadata.putAll(recieptTag)
+                    metadata.putAll(receiptDescriptionTag)
+                }
+                val addtionalTags = hashMapOf("pay-theory-environment" to partner)
+                metadata.putAll(addtionalTags)
                 this.metadata = metadata
 
 
@@ -149,7 +162,7 @@ class PayTheoryFragment : Fragment() {
                         stage,
                         api_key,
                         this.constants,
-                        this.requireConfirmation,
+                        this.confirmation,
                         this.sendReceipt,
                         this.receiptDescription,
                         this.metadata
