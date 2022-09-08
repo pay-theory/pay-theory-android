@@ -9,12 +9,15 @@ import com.goterl.lazysodium.utils.KeyPair
 
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 val boxLazy = lazySodium as Box.Lazy
+private val keyPair = boxLazy.cryptoBoxKeypair()
+//private val secretKey = keyPair.secretKey
+//private val publicKey = keyPair.publicKey
 
 /**
  * Function to generate KeyPair
  */
 fun generateLocalKeyPair(): KeyPair {
-    return boxLazy.cryptoBoxKeypair()
+    return keyPair
 }
 
 /**
@@ -27,4 +30,12 @@ fun encryptBox(message: String, publicKey: Key): String {
         message,
         publicKey
     )
+}
+
+fun decryptBox(message: String): String {
+    val message = boxLazy.cryptoBoxSealOpenEasy(
+        message,
+        keyPair
+    )
+    return message
 }

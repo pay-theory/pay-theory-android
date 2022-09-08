@@ -160,18 +160,6 @@ data class PaymentMethodData (
 )
 
 /**
- * Payment data for Pay Theory system to process receipting, references, and account codes
- * @param
- */
-data class PayTheoryData (
-    @SerializedName("account_code") val accountCode: String? = null,
-    @SerializedName("reference") val reference: String? = null,
-    @SerializedName("send_receipt") val sendReceipt: Boolean,
-    @SerializedName("receipt_description") val receiptDescription: String? = null,
-//    @SerializedName("timezone") val timezone: String? = null,
-)
-
-/**
  * Data class for transfer part one request
  * @param hostToken token with transaction details
  */
@@ -181,7 +169,7 @@ data class TransferPartOneRequest(
     @SerializedName("payment_data") val paymentData: PaymentData,
     @SerializedName("confirmation_needed") val confirmationNeeded: Boolean,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
-    @SerializedName("pay_theory_data") val payTheoryData: PayTheoryData,
+    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long

@@ -81,6 +81,15 @@ data class PaymentConfirmation (
 )
 
 /**
+ * Data class to store payment confirmation details
+ */
+data class EncryptedPaymentConfirmation (
+    @SerializedName("type") val type: String,
+    @SerializedName("body") val body: String,
+    @SerializedName("public_key") val publicKey: String
+)
+
+/**
  * Interface that handles a transaction completion, failure, and errors
  */
 interface Payable {

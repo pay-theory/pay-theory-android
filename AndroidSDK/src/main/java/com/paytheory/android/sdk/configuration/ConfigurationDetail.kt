@@ -25,20 +25,20 @@ object FeeMode {
  * @param transactionType the type of transaction requested
  */
 data class ConfigurationDetail(
-    var apiKey: String,
-    var amount: Int,
-    var transactionType: TransactionType,
-    var requireAccountName: Boolean = false,
-    var requireBillingAddress: Boolean = false,
-    var confirmation: Boolean = false,
-    var feeMode: String = FeeMode.INTERCHANGE,
-    var metadata: HashMap<Any, Any> = hashMapOf(),
-    var payorInfo: PayorInfo = PayorInfo(),
-    var payorId: String? = null, //TODO
-    var accountCode: String? = null, //TODO
-    var reference: String? = null, //TODO
-    var paymentParameters: String? = null, //TODO
-    var invoiceId: String? = null, //TODO
-    var sendReceipt: Boolean = false,
-    var receiptDescription: String = ""
+    var apiKey: String? = null,
+    var amount: Int? = null,
+    var transactionType: TransactionType? = TransactionType.CARD,
+    var requireAccountName: Boolean? = false,
+    var requireBillingAddress: Boolean? = false,
+    var confirmation: Boolean? = false,
+    var feeMode: String? = FeeMode.INTERCHANGE,
+    var metadata: HashMap<Any, Any>? = HashMap(),
+    var payorInfo: PayorInfo? = PayorInfo(),
+    var payorId: String? = null,
+    var accountCode: String? = null,
+    var reference: String? = null,
+    var paymentParameters: String? = null,
+    var invoiceId: String? = null,
+    var sendReceipt: Boolean? = false,
+    var receiptDescription: String? = null,
 )

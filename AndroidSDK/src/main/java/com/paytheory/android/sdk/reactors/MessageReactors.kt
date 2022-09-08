@@ -1,13 +1,14 @@
 package com.paytheory.android.sdk.reactors
 
 import BarcodeMessage
-import HostToken
 import HostTokenMessage
 import Payment
 import TransferMessage
 import android.util.Log
 import com.google.gson.Gson
+import com.goterl.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.*
+import com.paytheory.android.sdk.nacl.decryptBox
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +33,6 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     @ExperimentalCoroutinesApi
     fun onHostToken(message: String, transaction: Transaction): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
-//        val hostTokenBody = Gson().fromJson(hostTokenMessage.body, HostToken::class.java)
         socketPublicKey = hostTokenMessage.body.publicKey
         sessionKey = hostTokenMessage.body.sessionKey
         hostToken = hostTokenMessage.body.hostToken
@@ -52,8 +52,12 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     fun confirmPayment(message: String, transaction: Transaction? = null){
 
-        val paymentConfirmation = Gson().fromJson(message, PaymentConfirmation::class.java)
+        val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedPaymentConfirmation::class.java)
 
+        //decrypt message
+        val decryptedBody = decryptBox(encryptedPaymentConfirmation.body)
+
+        val paymentConfirmation = Gson().fromJson(decryptedBody, PaymentConfirmation::class.java)
         //get user confirmation of payment
         if (transaction != null) {
             if (transaction.context is Payable){
@@ -66,8 +70,8 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
-    fun onUnknown(message: String, transaction: Transaction? = null) {
-        print("Error calling WebSocket: $message")
+    fun onError(message: String, transaction: Transaction? = null) {
+        print("Error with WebSocket: $message")
         /* fail if unknown websocket message */
         if (transaction != null) {
             if (transaction.context is Payable){

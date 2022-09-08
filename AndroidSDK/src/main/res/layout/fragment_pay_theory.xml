@@ -77,7 +77,8 @@
                             android:hint="@string/card_number"
                             android:visibility="gone"
                             android:inputType="number"
-                            android:autofillHints="creditCardNumber"  />
+                            android:autofillHints="creditCardNumber"
+                            android:text="5454 5454 5454 5454" />
 
                         <LinearLayout
                             android:id="@+id/cvv_and_expiration"
@@ -94,7 +95,8 @@
                                     android:hint="@string/expiration"
                                     android:inputType="number"
                                     android:visibility="gone"
-                                    android:layout_weight="1"/>
+                                    android:layout_weight="1"
+                                    android:text="04/2024"/>
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
                                     android:id="@+id/cc_cvv"
                                     android:layout_width="match_parent"
@@ -104,7 +106,8 @@
                                     android:hint="@string/cvv"
                                     android:inputType="number"
                                     android:visibility="gone"
-                                    android:layout_weight="1"/>
+                                    android:layout_weight="1"
+                                    android:text="123"/>
                         </LinearLayout>
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText

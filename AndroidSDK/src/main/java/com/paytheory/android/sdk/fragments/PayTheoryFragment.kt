@@ -39,12 +39,13 @@ annotation class PayTheory
  */
 class PayTheoryFragment : Fragment() {
     companion object {
-        const val PAYMENT_CARD = "PAYMENT_CARD"
-        const val BANK_ACCOUNT = "BANK_ACCOUNT"
-        const val CASH = "CASH"
+        const val PAYMENT_CARD = "card"
+        const val BANK_ACCOUNT = "ach"
+        const val CASH = "cash"
     }
 
 
+    //default values for pay theory fragment
     private lateinit var constants: Constants
     private var payTheoryTransaction: Transaction? = null
     private var apiKey: String? = null
@@ -54,17 +55,18 @@ class PayTheoryFragment : Fragment() {
     private var requireBillingAddress: Boolean = false
     private var confirmation: Boolean = false
     private var feeMode: String = FeeMode.INTERCHANGE
-    private var metadata: HashMap<Any, Any> = hashMapOf()
-    private var payorInfo: PayorInfo = PayorInfo()
+    private var metadata: HashMap<Any, Any>? = hashMapOf()
+    private var payTheoryData: HashMap<Any, Any>? = hashMapOf()
+    private var payorInfo: PayorInfo? = PayorInfo()
     private var payorId: String? = null
     private var accountCode: String? = null
     private var reference: String? = null
     private var paymentParameters: String? = null
     private var invoiceId: String? = null
     private var sendReceipt: Boolean = false
-    private var receiptDescription: String? = null
+    private var receiptDescription: String = ""
     
-    private var billingAddress: Address = Address()
+    private var billingAddress: Address? = Address()
     private var accountName: String? = null
     private var model: ConfigurationViewModel? = null
 
@@ -93,7 +95,7 @@ class PayTheoryFragment : Fragment() {
     }
 
     /**
-     * Create configurations to execute a payment
+     * Create configurations to execute a payment and contains default configuration
      * @param apiKey Pay Theory API-Key
      * @param amount Amount of transaction
      * @param transactionType Type of payment method
@@ -105,42 +107,42 @@ class PayTheoryFragment : Fragment() {
     fun configure(
         apiKey: String,
         amount: Int,
-        transactionType: TransactionType,
-        requireAccountName: Boolean = false,
-        requireBillingAddress: Boolean = false,
-        confirmation: Boolean = false,
-        feeMode: String = FeeMode.INTERCHANGE,
-        metadata: HashMap<Any, Any> = hashMapOf(),
-        payorInfo: PayorInfo = PayorInfo(),
-        payorId: String? = null, //TODO
-        accountCode: String? = null, //TODO
-        reference: String? = null, //TODO
-        paymentParameters: String? = null, //TODO
-        invoiceId: String? = null, //TODO
-        sendReceipt: Boolean = false,
-        receiptDescription: String = ""
+        transactionType: TransactionType? = TransactionType.CARD,
+        requireAccountName: Boolean? = false,
+        requireBillingAddress: Boolean? = false,
+        confirmation: Boolean? = false,
+        feeMode: String? = FeeMode.INTERCHANGE,
+        metadata: HashMap<Any, Any>? = HashMap(),
+        payorInfo: PayorInfo? = PayorInfo(),
+        payorId: String? = null,
+        accountCode: String? = null,
+        reference: String? = null,
+        paymentParameters: String? = null,
+        invoiceId: String? = null,
+        sendReceipt: Boolean? = false,
+        receiptDescription: String? = null
         ) {
 
         if (model == null) {
             model = ViewModelProvider(
                 this,
-                ConfigurationInjector(requireActivity().application, ConfigurationDetail()).provideConfigurationViewModelFactory()
+                ConfigurationInjector(requireActivity().application, ConfigurationDetail(apiKey,amount,transactionType,requireAccountName,requireBillingAddress,confirmation, feeMode, metadata, payorInfo, payorId, accountCode, reference, paymentParameters, invoiceId, sendReceipt, receiptDescription)).provideConfigurationViewModelFactory()
             ).get(
                 ConfigurationViewModel::class.java
             )
         }
 
         // update Configuration Details object with payment data
-        model!!.update(ConfigurationDetail(apiKey,amount,transactionType, requireAccountName,requireBillingAddress,confirmation, feeMode, metadata, payorInfo, payorId, accountCode, reference, paymentParameters, invoiceId, sendReceipt, receiptDescription))
+        model!!.update(ConfigurationDetail(apiKey,amount,transactionType,requireAccountName,requireBillingAddress,confirmation, feeMode, metadata, payorInfo, payorId, accountCode, reference, paymentParameters, invoiceId, sendReceipt, receiptDescription))
         model!!.configuration.observe(this.viewLifecycleOwner) { configurationDetail ->
             // set private variables for Pay Theory Fragment
             this.apiKey = configurationDetail.apiKey
             this.amount = configurationDetail.amount
-            this.transactionType = configurationDetail.transactionType
-            this.requireAccountName = configurationDetail.requireAccountName
-            this.requireBillingAddress = configurationDetail.requireBillingAddress
-            this.confirmation = configurationDetail.confirmation
-            this.feeMode = configurationDetail.feeMode
+            this.transactionType = configurationDetail.transactionType!!
+            this.requireAccountName = configurationDetail.requireAccountName!!
+            this.requireBillingAddress = configurationDetail.requireBillingAddress!!
+            this.confirmation = configurationDetail.confirmation!!
+            this.feeMode = configurationDetail.feeMode!!
             this.metadata = configurationDetail.metadata
             this.payorInfo = configurationDetail.payorInfo
             this.payorId = configurationDetail.payorId
@@ -148,8 +150,8 @@ class PayTheoryFragment : Fragment() {
             this.reference = configurationDetail.reference
             this.paymentParameters = configurationDetail.paymentParameters
             this.invoiceId = configurationDetail.invoiceId
-            this.sendReceipt = configurationDetail.sendReceipt
-            this.receiptDescription = configurationDetail.receiptDescription
+            this.sendReceipt = configurationDetail.sendReceipt!!
+            this.receiptDescription = configurationDetail.receiptDescription!!
 
             //ensure api key is not empty
             if (this.apiKey!!.isNotEmpty()) {
@@ -160,36 +162,43 @@ class PayTheoryFragment : Fragment() {
                 this.constants = Constants(partner, stage)
 
                 //add all tags
-                val allTags = hashMapOf<Any, Any>()
-                if (this.sendReceipt) {
-                    val receiptTag = hashMapOf<Any, Any>("pay-theory-receipt" to this.sendReceipt)
-                    val receiptDescriptionTag = hashMapOf<Any, Any>("pay-theory-receipt-description" to this.receiptDescription)
-                    allTags.putAll(receiptTag)
-                    allTags.putAll(receiptDescriptionTag)
-                }
-                val addtionalTags = hashMapOf("pay-theory-environment" to partner)
-                metadata.putAll(addtionalTags)
-                this.metadata = metadata
+                this.metadata!!["pay-theory-environment"] = partner
 
+                val payTheoryData = hashMapOf<Any, Any>()
+                payTheoryData["pay-theory-environment"] = partner
+                if (this.sendReceipt) {
+                    payTheoryData["send_receipt"] = this.sendReceipt
+                    payTheoryData["receipt_description"] = this.receiptDescription
+                }
+                if (this.metadata!!["pay-theory-account-code"] != null) {
+                    payTheoryData["account_code"] = this.metadata!!["pay-theory-account-code"] as Any
+                }
+
+                if (this.metadata!!["pay-theory-reference"] != null) {
+                    payTheoryData["reference"] = this.metadata!!["pay-theory-reference"] as Any
+                }
+
+                this.payTheoryData = payTheoryData
 
                 payTheoryTransaction =
                     Transaction(
                         this.activity!!,
                         partner,
                         stage,
-                        apiKey,
+                        this.apiKey!!,
                         this.constants,
                         this.confirmation,
                         this.sendReceipt,
                         this.receiptDescription,
-                        this.metadata
+                        this.metadata,
+                        this.payTheoryData
                     )
 
                 payTheoryTransaction!!.init()
 
 
 
-                enableFields(this.transactionType, requireAccountName, requireBillingAddress)
+                enableFields(this.transactionType, requireAccountName!!, requireBillingAddress!!)
 
                 val btn = activity!!.findViewById<Button>(R.id.submitButton)
 
@@ -279,11 +288,11 @@ class PayTheoryFragment : Fragment() {
 
                     if (hasBillingAddress) {
                         billingAddress = Address(
-                            billingCity.text.toString(),
-                            billingState.text.toString(),
-                            billingZip.text.toString(),
-                            billingAddress1.text.toString(),
-                            billingAddress2.text.toString(),
+                            billingCity.text.toString().ifBlank { "" },
+                            billingState.text.toString().ifBlank { "" },
+                            billingZip.text.toString().ifBlank { "" },
+                            billingAddress1.text.toString().ifBlank { "" },
+                            billingAddress2.text.toString().ifBlank { "" },
                             "USA"
                         )
                     }
@@ -291,15 +300,18 @@ class PayTheoryFragment : Fragment() {
                     //Create card payment
                     if (hasCC) {
                         val expirationString = ccExpiration.text.toString()
+                        val expirationMonth = expirationString.split("/").first()
+                        val expirationYear = expirationString.split("/").last()
+
                         val payment = Payment(
                             timing = System.currentTimeMillis(),
                             amount = amount,
                             type = PAYMENT_CARD,
-                            name = this.accountName,
+                            name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
                             number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
                             security_code = ccCVV.text.toString(),
-                            expiration_month = expirationString.split("/").first(),
-                            expiration_year = expirationString.split("/").last(),
+                            expiration_month = expirationMonth,
+                            expiration_year = expirationYear,
                             fee_mode = feeMode,
                             address = billingAddress,
                             payorInfo = payorInfo

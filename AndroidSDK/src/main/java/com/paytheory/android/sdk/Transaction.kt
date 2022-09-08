@@ -2,7 +2,6 @@ package com.paytheory.android.sdk
 
 import ActionRequest
 import CashRequest
-import PayTheoryData
 import PaymentMethodData
 import Payment
 import PaymentData
@@ -42,7 +41,8 @@ class Transaction(
     private val confirmation: Boolean,
     private val sendReceipt: Boolean,
     private val receiptDescription: String,
-    private val metadata: HashMap<Any, Any>?
+    private val metadata: HashMap<Any, Any>?,
+    private val payTheoryData: HashMap<Any, Any>?
 ): WebsocketMessageHandler {
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
@@ -55,12 +55,13 @@ class Transaction(
     companion object {
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
+        private const val INTERNAL_SERVER_ERROR = "Internal server error"
         private const val HOST_TOKEN_RESULT = "hostToken"
         private const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
         private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
         private const val BARCODE_ACTION = "host:barcode"
         private const val BARCODE_RESULT = "BarcodeUid"
-        private const val TRANSFER_PART_ONE_RESULT = "payment"
+        private const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
         private const val COMPLETED_TRANSFER = "payment-detail-reference"
         private const val UNKNOWN = "unknown"
         const val CASH = "CASH"
@@ -86,36 +87,30 @@ class Transaction(
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
-        if(UtilMethods.isConnectedToInternet(context)){
 
-            val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
+    val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
 
-            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+    observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
-                .subscribe({ ptTokenResponse: PTTokenResponse ->
-                    if (queuedRequest != null) {
-                        establishViewModel(ptTokenResponse)
-                    } else {
-                        callSafetyNet(ptTokenResponse)
-                    }
+        .subscribe({ ptTokenResponse: PTTokenResponse ->
+            if (queuedRequest != null) {
+                establishViewModel(ptTokenResponse)
+            } else {
+                callSafetyNet(ptTokenResponse)
+            }
 
 
-                }, { error ->
-                    if (context is Payable) {
-                        if(error.message == "HTTP 404 "){
-                            context.transactionError(TransactionError("Access Denied"))
-                        }
-                        else {
-                            context.transactionError(TransactionError(error.message!!))
-                        }
-                    }
-                }
-                )
-        }else{
+        }, { error ->
             if (context is Payable) {
-                context.transactionError(TransactionError(constants.NO_INTERNET_ERROR))
+                if(error.message == "HTTP 404 "){
+                    context.transactionError(TransactionError("Access Denied"))
+                }
+                else {
+                    context.transactionError(TransactionError("Cannot connect to payment system"))
+                }
             }
         }
+        )
     }
 
     @ExperimentalCoroutinesApi
@@ -213,9 +208,7 @@ class Transaction(
             val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
 
-            val payTheoryData = PayTheoryData(this.metadata?.getValue("pay-theory-account-code"), this.metadata?.getValue("pay-theory-reference"), this.sendReceipt, this.receiptDescription)
-
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, payTheoryData,
+            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
 
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
@@ -245,7 +238,7 @@ class Transaction(
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else{
             if (context is Payable) {
-                context.transactionError(TransactionError("Connection failed"))
+                context.transactionError(TransactionError("Failed to complete transaction"))
             }
             else{
                 return
@@ -270,15 +263,15 @@ class Transaction(
     override fun receiveMessage(message: String) {
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
-            DISCONNECTED -> { connectionReactors!!.onDisconnected()
-            }
+            DISCONNECTED -> { connectionReactors!!.onDisconnected() }
+            INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message) }
             else -> {
                 when (discoverMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
                     COMPLETED_TRANSFER -> messageReactors!!.completeTransfer(message,viewModel, this)
-                    else -> messageReactors!!.onUnknown(message, this)
+                    else -> messageReactors!!.onError(message, this)
                 }
             }
         }

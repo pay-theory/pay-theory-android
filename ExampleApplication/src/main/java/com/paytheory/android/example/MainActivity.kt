@@ -4,9 +4,11 @@ import Address
 import PayorInfo
 import android.app.Dialog
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.Window
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -85,7 +87,6 @@ class MainActivity : AppCompatActivity() , Payable {
 
         //PayTheoryFragment configuration for cash payments
         //payTheoryFragment.configure(apiKey,7500, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, payorInfo, metadata)
-
     }
 
     //Demo function to display payment response
