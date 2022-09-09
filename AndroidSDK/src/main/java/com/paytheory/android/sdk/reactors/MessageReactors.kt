@@ -6,7 +6,6 @@ import Payment
 import TransferMessage
 import android.util.Log
 import com.google.gson.Gson
-import com.goterl.lazysodium.utils.KeyPair
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.nacl.decryptBox
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
@@ -41,7 +40,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         transaction.sessionKey = hostTokenMessage.body.sessionKey
         transaction.hostToken = hostTokenMessage.body.hostToken
 
-        Log.d("PayTheory-onHostToken", hostTokenMessage.toString())
+        Log.d("PT- onHostToken", "Socket Public Key: ${hostTokenMessage.body.publicKey}")
         return hostTokenMessage
     }
 
@@ -51,7 +50,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param
      */
     fun confirmPayment(message: String, transaction: Transaction? = null){
-
+        Log.d("PT-confirmPayment", "Socket Public Key: $socketPublicKey")
         val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedPaymentConfirmation::class.java)
 
         //decrypt message

@@ -173,6 +173,50 @@ class Transaction(
         }
     }
 
+//    /**
+//     * Generate the initial action request
+//     * @param payment payment object to transact
+//     */
+//    private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
+//
+//        //generate public key
+//        publicKey = generateLocalKeyPair()
+//
+//        //if payment type is "CASH" return cash ActionRequest
+//        if (payment.type == CASH){
+//            val requestAction = BARCODE_ACTION
+//            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
+//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
+//            return ActionRequest(
+//                requestAction,
+//                encryptedBody,
+//                publicKey,
+//                sessionKey
+//            )
+//        }
+//        //if payment type is not "CASH" return transfer ActionRequest
+//        else {
+//            val requestAction = TRANSFER_PART_ONE_ACTION
+//
+//            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
+//
+//            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
+//                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
+//
+//            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
+//                metadata, sessionKey, System.currentTimeMillis())
+//
+//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
+//
+//            return ActionRequest(
+//                requestAction,
+//                encryptedBody,
+//                publicKey,
+//                sessionKey
+//            )
+//        }
+//    }
+
     /**
      * Generate the initial action request
      * @param payment payment object to transact
@@ -180,13 +224,18 @@ class Transaction(
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
 
         //generate public key
-        publicKey = generateLocalKeyPair()
+        val keyPair = generateLocalKeyPair()
+        publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        } else {
+            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+        }
 
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
             val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -206,7 +255,7 @@ class Transaction(
             val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
 
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
             return ActionRequest(
                 requestAction,
@@ -217,6 +266,7 @@ class Transaction(
         }
     }
 
+
     /**
      * Generate transfer part two action request
      * @param
@@ -225,7 +275,7 @@ class Transaction(
 
         val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
 
-        val encryptedBody = encryptBox(Gson().toJson(requestBody))
+        val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
         val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
 
