@@ -180,18 +180,13 @@ class Transaction(
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
 
         //generate public key
-        val keyPair = generateLocalKeyPair()
-        publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
+        publicKey = generateLocalKeyPair()
 
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
             val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -211,7 +206,7 @@ class Transaction(
             val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
 
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
 
             return ActionRequest(
                 requestAction,
@@ -230,7 +225,7 @@ class Transaction(
 
         val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
 
-        val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
+        val encryptedBody = encryptBox(Gson().toJson(requestBody))
 
         val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
 
