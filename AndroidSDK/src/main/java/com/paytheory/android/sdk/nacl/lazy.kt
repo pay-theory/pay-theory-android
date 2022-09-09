@@ -1,6 +1,5 @@
 package com.paytheory.android.sdk.nacl
 
-import android.os.Build
 import android.util.Log
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
@@ -13,6 +12,7 @@ import java.util.*
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 private val boxLazy = lazySodium as Box.Lazy
 private lateinit var keyPair: KeyPair
+private val nonce = lazySodium.nonce(Box.NONCEBYTES)
 //private val secretKey = keyPair.secretKey
 //private val publicKey = keyPair.publicKey
 
@@ -72,6 +72,11 @@ fun generateLocalKeyPair(): KeyPair {
  * @param message the message to be encrypted
  * @param publicKey the key used to encrypt
  */
+//fun encryptBox(message: String, publicKey: Key): String {
+//    return lazySodium.cryptoBoxEasy(message, nonce, keyPair)
+//
+//}
+
 fun encryptBox(message: String, publicKey: Key): String {
     return boxLazy.cryptoBoxSealEasy(
         message,

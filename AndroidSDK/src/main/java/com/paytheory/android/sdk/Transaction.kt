@@ -98,7 +98,13 @@ class Transaction(
             } else {
                 callSafetyNet(ptTokenResponse)
             }
-
+//            if (ptTokenResponse.ptToken != null) {
+//                callSafetyNet(ptTokenResponse)
+//            } else {
+//                if (context is Payable) {
+//                    context.transactionError(TransactionError("Cannot connect to payment system"))
+//                }
+//            }
 
         }, { error ->
             if (context is Payable) {
