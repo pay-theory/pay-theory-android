@@ -4,6 +4,7 @@ import android.util.Log
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
 import com.goterl.lazysodium.interfaces.Box
+import com.goterl.lazysodium.utils.Base64MessageEncoder
 import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
 import java.util.*
@@ -12,31 +13,6 @@ import java.util.*
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 private val boxLazy = lazySodium as Box.Lazy
 private lateinit var keyPair: KeyPair
-//private val nonce = lazySodium.nonce(Box.NONCEBYTES)
-//private val secretKey = keyPair.secretKey
-//private val publicKey = keyPair.publicKey
-
-///**
-// * Function to generate KeyPair
-// */
-//fun generateLocalKeyPair(): String {
-//
-//    val returnedPublicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//        Base64.getEncoder().encodeToString(publicKey.asBytes)
-//    } else {
-//        android.util.Base64.encodeToString(publicKey.asBytes,android.util.Base64.DEFAULT)
-//    }
-//
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//        Log.d("PAYTHEORY", Base64.getEncoder().encodeToString(publicKey.asBytes))
-//    }
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//        Log.d("PAYTHEORY", Base64.getEncoder().encodeToString(secretKey.asBytes))
-//    }
-//
-//    return returnedPublicKey
-//}
-
 /**
  * Function to generate KeyPair
  */
@@ -47,36 +23,11 @@ fun generateLocalKeyPair(): KeyPair {
     return keyPair
 }
 
-
-///**
-// * Function to encrypt message
-// * @param message the message to be encrypted
-// * @param publicKey the key used to encrypt
-// */
-//fun encryptBox(message: String): String {
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//        Log.d("PAYTHEORY", Base64.getEncoder().encodeToString(publicKey.asBytes))
-//    }
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//        Log.d("PAYTHEORY", Base64.getEncoder().encodeToString(secretKey.asBytes))
-//    }
-//
-//    return boxLazy.cryptoBoxSealEasy(
-//        message,
-//        publicKey
-//    )
-//}
-
 /**
  * Function to encrypt message
  * @param message the message to be encrypted
  * @param publicKey the key used to encrypt
  */
-//fun encryptBox(message: String, publicKey: Key): String {
-//    return lazySodium.cryptoBoxEasy(message, nonce, keyPair)
-//
-//}
-
 fun encryptBox(message: String, publicKey: Key): String {
     return boxLazy.cryptoBoxSealEasy(
         message,
@@ -84,18 +35,13 @@ fun encryptBox(message: String, publicKey: Key): String {
     )
 }
 
+//Below are examples of secure-tags-lib decrypting the incoming tag-secure-socket messages
 
-//This is decryption from tags-secure-socket
-//def decrypt_sealed_box(private_key, hex_message):
-//decoded_message = bytes.fromhex(hex_message)
-//
-//server_private_key = PrivateKey(base64.b64decode(private_key))
-//
-//box = SealedBox(server_private_key)
-//
-//return str(box.decrypt(decoded_message), 'UTF-8')
+//const messagePublicKey = encryption.decodeKey(data.public_key)
+//const messageBox = encryption.pairedBox(messagePublicKey, keyPair.secretKey)
+//body = encryption.decrypt(messageBox, body)
 
-//This is decryption from secure-tags-lib
+
 //export const decrypt = (
 //secretOrSharedKey,
 //messageWithNonce
@@ -117,19 +63,39 @@ fun encryptBox(message: String, publicKey: Key): String {
 //    return JSON.parse(base64DecryptedMessage);
 //};
 
-fun decryptBox(message: String): String {
-    Log.d("PT- decryptBox SECRET KEY", Base64.getEncoder().encodeToString(keyPair.secretKey.asBytes))
-    Log.d("PT- decryptBox PUBLIC KEY", Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes))
+//Above are examples of secure-tags-lib decrypting the incoming tag-secure-socket messages
+fun decryptBox(message: String, socketPublicKey: String): String {
+    //Take public key passed from tag-secure-socket and base64 decode it and convert to lazysodium key
+    val socketPublicKey = Key.fromBase64String(socketPublicKey)
 
-    val decodedMessageWithNonce = String(Base64.getDecoder().decode(message))
-    Log.d("PT- decodedMessageWithNonce", decodedMessageWithNonce)
+    //base64 decode message with nonce into byte array
+    val messageWithNonceByteArray = Base64MessageEncoder().decode(message)
+    Log.d("PT- decryptBox messageWithNonceByteArray", messageWithNonceByteArray.toString())
 
-    val nonce = lazySodium.nonce(24)
-//    val nonce = decodedMessageWithNonce.take(24).toByteArray()
-    Log.d("PT- nonce", nonce.toString())
+    //remove first 24 bytes for nonce value
+    val nonceOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(0,24)
 
-    val messageOnly = decodedMessageWithNonce.drop(24)
-    Log.d("PT- messageOnly", messageOnly)
+    //remove after first 24 bytes for message value
+    val messageOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(24,messageWithNonceByteArray.size)
+
+    //convert message from bytearray into string
+    val messageOnlyString = lazySodium.str(messageOnlyByteArray)
+
+    //create key pair with generated secret key and tags-secure-socket public key
+    val messageKeys = KeyPair(socketPublicKey, keyPair.secretKey)
+
+    //Different methods to open
+    val decrypedMessage = boxLazy.cryptoBoxOpenEasy(messageOnlyString, nonceOnlyByteArray, messageKeys)
+//    val decrypedMessage = boxLazy.cryptoBoxSealOpenEasy(messageOnlyString, messageKeys)
+//    val decrypedMessage = lazySodium.cryptoSecretBoxOpenEasy(messageOnlyString, nonceOnlyByteArray, keyPair.secretKey)
+//    val decrypedMessage = boxLazy.cryptoBoxSealOpenEasy(messageOnlyString, messageKeyPair)
+
+    return decrypedMessage
+}
+
+
+
+
 
 //    Log.d("PT- message", message)
 //    val first24ofmessage = message.substring(0,24)
@@ -176,16 +142,3 @@ fun decryptBox(message: String): String {
 //        message,
 //        keyPair
 //    )
-
-    val decrypedMessage = boxLazy.cryptoBoxOpenEasy(message, nonce, keyPair)
-
-//    val decrypedMessage = boxLazy.cryptoBoxEasyAfterNm(
-//        messageOnly,
-//        nonce,
-//        Base64.getEncoder().encodeToString(keyPair.secretKey.asBytes)
-//    )
-
-//    val decrypedMessage = "hello"
-
-    return decrypedMessage
-}

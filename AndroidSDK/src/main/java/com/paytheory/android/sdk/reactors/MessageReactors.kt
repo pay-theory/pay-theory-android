@@ -53,9 +53,9 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         Log.d("PT-confirmPayment", "Socket Public Key: $socketPublicKey")
 
         val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedPaymentConfirmation::class.java)
-        Log.d("PT-confirmPayment", "encryptedPaymentConfirmation public key from socket: ${encryptedPaymentConfirmation.publicKey}")
+        Log.d("PT-confirmPayment", "encryptedPaymentConfirmation PUBLIC_KEY from socket: ${encryptedPaymentConfirmation.publicKey}")
         //decrypt message
-        val decryptedBody = decryptBox(encryptedPaymentConfirmation.body)
+        val decryptedBody = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
 
         val paymentConfirmation = Gson().fromJson(decryptedBody, PaymentConfirmation::class.java)
         //get user confirmation of payment
