@@ -18,8 +18,9 @@ private lateinit var keyPair: KeyPair
  */
 fun generateLocalKeyPair(): KeyPair {
     keyPair = boxLazy.cryptoBoxKeypair()
-    Log.d("PT- generateLocalKeyPair SECRET KEY", Base64.getEncoder().encodeToString(keyPair.secretKey.asBytes))
-    Log.d("PT- generateLocalKeyPair PUBLIC KEY", Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes))
+    // secret keys should not be logged even in testing
+    //Log.d("PT- generateLocalKeyPair SECRET KEY", Base64.getEncoder().encodeToString(keyPair.secretKey.asBytes))
+    //Log.d("PT- generateLocalKeyPair PUBLIC KEY", Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes))
     return keyPair
 }
 
@@ -70,7 +71,8 @@ fun decryptBox(message: String, socketPublicKey: String): String {
 
     //base64 decode message with nonce into byte array
     val messageWithNonceByteArray = Base64MessageEncoder().decode(message)
-    Log.d("PT- decryptBox messageWithNonceByteArray", messageWithNonceByteArray.toString())
+    Log.d("decryptBox", messageWithNonceByteArray.toString())
+
 
     //remove first 24 bytes for nonce value
     val nonceOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(0,24)

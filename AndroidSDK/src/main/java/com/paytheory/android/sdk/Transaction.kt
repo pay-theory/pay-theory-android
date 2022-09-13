@@ -47,6 +47,7 @@ class Transaction(
 
     private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
     var queuedRequest: Payment? = null
+    @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
     var publicKey: String? = null
     var sessionKey:String? = null
@@ -66,7 +67,9 @@ class Transaction(
         private const val UNKNOWN = "unknown"
         const val CASH = "CASH"
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         private var messageReactors: MessageReactors? = null
+        @OptIn(ExperimentalCoroutinesApi::class)
         private var connectionReactors: ConnectionReactors? = null
 
 
@@ -161,6 +164,7 @@ class Transaction(
      * Final api call to complete transaction
      * @param payment payment object to transact
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalCoroutinesApi
     fun transact(
         payment: Payment
@@ -227,6 +231,7 @@ class Transaction(
      * Generate the initial action request
      * @param payment payment object to transact
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
 
         //generate public key
@@ -277,6 +282,7 @@ class Transaction(
      * Generate transfer part two action request
      * @param
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer(message: PaymentConfirmation) {
 
         val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
@@ -311,6 +317,7 @@ class Transaction(
      * Function to call next action based on incoming socket message
      * @param message the incoming message from socket
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun receiveMessage(message: String) {
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
@@ -328,6 +335,7 @@ class Transaction(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun disconnect() {
         if (webSocketInteractor != null) {
             webSocketInteractor!!.stopSocket()

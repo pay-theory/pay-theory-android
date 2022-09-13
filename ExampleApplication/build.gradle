@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.paytheory.android.example"
         minSdkVersion 26
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -126,10 +126,10 @@ dependencies {
 
     //use PayTheorySDK as library
     implementation project(path: ':AndroidSDK')
-    implementation 'net.java.dev.jna:jna:5.8.0@aar'
+    implementation 'net.java.dev.jna:jna:5.12.1@aar'
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     //dependency for androidTest source set
@@ -156,7 +156,7 @@ dependencies {
 //    testImplementation('net.java.dev.jna:jna:5.8.0@aar')
 //    testImplementation('com.github.terl:lazysodium-android:4.3.1@aar')
 //    testImplementation 'com.squareup.retrofit2:retrofit:2.9.0'
-//    testImplementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
+//    testImplembintrayentation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
 //    testImplementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 //    testImplementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
 //    testImplementation 'com.squareup.retrofit2:converter-scalars:2.9.0'

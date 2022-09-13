@@ -3,6 +3,7 @@ package com.paytheory.android.sdk.fragments
 import Address
 import PayorInfo
 import Payment
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -103,6 +105,7 @@ class PayTheoryFragment : Fragment() {
      * @param feeMode Type of fee mode that will be processed
      * @param payorInfo Optional details about the buyer
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
     fun configure(
         apiKey: String,
@@ -181,7 +184,7 @@ class PayTheoryFragment : Fragment() {
 
             payTheoryTransaction =
                 Transaction(
-                    this.activity!!,
+                    this.requireActivity(),
                     partner,
                     stage,
                     this.apiKey!!,
@@ -199,7 +202,7 @@ class PayTheoryFragment : Fragment() {
 
             enableFields(this.transactionType, requireAccountName!!, requireBillingAddress!!)
 
-            val btn = activity!!.findViewById<Button>(R.id.submitButton)
+            val btn = requireActivity().findViewById<Button>(R.id.submitButton)
 
             // credit card fields
             val (ccNumber, ccCVV, ccExpiration) = getCreditCardFields()
@@ -213,7 +216,7 @@ class PayTheoryFragment : Fragment() {
             val (achAccount, achRouting) = getAchFields()
 
             val achChooser: AppCompatAutoCompleteTextView =
-                activity!!.findViewById(R.id.ach_type_choice)
+                requireActivity().findViewById(R.id.ach_type_choice)
 
             val items = listOf(getString(R.string.checking), getString(R.string.savings))
 
@@ -225,22 +228,22 @@ class PayTheoryFragment : Fragment() {
 
             // cash fields
             val cashBuyerContact =
-                activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
-            val cashBuyer = activity!!.findViewById<PayTheoryEditText>(R.id.cash_buyer)
+                requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
+            val cashBuyer = requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer)
 
 
             val hasCASH = (cashBuyerContact.visibility == View.VISIBLE
                     && cashBuyer.visibility == View.VISIBLE)
 
             // buyer options
-            val accountName = activity!!.findViewById<PayTheoryEditText>(R.id.account_name)
+            val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
             val billingAddress1 =
-                activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_1)
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_1)
             val billingAddress2 =
-                activity!!.findViewById<PayTheoryEditText>(R.id.billing_address_2)
-            val billingCity = activity!!.findViewById<PayTheoryEditText>(R.id.billing_city)
-            val billingState = activity!!.findViewById<PayTheoryEditText>(R.id.billing_state)
-            val billingZip = activity!!.findViewById<PayTheoryEditText>(R.id.billing_zip)
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
+            val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
+            val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
+            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
             val hasAccountName = accountName.visibility == View.VISIBLE
 
@@ -366,15 +369,15 @@ class PayTheoryFragment : Fragment() {
     }
 
     private fun getAchFields(): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = activity!!.findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = activity!!.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
+        val achAccount = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_account_number)
+        val achRouting = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_routing_number)
         return Pair(achAccount, achRouting)
     }
 
     private fun getCreditCardFields(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
-        val ccNumber = activity!!.findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = activity!!.findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        val ccExpiration = activity!!.findViewById<PayTheoryEditText>(R.id.cc_expiration)
+        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
         return Triple(ccNumber, ccCVV, ccExpiration)
     }
 
@@ -404,6 +407,7 @@ class PayTheoryFragment : Fragment() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePayment(payment: Payment) {
         payTheoryTransaction!!.transact(payment)
