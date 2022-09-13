@@ -63,7 +63,7 @@ class Transaction(
         private const val BARCODE_ACTION = "host:barcode"
         private const val BARCODE_RESULT = "BarcodeUid"
         private const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
-        private const val COMPLETED_TRANSFER = "payment-detail-reference"
+        private const val COMPLETED_TRANSFER = "transfer_complete"
         private const val UNKNOWN = "unknown"
         const val CASH = "CASH"
 
@@ -285,6 +285,10 @@ class Transaction(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer(message: PaymentConfirmation) {
+
+        if (message.payerId.isNotBlank()){
+            message.payor_id = message.payerId
+        }
 
         val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
 

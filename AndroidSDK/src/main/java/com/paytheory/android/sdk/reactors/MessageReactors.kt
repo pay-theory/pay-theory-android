@@ -50,14 +50,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param
      */
     fun confirmPayment(message: String, transaction: Transaction? = null){
-        Log.d("PT-confirmPayment", "Socket Public Key: $socketPublicKey")
-
         val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedPaymentConfirmation::class.java)
-        Log.d("PT-confirmPayment", "encryptedPaymentConfirmation PUBLIC_KEY from socket: ${encryptedPaymentConfirmation.publicKey}")
         //decrypt message
-        val decryptedBody = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
-
-        val paymentConfirmation = Gson().fromJson(decryptedBody, PaymentConfirmation::class.java)
+        val decryptedMessage = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
+        val paymentConfirmation = Gson().fromJson(decryptedMessage, PaymentConfirmation::class.java)
         //get user confirmation of payment
         if (transaction != null) {
             if (transaction.context is Payable){
@@ -86,10 +82,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     @ExperimentalCoroutinesApi
     fun completeTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
-        println("Pay Theory Payment Result")
         viewModel.disconnect()
-        val responseJson = JSONObject(message)
-        if (transaction.context is Payable) when (responseJson["state"]) {
+        val encryptedTransferMessage = Gson().fromJson(message, EncryptedCompletedTransfer::class.java)
+        //decrypt message
+        val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
+
+        val completedTransfer = Gson().fromJson(decryptedMessage, CompletedTransfer::class.java)
+
+        if (transaction.context is Payable) when (completedTransfer.state) {
             "SUCCEEDED" -> {
                 val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
                 val paymentResponse = PaymentResult(transferResponse.metadata["pt-number"].toString(),
@@ -107,22 +107,22 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                 transaction.context.paymentComplete(paymentResponse)
             }
             "FAILURE" -> {
-                val failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
-                    responseJson["last_four"] as String,
-                    responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
+                val failedResponse = PaymentResultFailure(completedTransfer.receiptNumber,
+                    completedTransfer.lastFour,
+                    completedTransfer.brand, completedTransfer.state
                 )
                 transaction.context.paymentFailed(failedResponse)
             }
 
-            else -> {
-                val json = """
-                { 
-                    "error": ${responseJson["error"]}, 
-                 }"""
-
-                val errorResponse = Gson().fromJson(json, TransactionError::class.java)
-                transaction.context.transactionError(errorResponse)
-            }
+//            else -> {
+//                val json = """
+//                {
+//                    "error": ${responseJson["error"]},
+//                 }"""
+//
+//                val errorResponse = Gson().fromJson(json, TransactionError::class.java)
+//                transaction.context.transactionError(errorResponse)
+//            }
         }
     }
 

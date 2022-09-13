@@ -2,17 +2,6 @@ import com.google.gson.annotations.SerializedName
 import com.paytheory.android.sdk.PaymentConfirmation
 import com.paytheory.android.sdk.configuration.FeeMode
 
-/**
- * Data class to store bin details
- * @param first_six first six digits of account number
- * @param last_four last four digits of card number
- * @param card_brand card brand of the card used for payment
- */
-data class Bin (
-    @SerializedName("first_six") val first_six: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("card_brand") val card_brand: String
-)
 
 /**
  * Data class to store resulting transaction data
@@ -180,8 +169,8 @@ data class TransferPartOneRequest(
  * Data class for the transfer part two
  */
 data class TransferPartTwoRequest(
-    @SerializedName("transfer") val transferBody: PaymentConfirmation,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("payment_prep") val paymentPrep: PaymentConfirmation,
+    @SerializedName("tags") val tags: HashMap<Any, Any>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long
 )
@@ -204,6 +193,23 @@ data class Address (
     @SerializedName("country") val country: String? = "USA"
 )
 
+/**
+ * Data class to store address details
+ * @param city billing city
+ * @param region billing region
+ * @param postal_code billing postal code
+ * @param line1 billing address line 1
+ * @param line2 billing address line 2
+ * @param country billing country
+ */
+data class BillingAddress (
+    @SerializedName("address1") val address1: String? = null,
+    @SerializedName("address2") val address2: String? = null,
+    @SerializedName("city") val city: String? = null,
+    @SerializedName("state") val state: String? = null,
+    @SerializedName("zip") val zip: String? = null,
+    @SerializedName("country") val country: String? = "USA"
+)
 /**
  * Data class to store payment details
  * @param type type of payment

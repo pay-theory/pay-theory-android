@@ -1,7 +1,9 @@
 package com.paytheory.android.sdk
 
-import Bin
+import Address
+import BillingAddress
 import Payment
+import PayorInfo
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -44,8 +46,7 @@ data class PaymentResultFailure (
     @SerializedName("receipt_number") val receipt_number: String,
     @SerializedName("last_four") val last_four: String,
     @SerializedName("brand") val brand: String,
-    @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?
+    @SerializedName("state") val state: String
 )
 
 /**
@@ -73,17 +74,62 @@ data class BarcodeResult (
  * Data class to store payment confirmation details
  */
 data class PaymentConfirmation (
-    @SerializedName("bin") val bin: Bin,
+    @SerializedName("payment_token") val paymentToken: String,
+    @SerializedName("payer_id") val payerId: String,
+    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String,
+    @SerializedName("merchant_uid") val merchantUid: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("first_six") val firstSix: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("session_key") val sessionKey: String,
+    @SerializedName("processor") val processor: String,
+    @SerializedName("expiration") val expiration: String,
     @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("payment-token") val paymentToken: String,
+    @SerializedName("billing_name") val billingName: String,
+    @SerializedName("billing_address") val billingAddress: BillingAddress,
+    @SerializedName("amount") val amount: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("fee_mode") val fee_mode: String,
+    @SerializedName("fee") val fee: String,
+    @SerializedName("processor_merchant_id") val processor_merchant_id: String,
+    @SerializedName("payment_method") val payment_method: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("pay_theory_data") val pay_theory_data: HashMap<Any, Any>?,
+    @SerializedName("payor_info") val payorInfo: PayorInfo,
+    @SerializedName("payor_id") var payor_id: String,
+    @SerializedName("invoice_id") val invoice_id: String,
     @SerializedName("payment_intent_id") val paymentIntentId: String,
 )
 
 /**
+ * Data class to store completed transfer details
+ */
+data class CompletedTransfer (
+    @SerializedName("state") val state: String,
+    @SerializedName("amount") val amount: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("service_fee") val serviceFee: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
+)
+/**
  * Data class to store payment confirmation details
  */
 data class EncryptedPaymentConfirmation (
+    @SerializedName("type") val type: String,
+    @SerializedName("body") val body: String,
+    @SerializedName("public_key") val publicKey: String
+)
+
+/**
+ * Data class to store payment completed transfer details
+ */
+data class EncryptedCompletedTransfer (
     @SerializedName("type") val type: String,
     @SerializedName("body") val body: String,
     @SerializedName("public_key") val publicKey: String

@@ -22,7 +22,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "abel-paytheorylab-5f75e94a66dc5f88a8f207f34f670ee7"
+    val apiKey = "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() , Payable {
     }
 
     override fun paymentFailed(paymentFailure: PaymentResultFailure) {
-        showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
+        showToast("payment failed on account XXXX${paymentFailure.last_four}")
     }
 
     override fun transactionError(transactionError: TransactionError) {
@@ -121,14 +121,14 @@ class MainActivity : AppCompatActivity() , Payable {
         Log.d("Pay Theory Demo", confirmationData.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text = if (confirmationData.bin.card_brand == "ACH") {
-            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
-                    "on account ending in ${confirmationData.bin.last_four}?"
+        confirmationTextView.text = if (confirmationData.brand == "ACH") {
+            "Are you sure you want to make a payment of $${confirmationData.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationData.fee!!.toFloat()/100} " +
+                    "on account ending in ${confirmationData.lastFour}?"
         } else {
-            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
-                    "on ${confirmationData.bin.card_brand} account beginning with ${confirmationData.bin.first_six}?"
+            "Are you sure you want to make a payment of $${confirmationData.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationData.fee!!.toFloat()/100} " +
+                    "on ${confirmationData.brand} account beginning with ${confirmationData.firstSix}?"
         }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity() , Payable {
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
-            showToast("payment canceled on account beginning with ${confirmationData.bin.first_six}")
+            showToast("payment canceled on account beginning with ${confirmationData.firstSix}")
             transaction.disconnect()
         }
 
