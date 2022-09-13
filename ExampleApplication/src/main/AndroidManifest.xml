@@ -11,7 +11,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PayTheoryLibrary">
 
-        <activity android:name="com.paytheory.android.example.MainActivity">
+        <activity android:name="com.paytheory.android.example.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

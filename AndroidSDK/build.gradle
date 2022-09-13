@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    namespace = "com.paytheory.android.sdk"
     compileSdkVersion 33
     buildToolsVersion "30.0.3"
 
@@ -35,8 +36,8 @@ android {
         jvmTarget = '1.8'
     }
 
-    afterEvaluate {
-        publishing {
+//    afterEvaluate {
+//        publishing {
 //            publications {
 //                // Creates a Maven publication called "release".
 //                release(MavenPublication) {
@@ -49,6 +50,12 @@ android {
 //                    version = '2.0.9-alpha'
 //                }
 //            }
+//        }
+//    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
         }
     }
 }
