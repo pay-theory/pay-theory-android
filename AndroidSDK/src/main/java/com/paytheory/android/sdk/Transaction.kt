@@ -169,6 +169,7 @@ class Transaction(
     fun transact(
         payment: Payment
     ) {
+
         messageReactors!!.activePayment = payment
 
         val actionRequest =  generateQueuedActionRequest(payment)

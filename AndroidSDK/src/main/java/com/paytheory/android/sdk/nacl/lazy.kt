@@ -4,6 +4,7 @@ import android.util.Log
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
 import com.goterl.lazysodium.interfaces.Box
+import com.goterl.lazysodium.interfaces.Helpers
 import com.goterl.lazysodium.utils.Base64MessageEncoder
 import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
@@ -81,7 +82,7 @@ fun decryptBox(message: String, socketPublicKey: String): String {
     val messageOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(24,messageWithNonceByteArray.size)
 
     //convert message from bytearray into string
-    val messageOnlyString = lazySodium.str(messageOnlyByteArray)
+    val messageOnlyString = lazySodium.sodiumBin2Hex(messageOnlyByteArray)
 
     //create key pair with generated secret key and tags-secure-socket public key
     val messageKeys = KeyPair(socketPublicKey, keyPair.secretKey)
