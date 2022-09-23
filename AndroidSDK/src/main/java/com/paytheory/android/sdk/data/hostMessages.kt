@@ -1,5 +1,5 @@
 import com.google.gson.annotations.SerializedName
-import com.paytheory.android.sdk.PaymentConfirmation
+import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.configuration.FeeMode
 
 
@@ -72,9 +72,9 @@ data class HostToken (
  */
 data class HostTokenRequest(
     @SerializedName("ptToken") val ptToken: String,
-    @SerializedName("origin") val origin: String,
     @SerializedName("attestation") val attestation: String,
-    @SerializedName("timing") val timing: Long
+    @SerializedName("timing") val timing: Long,
+    @SerializedName("origin") val origin: String = "android"
 )
 
 /**
@@ -90,7 +90,7 @@ data class PayorInfo (
     @SerializedName("last_name") val last_name: String? = null,
     @SerializedName("email") val email: String? = null,
     @SerializedName("phone") val phone: String? = null,
-    @SerializedName("address") val address: Address? = null
+    @SerializedName("personal_address") val address: Address? = null
 )
 
 /**
@@ -169,7 +169,7 @@ data class TransferPartOneRequest(
  * Data class for the transfer part two
  */
 data class TransferPartTwoRequest(
-    @SerializedName("payment_prep") val paymentPrep: PaymentConfirmation,
+    @SerializedName("payment_prep") val paymentPrep: ConfirmationMessage,
     @SerializedName("tags") val tags: HashMap<Any, Any>?,
     @SerializedName("sessionKey") val sessionKey: String?,
     @SerializedName("timing") val timing: Long
@@ -185,29 +185,11 @@ data class TransferPartTwoRequest(
  * @param country billing country
  */
 data class Address (
-    @SerializedName("line1") val line1: String? = null,
-    @SerializedName("line2") val line2: String? = null,
-    @SerializedName("city") val city: String? = null,
-    @SerializedName("region") val region: String? = null,
-    @SerializedName("postal_code") val postal_code: String? = null,
-    @SerializedName("country") val country: String? = "USA"
-)
-
-/**
- * Data class to store address details
- * @param city billing city
- * @param region billing region
- * @param postal_code billing postal code
- * @param line1 billing address line 1
- * @param line2 billing address line 2
- * @param country billing country
- */
-data class BillingAddress (
-    @SerializedName("address1") val address1: String? = null,
-    @SerializedName("address2") val address2: String? = null,
-    @SerializedName("city") val city: String? = null,
-    @SerializedName("state") val state: String? = null,
-    @SerializedName("zip") val zip: String? = null,
+    @SerializedName("line1") val line1: String? = "",
+    @SerializedName("line2") val line2: String? = "",
+    @SerializedName("city") val city: String? = "",
+    @SerializedName("region") val region: String? = "",
+    @SerializedName("postal_code") val postal_code: String? = "",
     @SerializedName("country") val country: String? = "USA"
 )
 /**

@@ -50,8 +50,8 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    override fun paymentComplete(paymentResult: PaymentResult) {
-        showToast("payment successful on account XXXX${paymentResult.last_four}")
+    override fun paymentComplete(transactionResult: TransactionResult) {
+        showToast("payment successful on account XXXX${transactionResult.lastFour}")
     }
 
     override fun barcodeComplete(barcodeResult: BarcodeResult) {
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     //Demo function to display payment confirmation message to user
-    override fun paymentConfirmation(confirmationData: PaymentConfirmation, transaction: Transaction) {
+    override fun paymentConfirmation(confirmationData: ConfirmationMessage, transaction: Transaction) {
         Log.d("Pay Theory Demo", confirmationData.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
         yesBtn.setOnClickListener {
             dialog!!.dismiss()
-            transaction.completeTransfer(confirmationData)
+            transaction.completeTransfer()
         }
 
         noBtn.setOnClickListener {

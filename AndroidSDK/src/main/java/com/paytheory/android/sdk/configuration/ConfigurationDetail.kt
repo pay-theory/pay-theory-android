@@ -13,7 +13,7 @@ enum class TransactionType {
  * Object that holds the fee mode values
  */
 object FeeMode {
-    const val INTERCHANGE = "surcharge"
+    const val INTERCHANGE = "interchange"
     const val SERVICE_FEE = "service_fee"
 }
 /**

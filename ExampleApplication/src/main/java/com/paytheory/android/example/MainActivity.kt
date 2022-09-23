@@ -4,11 +4,9 @@ import Address
 import PayorInfo
 import android.app.Dialog
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import android.view.Window
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -44,42 +42,42 @@ class MainActivity : AppCompatActivity() , Payable {
             "Abel",
             "Collins",
             "abel@paytheory.com",
-            "513-123-4567",
+            "5135555555", //TODO handle if passed in with dashes
             Address(
-                "123 Testing Lane",
-                "Apt 2",
+                "10549 Reading Rd",
+                "Apt 1",
                 "Cincinnati",
                 "OH",
-                "45236",
+                "45241",
                 "USA")
         )
 
         //metadata configuration
         val metadata: HashMap<Any,Any> = hashMapOf(
-            "pay-theory-account-code" to "test-acccount-code",
-            "pay-theory-reference" to "android-test",
-            "payment-parameters-name" to "expires-in-30-days" //TODO
+            "studentId" to "student_1859034",
+            "courseId" to "course_1859034"
         )
 
 
         //PayTheoryFragment configuration for card payments
         payTheoryFragment.configure(
             apiKey = apiKey,
-            amount = 1000,
+            amount = 2122,
             transactionType = TransactionType.CARD,
             requireAccountName = false,
             requireBillingAddress = false,
             confirmation = true,
-            feeMode = FeeMode.SERVICE_FEE,
+            feeMode = FeeMode.INTERCHANGE,
             metadata = metadata,
             payorInfo = payorInfo,
-            payorId = "payor-1234", //TODO
-            accountCode = "test-account-code", //TODO
-            reference = "android-test", //TODO
-            paymentParameters = "expires-in-30-days", //TODO
-            invoiceId = "pt_inv_XXXXXXXXX", //TODO
             sendReceipt = true,
-            receiptDescription = "Test on Android SDK")
+            receiptDescription = "Test on Android SDK",
+            accountCode = "987654321", //TODO
+            reference = "Test v2.7.0 on android", //TODO
+//            payorId = "payor-1234", //TODO
+//            paymentParameters = "expires-in-30-days", //TODO
+//            invoiceId = "pt_inv_XXXXXXXXX" //TODO
+)
 
         //PayTheoryFragment configuration for bank account payments
 
@@ -100,35 +98,39 @@ class MainActivity : AppCompatActivity() , Payable {
     }
 
     //Inherited from Payable interface
-    override fun paymentComplete(paymentResult: PaymentResult) {
-        showToast("payment successful on account XXXX${paymentResult.last_four}")
+    override fun paymentComplete(transactionResult: CompletedTransactionResult) {
+        println("transactionResult $transactionResult")
+        showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
+    }
+
+    override fun paymentFailed(transactionResult: FailedTransactionResult) {
+        println("paymentFailure $transactionResult")
+        showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
     }
 
     override fun barcodeComplete(barcodeResult: BarcodeResult) {
-        showToast("barcode request successful $barcodeResult")
-    }
-
-    override fun paymentFailed(paymentFailure: PaymentResultFailure) {
-        showToast("payment failed on account XXXX${paymentFailure.last_four}")
+        println("barcodeResult $barcodeResult")
+        showToast("Barcode Request Successful $barcodeResult")
     }
 
     override fun transactionError(transactionError: TransactionError) {
-        showToast("an error occurred ${transactionError.reason}")
+        println("transactionError $transactionError")
+        showToast("Error occurred ${transactionError.reason}")
     }
 
     //Demo function to display payment confirmation message to user
-    override fun paymentConfirmation(confirmationData: PaymentConfirmation, transaction: Transaction) {
-        Log.d("Pay Theory Demo", confirmationData.toString())
+    override fun paymentConfirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+        Log.d("Pay Theory Demo", confirmationMessage.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text = if (confirmationData.brand == "ACH") {
-            "Are you sure you want to make a payment of $${confirmationData.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.fee!!.toFloat()/100} " +
-                    "on account ending in ${confirmationData.lastFour}?"
+        confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
+            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    "on account ending in ${confirmationMessage.lastFour}?"
         } else {
-            "Are you sure you want to make a payment of $${confirmationData.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.fee!!.toFloat()/100} " +
-                    "on ${confirmationData.brand} account beginning with ${confirmationData.firstSix}?"
+            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
@@ -136,12 +138,12 @@ class MainActivity : AppCompatActivity() , Payable {
 
         yesBtn.setOnClickListener {
             dialog!!.dismiss()
-            transaction.completeTransfer(confirmationData)
+            transaction.completeTransfer()
         }
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
-            showToast("payment canceled on account beginning with ${confirmationData.firstSix}")
+            showToast("payment canceled on account beginning with ${confirmationMessage.firstSix}")
             transaction.disconnect()
         }
 

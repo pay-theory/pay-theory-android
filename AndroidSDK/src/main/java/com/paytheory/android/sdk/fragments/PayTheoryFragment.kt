@@ -163,22 +163,35 @@ class PayTheoryFragment : Fragment() {
             val stage: String = apiKey.substring(startIndex + 1, endIndex)
             this.constants = Constants(partner, stage)
 
-            //add all tags
-            this.metadata!!["pay-theory-environment"] = partner
-
+            //create pay_theory_data object for host:transfer_part1 action request
             val payTheoryData = hashMapOf<Any, Any>()
-            payTheoryData["pay-theory-environment"] = partner
+
+//            this.metadata!!["pay-theory-environment"] = partner
+//            payTheoryData["pay-theory-environment"] = partner
+
+            //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
             if (this.sendReceipt) {
                 payTheoryData["send_receipt"] = this.sendReceipt
                 payTheoryData["receipt_description"] = this.receiptDescription
             }
-            if (this.metadata!!["pay-theory-account-code"] != null) {
-                payTheoryData["account_code"] = this.metadata!!["pay-theory-account-code"] as Any
+
+            // if account_code is given add to pay_theory_data
+            if (!this.accountCode.isNullOrBlank()) {
+                payTheoryData["account_code"] = this.accountCode!!
             }
 
-            if (this.metadata!!["pay-theory-reference"] != null) {
-                payTheoryData["reference"] = this.metadata!!["pay-theory-reference"] as Any
+            // if reference is given add to pay_theory_data
+            if (!this.reference.isNullOrBlank()) {
+                payTheoryData["reference"] = this.reference!!
             }
+
+//            if (this.metadata!!["pay-theory-account-code"] != null) {
+//                payTheoryData["account_code"] = this.metadata!!["pay-theory-account-code"] as Any
+//            }
+//
+//            if (this.metadata!!["pay-theory-reference"] != null) {
+//                payTheoryData["reference"] = this.metadata!!["pay-theory-reference"] as Any
+//            }
 
             this.payTheoryData = payTheoryData
 
@@ -188,6 +201,7 @@ class PayTheoryFragment : Fragment() {
                     partner,
                     stage,
                     this.apiKey!!,
+                    this.feeMode,
                     this.constants,
                     this.confirmation,
                     this.sendReceipt,
@@ -205,11 +219,15 @@ class PayTheoryFragment : Fragment() {
             val btn = requireActivity().findViewById<Button>(R.id.submitButton)
 
             // credit card fields
-            val (ccNumber, ccCVV, ccExpiration) = getCreditCardFields()
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
             val hasCC = (ccNumber.visibility == View.VISIBLE
                     && ccCVV.visibility == View.VISIBLE
-                    && ccExpiration.visibility == View.VISIBLE)
+                    && ccExpiration.visibility == View.VISIBLE
+                    && billingZip.visibility == View.VISIBLE)
 
 
             // ach fields
@@ -224,7 +242,8 @@ class PayTheoryFragment : Fragment() {
             achChooser.setAdapter(adapter)
 
             val hasACH = (achAccount.visibility == View.VISIBLE
-                    && achRouting.visibility == View.VISIBLE)
+                    && achRouting.visibility == View.VISIBLE
+                    && billingZip.visibility == View.VISIBLE)
 
             // cash fields
             val cashBuyerContact =
@@ -233,7 +252,8 @@ class PayTheoryFragment : Fragment() {
 
 
             val hasCASH = (cashBuyerContact.visibility == View.VISIBLE
-                    && cashBuyer.visibility == View.VISIBLE)
+                    && cashBuyer.visibility == View.VISIBLE
+                    && billingZip.visibility == View.VISIBLE)
 
             // buyer options
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
@@ -243,7 +263,6 @@ class PayTheoryFragment : Fragment() {
                 requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
             val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
             val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
-            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
             val hasAccountName = accountName.visibility == View.VISIBLE
 
@@ -283,24 +302,38 @@ class PayTheoryFragment : Fragment() {
 
             btn.setOnClickListener {
 
-
                 if (hasAccountName) {
                     this.accountName = accountName.text.toString()
                 }
 
+                //If all billing address fields are visible get all field data
                 if (hasBillingAddress) {
                     billingAddress = Address(
+                        billingAddress1.text.toString().ifBlank { "" },
+                        billingAddress2.text.toString().ifBlank { "" },
                         billingCity.text.toString().ifBlank { "" },
                         billingState.text.toString().ifBlank { "" },
                         billingZip.text.toString().ifBlank { "" },
-                        billingAddress1.text.toString().ifBlank { "" },
-                        billingAddress2.text.toString().ifBlank { "" },
+                        "USA"
+                    )
+
+
+
+                // else just get zip code
+                } else {
+                    billingAddress = Address(
+                        "",
+                        "",
+                        "",
+                        "",
+                        billingZip.text.toString().ifBlank { "" },
                         "USA"
                     )
                 }
 
                 //Create card payment
                 if (hasCC) {
+//                    if(billingZip.text.isNullOrBlank() || billingZip.text!!.count() < 3)
                     val expirationString = ccExpiration.text.toString()
                     val expirationMonth = expirationString.split("/").first()
                     val expirationYear = expirationString.split("/").last()
@@ -374,13 +407,6 @@ class PayTheoryFragment : Fragment() {
         return Pair(achAccount, achRouting)
     }
 
-    private fun getCreditCardFields(): Triple<PayTheoryEditText, PayTheoryEditText, PayTheoryEditText> {
-        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-        return Triple(ccNumber, ccCVV, ccExpiration)
-    }
-
     private fun enableFields(
         transactionType: TransactionType,
         requireAccountName: Boolean,
@@ -420,6 +446,8 @@ class PayTheoryFragment : Fragment() {
         ccCVV!!.visibility = View.VISIBLE
         val ccExpiration: PayTheoryEditText? = view?.findViewById(R.id.cc_expiration)
         ccExpiration!!.visibility = View.VISIBLE
+        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
+        billingZip!!.visibility = View.VISIBLE
         val cvvAndExpiration: LinearLayout? = view?.findViewById(R.id.cvv_and_expiration)
         cvvAndExpiration!!.visibility = View.VISIBLE
     }
@@ -433,8 +461,8 @@ class PayTheoryFragment : Fragment() {
         city!!.visibility = View.VISIBLE
         val state: PayTheoryEditText? = view?.findViewById(R.id.billing_state)
         state!!.visibility = View.VISIBLE
-        val zip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
-        zip!!.visibility = View.VISIBLE
+        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
+        billingZip!!.visibility = View.VISIBLE
     }
 
     private fun enableAccountName() {
@@ -447,14 +475,17 @@ class PayTheoryFragment : Fragment() {
         achAccount!!.visibility = View.VISIBLE
         val achRouting: PayTheoryEditText? = view?.findViewById(R.id.ach_routing_number)
         achRouting!!.visibility = View.VISIBLE
+        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
+        billingZip!!.visibility = View.VISIBLE
         val achChoice: TextInputLayout? = view?.findViewById(R.id.ach_type_choice_layout)
         achChoice!!.visibility = View.VISIBLE
     }
 
     private fun enableCash(){
+        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
+        billingZip!!.visibility = View.VISIBLE
         val cashBuyerContact: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer_contact)
         cashBuyerContact!!.visibility = View.VISIBLE
-
         val cashBuyer: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer)
         cashBuyer!!.visibility = View.VISIBLE
     }

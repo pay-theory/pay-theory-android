@@ -1,11 +1,8 @@
 package com.paytheory.android.sdk
 
 import Address
-import BillingAddress
-import Payment
 import PayorInfo
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Data class that represents the payment results after transaction has been processed
@@ -73,7 +70,7 @@ data class BarcodeResult (
 /**
  * Data class to store payment confirmation details
  */
-data class PaymentConfirmation (
+data class ConfirmationMessage (
     @SerializedName("payment_token") val paymentToken: String,
     @SerializedName("payer_id") val payerId: String,
     @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String,
@@ -86,11 +83,11 @@ data class PaymentConfirmation (
     @SerializedName("expiration") val expiration: String,
     @SerializedName("idempotency") val idempotency: String,
     @SerializedName("billing_name") val billingName: String,
-    @SerializedName("billing_address") val billingAddress: BillingAddress,
+    @SerializedName("billing_address") val billingAddress: Address,
     @SerializedName("amount") val amount: String,
     @SerializedName("currency") val currency: String,
     @SerializedName("fee_mode") val fee_mode: String,
-    @SerializedName("fee") val fee: String,
+    @SerializedName("fee") var fee: String,
     @SerializedName("processor_merchant_id") val processor_merchant_id: String,
     @SerializedName("payment_method") val payment_method: String,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
@@ -102,9 +99,27 @@ data class PaymentConfirmation (
 )
 
 /**
- * Data class to store completed transfer details
+ * Data class to store transaction result data for successful, pending, failed transactions
  */
-data class CompletedTransfer (
+data class TransactionResult (
+    @SerializedName("state") val state: String,
+    @SerializedName("amount") val amount: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("service_fee") var serviceFee: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
+    @SerializedName("type") val type: String,
+)
+
+/**
+ * Data class to store transaction result data for successful or pending transaction results
+ */
+data class CompletedTransactionResult (
     @SerializedName("state") val state: String,
     @SerializedName("amount") val amount: String,
     @SerializedName("brand") val brand: String,
@@ -114,6 +129,18 @@ data class CompletedTransfer (
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
     @SerializedName("receipt_number") val receiptNumber: String,
     @SerializedName("created_at") val createdAt: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
+)
+
+/**
+ * Data class to store transaction result data for failed transactions results
+ */
+data class FailedTransactionResult (
+    @SerializedName("state") val state: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("receipt_number") val receiptNumber: String,
     @SerializedName("payment_method_id") val paymentMethodId: String,
     @SerializedName("payor_id") val payorId: String,
 )
@@ -143,13 +170,13 @@ interface Payable {
      * Converts paymentResult as Payable
      * @param paymentResult result of the completed transaction
      */
-    fun paymentComplete(paymentResult: PaymentResult)
+    fun paymentComplete(paymentResult: CompletedTransactionResult)
 
     /**
      * Converts paymentFailure as Payable
      * @param paymentFailure reason the transaction failed
      */
-    fun paymentFailed(paymentFailure: PaymentResultFailure)
+    fun paymentFailed(paymentFailure: FailedTransactionResult)
 
     /**
      * Converts transactionError as Payable
@@ -161,7 +188,7 @@ interface Payable {
      * method to handle confirmation of payment
      * @param confirmationData confirmation data
      */
-    fun paymentConfirmation(confirmationData: PaymentConfirmation, transaction: Transaction)
+    fun paymentConfirmation(confirmationData: ConfirmationMessage, transaction: Transaction)
 
     /**
      * Converts barcodeResult as Payable

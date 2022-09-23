@@ -11,7 +11,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.android.gms.safetynet.SafetyNet
+import com.google.android.gms.tasks.Task
+import com.google.android.play.core.integrity.IntegrityManagerFactory
+import com.google.android.play.core.integrity.IntegrityTokenRequest
+import com.google.android.play.core.integrity.IntegrityTokenResponse
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
@@ -37,6 +40,7 @@ class Transaction(
     private val partner: String,
     private val stage: String,
     private val apiKey: String,
+    val feeMode: String,
     private val constants: Constants,
     private val confirmation: Boolean,
     private val sendReceipt: Boolean,
@@ -44,14 +48,15 @@ class Transaction(
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>?
 ): WebsocketMessageHandler {
-
-    private val GOOGLE_API = "AIzaSyDDn2oOEQGs-1ETypHoa9MIkJZZtjEAYBs"
-    var queuedRequest: Payment? = null
+    private val googleProjectNumber = 192992826889
+    private var originalConfirmation: ConfirmationMessage? = null
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
+    var queuedRequest: Payment? = null
     var publicKey: String? = null
     var sessionKey:String? = null
     var hostToken:String? = null
+
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -71,9 +76,6 @@ class Transaction(
         private var messageReactors: MessageReactors? = null
         @OptIn(ExperimentalCoroutinesApi::class)
         private var connectionReactors: ConnectionReactors? = null
-
-
-
         private var webServicesProvider: WebServicesProvider? = null
         private var webSocketRepository: WebsocketRepository? = null
         var webSocketInteractor: WebsocketInteractor? = null
@@ -99,15 +101,8 @@ class Transaction(
             if (queuedRequest != null) {
                 establishViewModel(ptTokenResponse)
             } else {
-                callSafetyNet(ptTokenResponse)
+                googlePlayIntegrity(ptTokenResponse)
             }
-//            if (ptTokenResponse.ptToken != null) {
-//                callSafetyNet(ptTokenResponse)
-//            } else {
-//                if (context is Payable) {
-//                    context.transactionError(TransactionError("Cannot connect to payment system"))
-//                }
-//            }
 
         }, { error ->
             if (context is Payable) {
@@ -124,17 +119,30 @@ class Transaction(
 
     @ExperimentalCoroutinesApi
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun callSafetyNet(ptTokenResponse: PTTokenResponse) {
+    private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
-        SafetyNet.getClient(context).attest(challenge.toByteArray(), GOOGLE_API)
-            .addOnSuccessListener {
-                val attestationResult = it.jwsResult
-                establishViewModel(ptTokenResponse, attestationResult)
-            }.addOnFailureListener {
-                if (context is Payable) {
-                    context.transactionError(TransactionError(it.message!!))
-                }
+        // Create an instance of a manager.
+        val integrityManager =
+            IntegrityManagerFactory.create(this.context)
+
+        // Request the integrity token by providing the nonce as Pay Theory challenge string.
+        val integrityTokenResponse: Task<IntegrityTokenResponse> =
+            integrityManager.requestIntegrityToken(
+                IntegrityTokenRequest.builder()
+                    .setNonce(challenge)
+                    .setCloudProjectNumber(googleProjectNumber)
+                    .build())
+
+        integrityTokenResponse.addOnSuccessListener {
+            val integrityToken = it.token()
+            establishViewModel(ptTokenResponse, integrityToken)
+        }
+
+        integrityTokenResponse.addOnFailureListener {
+            if (context is Payable) {
+                context.transactionError(TransactionError(it.message!!))
             }
+        }
     }
 
     @ExperimentalCoroutinesApi
@@ -183,50 +191,6 @@ class Transaction(
             println("Pay Theory Resetting Connection")
         }
     }
-
-//    /**
-//     * Generate the initial action request
-//     * @param payment payment object to transact
-//     */
-//    private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
-//
-//        //generate public key
-//        publicKey = generateLocalKeyPair()
-//
-//        //if payment type is "CASH" return cash ActionRequest
-//        if (payment.type == CASH){
-//            val requestAction = BARCODE_ACTION
-//            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
-//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
-//            return ActionRequest(
-//                requestAction,
-//                encryptedBody,
-//                publicKey,
-//                sessionKey
-//            )
-//        }
-//        //if payment type is not "CASH" return transfer ActionRequest
-//        else {
-//            val requestAction = TRANSFER_PART_ONE_ACTION
-//
-//            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
-//
-//            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
-//                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
-//
-//            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
-//                metadata, sessionKey, System.currentTimeMillis())
-//
-//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest))
-//
-//            return ActionRequest(
-//                requestAction,
-//                encryptedBody,
-//                publicKey,
-//                sessionKey
-//            )
-//        }
-//    }
 
     /**
      * Generate the initial action request
@@ -278,19 +242,26 @@ class Transaction(
         }
     }
 
+    /**
+     * Set confirmation message to send host:transfer_part2 action request after user confirmation
+     */
+    fun setConfirmation(confirmationMessage: ConfirmationMessage){
+        originalConfirmation = confirmationMessage
+    }
 
     /**
-     * Generate transfer part two action request
+     * After payment confirmation is complete host:transfer_part2 action request is created
+     * Function called from override fun paymentConfirmation
      * @param
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun completeTransfer(message: PaymentConfirmation) {
+    fun completeTransfer() {
+//        //set payer_id to payor_id
+//        if (this.originalConfirmation?.payerId?.isNotBlank() == true){
+//            originalConfirmation!!.payor_id = originalConfirmation!!.payerId
+//        }
 
-        if (message.payerId.isNotBlank()){
-            message.payor_id = message.payerId
-        }
-
-        val requestBody = TransferPartTwoRequest(message, metadata, sessionKey, System.currentTimeMillis())
+        val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
@@ -333,7 +304,7 @@ class Transaction(
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
-                    COMPLETED_TRANSFER -> messageReactors!!.completeTransfer(message,viewModel, this)
+                    COMPLETED_TRANSFER -> messageReactors!!.completeTransaction(message,viewModel, this)
                     else -> messageReactors!!.onError(message, this)
                 }
             }
