@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() , Payable {
             receiptDescription = "Test on Android SDK",
             accountCode = "987654321", //TODO
             reference = "Test v2.7.0 on android", //TODO
-//            payorId = "payor-1234", //TODO
-//            paymentParameters = "expires-in-30-days", //TODO
-//            invoiceId = "pt_inv_XXXXXXXXX" //TODO
+            payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5", //TODO dont allow payor info as well
+            paymentParameters = "test-params-2", //TODO
+//            invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1" //TODO
 )
 
         //PayTheoryFragment configuration for bank account payments

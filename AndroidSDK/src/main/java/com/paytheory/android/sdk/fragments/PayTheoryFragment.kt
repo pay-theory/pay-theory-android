@@ -175,6 +175,21 @@ class PayTheoryFragment : Fragment() {
                 payTheoryData["receipt_description"] = this.receiptDescription
             }
 
+            // if paymentParameters is given add to pay_theory_data
+            if (!this.paymentParameters.isNullOrBlank()) {
+                payTheoryData["payment_parameters"] = this.paymentParameters!!
+            }
+
+            // if payorId is given add to pay_theory_data
+            if (!this.payorId.isNullOrBlank()) {
+                payTheoryData["payor_id"] = this.payorId!!
+            }
+
+            // if invoiceId is given add to pay_theory_data
+            if (!this.invoiceId.isNullOrBlank()) {
+                payTheoryData["invoice_id"] = this.invoiceId!!
+            }
+
             // if account_code is given add to pay_theory_data
             if (!this.accountCode.isNullOrBlank()) {
                 payTheoryData["account_code"] = this.accountCode!!
