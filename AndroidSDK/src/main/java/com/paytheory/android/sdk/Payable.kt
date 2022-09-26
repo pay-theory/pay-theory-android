@@ -50,7 +50,7 @@ data class PaymentResultFailure (
  * Data class that represents the error received if a transaction fails
  * @param reason reason the transaction failed
  */
-data class TransactionError (
+data class Error (
     @SerializedName("reason") val reason: String
 )
 
@@ -72,30 +72,30 @@ data class BarcodeResult (
  */
 data class ConfirmationMessage (
     @SerializedName("payment_token") val paymentToken: String,
-    @SerializedName("payer_id") val payerId: String,
-    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String,
-    @SerializedName("merchant_uid") val merchantUid: String,
-    @SerializedName("last_four") val lastFour: String,
-    @SerializedName("first_six") val firstSix: String,
-    @SerializedName("brand") val brand: String,
+    @SerializedName("payer_id") val payerId: String?,
+    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String?,
+    @SerializedName("merchant_uid") val merchantUid: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
     @SerializedName("session_key") val sessionKey: String,
     @SerializedName("processor") val processor: String,
-    @SerializedName("expiration") val expiration: String,
+    @SerializedName("expiration") val expiration: String?,
     @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("billing_name") val billingName: String,
-    @SerializedName("billing_address") val billingAddress: Address,
+    @SerializedName("billing_name") val billingName: String?,
+    @SerializedName("billing_address") val billingAddress: Address?,
     @SerializedName("amount") val amount: String,
     @SerializedName("currency") val currency: String,
     @SerializedName("fee_mode") val fee_mode: String,
-    @SerializedName("fee") var fee: String,
-    @SerializedName("processor_merchant_id") val processor_merchant_id: String,
+    @SerializedName("fee") var fee: String?,
+    @SerializedName("processor_merchant_id") val processor_merchant_id: String?,
     @SerializedName("payment_method") val payment_method: String,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
     @SerializedName("pay_theory_data") val pay_theory_data: HashMap<Any, Any>?,
-    @SerializedName("payor_info") val payorInfo: PayorInfo,
-    @SerializedName("payor_id") var payor_id: String,
-    @SerializedName("invoice_id") val invoice_id: String,
-    @SerializedName("payment_intent_id") val paymentIntentId: String,
+    @SerializedName("payor_info") val payorInfo: PayorInfo?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("invoice_id") val invoice_id: String?,
+    @SerializedName("payment_intent_id") val paymentIntentId: String?,
 )
 
 /**
@@ -134,6 +134,20 @@ data class CompletedTransactionResult (
 )
 
 /**
+ * Data class to store payment method token result details
+ */
+data class PaymentMethodTokenResults (
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("expiration") val expiration: String?,
+    @SerializedName("payment_type") val paymentType: String
+)
+
+/**
  * Data class to store transaction result data for failed transactions results
  */
 data class FailedTransactionResult (
@@ -163,36 +177,49 @@ data class EncryptedCompletedTransfer (
 )
 
 /**
+ * Data class to store payment confirmation details
+ */
+data class EncryptedPaymentToken (
+    @SerializedName("type") val type: String,
+    @SerializedName("body") val body: String,
+    @SerializedName("public_key") val publicKey: String
+)
+/**
  * Interface that handles a transaction completion, failure, and errors
  */
 interface Payable {
     /**
      * Converts paymentResult as Payable
-     * @param paymentResult result of the completed transaction
+     * @param completedTransactionResult result of the completed transaction
      */
-    fun paymentComplete(paymentResult: CompletedTransactionResult)
+    fun paymentSuccess(completedTransactionResult: CompletedTransactionResult)
 
     /**
      * Converts paymentFailure as Payable
-     * @param paymentFailure reason the transaction failed
+     * @param failedTransactionResult reason the transaction failed
      */
-    fun paymentFailed(paymentFailure: FailedTransactionResult)
-
-    /**
-     * Converts transactionError as Payable
-     * @param transactionError reason the transaction error
-     */
-    fun transactionError(transactionError: TransactionError)
+    fun paymentFailed(failedTransactionResult: FailedTransactionResult)
 
     /**
      * method to handle confirmation of payment
-     * @param confirmationData confirmation data
+     * @param confirmationMessage confirmation data
      */
-    fun paymentConfirmation(confirmationData: ConfirmationMessage, transaction: Transaction)
+    fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction)
 
     /**
-     * Converts barcodeResult as Payable
+     * Converts transactionError as Payable
+     * @param error reason the transaction error
+     */
+    fun transactionError(error: Error)
+
+    /**
+     * method to handle barcode results
      * @param barcodeResult result of the completed barcode transaction
      */
-    fun barcodeComplete(barcodeResult: BarcodeResult)
+    fun barcodeSuccess(barcodeResult: BarcodeResult)
+
+    /**
+     * method to handle payment method tokenize results
+     */
+    fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults)
 }

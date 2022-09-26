@@ -50,35 +50,35 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    override fun paymentComplete(transactionResult: TransactionResult) {
-        showToast("payment successful on account XXXX${transactionResult.lastFour}")
+    //Inherited from Payable interface
+    override fun paymentSuccess(transactionResult: CompletedTransactionResult) {
+        println("transactionResult $transactionResult")
+        showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
     }
 
-    override fun barcodeComplete(barcodeResult: BarcodeResult) {
-        showToast("barcode request successful $barcodeResult")
+    override fun paymentFailed(transactionResult: FailedTransactionResult) {
+        println("paymentFailure $transactionResult")
+        showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
     }
 
-    override fun paymentFailed(paymentFailure: PaymentResultFailure) {
-        showToast("payment failed on account XXXX${paymentFailure.last_four} ${paymentFailure.type}")
-    }
-
-    override fun transactionError(transactionError: TransactionError) {
-        showToast("an error occurred ${transactionError.reason}")
+    override fun transactionError(error: Error) {
+        println("transactionError $error")
+        showToast("Error occurred ${error.reason}")
     }
 
     //Demo function to display payment confirmation message to user
-    override fun paymentConfirmation(confirmationData: ConfirmationMessage, transaction: Transaction) {
-        Log.d("Pay Theory Demo", confirmationData.toString())
+    override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+        Log.d("Pay Theory Demo", confirmationMessage.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        confirmationTextView.text = if (confirmationData.bin.card_brand == "ACH") {
-            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
-                    "on account ending in ${confirmationData.bin.last_four}?"
+        confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
+            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    "on account ending in ${confirmationMessage.lastFour}?"
         } else {
-            "Are you sure you want to make a payment of $${confirmationData.payment.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationData.payment.service_fee!!.toFloat()/100} " +
-                    "on ${confirmationData.bin.card_brand} account beginning with ${confirmationData.bin.first_six}?"
+            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
+                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 
         val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
@@ -91,13 +91,24 @@ class MainActivity : AppCompatActivity(), Payable {
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
-            showToast("payment canceled on account beginning with ${confirmationData.bin.first_six}")
+            showToast("payment canceled")
             transaction.disconnect()
         }
 
         runOnUiThread {
             dialog!!.show()
         }
+    }
+
+
+    override fun barcodeSuccess(barcodeResult: BarcodeResult) {
+        println("barcodeResult $barcodeResult")
+        showToast("Barcode Request Successful $barcodeResult")
+    }
+
+    override fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults) {
+        println("tokenize payment method results $paymentMethodToken")
+        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
     }
 
 }

@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
+import com.paytheory.android.sdk.configuration.TokenizationType
 import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
@@ -20,7 +21,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285"
+    val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() , Payable {
         //PayTheoryFragment configuration for card payments
         payTheoryFragment.configure(
             apiKey = apiKey,
-            amount = 2122,
+            amount = 2500,
             transactionType = TransactionType.CARD,
             requireAccountName = false,
             requireBillingAddress = false,
@@ -73,18 +74,44 @@ class MainActivity : AppCompatActivity() , Payable {
             sendReceipt = true,
             receiptDescription = "Test on Android SDK",
             accountCode = "987654321", //TODO
-            reference = "Test v2.7.0 on android", //TODO
-            payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5", //TODO dont allow payor info as well
-            paymentParameters = "test-params-2", //TODO
-//            invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1" //TODO
-)
+            reference = "Test v2.7.0 on android",
+            paymentParameters = "test-params-2",
+//          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
+//          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
+        )
 
-        //PayTheoryFragment configuration for bank account payments
+        //PayTheoryFragment configuration for card payments
+//        payTheoryFragment.tokenizePaymentMethod(
+//            apiKey = apiKey,
+//            tokenizationType = TokenizationType.CARD,
+//            requireAccountName = true,
+//            requireBillingAddress = true,
+//            payorInfo = payorInfo,
+//            payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
+//            metadata = metadata
+//        )
 
-        //payTheoryFragment.configure(apiKey,5600, TransactionType.BANK, false, false, false, FeeMode.SERVICE_FEE, payorInfo, metadata)
 
         //PayTheoryFragment configuration for cash payments
-        //payTheoryFragment.configure(apiKey,7500, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, payorInfo, metadata)
+//        payTheoryFragment.configure(
+//            apiKey = apiKey,
+//            amount = 2500,
+//            transactionType = TransactionType.CASH,
+//            requireAccountName = false,
+//            requireBillingAddress = false,
+//            confirmation = false, //TODO test if confirmation is true on cash
+//            feeMode = FeeMode.INTERCHANGE,
+//            metadata = metadata,
+//            payorInfo = payorInfo,
+//            sendReceipt = true,
+//            receiptDescription = "Test on Android SDK",
+//            accountCode = "987654321", //TODO
+//            reference = "Test v2.7.0 on android",
+//            paymentParameters = "test-params-2",
+////          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
+////          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
+//        )
+
     }
 
     //Demo function to display payment response
@@ -98,7 +125,7 @@ class MainActivity : AppCompatActivity() , Payable {
     }
 
     //Inherited from Payable interface
-    override fun paymentComplete(transactionResult: CompletedTransactionResult) {
+    override fun paymentSuccess(transactionResult: CompletedTransactionResult) {
         println("transactionResult $transactionResult")
         showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
     }
@@ -108,18 +135,13 @@ class MainActivity : AppCompatActivity() , Payable {
         showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
     }
 
-    override fun barcodeComplete(barcodeResult: BarcodeResult) {
-        println("barcodeResult $barcodeResult")
-        showToast("Barcode Request Successful $barcodeResult")
-    }
-
-    override fun transactionError(transactionError: TransactionError) {
-        println("transactionError $transactionError")
-        showToast("Error occurred ${transactionError.reason}")
+    override fun transactionError(error: Error) {
+        println("transactionError $error")
+        showToast("Error occurred ${error.reason}")
     }
 
     //Demo function to display payment confirmation message to user
-    override fun paymentConfirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+    override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
         Log.d("Pay Theory Demo", confirmationMessage.toString())
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
@@ -143,13 +165,24 @@ class MainActivity : AppCompatActivity() , Payable {
 
         noBtn.setOnClickListener {
             dialog!!.dismiss()
-            showToast("payment canceled on account beginning with ${confirmationMessage.firstSix}")
+            showToast("payment canceled")
             transaction.disconnect()
         }
 
         runOnUiThread {
             dialog!!.show()
         }
+    }
+
+
+    override fun barcodeSuccess(barcodeResult: BarcodeResult) {
+        println("barcodeResult $barcodeResult")
+        showToast("Barcode Request Successful $barcodeResult")
+    }
+
+    override fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults) {
+        println("tokenize payment method results $paymentMethodToken")
+        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
     }
 
 }

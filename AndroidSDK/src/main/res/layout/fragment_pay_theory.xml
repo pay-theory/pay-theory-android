@@ -118,22 +118,6 @@
                             android:visibility="gone"
                             android:inputType="number" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/ach_type_choice_layout"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/account_type"
-                            android:visibility="gone">
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/ach_type_choice"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:cursorVisible="false"
-                                android:focusable="false"
-                                android:inputType="none"/>
-                        </com.google.android.material.textfield.TextInputLayout>
-
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cash_buyer"
                             android:layout_width="match_parent"
@@ -160,6 +144,22 @@
                             android:visibility="gone"
                             android:inputType="number"
                             android:autofillHints="postalCode" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/ach_type_choice_layout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/account_type"
+                            android:visibility="gone">
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/ach_type_choice"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:cursorVisible="false"
+                                android:focusable="false"
+                                android:inputType="none"/>
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/submitButton"

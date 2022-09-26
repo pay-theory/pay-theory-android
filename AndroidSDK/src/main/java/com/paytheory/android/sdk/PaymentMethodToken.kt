@@ -1,11 +1,9 @@
 package com.paytheory.android.sdk
 
 import ActionRequest
-import CashRequest
 import PaymentMethodData
-import Payment
-import PaymentData
-import TransferPartOneRequest
+import PaymentMethodTokenData
+import TokenizeRequest
 import TransferPartTwoRequest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -30,21 +28,14 @@ import java.util.*
 import kotlin.collections.HashMap
 
 /**
- * Transaction Class is created after data validation and click listener is activated.
- * This hold all pay theory logic to process payments.
- * @param context the applications resources
- * @param apiKey the api-key that will be used to create payment transaction
+ *
  */
-class Transaction(
+class PaymentMethodToken(
     val context: Context,
     private val partner: String,
     private val stage: String,
     private val apiKey: String,
-    val feeMode: String,
     private val constants: Constants,
-    private val confirmation: Boolean,
-    private val sendReceipt: Boolean,
-    private val receiptDescription: String,
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>? = null
 ): WebsocketMessageHandler {
@@ -52,7 +43,7 @@ class Transaction(
     private var originalConfirmation: ConfirmationMessage? = null
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
-    var queuedRequest: Payment? = null
+    var queuedRequest: PaymentMethodTokenData? = null
     var publicKey: String? = null
     var sessionKey:String? = null
     var hostToken:String? = null
@@ -63,14 +54,13 @@ class Transaction(
         private const val DISCONNECTED = "disconnected from socket"
         private const val INTERNAL_SERVER_ERROR = "Internal server error"
         private const val HOST_TOKEN_RESULT = "hostToken"
-        private const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
+        private const val TOKENIZE = "host:tokenize"
+        private const val TOKENIZE_RESULT = "tokenize_complete"
         private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
-        private const val BARCODE_ACTION = "host:barcode"
         private const val BARCODE_RESULT = "BarcodeUid"
         private const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
         private const val COMPLETED_TRANSFER = "transfer_complete"
         private const val UNKNOWN = "unknown"
-        const val CASH = "CASH"
 
         @OptIn(ExperimentalCoroutinesApi::class)
         private var messageReactors: MessageReactors? = null
@@ -93,28 +83,28 @@ class Transaction(
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
 
-    val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
+        val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
 
-    observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
-        .subscribe({ ptTokenResponse: PTTokenResponse ->
-            if (queuedRequest != null) {
-                establishViewModel(ptTokenResponse)
-            } else {
-                googlePlayIntegrity(ptTokenResponse)
-            }
-
-        }, { error ->
-            if (context is Payable) {
-                if(error.message == "HTTP 404 "){
-                    context.transactionError(Error("Access Denied"))
+            .subscribe({ ptTokenResponse: PTTokenResponse ->
+                if (queuedRequest != null) {
+                    establishViewModel(ptTokenResponse)
+                } else {
+                    googlePlayIntegrity(ptTokenResponse)
                 }
-                else {
-                    context.transactionError(Error("Failed to connect to payment system"))
+
+            }, { error ->
+                if (context is Payable) {
+                    if(error.message == "HTTP 404 "){
+                        context.transactionError(Error("Access Denied"))
+                    }
+                    else {
+                        context.transactionError(Error("Failed to connect to payment system"))
+                    }
                 }
             }
-        }
-        )
+            )
     }
 
     @ExperimentalCoroutinesApi
@@ -160,7 +150,7 @@ class Transaction(
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
         if (queuedRequest != null)
-            messageReactors!!.activePayment = queuedRequest
+            messageReactors!!.activePaymentToken = queuedRequest
     }
 
     /**
@@ -178,19 +168,19 @@ class Transaction(
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalCoroutinesApi
-    fun transact(
-        payment: Payment
+    fun tokenize(
+        paymentMethodTokenData: PaymentMethodTokenData
     ) {
 
-        messageReactors!!.activePayment = payment
+        messageReactors!!.activePaymentToken = paymentMethodTokenData
 
-        val actionRequest =  generateQueuedActionRequest(payment)
+        val actionRequest =  generateQueuedActionRequest(paymentMethodTokenData)
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Payment Requested")
+            println("Pay Theory Payment Token Requested")
         } else {
-            queuedRequest = payment
+            queuedRequest = paymentMethodTokenData
             ptTokenApiCall(context)
             println("Pay Theory Resetting Connection")
         }
@@ -201,8 +191,7 @@ class Transaction(
      * @param payment payment object to transact
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
-
+    private fun generateQueuedActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -211,47 +200,24 @@ class Transaction(
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
         }
 
-        //if payment type is "CASH" return cash ActionRequest
-        if (payment.type == CASH){
-            val requestAction = BARCODE_ACTION
-            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-            return ActionRequest(
-                requestAction,
-                encryptedBody,
-                publicKey,
-                sessionKey
-            )
-        }
-        //if payment type is not "CASH" return transfer ActionRequest
-        else {
-            val requestAction = TRANSFER_PART_ONE_ACTION
+        val requestAction = TOKENIZE
 
-            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
+        val paymentMethodData = PaymentMethodData(paymentMethodTokenData.name, paymentMethodTokenData.number, paymentMethodTokenData.security_code, paymentMethodTokenData.type, paymentMethodTokenData.expiration_year,
+            paymentMethodTokenData.expiration_month, paymentMethodTokenData.address, paymentMethodTokenData.account_number, paymentMethodTokenData.account_type, paymentMethodTokenData.bank_code )
 
-            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
-                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
+        val tokenRequest = TokenizeRequest(this.hostToken, paymentMethodData, paymentMethodTokenData.payorInfo, this.payTheoryData,metadata, sessionKey, System.currentTimeMillis())
 
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
-                metadata, sessionKey, System.currentTimeMillis())
+        val encryptedBody = encryptBox(Gson().toJson(tokenRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
 
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+        return ActionRequest(
+            requestAction,
+            encryptedBody,
+            publicKey,
+            sessionKey
+        )
 
-            return ActionRequest(
-                requestAction,
-                encryptedBody,
-                publicKey,
-                sessionKey
-            )
-        }
     }
 
-    /**
-     * Set confirmation message to send host:transfer_part2 action request after user confirmation
-     */
-    fun setConfirmation(confirmationMessage: ConfirmationMessage){
-        this.originalConfirmation = confirmationMessage.copy()
-    }
 
     /**
      * After payment confirmation is complete host:transfer_part2 action request is created
@@ -285,9 +251,7 @@ class Transaction(
 
     private fun discoverMessageType(message: String): String  {
         return when {
-            message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
-            message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
-            message.indexOf(TRANSFER_PART_ONE_RESULT) > -1 -> TRANSFER_PART_ONE_RESULT
+            message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
             message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
             else -> UNKNOWN
         }
@@ -305,11 +269,9 @@ class Transaction(
             INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message) }
             else -> {
                 when (discoverMessageType(message)) {
-                    HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
-                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
-                    BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
-                    COMPLETED_TRANSFER -> messageReactors!!.completeTransaction(message,viewModel, this)
-                    else -> messageReactors!!.onError(message, this)
+                    HOST_TOKEN_RESULT -> messageReactors!!.onTokenizeHostToken(message, this)
+                    TOKENIZE_RESULT -> messageReactors!!.onCompleteToken(message, this)
+                    else -> messageReactors!!.onTokenError(message, this)
                 }
             }
         }

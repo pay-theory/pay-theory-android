@@ -29,13 +29,13 @@ class CreditCardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         creditCardViewModel =
-            ViewModelProvider(this).get(CreditCardViewModel::class.java)
+            ViewModelProvider(this)[CreditCardViewModel::class.java]
 
         val root = inflater.inflate(R.layout.fragment_credit, container, false)
         val textView: TextView = root.findViewById(R.id.text_credit)
-        creditCardViewModel.text.observe(viewLifecycleOwner, {
+        creditCardViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
-        })
+        }
 
         this.childFragmentManager.beginTransaction()
             .add(R.id.payTheoryContainer, payTheoryFragment)
@@ -47,12 +47,47 @@ class CreditCardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        val payorInfo = PayorInfo("Test", "Card", "test@gmail.com", "513-123-4567",
-            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+        //PayorInfo configuration
+        val payorInfo = PayorInfo(
+            "Abel",
+            "Collins",
+            "abel@paytheory.com",
+            "5135555555", //TODO handle if passed in with dashes
+            Address(
+                "10549 Reading Rd",
+                "Apt 1",
+                "Cincinnati",
+                "OH",
+                "45241",
+                "USA")
+        )
 
-        val metadata = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-card-payment")
+        //metadata configuration
+        val metadata: HashMap<Any,Any> = hashMapOf(
+            "studentId" to "student_1859034",
+            "courseId" to "course_1859034"
+        )
 
-        payTheoryFragment.configure(apiKey,8500, TransactionType.CARD, false, false, true, FeeMode.SERVICE_FEE, payorInfo, metadata)
+
+        //PayTheoryFragment configuration for card payments
+        payTheoryFragment.configure(
+            apiKey = apiKey,
+            amount = 2500,
+            transactionType = TransactionType.CARD,
+            requireAccountName = false,
+            requireBillingAddress = false,
+            confirmation = true,
+            feeMode = FeeMode.INTERCHANGE,
+            metadata = metadata,
+            payorInfo = payorInfo,
+            sendReceipt = true,
+            receiptDescription = "Test on Android SDK",
+            accountCode = "987654321", //TODO
+            reference = "Test v2.7.0 on android",
+            paymentParameters = "test-params-2",
+//          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
+//          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
+        )
     }
 
 

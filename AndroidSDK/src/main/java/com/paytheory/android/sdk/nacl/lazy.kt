@@ -32,21 +32,20 @@ fun encryptBox(message: String, publicKey: Key): String {
 }
 
 //Above are examples of secure-tags-lib decrypting the incoming tag-secure-socket messages
-fun decryptBox(message: String, socketPublicKey: String): String {
+fun decryptBox(message: String, base64socketPublicKey: String): String {
     //Take public key passed from tag-secure-socket and base64 decode it and convert to lazysodium key
-    val socketPublicKey = Key.fromBase64String(socketPublicKey)
+    val socketPublicKey = Key.fromBase64String(base64socketPublicKey)
     //base64 decode message with nonce into byte array
     val messageWithNonceByteArray = Base64MessageEncoder().decode(message)
     //remove first 24 bytes for nonce value
-    val nonceOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(0,24)
+    val nonceOnlyByteArray: ByteArray = messageWithNonceByteArray.copyOfRange(0, 24)
     //remove after first 24 bytes for message value
-    val messageOnlyByteArray : ByteArray = messageWithNonceByteArray.copyOfRange(24,messageWithNonceByteArray.size)
+    val messageOnlyByteArray: ByteArray =
+        messageWithNonceByteArray.copyOfRange(24, messageWithNonceByteArray.size)
     //convert message from bytearray into string
     val messageOnlyString = lazySodium.sodiumBin2Hex(messageOnlyByteArray)
     //create key pair with generated secret key and tags-secure-socket public key
     val messageKeys = KeyPair(socketPublicKey, keyPair.secretKey)
 
-    val decrypedMessage = boxLazy.cryptoBoxOpenEasy(messageOnlyString, nonceOnlyByteArray, messageKeys)
-
-    return decrypedMessage
+    return boxLazy.cryptoBoxOpenEasy(messageOnlyString, nonceOnlyByteArray, messageKeys)
 }

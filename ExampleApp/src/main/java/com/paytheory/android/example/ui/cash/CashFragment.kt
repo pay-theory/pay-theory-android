@@ -29,14 +29,14 @@ class CashFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         cashViewModel =
-                ViewModelProvider(this).get(CashViewModel::class.java)
+            ViewModelProvider(this)[CashViewModel::class.java]
 
         val root = inflater.inflate(R.layout.fragment_cash, container, false)
         val textView: TextView = root.findViewById(R.id.text_cash)
 
-        cashViewModel.text.observe(viewLifecycleOwner, {
+        cashViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
-        })
+        }
 
         this.childFragmentManager.beginTransaction()
             .add(R.id.payTheoryContainer, payTheoryFragment)
@@ -48,11 +48,45 @@ class CashFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        val payorInfo = PayorInfo("Test", "Cash", "test@gmail.com", "513-123-4567",
-            Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+        //PayorInfo configuration
+        val payorInfo = PayorInfo(
+            "Abel",
+            "Collins",
+            "abel@paytheory.com",
+            "5135555555", //TODO handle if passed in with dashes
+            Address(
+                "10549 Reading Rd",
+                "Apt 1",
+                "Cincinnati",
+                "OH",
+                "45241",
+                "USA")
+        )
 
-        val metadata = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-cash-payment")
+        //metadata configuration
+        val metadata: HashMap<Any,Any> = hashMapOf(
+            "studentId" to "student_1859034",
+            "courseId" to "course_1859034"
+        )
 
-        payTheoryFragment.configure(apiKey,2501, TransactionType.CASH, false, false,  false, FeeMode.SERVICE_FEE, payorInfo, metadata)
+        //PayTheoryFragment configuration for cash payments
+        payTheoryFragment.configure(
+            apiKey = apiKey,
+            amount = 2500,
+            transactionType = TransactionType.CASH,
+            requireAccountName = false,
+            requireBillingAddress = false,
+            confirmation = false, //TODO test if confirmation is true on cash
+            feeMode = FeeMode.INTERCHANGE,
+            metadata = metadata,
+            payorInfo = payorInfo,
+            sendReceipt = true,
+            receiptDescription = "Test on Android SDK",
+            accountCode = "987654321", //TODO
+            reference = "Test v2.7.0 on android",
+            paymentParameters = "test-params-2",
+//          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
+//          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
+        )
     }
 }

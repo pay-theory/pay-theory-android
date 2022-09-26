@@ -10,6 +10,13 @@ enum class TransactionType {
 }
 
 /**
+ * Enum class that contains the types of payments
+ */
+enum class TokenizationType {
+    CARD, BANK
+}
+
+/**
  * Object that holds the fee mode values
  */
 object FeeMode {
@@ -28,6 +35,7 @@ data class ConfigurationDetail(
     var apiKey: String? = null,
     var amount: Int? = null,
     var transactionType: TransactionType? = TransactionType.CARD,
+    var tokenizationType: TokenizationType? = TokenizationType.CARD,
     var requireAccountName: Boolean? = false,
     var requireBillingAddress: Boolean? = false,
     var confirmation: Boolean? = false,
