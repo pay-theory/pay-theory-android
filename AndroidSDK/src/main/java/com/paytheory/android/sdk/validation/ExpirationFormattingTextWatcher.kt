@@ -2,6 +2,7 @@ package com.paytheory.android.sdk.validation
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.util.*
 
@@ -9,9 +10,10 @@ import java.util.*
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ExpirationFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
+class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
+    private var submitButton = submitButton
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -40,9 +42,7 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
 
         lock = false
         val isValidNumber = validExpiration(s.toString())
-        if (!isValidNumber) {
-            ptText!!.error = "invalid expiration number"
-        }
+        handleButton(isValidNumber)
     }
 
     private fun validExpiration(expiration: String): Boolean {
@@ -72,5 +72,14 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
         }
 
         return true
+    }
+    private fun handleButton(valid: Boolean){
+        if (valid) {
+            submitButton.isEnabled = true
+        }
+        if (!valid) {
+            submitButton.isEnabled = false
+            ptText!!.error = "Invalid Expiration"
+        }
     }
 }

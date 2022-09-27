@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.TokenizationType
 import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
@@ -59,28 +58,28 @@ class MainActivity : AppCompatActivity() , Payable {
             "courseId" to "course_1859034"
         )
 
-
-        //PayTheoryFragment configuration for card payments
-        payTheoryFragment.configure(
-            apiKey = apiKey,
-            amount = 2500,
-            transactionType = TransactionType.CARD,
-            requireAccountName = false,
-            requireBillingAddress = false,
-            confirmation = true,
-            feeMode = FeeMode.INTERCHANGE,
-            metadata = metadata,
-            payorInfo = payorInfo,
-            sendReceipt = true,
-            receiptDescription = "Test on Android SDK",
-            accountCode = "987654321", //TODO
-            reference = "Test v2.7.0 on android",
-            paymentParameters = "test-params-2",
+        try {
+            //PayTheoryFragment configuration for card payments
+            payTheoryFragment.configure(
+                apiKey = apiKey,
+                amount = 1000,
+                transactionType = TransactionType.CARD,
+                requireAccountName = false,
+                requireBillingAddress = false,
+                confirmation = true,
+                feeMode = FeeMode.INTERCHANGE,
+                metadata = metadata,
+                payorInfo = payorInfo,
+                sendReceipt = true,
+                receiptDescription = "Test on Android SDK",
+                accountCode = "987654321", //TODO
+                reference = "Test v2.7.0 on android",
+                paymentParameters = "test-params-2",
 //          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
 //          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
-        )
+            )
 
-        //PayTheoryFragment configuration for card payments
+            //PayTheoryFragment configuration for card payments
 //        payTheoryFragment.tokenizePaymentMethod(
 //            apiKey = apiKey,
 //            tokenizationType = TokenizationType.CARD,
@@ -92,7 +91,7 @@ class MainActivity : AppCompatActivity() , Payable {
 //        )
 
 
-        //PayTheoryFragment configuration for cash payments
+            //PayTheoryFragment configuration for cash payments
 //        payTheoryFragment.configure(
 //            apiKey = apiKey,
 //            amount = 2500,
@@ -111,6 +110,10 @@ class MainActivity : AppCompatActivity() , Payable {
 ////          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
 ////          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
 //        )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
 
     }
 

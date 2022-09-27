@@ -10,7 +10,7 @@ enum class TransactionType {
 }
 
 /**
- * Enum class that contains the types of payments
+ * Enum class that contains the types of payment method tokenization
  */
 enum class TokenizationType {
     CARD, BANK
