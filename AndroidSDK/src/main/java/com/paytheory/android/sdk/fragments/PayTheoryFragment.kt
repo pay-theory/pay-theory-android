@@ -29,14 +29,6 @@ import com.paytheory.android.sdk.validation.ExpirationFormattingTextWatcher
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-///**
-// * Pay Theory Class
-// */
-//@RequiresOptIn(message = "This API is being actively developed and may be subject to change.")
-//@Retention(AnnotationRetention.BINARY)
-//@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-//annotation class PayTheory
-
 /**
  * PayTheoryFragment populates with required text inputs.
  * Flexible display that adds inputs dynamically as needed
@@ -47,7 +39,6 @@ class PayTheoryFragment : Fragment() {
         const val BANK_ACCOUNT = "ach"
         const val CASH = "cash"
     }
-
 
     //default values for pay theory fragment
     private lateinit var constants: Constants
@@ -71,7 +62,6 @@ class PayTheoryFragment : Fragment() {
     private var invoiceId: String? = null
     private var sendReceipt: Boolean = false
     private var receiptDescription: String = ""
-
     private var billingAddress: Address? = Address()
     private var accountName: String? = null
     private var model: ConfigurationViewModel? = null
@@ -89,7 +79,6 @@ class PayTheoryFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_pay_theory, container, false)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onDetach() {
         super.onDetach()
         if (payTheoryTransaction != null) {
@@ -114,6 +103,7 @@ class PayTheoryFragment : Fragment() {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
+    @Throws(Exception::class)
     fun configure(
         apiKey: String,
         amount: Int,
@@ -240,14 +230,6 @@ class PayTheoryFragment : Fragment() {
                 payTheoryData["reference"] = this.reference!!
             }
 
-//            if (this.metadata!!["pay-theory-account-code"] != null) {
-//                payTheoryData["account_code"] = this.metadata!!["pay-theory-account-code"] as Any
-//            }
-//
-//            if (this.metadata!!["pay-theory-reference"] != null) {
-//                payTheoryData["reference"] = this.metadata!!["pay-theory-reference"] as Any
-//            }
-
             this.payTheoryData = payTheoryData
 
             payTheoryTransaction =
@@ -267,8 +249,6 @@ class PayTheoryFragment : Fragment() {
 
             payTheoryTransaction!!.init()
 
-
-
             enablePaymentFields(this.transactionType, requireAccountName!!, requireBillingAddress!!)
 
             val btn = requireActivity().findViewById<Button>(R.id.submitButton)
@@ -283,7 +263,6 @@ class PayTheoryFragment : Fragment() {
                     && ccCVV.visibility == View.VISIBLE
                     && ccExpiration.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
-
 
             // ach fields
             val (achAccount, achRouting) = getAchFields()
@@ -305,7 +284,6 @@ class PayTheoryFragment : Fragment() {
                 requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
             val cashBuyer = requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer)
 
-
             val hasCASH = (cashBuyerContact.visibility == View.VISIBLE
                     && cashBuyer.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
@@ -326,7 +304,6 @@ class PayTheoryFragment : Fragment() {
                     && billingCity.visibility == View.VISIBLE
                     && billingState.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
-
 
             //if card payment fields are active add text watcher validation
             if (hasCC) {
@@ -354,6 +331,10 @@ class PayTheoryFragment : Fragment() {
                 )
             }
 
+            //TODO add exceptions for checks
+//            if (this.amount == 2500) {
+//                throw Exception("Your balance $amount is less than minimum balance 1000.")
+//            }
 
             btn.setOnClickListener {
 
@@ -371,7 +352,6 @@ class PayTheoryFragment : Fragment() {
                         billingZip.text.toString().ifBlank { "" },
                         "USA"
                     )
-
 
                     // else just get zip code
                 } else {
@@ -452,9 +432,9 @@ class PayTheoryFragment : Fragment() {
                 }
             }
         }
-
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun tokenizePaymentMethod(
         apiKey: String,
         tokenizationType: TokenizationType? = TokenizationType.CARD,
@@ -532,8 +512,6 @@ class PayTheoryFragment : Fragment() {
 
             payTheoryTokenizeTransaction!!.init()
 
-
-
             enableTokenizationFields(this.tokenizationType, this.requireAccountName, this.requireBillingAddress)
 
             val btn = requireActivity().findViewById<Button>(R.id.submitButton)
@@ -549,7 +527,6 @@ class PayTheoryFragment : Fragment() {
                     && ccExpiration.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
 
-
             // ach fields
             val (achAccount, achRouting) = getAchFields()
 
@@ -564,7 +541,6 @@ class PayTheoryFragment : Fragment() {
             val hasACH = (achAccount.visibility == View.VISIBLE
                     && achRouting.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
-
 
             // buyer options
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
@@ -583,7 +559,6 @@ class PayTheoryFragment : Fragment() {
                     && billingState.visibility == View.VISIBLE
                     && billingZip.visibility == View.VISIBLE)
 
-
             //if card payment fields are active add text watcher validation
             if (hasCC) {
                 val ccNumberValidation: (PayTheoryEditText) -> CreditCardFormattingTextWatcher =
@@ -597,7 +572,6 @@ class PayTheoryFragment : Fragment() {
                 ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
                 ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
             }
-
 
             btn.setOnClickListener {
 
@@ -615,7 +589,6 @@ class PayTheoryFragment : Fragment() {
                         billingZip.text.toString().ifBlank { "" },
                         "USA"
                     )
-
 
                     // else just get zip code
                 } else {
@@ -674,9 +647,7 @@ class PayTheoryFragment : Fragment() {
                 }
             }
         }
-
     }
-
 
     private fun getAchFields(): Pair<PayTheoryEditText, PayTheoryEditText> {
         val achAccount = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_account_number)
@@ -702,7 +673,6 @@ class PayTheoryFragment : Fragment() {
         if (transactionType == TransactionType.CASH) {
             enableCash()
         }
-
 
         if (requireBillingAddress) {
             enableBillingAddress()
@@ -792,6 +762,4 @@ class PayTheoryFragment : Fragment() {
         val cashBuyer: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer)
         cashBuyer!!.visibility = View.VISIBLE
     }
-
-
 }
