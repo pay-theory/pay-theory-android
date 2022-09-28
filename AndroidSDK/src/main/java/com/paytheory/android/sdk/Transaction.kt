@@ -202,7 +202,6 @@ class Transaction(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
-
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -210,7 +209,6 @@ class Transaction(
         } else {
             android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
         }
-
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
@@ -260,10 +258,6 @@ class Transaction(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer() {
-//        //set payer_id to payor_id
-//        if (this.originalConfirmation?.payerId?.isNotBlank() == true){
-//            originalConfirmation!!.payor_id = originalConfirmation!!.payerId
-//        }
 
         val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
 

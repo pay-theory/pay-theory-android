@@ -99,39 +99,29 @@ add PayTheoryFragment to your activity's xml layout file
 
 [Click here to see example](https://github.com/pay-theory/pay-theory-android/blob/premain/ExampleApplication/src/main/res/layout/activity_main.xml)
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
     <fragment
         android:id="@+id/payTheoryFragment"
         android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
-
-</LinearLayout>
 ```
 
 ### Code
 
-Add this line to for your API key
+Set your api key
 
 ```Kotlin
-private val apiKey = "YOUR-API-KEY"
+private val apiKey = "My Api Key"
 ```
 
-Add this line inside your onCreate method set PayTheoryFragment
+Set PayTheoryFragment inside your onCreate method
 
 ```Kotlin
 val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-Inside your onCreate method configure Pay Theory
- * by default the SDK provides a simple credit card input (additional configurations available)
+Configure PayTheoryFragment inside your onCreate method
 
 ```Kotlin
 payTheoryFragment.configure(apiKey,8500)
@@ -169,25 +159,48 @@ class MainActivity : AppCompatActivity() , Payable {
 Here is an example on how to use PayTheoryFragment class method configure():
 ```Kotlin
 
-val payorInfo = PayorInfo(firstName, lastName, email, phoneNumber, Address(addressLineOne, addressLineTwo, addressCity, addressState, addressZip, addressCountry))
-
-val metadata = hashMapOf("pay-theory-account-code" to "test-acccount-code", "pay-theory-reference" to "android-test")
-
-payTheoryFragment.configure(
-    apiKey,                         // String : Pay Theory api key
-    amount,                         // Int : amount of the transaction in total cents 
-    TransactionType.CARD,           // String : requested transaction type (TransactionType.CARD, TransactionType.BANK, TransactionType.CASH) : defaults to TransactionType.CREDIT
-    false,                          // Boolean : set account name field to be displayed : defaults to true
-    false,                          // Boolean : set address fields to be displayed : defaults to true
-    false,                          // Boolean : require payment confirmation before completing payment : defaults to false
-    FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.INTERCHANGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.INTERCHANGE
-    payorInfo,                   // PayorInfo : buyer data sent to Pay Theory : defaults to empty object
-    metadata,                           // HashMap<String, String> : set optional metadata for Pay Theory : defaults to empty hash map
+val payorInfo = PayorInfo(
+    firstName, 
+    lastName, 
+    email, 
+    phoneNumber, 
+    Address(
+        addressLineOne, 
+        addressLineTwo, 
+        addressCity, 
+        addressState, 
+        addressZip, 
+        addressCountry)
 )
+
+val metadata: HashMap<Any,Any> = hashMapOf(
+    "studentId" to "student_1859034",
+    "courseId" to "course_1859034"
+)
+
+try {
+    payTheoryFragment.configure(
+        apiKey,                         // String : Pay Theory api key
+        amount,                         // Int : amount of the transaction in total cents 
+        TransactionType.CARD,           // String : requested transaction type (TransactionType.CARD, TransactionType.BANK, TransactionType.CASH) : defaults to TransactionType.CREDIT
+        false,                          // Boolean : set account name field to be displayed : defaults to true
+        false,                          // Boolean : set address fields to be displayed : defaults to true
+        false,                          // Boolean : require payment confirmation before completing payment : defaults to false
+        FeeMode.SERVICE_FEE,            // String : Pay Theory fee mode (FeeMode.INTERCHANGE, FeeMode.SERVICE_FEE) : defaults to FeeMode.INTERCHANGE
+        payorInfo,                   // PayorInfo : buyer data sent to Pay Theory : defaults to empty object
+        metadata,                           // HashMap<String, String> : set optional metadata for Pay Theory : defaults to empty hash map
+    )
+} catch (e: Exception) {
+    e.printStackTrace()
+}
 ```
 
 ### Transaction Type
 Optionally set the transaction type
+* by default the SDK provides a simple card input (additional configurations available)
+```Kotlin
+payTheoryFragment.configure(apiKey, amount)
+```
 ```Kotlin
 payTheoryFragment.configure(apiKey, amount, TransactionType.CARD)
 ```
@@ -212,8 +225,19 @@ payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, 
 ### Buyer Options
 Optionally pass additional customer data to Pay Theory. Use PayorInfo and Address data model from Pay Theory SDK
 ```Kotlin
-val payorInfo = PayorInfo("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
-    Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
+val payorInfo = PayorInfo(
+    "John",
+    "Smith",
+    "john@gmail.com",
+    "5135555555",
+    Address(
+        "10549 Reading Rd",
+        "Apt 1",
+        "Cincinnati",
+        "OH",
+        "45241",
+        "USA")
+)
 
 payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.INTERCHANGE, payorInfo)
 ```

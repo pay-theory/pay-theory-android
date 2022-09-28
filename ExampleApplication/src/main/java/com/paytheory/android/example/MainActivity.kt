@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
+    private val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,12 +37,13 @@ class MainActivity : AppCompatActivity() , Payable {
         //Create PayTheoryFragment
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
+        //TODO handle if phone passed in with dashes
         //PayorInfo configuration
         val payorInfo = PayorInfo(
             "Abel",
             "Collins",
             "abel@paytheory.com",
-            "5135555555", //TODO handle if passed in with dashes
+            "5135555555",
             Address(
                 "10549 Reading Rd",
                 "Apt 1",
@@ -72,7 +73,7 @@ class MainActivity : AppCompatActivity() , Payable {
                 payorInfo = payorInfo,
                 sendReceipt = true,
                 receiptDescription = "Test on Android SDK",
-                accountCode = "987654321", //TODO
+                accountCode = "987654321",
                 reference = "Test v2.7.0 on android",
                 paymentParameters = "test-params-2",
 //          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
@@ -98,13 +99,13 @@ class MainActivity : AppCompatActivity() , Payable {
 //            transactionType = TransactionType.CASH,
 //            requireAccountName = false,
 //            requireBillingAddress = false,
-//            confirmation = false, //TODO test if confirmation is true on cash
+//            confirmation = false,
 //            feeMode = FeeMode.INTERCHANGE,
 //            metadata = metadata,
 //            payorInfo = payorInfo,
 //            sendReceipt = true,
 //            receiptDescription = "Test on Android SDK",
-//            accountCode = "987654321", //TODO
+//            accountCode = "987654321",
 //            reference = "Test v2.7.0 on android",
 //            paymentParameters = "test-params-2",
 ////          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
