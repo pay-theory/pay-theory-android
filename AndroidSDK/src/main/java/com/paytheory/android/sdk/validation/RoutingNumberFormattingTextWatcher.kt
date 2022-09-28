@@ -1,16 +1,15 @@
 package com.paytheory.android.sdk.validation
 
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Patterns
 import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
- * Text watcher class to validate buyer contact edit text field
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
  */
-class CashBuyerContactTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
+class RoutingNumberFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt
     private var submitButton = submitButton
 
@@ -23,16 +22,12 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText, submitButton: Button) :
     }
 
     override fun afterTextChanged(s: Editable) {
-        var isValid = isValidEmail(s.toString())
-        handleButton(isValid)
-    }
-
-    private fun isValidEmail(target: CharSequence): Boolean {
-        return if (TextUtils.isEmpty(target)) {
-            false
-        } else {
-            Patterns.EMAIL_ADDRESS.matcher(target).matches() || Patterns.PHONE.matcher(target).matches()
+        if (s.isEmpty()) {
+            return
         }
+
+        val isValidNumber = s.toString().length == 9
+        handleButton(isValidNumber)
     }
 
     private fun handleButton(valid: Boolean){
@@ -41,8 +36,7 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText, submitButton: Button) :
         }
         if (!valid) {
             submitButton.isEnabled = false
-            ptText!!.error = "Invalid email or phone number"
+            ptText!!.error = "Invalid Routing Number"
         }
     }
-
 }

@@ -64,7 +64,7 @@ data class BarcodeResult (
     @SerializedName("barcode") val barcode: String,
     @SerializedName("barcodeFee") val barcodeFee: String,
     @SerializedName("Merchant") val merchant: String,
-    @SerializedName("MapUrl") val mapUrl : String
+    @SerializedName("mapUrl") val mapUrl : String
 )
 
 /**
@@ -80,14 +80,14 @@ data class ConfirmationMessage (
     @SerializedName("brand") val brand: String?,
     @SerializedName("session_key") val sessionKey: String,
     @SerializedName("processor") val processor: String,
-    @SerializedName("expiration") val expiration: String?,
+    @SerializedName("expiration") var expiration: String?,
     @SerializedName("idempotency") val idempotency: String,
     @SerializedName("billing_name") val billingName: String?,
     @SerializedName("billing_address") val billingAddress: Address?,
     @SerializedName("amount") val amount: String,
     @SerializedName("currency") val currency: String,
     @SerializedName("fee_mode") val fee_mode: String,
-    @SerializedName("fee") var fee: String?,
+    @SerializedName("fee") var fee: String,
     @SerializedName("processor_merchant_id") val processor_merchant_id: String?,
     @SerializedName("payment_method") val payment_method: String,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
@@ -158,19 +158,11 @@ data class FailedTransactionResult (
     @SerializedName("payment_method_id") val paymentMethodId: String,
     @SerializedName("payor_id") val payorId: String,
 )
-/**
- * Data class to store payment confirmation details
- */
-data class EncryptedPaymentConfirmation (
-    @SerializedName("type") val type: String,
-    @SerializedName("body") val body: String,
-    @SerializedName("public_key") val publicKey: String
-)
 
 /**
- * Data class to store payment completed transfer details
+ * Data class to store received encrypted message
  */
-data class EncryptedCompletedTransfer (
+data class EncryptedMessage (
     @SerializedName("type") val type: String,
     @SerializedName("body") val body: String,
     @SerializedName("public_key") val publicKey: String

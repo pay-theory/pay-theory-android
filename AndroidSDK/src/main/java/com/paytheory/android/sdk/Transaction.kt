@@ -44,7 +44,7 @@ class Transaction(
     private val constants: Constants,
     private val confirmation: Boolean,
     private val sendReceipt: Boolean,
-    private val receiptDescription: String,
+    private val receiptDescription: String?,
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>? = null
 ): WebsocketMessageHandler {
@@ -66,11 +66,11 @@ class Transaction(
         private const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
         private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
         private const val BARCODE_ACTION = "host:barcode"
-        private const val BARCODE_RESULT = "BarcodeUid"
+        private const val BARCODE_RESULT = "barcode_complete"
         private const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
         private const val COMPLETED_TRANSFER = "transfer_complete"
         private const val UNKNOWN = "unknown"
-        const val CASH = "CASH"
+        private const val CASH = "cash"
 
         @OptIn(ExperimentalCoroutinesApi::class)
         private var messageReactors: MessageReactors? = null
@@ -110,6 +110,7 @@ class Transaction(
                     context.transactionError(Error("Access Denied"))
                 }
                 else {
+                    println(error.message)
                     context.transactionError(Error("Failed to connect to payment system"))
                 }
             }
@@ -134,14 +135,13 @@ class Transaction(
                     .build())
 
         integrityTokenResponse.addOnSuccessListener {
-            val integrityToken = it.token()
-            establishViewModel(ptTokenResponse, integrityToken)
+            establishViewModel(ptTokenResponse, it.token())
         }
 
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true){
-                    context.transactionError(Error("Please Check Network Connection"))
+                    context.transactionError(Error("Google Play Integrity: Please Check Network Connection"))
                 } else {
                     context.transactionError(Error(it.message!!))
                 }
@@ -181,7 +181,6 @@ class Transaction(
     fun transact(
         payment: Payment
     ) {
-
         messageReactors!!.activePayment = payment
 
         val actionRequest =  generateQueuedActionRequest(payment)
@@ -214,7 +213,7 @@ class Transaction(
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
-            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, metadata)
+            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, this.payTheoryData, metadata)
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(
                 requestAction,
@@ -260,11 +259,11 @@ class Transaction(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer() {
-//        //set payer_id to payor_id
-//        if (this.originalConfirmation?.payerId?.isNotBlank() == true){
-//            originalConfirmation!!.payor_id = originalConfirmation!!.payerId
-//        }
 
+        // only for ach payments, need to set expiration to null back to tags-secure-socket
+        if (originalConfirmation!!.expiration.isNullOrBlank() && originalConfirmation!!.brand == "ACH"){
+            originalConfirmation!!.expiration = ""
+        }
         val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
 
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))

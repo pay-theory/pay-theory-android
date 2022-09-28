@@ -25,6 +25,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     var hostToken = ""
     var sessionKey = ""
     var socketPublicKey = ""
+    private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
     /**
      * Called when host token message received from websocket
@@ -63,7 +64,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     fun confirmPayment(message: String, transaction: Transaction? = null){
         //decrypt message
-        val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedPaymentConfirmation::class.java)
+        val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedMessage::class.java)
         val decryptedMessage = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
         val confirmationMessage = Gson().fromJson(decryptedMessage, ConfirmationMessage::class.java)
         //set original confirmation message from Pay Theory
@@ -113,7 +114,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     @ExperimentalCoroutinesApi
     fun completeTransaction(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         viewModel.disconnect()
-        val encryptedTransferMessage = Gson().fromJson(message, EncryptedCompletedTransfer::class.java)
+        val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
         //decrypt message
         val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
 
@@ -153,22 +154,17 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     fun onBarcode(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         println("Pay Theory Barcode Result")
         viewModel.disconnect()
+        val encryptedBarcodeMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+        val decryptedMessage = decryptBox(encryptedBarcodeMessage.body, encryptedBarcodeMessage.publicKey)
+        val barcodeMessageResult = Gson().fromJson(decryptedMessage, BarcodeMessage::class.java)
 
-        val responseJson = JSONObject(message)
-        if (transaction.context is Payable && responseJson["BarcodeUid"].toString().isNotBlank()) {
-            val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
-            val mapUrl = "https://pay.vanilladirect.com/pages/locations"
-            val barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,
-                transferResponse.barcode, transferResponse.barcodeFee, transferResponse.merchant, mapUrl)
-            transaction.context.barcodeSuccess(barcodeResponse)
+        if (transaction.context is Payable && barcodeMessageResult.barcode.isNotBlank() && barcodeMessageResult.barcodeUrl.isNotBlank()) {
+            val barcodeResult = BarcodeResult(barcodeMessageResult.barcodeUid, barcodeMessageResult.barcodeUrl,
+                barcodeMessageResult.barcode, barcodeMessageResult.barcodeFee, barcodeMessageResult.merchant, mapUrl)
+            transaction.context.barcodeSuccess(barcodeResult)
 
         } else if (transaction.context is Payable) {
-            val json = """
-                { 
-                    "error": "Cannot Create Barcode", 
-                 }"""
-
-            val errorResponse = Gson().fromJson(json, Error::class.java)
+            val errorResponse = Error("Failed to Create Barcode")
             transaction.context.transactionError(errorResponse)
         }
     }

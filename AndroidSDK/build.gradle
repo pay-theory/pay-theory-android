@@ -1,5 +1,7 @@
 plugins {
+    // coverts app to library "id 'com.android.application'"
     id 'com.android.library'
+    // allow kotlin usage
     id 'kotlin-android'
     id 'maven-publish'
 }
@@ -40,7 +42,9 @@ android {
 }
 
 dependencies {
+    // allow kotlin usage
     implementation 'androidx.core:core-ktx:1.9.0'
+    // use or appcompat layouts
     implementation 'androidx.appcompat:appcompat:1.5.1'
     // lifecycle (ViewModel, LiveData, Extension)
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
@@ -76,7 +80,7 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     //Google Play Integrity Api
-    implementation "com.google.android.play:integrity:1.0.1"
+    implementation "com.google.android.play:integrity:1.0.2"
 }
 
 

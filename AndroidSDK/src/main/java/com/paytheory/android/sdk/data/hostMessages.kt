@@ -106,6 +106,7 @@ data class CashRequest(
     @SerializedName("payment") val payment: Payment,
     @SerializedName("timing") val timing: Long,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
+    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?
 )
 
@@ -240,7 +241,7 @@ data class Payment (
     @SerializedName("fee_mode") var fee_mode: String? = FeeMode.INTERCHANGE,
     @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
     @SerializedName("buyer") val buyer: String? = null,
-    @SerializedName("buyerContact") val buyerContact: String? = null,
+    @SerializedName("buyer_contact") val buyerContact: String? = null,
     @SerializedName("sessionKey") var sessionKey: String? = null,
 )
 

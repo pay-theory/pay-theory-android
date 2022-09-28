@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
+    val apiKey = "API_KEY"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() , Payable {
             "Abel",
             "Collins",
             "abel@paytheory.com",
-            "5135555555", //TODO handle if passed in with dashes
+            "5135555555",
             Address(
                 "10549 Reading Rd",
                 "Apt 1",
@@ -64,52 +64,32 @@ class MainActivity : AppCompatActivity() , Payable {
                 apiKey = apiKey,
                 amount = 1000,
                 transactionType = TransactionType.CARD,
-                requireAccountName = false,
+                requireAccountName = true,
                 requireBillingAddress = false,
                 confirmation = true,
                 feeMode = FeeMode.INTERCHANGE,
                 metadata = metadata,
                 payorInfo = payorInfo,
                 sendReceipt = true,
-                receiptDescription = "Test on Android SDK",
-                accountCode = "987654321", //TODO
-                reference = "Test v2.7.0 on android",
-                paymentParameters = "test-params-2",
-//          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
-//          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
+                receiptDescription = "RECEIPT_DESCRIPTION",
+                accountCode = "ACCOUNT_CODE",
+                reference = "PAYMENT_REFERENCE",
+                paymentParameters = "PAYMENT_PARAMETERS",
+                payorId = "PAYOR_ID",
+                invoiceId = "INVOICE_ID"
             )
 
             //PayTheoryFragment configuration for card payments
-//        payTheoryFragment.tokenizePaymentMethod(
-//            apiKey = apiKey,
-//            tokenizationType = TokenizationType.CARD,
-//            requireAccountName = true,
-//            requireBillingAddress = true,
-//            payorInfo = payorInfo,
-//            payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
-//            metadata = metadata
-//        )
+//            payTheoryFragment.tokenizePaymentMethod(
+//                apiKey = apiKey,
+//                tokenizationType = TokenizationType.CARD,
+//                requireAccountName = true,
+//                requireBillingAddress = false,
+//                payorInfo = payorInfo,
+//                payorId = "PAYOR_ID",
+//                metadata = metadata
+//            )
 
-
-            //PayTheoryFragment configuration for cash payments
-//        payTheoryFragment.configure(
-//            apiKey = apiKey,
-//            amount = 2500,
-//            transactionType = TransactionType.CASH,
-//            requireAccountName = false,
-//            requireBillingAddress = false,
-//            confirmation = false, //TODO test if confirmation is true on cash
-//            feeMode = FeeMode.INTERCHANGE,
-//            metadata = metadata,
-//            payorInfo = payorInfo,
-//            sendReceipt = true,
-//            receiptDescription = "Test on Android SDK",
-//            accountCode = "987654321", //TODO
-//            reference = "Test v2.7.0 on android",
-//            paymentParameters = "test-params-2",
-////          payorId = "ptl_pay_3CHDGvMHbnscEgq3pbqZp5",
-////          invoiceId = "PTL_INV_6BVQ3USX7PXWMXCRKV8SU1"
-//        )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -128,19 +108,19 @@ class MainActivity : AppCompatActivity() , Payable {
     }
 
     //Inherited from Payable interface
-    override fun paymentSuccess(transactionResult: CompletedTransactionResult) {
-        println("transactionResult $transactionResult")
-        showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
+    override fun paymentSuccess(completedTransactionResult: CompletedTransactionResult) {
+        println(completedTransactionResult)
+        showToast("Transaction Complete on Account XXXX${completedTransactionResult.lastFour}")
     }
 
-    override fun paymentFailed(transactionResult: FailedTransactionResult) {
-        println("paymentFailure $transactionResult")
-        showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
+    override fun paymentFailed(failedTransactionResult: FailedTransactionResult) {
+        println(failedTransactionResult)
+        showToast("Payment Failed on Account XXXX${failedTransactionResult.lastFour}")
     }
 
     override fun transactionError(error: Error) {
-        println("transactionError $error")
-        showToast("Error occurred ${error.reason}")
+        println(error)
+        showToast(error.reason)
     }
 
     //Demo function to display payment confirmation message to user
@@ -149,12 +129,12 @@ class MainActivity : AppCompatActivity() , Payable {
 
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
-            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+            "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
+                    " including the fee of ${getFormattedAmount(confirmationMessage.fee)} " +
                     "on account ending in ${confirmationMessage.lastFour}?"
         } else {
-            "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+            "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
+                    " including the fee of ${getFormattedAmount(confirmationMessage.fee)} " +
                     "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 
@@ -179,13 +159,25 @@ class MainActivity : AppCompatActivity() , Payable {
 
 
     override fun barcodeSuccess(barcodeResult: BarcodeResult) {
-        println("barcodeResult $barcodeResult")
+        println(barcodeResult)
         showToast("Barcode Request Successful $barcodeResult")
     }
 
     override fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults) {
-        println("tokenize payment method results $paymentMethodToken")
+        println(paymentMethodToken)
         showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
     }
 
+    // Demo function to format dollar amount
+    private fun getFormattedAmount(amount: String): String {
+        var centsString: String? = null
+        val cents = amount.toInt() % 100
+        val dollars = (amount.toInt() - cents) / 100
+        centsString = if (cents == 0) {
+            "00"
+        } else {
+            cents.toString()
+        }
+        return "$$dollars.${centsString}"
+    }
 }

@@ -124,14 +124,13 @@ class PaymentMethodToken(
                     .build())
 
         integrityTokenResponse.addOnSuccessListener {
-            val integrityToken = it.token()
-            establishViewModel(ptTokenResponse, integrityToken)
+            establishViewModel(ptTokenResponse, it.token())
         }
 
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true){
-                    context.transactionError(Error("Please Check Network Connection"))
+                    context.transactionError(Error("Google Play Integrity: Please Check Network Connection"))
                 } else {
                     context.transactionError(Error(it.message!!))
                 }
