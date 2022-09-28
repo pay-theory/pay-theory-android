@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  * Example activity class
  */
 class MainActivity : AppCompatActivity() , Payable {
-    val apiKey = "API_KEY"
+    private val apiKey = "API_KEY"
     var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() , Payable {
         //Create PayTheoryFragment
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
+        //TODO handle if phone passed in with dashes
         //PayorInfo configuration
         val payorInfo = PayorInfo(
             "Abel",
