@@ -97,10 +97,10 @@ class PaymentMethodToken(
             }, { error ->
                 if (context is Payable) {
                     if(error.message == "HTTP 404 "){
-                        context.transactionError(Error("Access Denied"))
+                        context.handleError(Error("Access Denied"))
                     }
                     else {
-                        context.transactionError(Error("Failed to connect to payment system"))
+                        context.handleError(Error("Failed to connect to payment system"))
                     }
                 }
             }
@@ -130,9 +130,9 @@ class PaymentMethodToken(
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true){
-                    context.transactionError(Error("Google Play Integrity: Please Check Network Connection"))
+                    context.handleError(Error("Google Play Integrity: Please Check Network Connection"))
                 } else {
-                    context.transactionError(Error(it.message!!))
+                    context.handleError(Error(it.message!!))
                 }
             }
         }
@@ -240,7 +240,7 @@ class PaymentMethodToken(
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else{
             if (context is Payable) {
-                context.transactionError(Error("Failed to complete transaction"))
+                context.handleError(Error("Failed to complete transaction"))
             }
             else{
                 return

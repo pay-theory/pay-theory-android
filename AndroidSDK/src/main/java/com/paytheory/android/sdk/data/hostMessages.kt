@@ -78,7 +78,7 @@ data class HostTokenRequest(
 )
 
 /**
- * Data class to store buyer option details
+ * Data class to store payor details
  * @param first_name first name of buyer
  * @param last_name last name of buyer
  * @param email email of buyer
@@ -191,11 +191,11 @@ data class TokenizeRequest(
 
 /**
  * Data class to store address details
+ * @param line1 billing address line 1
+ * @param line2 billing address line 2
  * @param city billing city
  * @param region billing region
  * @param postal_code billing postal code
- * @param line1 billing address line 1
- * @param line2 billing address line 2
  * @param country billing country
  */
 data class Address (

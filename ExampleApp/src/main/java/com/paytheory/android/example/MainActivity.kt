@@ -51,18 +51,18 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     //Inherited from Payable interface
-    override fun paymentSuccess(transactionResult: CompletedTransactionResult) {
+    override fun handleSuccess(transactionResult: SuccessfulTransactionResult) {
         println("transactionResult $transactionResult")
         showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
     }
 
-    override fun paymentFailed(transactionResult: FailedTransactionResult) {
+    override fun handleFailure(transactionResult: FailedTransactionResult) {
         println("paymentFailure $transactionResult")
         showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
     }
 
-    override fun transactionError(error: Error) {
-        println("transactionError $error")
+    override fun handleError(error: Error) {
+        println("handleError $error")
         showToast("Error occurred ${error.reason}")
     }
 
@@ -101,12 +101,12 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
 
-    override fun barcodeSuccess(barcodeResult: BarcodeResult) {
+    override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
         println("barcodeResult $barcodeResult")
         showToast("Barcode Request Successful $barcodeResult")
     }
 
-    override fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults) {
+    override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
         println("tokenize payment method results $paymentMethodToken")
         showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
     }

@@ -119,7 +119,7 @@ data class TransactionResult (
 /**
  * Data class to store transaction result data for successful or pending transaction results
  */
-data class CompletedTransactionResult (
+data class SuccessfulTransactionResult (
     @SerializedName("state") val state: String,
     @SerializedName("amount") val amount: String,
     @SerializedName("brand") val brand: String,
@@ -182,15 +182,26 @@ data class EncryptedPaymentToken (
 interface Payable {
     /**
      * Converts paymentResult as Payable
-     * @param completedTransactionResult result of the completed transaction
+     * @param successfulTransactionResult result of the completed transaction
      */
-    fun paymentSuccess(completedTransactionResult: CompletedTransactionResult)
+    fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult)
 
     /**
      * Converts paymentFailure as Payable
      * @param failedTransactionResult reason the transaction failed
      */
-    fun paymentFailed(failedTransactionResult: FailedTransactionResult)
+    fun handleFailure(failedTransactionResult: FailedTransactionResult)
+
+    /**
+     * method to handle barcode results
+     * @param barcodeResult result of the completed barcode transaction
+     */
+    fun handleBarcodeSuccess(barcodeResult: BarcodeResult)
+
+    /**
+     * method to handle payment method tokenize results
+     */
+    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
 
     /**
      * method to handle confirmation of payment
@@ -199,19 +210,8 @@ interface Payable {
     fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction)
 
     /**
-     * Converts transactionError as Payable
+     * Converts handleError as Payable
      * @param error reason the transaction error
      */
-    fun transactionError(error: Error)
-
-    /**
-     * method to handle barcode results
-     * @param barcodeResult result of the completed barcode transaction
-     */
-    fun barcodeSuccess(barcodeResult: BarcodeResult)
-
-    /**
-     * method to handle payment method tokenize results
-     */
-    fun tokenizedSuccess(paymentMethodToken: PaymentMethodTokenResults)
+    fun handleError(error: Error)
 }

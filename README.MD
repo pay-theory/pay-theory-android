@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() , Payable {
     override fun barcodeComplete(barcodeResult: BarcodeResult) {
     }
 
-    override fun paymentFailed(paymentFailure: PaymentResult) {
+    override fun handleFailure(paymentFailure: PaymentResult) {
     }
 
     override fun paymentError(paymentError: PaymentError) {

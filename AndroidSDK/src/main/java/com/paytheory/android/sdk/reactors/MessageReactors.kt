@@ -88,7 +88,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         /* fail if unknown websocket message */
         if (transaction != null) {
             if (transaction.context is Payable){
-                transaction.context.transactionError(Error("Error processing payment"))
+                transaction.context.handleError(Error("Error processing payment"))
             }
         }
     }
@@ -102,7 +102,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         /* fail if unknown websocket message */
         if (paymentMethodToken != null) {
             if (paymentMethodToken.context is Payable){
-                paymentMethodToken.context.transactionError(Error("Error tokenizing payment method"))
+                paymentMethodToken.context.handleError(Error("Error tokenizing payment method"))
             }
         }
     }
@@ -127,21 +127,21 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
 
         if (transaction.context is Payable) when (transactionResult.state) {
             "SUCCEEDED" -> {
-                val completedTransactionResult = Gson().fromJson(decryptedMessage, CompletedTransactionResult::class.java)
-                transaction.context.paymentSuccess(completedTransactionResult)
+                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                transaction.context.handleSuccess(successfulTransactionResult)
             }
             "PENDING" -> {
-                val completedTransactionResult = Gson().fromJson(decryptedMessage, CompletedTransactionResult::class.java)
-                transaction.context.paymentSuccess(completedTransactionResult)
+                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                transaction.context.handleSuccess(successfulTransactionResult)
             }
             "FAILURE" -> {
                 val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
-                transaction.context.paymentFailed(failedTransactionResult)
+                transaction.context.handleFailure(failedTransactionResult)
             }
 
         else -> {
             val errorResponse = Error("Error retrieving payment confirmation")
-            transaction.context.transactionError(errorResponse)
+            transaction.context.handleError(errorResponse)
         }
         }
     }
@@ -161,11 +161,11 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         if (transaction.context is Payable && barcodeMessageResult.barcode.isNotBlank() && barcodeMessageResult.barcodeUrl.isNotBlank()) {
             val barcodeResult = BarcodeResult(barcodeMessageResult.barcodeUid, barcodeMessageResult.barcodeUrl,
                 barcodeMessageResult.barcode, barcodeMessageResult.barcodeFee, barcodeMessageResult.merchant, mapUrl)
-            transaction.context.barcodeSuccess(barcodeResult)
+            transaction.context.handleBarcodeSuccess(barcodeResult)
 
         } else if (transaction.context is Payable) {
             val errorResponse = Error("Failed to Create Barcode")
-            transaction.context.transactionError(errorResponse)
+            transaction.context.handleError(errorResponse)
         }
     }
 
@@ -179,7 +179,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
         val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
         if (paymentMethodToken.context is Payable) {
-            paymentMethodToken.context.tokenizedSuccess(paymentMethodTokenResult)
+            paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
         }
     }
 }

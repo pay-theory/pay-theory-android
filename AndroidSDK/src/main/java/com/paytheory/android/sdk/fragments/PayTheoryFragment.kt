@@ -28,8 +28,8 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
- * PayTheoryFragment populates with required text inputs.
- * Flexible display that adds inputs dynamically as needed
+ * PayTheoryFragment populates required transaction input fields.
+ * Flexible display that adds inputs dynamically as requested.
  */
 class PayTheoryFragment : Fragment() {
     companion object {
