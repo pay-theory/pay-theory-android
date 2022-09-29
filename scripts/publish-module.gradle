@@ -39,28 +39,28 @@ afterEvaluate {
                 // Mostly self-explanatory metadata
                 pom {
                     name = PUBLISH_ARTIFACT_ID
-                    description = PUBLISH_DESCRIPTION
-                    url = PUBLISH_URL
+                    description = 'Pay Theory Android SDK'
+                    url = 'https://github.com/pay-theory/pay-theory-android'
                     licenses {
                         license {
-                            name = PUBLISH_LICENSE_NAME
-                            url = PUBLISH_LICENSE_URL
+                            name = 'MIT License'
+                            url = 'https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE'
                         }
                     }
                     developers {
                         developer {
-                            id = PUBLISH_DEVELOPER_ID
-                            name = PUBLISH_DEVELOPER_NAME
-                            email = PUBLISH_DEVELOPER_EMAIL
+                            id = 'paytheory'
+                            name = 'Abel Collins'
+                            email = 'abel@paytheory.com'
                         }
                     }
 
                     // Version control info - if you're using GitHub, follow the
                     // format as seen here
                     scm {
-                        connection = PUBLISH_SCM_CONNECTION
-                        developerConnection = PUBLISH_SCM_DEVELOPER_CONNECTION
-                        url = PUBLISH_SCM_URL
+                        connection = 'scm:git:github.com/pay-theory/pay-theory-android.git'
+                        developerConnection = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
+                        url = 'https://github.com/pay-theory/pay-theory-android/tree/main'
                     }
                 }
             }
@@ -68,9 +68,9 @@ afterEvaluate {
     }
 }
 
-ext["signing.keyId"] = rootProject.ext["signing.keyId"]
-ext["signing.password"] = rootProject.ext["signing.password"]
-ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
+//ext["signing.keyId"] = rootProject.ext["signing.keyId"]
+//ext["signing.password"] = rootProject.ext["signing.password"]
+//ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
 
 signing {
     sign publishing.publications

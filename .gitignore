@@ -15,4 +15,4 @@ local.properties
 /ExampleApp/.idea/misc.xml
 /ExampleApp/.idea/modules.xml
 /ExampleApp/.idea/vcs.xml
-/publishingKey.gpg
+/AndroidSDK/publishingKey.gpg

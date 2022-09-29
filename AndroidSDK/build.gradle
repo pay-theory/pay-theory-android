@@ -1,14 +1,13 @@
 plugins {
-    // coverts app to library "id 'com.android.application'"
     id 'com.android.library'
-    // allow kotlin usage
     id 'kotlin-android'
     id 'maven-publish'
 }
 
+
 ext {
     PUBLISH_GROUP_ID = 'com.paytheory'
-    PUBLISH_VERSION = '2.7.0'
+    PUBLISH_VERSION = '2.0.0'
     PUBLISH_ARTIFACT_ID = 'pay-theory-android'
     PUBLISH_DESCRIPTION = 'Pay Theory Android SDK'
     PUBLISH_URL = 'https://github.com/pay-theory/pay-theory-android'
@@ -22,7 +21,7 @@ ext {
     PUBLISH_SCM_URL = 'https://github.com/pay-theory/pay-theory-android/tree/main'
 }
 
-apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
+apply from: "${rootDir}/scripts/publish-module.gradle"
 
 android {
     namespace = "com.paytheory.android.sdk"
@@ -35,7 +34,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 1
-        versionName "1.0"
+        versionName "2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
