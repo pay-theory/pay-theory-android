@@ -92,12 +92,22 @@ class PayTheoryFragment : Fragment() {
 
     /**
      * Create configurations to execute a payment and contains default configuration
-     * @param apiKey Pay Theory API-Key
-     * @param amount Amount of transaction
-     * @param transactionType Type of payment method
-     * @param requireBillingAddress Boolean if billing address is required
-     * @param feeMode Type of fee mode that will be processed
-     * @param payorInfo Optional details about the buyer
+     * @param apiKey Your Pay Theory api-key
+     * @param amount Amount of transaction in USD cents
+     * @param transactionType TransactionType.CARD or TransactionType.BANK or TransactionType.CASH
+     * @param requireAccountName Enable account name for the transaction
+     * @param requireBillingAddress Enable billing address for the transaction
+     * @param confirmation: Enable a user confirmation step for the transaction
+     * @param feeMode Pay Theory Fee Mode (FeeMode.INTERCHANGE or FeeMode.SERVICE_FEE)
+     * @param metadata Optional Transaction metadata
+     * @param payorInfo Optional details about the payor
+     * @param payorId Optional Pay Theory payorId
+     * @param accountCode Optional account code for the transaction
+     * @param reference Optional reference for the transaction
+     * @param paymentParameters Optional Pay Theory Payment Parameters
+     * @param invoiceId Optional Pay Theory invoiceId
+     * @param sendReceipt Enable a receipt to be sent to a payor for the transaction
+     * @param receiptDescription Add description to receipt for transaction
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -37,53 +37,43 @@ Copy your SHA-256 digest
 
 ## Installation
 
-pay-theory-android is available through jitpack for android projects
+The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.maven.org/maven2/com/paytheory/). The latest version is available via `mavenCentral()`:
 
-### Project level build.gradle file
-- Add maven jitpack url
-- Add jcenter() or mavenCentral()
+- Add mavenCentral() to your project level build.gradle file
 
-```gradle
+```kotlin
 allprojects {
     repositories {
-        google()
-        maven { url 'https://jitpack.io' }
+        ...
         mavenCentral()
-        jcenter()
     }
 }
 ```
 
-### Application level build.gradle file
-
-- Add implementation for pay-theory-android
-- Add implementation for java jna
-
-```gradle
+```kotlin
 dependencies {
-    ...
-    implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-VERSION') {
-        exclude group: 'net.java.dev.jna', module:'jna'
-    }
-    implementation 'net.java.dev.jna:jna:JNA-VERSION@aar'
-    ...
+  implementation 'com.paytheory.sdk:pay-theory-android:2.7.0'
 }
 ```
+
 
 [![](https://jitpack.io/v/pay-theory/pay-theory-android.svg)](https://jitpack.io/#pay-theory/pay-theory-android)
 
+
 _replace PAY-THEORY-VERSION with the release version shown above_
+
 
 [![](https://jitpack.io/v/java-native-access/jna.svg)](https://jitpack.io/#java-native-access/jna)
 
+
 _replace JNA-VERSION with the release version shown above_
 
-### Update minimum sdk version to 21 or higher in application level build.gradle file
+### Update minimum sdk version to 26 or higher in application level build.gradle file
 
 ```Kotlin
 defaultConfig {
     applicationId "com.example.testapp"
-    minSdkVersion 21
+    minSdkVersion 26
     targetSdkVersion 30
     versionCode 1
     versionName "1.0"
@@ -278,6 +268,18 @@ payTheoryFragment.configure(apiKey, amount, TransactionType.CASH)
 
 ```
 
+## Tokenization Requests
+            //PayTheoryFragment configuration for card payments
+//            payTheoryFragment.tokenizePaymentMethod(
+//                apiKey = apiKey,
+//                tokenizationType = TokenizationType.CARD,
+//                requireAccountName = true,
+//                requireBillingAddress = false,
+//                payorInfo = payorInfo,
+//                payorId = "PAYOR_ID",
+//                metadata = metadata
+//            )
+
 ## Results
 
 The transaction results will come back through as these classes:
@@ -373,6 +375,15 @@ Linux
 ./gradlew completeTesting
 ```
 
+## Support/Feedback
+
+Feel free to get in touch:
+
+* [GitHub Issues](https://github.com/pay-theory/pay-theory-android/issues) - For any issues or feedback
+* [Support](https://paytheory.com/) / [support@paytheory.com](mailto:support@paytheory.com) -
+
 ## License
 
-MIT © [pay theory](https://github.com/pay-theory)
+The Pay Theory Android SDK is open source and available under the MIT license. See [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
+
+MIT © [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)

@@ -177,41 +177,37 @@ data class EncryptedPaymentToken (
     @SerializedName("public_key") val publicKey: String
 )
 /**
- * Interface that handles a transaction completion, failure, and errors
+ * Interface that responds for any transaction request
  */
 interface Payable {
     /**
-     * Converts paymentResult as Payable
-     * @param successfulTransactionResult result of the completed transaction
+     * function to handle successful payment results
+     * @param successfulTransactionResult result for a successful transaction
      */
     fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult)
-
     /**
-     * Converts paymentFailure as Payable
-     * @param failedTransactionResult reason the transaction failed
+     * function to handle declined payment results
+     * @param failedTransactionResult result for a failed transaction
      */
     fun handleFailure(failedTransactionResult: FailedTransactionResult)
-
     /**
-     * method to handle barcode results
-     * @param barcodeResult result of the completed barcode transaction
+     * function to handle successful barcode results
+     * @param barcodeResult result for a successful barcode request
      */
     fun handleBarcodeSuccess(barcodeResult: BarcodeResult)
-
     /**
-     * method to handle payment method tokenize results
+     * function to handle successful tokenization results
+     * @param paymentMethodToken result for a payment method token request
      */
     fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
-
     /**
-     * method to handle confirmation of payment
-     * @param confirmationMessage confirmation data
+     * function to handle a confirmation when requested in transaction configuration
+     * @param confirmationMessage payment confirmation step, enabled using PayTheoryFragment's configure function confirmation set to true
      */
     fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction)
-
     /**
-     * Converts handleError as Payable
-     * @param error reason the transaction error
+     * function to handle any system errors from a user's device or Pay Theory
+     * @param error reason for the failure
      */
     fun handleError(error: Error)
 }

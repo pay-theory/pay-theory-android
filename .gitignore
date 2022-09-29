@@ -1,11 +1,11 @@
 *.iml
-/local.properties
+/AndroidSDK/local.properties
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+AndroidSDK/local.properties
 /PayTheorySDK/install.gradle
 /PayTheorySDK/bintray.gradle
 /.gradle/
@@ -16,3 +16,4 @@ local.properties
 /ExampleApp/.idea/modules.xml
 /ExampleApp/.idea/vcs.xml
 /AndroidSDK/publishingKey.gpg
+/local.properties

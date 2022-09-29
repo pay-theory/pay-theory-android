@@ -31,10 +31,8 @@ android {
         prefab true
     }
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 33
-        versionCode 1
-        versionName "2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -59,9 +57,9 @@ android {
 }
 
 dependencies {
-    // allow kotlin usage
+    // Kotlin Usage
     implementation 'androidx.core:core-ktx:1.9.0'
-    // use or appcompat layouts
+    // Appcompat Layouts
     implementation 'androidx.appcompat:appcompat:1.5.1'
     // lifecycle (ViewModel, LiveData, Extension)
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
@@ -86,7 +84,6 @@ dependencies {
     //Rx Java
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
-
     //Google Play services
     implementation "com.google.android.gms:play-services-base:18.1.0"
     //AWS Android SDK
@@ -95,7 +92,6 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
     implementation "androidx.multidex:multidex:2.0.1"
-
     //Google Play Integrity Api
     implementation "com.google.android.play:integrity:1.0.2"
 }

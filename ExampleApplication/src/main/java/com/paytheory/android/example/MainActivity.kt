@@ -40,9 +40,9 @@ class MainActivity : AppCompatActivity() , Payable {
         //TODO handle if phone passed in with dashes
         //PayorInfo configuration
         val payorInfo = PayorInfo(
-            "Abel",
-            "Collins",
-            "abel@paytheory.com",
+            "John",
+            "Doe",
+            "johndoe@paytheory.com",
             "5135555555",
             Address(
                 "10549 Reading Rd",
@@ -79,17 +79,6 @@ class MainActivity : AppCompatActivity() , Payable {
                 payorId = "PAYOR_ID",
                 invoiceId = "INVOICE_ID"
             )
-
-            //PayTheoryFragment configuration for card payments
-//            payTheoryFragment.tokenizePaymentMethod(
-//                apiKey = apiKey,
-//                tokenizationType = TokenizationType.CARD,
-//                requireAccountName = true,
-//                requireBillingAddress = false,
-//                payorInfo = payorInfo,
-//                payorId = "PAYOR_ID",
-//                metadata = metadata
-//            )
 
         } catch (e: Exception) {
             e.printStackTrace()
