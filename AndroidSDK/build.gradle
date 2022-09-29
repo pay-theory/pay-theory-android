@@ -6,6 +6,24 @@ plugins {
     id 'maven-publish'
 }
 
+ext {
+    PUBLISH_GROUP_ID = 'com.paytheory'
+    PUBLISH_VERSION = '2.7.0'
+    PUBLISH_ARTIFACT_ID = 'pay-theory-android'
+    PUBLISH_DESCRIPTION = 'Pay Theory Android SDK'
+    PUBLISH_URL = 'https://github.com/pay-theory/pay-theory-android'
+    PUBLISH_LICENSE_NAME = 'MIT License'
+    PUBLISH_LICENSE_URL = 'https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE'
+    PUBLISH_DEVELOPER_ID = 'paytheory'
+    PUBLISH_DEVELOPER_NAME = 'Abel Collins'
+    PUBLISH_DEVELOPER_EMAIL = 'abel@paytheory.com'
+    PUBLISH_SCM_CONNECTION = 'scm:git:github.com/pay-theory/pay-theory-android.git'
+    PUBLISH_SCM_DEVELOPER_CONNECTION = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
+    PUBLISH_SCM_URL = 'https://github.com/pay-theory/pay-theory-android/tree/main'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
+
 android {
     namespace = "com.paytheory.android.sdk"
     compileSdkVersion 33
