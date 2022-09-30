@@ -5,7 +5,6 @@
 /captures
 .externalNativeBuild
 .cxx
-AndroidSDK/local.properties
 /PayTheorySDK/install.gradle
 /PayTheorySDK/bintray.gradle
 /.gradle/

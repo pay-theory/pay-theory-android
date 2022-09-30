@@ -19,7 +19,7 @@ import com.paytheory.android.sdk.*
  * Example Activity
  */
 class MainActivity : AppCompatActivity(), Payable {
-    var dialog : Dialog? = null
+    private var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,14 +51,14 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     //Inherited from Payable interface
-    override fun handleSuccess(transactionResult: SuccessfulTransactionResult) {
-        println("transactionResult $transactionResult")
-        showToast("Transaction Complete on Account XXXX${transactionResult.lastFour}")
+    override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
+        println("transactionResult $successfulTransactionResult")
+        showToast("Transaction Complete on Account XXXX${successfulTransactionResult.lastFour}")
     }
 
-    override fun handleFailure(transactionResult: FailedTransactionResult) {
-        println("paymentFailure $transactionResult")
-        showToast("Payment Failed on Account XXXX${transactionResult.lastFour}")
+    override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
+        println("paymentFailure $failedTransactionResult")
+        showToast("Payment Failed on Account XXXX${failedTransactionResult.lastFour}")
     }
 
     override fun handleError(error: Error) {
@@ -73,11 +73,11 @@ class MainActivity : AppCompatActivity(), Payable {
         val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
             "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    " including the fee of $${confirmationMessage.fee.toFloat()/100} " +
                     "on account ending in ${confirmationMessage.lastFour}?"
         } else {
             "Are you sure you want to make a payment of $${confirmationMessage.amount.toFloat()/100}" +
-                    " including the fee of $${confirmationMessage.fee!!.toFloat()/100} " +
+                    " including the fee of $${confirmationMessage.fee.toFloat()/100} " +
                     "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 

@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity() , Payable {
 
     // Demo function to format dollar amount
     private fun getFormattedAmount(amount: String): String {
-        var centsString: String? = null
+        var centsString: String?
         val cents = amount.toInt() % 100
         val dollars = (amount.toInt() - cents) / 100
         centsString = if (cents == 0) {
