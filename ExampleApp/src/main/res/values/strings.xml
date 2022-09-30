@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">Pay Theory Android SDK</string>
-    <string name="title_home">Pay Theory Android SDK</string>
-    <string name="title_credit_card">Card</string>
-    <string name="title_ach">ACH</string>
-    <string name="title_cash">Cash</string>
-    <string name="confirm_payment">Confirm Payment</string>
-</resources>

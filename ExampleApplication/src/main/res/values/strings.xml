@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">PayTheoryLibrary</string>
-    <string name="confirm_payment">Confirm Payment</string>
-
-    <string-array name="payment_array">
-        <item>CARD</item>
-        <item>ACH</item>
-    </string-array>
-</resources>
