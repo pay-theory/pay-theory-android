@@ -53,13 +53,9 @@ class PaymentMethodToken(
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
         private const val INTERNAL_SERVER_ERROR = "Internal server error"
-        private const val HOST_TOKEN_RESULT = "hostToken"
+        private const val HOST_TOKEN_RESULT = "host_token"
         private const val TOKENIZE = "host:tokenize"
         private const val TOKENIZE_RESULT = "tokenize_complete"
-        private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
-        private const val BARCODE_RESULT = "BarcodeUid"
-        private const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
-        private const val COMPLETED_TRANSFER = "transfer_complete"
         private const val UNKNOWN = "unknown"
 
         @OptIn(ExperimentalCoroutinesApi::class)
@@ -217,37 +213,6 @@ class PaymentMethodToken(
 
     }
 
-
-    /**
-     * After payment confirmation is complete host:transfer_part2 action request is created
-     * Function called from override fun paymentConfirmation
-     * @param
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun completeTransfer() {
-//        //set payer_id to payor_id
-//        if (this.originalConfirmation?.payerId?.isNotBlank() == true){
-//            originalConfirmation!!.payor_id = originalConfirmation!!.payerId
-//        }
-
-        val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
-
-        val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
-
-        val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
-
-        if (viewModel.connected) {
-            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-        } else{
-            if (context is Payable) {
-                context.handleError(Error("Failed to complete transaction"))
-            }
-            else{
-                return
-            }
-        }
-    }
-
     private fun discoverMessageType(message: String): String  {
         return when {
             message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
@@ -283,29 +248,3 @@ class PaymentMethodToken(
         }
     }
 }
-
-
-
-
-
-
-
-
-//DEPRECATED
-
-//private fun getCardType(number: String): String {
-//    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
-//    val mastercard = Regex("^5[1-5][0-9]{14}$")
-//    val amx = Regex("^3[47][0-9]{13}$")
-//    val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
-//    val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
-//
-//    return when {
-//        visa.matches(number) -> "Visa"
-//        mastercard.matches(number) -> "Mastercard"
-//        amx.matches(number) -> "American Express"
-//        diners.matches(number) -> "Diners"
-//        discover.matches(number) -> "Discover"
-//        else -> "Unknown"
-//    }
-//}

@@ -62,7 +62,7 @@ class Transaction(
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
         private const val INTERNAL_SERVER_ERROR = "Internal server error"
-        private const val HOST_TOKEN_RESULT = "hostToken"
+        private const val HOST_TOKEN_RESULT = "host_token"
         private const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
         private const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
         private const val BARCODE_ACTION = "host:barcode"
@@ -89,7 +89,6 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
 
@@ -119,7 +118,6 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
@@ -167,7 +165,6 @@ class Transaction(
      * Initiate Transaction Class and calls pt-token endpoint
      */
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
         ptTokenApiCall(context)
     }
@@ -176,7 +173,6 @@ class Transaction(
      * Final api call to complete transaction
      * @param payment payment object to transact
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalCoroutinesApi
     fun transact(
         payment: Payment
@@ -203,11 +199,8 @@ class Transaction(
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
-        publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        publicKey =
             Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
@@ -319,29 +312,3 @@ class Transaction(
         }
     }
 }
-
-
-
-
-
-
-
-
-//DEPRECATED
-
-//private fun getCardType(number: String): String {
-//    val visa = Regex("^4[0-9]{12}(?:[0-9]{3})?$")
-//    val mastercard = Regex("^5[1-5][0-9]{14}$")
-//    val amx = Regex("^3[47][0-9]{13}$")
-//    val diners = Regex("^3(?:0[0-5]|[68][0-9])[0-9]{11}$")
-//    val discover = Regex("^6(?:011|5[0-9]{2})[0-9]{12}$")
-//
-//    return when {
-//        visa.matches(number) -> "Visa"
-//        mastercard.matches(number) -> "Mastercard"
-//        amx.matches(number) -> "American Express"
-//        diners.matches(number) -> "Diners"
-//        discover.matches(number) -> "Discover"
-//        else -> "Unknown"
-//    }
-//}
