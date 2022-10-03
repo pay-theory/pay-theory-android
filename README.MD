@@ -2,7 +2,7 @@
 
 ## Requirements
 
-Written in Kotlin and requires Android 8.0 (API level 26)
+Pay Theory's Android SDK is available for Android SDK >= 26
 
 ## Register your application
 
@@ -74,11 +74,11 @@ android {
     }
 ```
 
-### Fragment
+## Usage
+
+### Layout
 
 Add PayTheoryFragment as a fragment in your activity's xml layout file
-
-[Click here for an example](https://github.com/pay-theory/pay-theory-android/blob/premain/ExampleApplication/src/main/res/layout/activity_main.xml)
 
 ```xml
     <fragment
@@ -147,12 +147,234 @@ Configure PayTheoryFragment inside your onCreate method
 payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
 ```
 
+## Additional Configurations
 
-[Click here to see how our demo handles transaction responses](https://github.com/pay-theory/pay-theory-android/blob/main/ExampleApplication/src/main/java/com/paytheory/android/example/MainActivity.kt)
+### Transaction Type
 
-## Additional PayTheoryFragment Configurations
+Optionally set the transaction type
+
+* by default the SDK provides a simple card input
+
+```Kotlin
+// debit/credit card fields
+transactionType = TransactionType.CARD 
+```
+
+```Kotlin
+// bank account fields
+transactionType = TransactionType.BANK 
+```
+
+```Kotlin
+// cash/barcode fields
+transactionType = TransactionType.CASH 
+```
+
+### Account Name
+
+Optionally set the transaction to require the account name input field
+
+* by default the SDK sets requireAccountName to false
+
+```Kotlin
+// will include account name field
+requireAccountName = true 
+```
+
+```Kotlin
+// will not include account name field
+requireAccountName = false 
+```
+
+### Billing Address
+
+Optionally set the transaction to require input fields for a full billing address
+
+* by default the SDK sets requireBillingAddress to false
+
+```Kotlin
+// will include billing address fields
+requireBillingAddress = true 
+```
+
+```Kotlin
+// will not include billing address fields
+requireBillingAddress = false 
+```
+
+### Confirmation
+
+Optionally set the transaction to require a confirmation step (confirmation function from Payable interface)
+
+* by default the SDK sets confirmation to false
+
+```Kotlin
+// will include a confirmation step 
+confirmation = true 
+```
+
+```Kotlin
+// will not include a confirmation step 
+confirmation = false 
+```
+
+### Fee Mode
+
+Optionally set the fee mode
+
+* By default FeeMode.INTERCHANGE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+
+```Kotlin
+//set fee mode as interchange
+feeMode = FeeMode.INTERCHANGE
+```
+
+```Kotlin
+//set fee mode as service fee (enabled by Pay Theory)
+feeMode = FeeMode.SERVICE_FEE
+```
+
+### Metadata
+
+Optionally track payments with custom metadata, simply add metadata with a HashMap:
+
+```Kotlin
+//Set optional metadata configuration
+val metadata: HashMap<Any,Any> = hashMapOf(
+    "studentId" to "student_1859034",
+    "courseId" to "course_1859034"
+)
+
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    metadata = metadata
+)
+```
+
+### Payor Info
+
+Optionally pass additional customer data to Pay Theory. Use PayorInfo and Address data model from Pay Theory SDK
+
+```Kotlin
+//Set optional payorInfo configuration
+val payorInfo = PayorInfo(
+    "John",
+    "Smith",
+    "john@gmail.com",
+    "5135555555",
+    Address(
+        "10549 Reading Rd",
+        "Apt 1",
+        "Cincinnati",
+        "OH",
+        "45241",
+        "USA")
+)
+
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    payorInfo = payorInfo
+)
+```
+
+### Payor Id
+
+Optionally set the payor id
+
+* By default a new payorId is created with payorInfo
+
+```Kotlin
+//set payor id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    payorId = "PAYOR_ID"
+)
+```
+
+### Account Code
+
+Optionally set the account code
+
+* accountCode is tracked for each transaction in Pay Theory portals
+
+```Kotlin
+//set account code
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    accountCode = "ACCOUNT_CODE"
+)
+```
+
+### Reference
+
+Optionally set the reference
+
+* reference is tracked for each transaction in Pay Theory portals
+
+```Kotlin
+//set reference
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    reference = "REFERENCE"
+)
+```
+
+### Payment Parameters
+
+Optionally set payment parameters
+
+* By default your Pay Theory defaulted payment parameter is used for all transactions
+
+```Kotlin
+//set payment parameter
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    paymentParameters = "PAYMENT_PARAMETERS"
+)
+```
+
+### Invoice Id
+
+Optionally set an invoice id
+
+* Set an invoice id to submit the transaction for a Pay Theory invoice
+
+```Kotlin
+//set invoice id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    invoiceId = "INVOICE_ID"
+)
+```
+
+### Receipts
+
+Optionally enable receipts
+
+* By default sendReceipt is set to false
+* The default receipt message will send if receiptDescription is not included
+
+```Kotlin
+//set invoice id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    sendReceipt = true,
+    receiptDescription = "School Fees"
+)
+```
+
+### Example Configuration
 
 Here is an example on how to use PayTheoryFragment class method configure():
+
 ```Kotlin
 
 //PayorInfo configuration
@@ -181,7 +403,7 @@ try {
     payTheoryFragment.configure(
         apiKey = apiKey,
         amount = 1000,
-        transactionType = TransactionType.CARD
+        transactionType = TransactionType.CARD,
         metadata = metadata,
         payorInfo = payorInfo
     )
@@ -191,100 +413,26 @@ try {
 }
 ```
 
-### Transaction Type
-Optionally set the transaction type
-* by default the SDK provides a simple card input (additional configurations available)
-```Kotlin
-payTheoryFragment.configure(apiKey, amount)
-```
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD)
-```
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.CASH)
-```
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.BANK)
-```
-
-### Fee Mode
-Optionally set the fee mode. By default FeeMode.INTERCHANGE mode is used FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
-
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.INTERCHANGE)
-```
-
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.SERVICE_FEE)
-```
-
-### Buyer Options
-Optionally pass additional customer data to Pay Theory. Use PayorInfo and Address data model from Pay Theory SDK
-```Kotlin
-val payorInfo = PayorInfo(
-    "John",
-    "Smith",
-    "john@gmail.com",
-    "5135555555",
-    Address(
-        "10549 Reading Rd",
-        "Apt 1",
-        "Cincinnati",
-        "OH",
-        "45241",
-        "USA")
-)
-
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, false, false, false, FeeMode.INTERCHANGE, payorInfo)
-```
-### Custom Tags
-To track payments with custom metadata simply add the following when initializing the SDK:
-- **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
-- **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
-- **payment-parameters-name**: A specific payment parameter that has been created in Pay Theory Portals.
-
-```Kotlin
-val metadata = hashMapOf("pay-theory-account-code" to accountCode, "pay-theory-reference" to payTheoryReference, "payment-parameters-name" to paymentParameter)
-payTheoryFragment.configure(apiKey,2501, TransactionType.CARD, false, false,  false, FeeMode.SERVICE_FEE, payorInfo, metadata)
-```
-
-### Example Configurations
-```Kotlin
-
-// use ACH bank account
-payTheoryFragment.configure(apiKey, amount, TransactionType.BANK)
-
-// use ACH bank account and require account name
-payTheoryFragment.configure(apiKey, amount, TransactionType.BANK, requireAccountName = true)
-
-// use ACH bank account and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, TransactionType.BANK, requireAccountName = true, requireBillingAddress = true)
-
-// use credit card account
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD)
-
-// use credit card and require account name
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, requireAccountName = true)
-
-// use credit card and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, TransactionType.CARD, requireAccountName = true, requireBillingAddress = true)
-
-// use cash
-payTheoryFragment.configure(apiKey, amount, TransactionType.CASH)
-
-```
-
 ## Tokenization Requests
-            //PayTheoryFragment configuration for card payments
-//            payTheoryFragment.tokenizePaymentMethod(
-//                apiKey = apiKey,
-//                tokenizationType = TokenizationType.CARD,
-//                requireAccountName = true,
-//                requireBillingAddress = false,
-//                payorInfo = payorInfo,
-//                payorId = "PAYOR_ID",
-//                metadata = metadata
-//            )
+
+Here is an example on how to use PayTheoryFragment class method tokenizePaymentMethod():
+
+```kotlin
+try {
+    //PayTheoryFragment configuration for creating a payment method token
+    payTheoryFragment.tokenizePaymentMethod(
+        apiKey = apiKey,
+        tokenizationType = TokenizationType.CARD,
+        requireAccountName = true,
+        requireBillingAddress = true,
+        payorInfo = payorInfo,
+        metadata = metadata
+    )
+
+} catch (e: Exception) {
+    e.printStackTrace()
+}
+```
 
 ## Results
 
