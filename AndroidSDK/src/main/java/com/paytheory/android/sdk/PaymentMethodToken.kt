@@ -189,11 +189,7 @@ class PaymentMethodToken(
     private fun generateQueuedActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
-        publicKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
+        publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
 
         val requestAction = TOKENIZE
 

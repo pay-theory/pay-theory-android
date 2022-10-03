@@ -199,8 +199,7 @@ class Transaction(
     private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
-        publicKey =
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+        publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         //if payment type is "CASH" return cash ActionRequest
         if (payment.type == CASH){
             val requestAction = BARCODE_ACTION
