@@ -1,2 +1,3 @@
 include ':AndroidSDK'
 rootProject.name = "PayTheoryLibrary"
+include ':testsdk'
