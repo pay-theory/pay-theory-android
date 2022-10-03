@@ -74,7 +74,8 @@ data class HostTokenRequest(
     @SerializedName("ptToken") val ptToken: String,
     @SerializedName("attestation") val attestation: String,
     @SerializedName("timing") val timing: Long,
-    @SerializedName("origin") val origin: String = "android"
+    @SerializedName("origin") val origin: String = "android",
+    @SerializedName("application_package_name") val applicationPackageName: String,
 )
 
 /**

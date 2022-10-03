@@ -5,48 +5,6 @@ import PayorInfo
 import com.google.gson.annotations.SerializedName
 
 /**
- * Data class that represents the payment results after transaction has been processed
- * @param receipt_number receipt/confirmation number for the transaction
- * @param last_four last four of account number
- * @param brand brand of card
- * @param state current state of transaction
- * @param amount amount of the transaction
- * @param service_fee service fee amount
- * @param metadata custom metadata that can be added to transaction
- * @param created_at creation time
- * @param updated_at updated time
- * @param type ACH or CARD
- */
-data class PaymentResult (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
-    @SerializedName("state") val state: String,
-    @SerializedName("amount") val amount: Int?,
-    @SerializedName("service_fee") val service_fee: String?,
-    @SerializedName("metadata") val metadata: Map<String,String>?,
-    @SerializedName("created_at") val created_at: String?,
-    @SerializedName("updated_at") val updated_at: String?,
-    @SerializedName("type") val type: String?
-)
-
-
-/**
- * Data class that represents the payment results after transaction has been processed
- * @param receipt_number receipt/confirmation number for the transaction
- * @param last_four last four of account number
- * @param brand brand of card
- * @param state current state of transaction
- * @param type ACH or CARD
- */
-data class PaymentResultFailure (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
-    @SerializedName("state") val state: String
-)
-
-/**
  * Data class that represents the error received if a transaction fails
  * @param reason reason the transaction failed
  */
@@ -56,7 +14,12 @@ data class Error (
 
 /**
  * Data class to store resulting barcode data
- * @param
+ * @param barcodeUid Pay Theory unique barcode identifier
+ * @param barcodeUrl url to view barcode
+ * @param barcode barcode number
+ * @param barcodeFee barcode fee
+ * @param merchant your Pay Theory merchant uid
+ * @param mapUrl a url for a map to nearby barcode payment locations
  */
 data class BarcodeResult (
     @SerializedName("BarcodeUid") val barcodeUid: String,

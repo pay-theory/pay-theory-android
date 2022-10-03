@@ -218,6 +218,18 @@ confirmation = true
 confirmation = false 
 ```
 
+Once you have completed the user confirmation you call transaction.completeTransfer() to send Pay Theory confirmation to complete the transaction
+
+```Kotlin
+    override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+        // YOUR USER CONFIRMATION STEP...
+            
+        if (userAgrees == true) {
+            transaction.completeTransfer()  //This will confirm and continue processing the transaction 
+        }
+    }
+```
+
 ### Fee Mode
 
 Optionally set the fee mode
@@ -438,24 +450,58 @@ try {
 
 The transaction results will come back through as these classes:
 
-*   complete ach/card payment result
+*   successful card/bank payment result
  
 ```Kotlin
-data class PaymentResult (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
+data class SuccessfulTransactionResult (
     @SerializedName("state") val state: String,
-    @SerializedName("amount") val amount: Int?,
-    @SerializedName("service_fee") val service_fee: String?,
-    @SerializedName("metadata") val metadata: Map<String,String>?,
-    @SerializedName("created_at") val created_at: String?,
-    @SerializedName("updated_at") val updated_at: String?,
-    @SerializedName("type") val type: String?
+    @SerializedName("amount") val amount: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("service_fee") val serviceFee: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
 )
 ```
 
-*   complete cash barcode result
+* confirmation step result
+
+```Kotlin
+data class ConfirmationMessage (
+    @SerializedName("payment_token") val paymentToken: String,
+    @SerializedName("payer_id") val payerId: String?,
+    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String?,
+    @SerializedName("merchant_uid") val merchantUid: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("session_key") val sessionKey: String,
+    @SerializedName("processor") val processor: String,
+    @SerializedName("expiration") var expiration: String?,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("billing_name") val billingName: String?,
+    @SerializedName("billing_address") val billingAddress: Address?,
+    @SerializedName("amount") val amount: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("fee_mode") val fee_mode: String,
+    @SerializedName("fee") var fee: String,
+    @SerializedName("processor_merchant_id") val processor_merchant_id: String?,
+    @SerializedName("payment_method") val payment_method: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("pay_theory_data") val pay_theory_data: HashMap<Any, Any>?,
+    @SerializedName("payor_info") val payorInfo: PayorInfo?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("invoice_id") val invoice_id: String?,
+    @SerializedName("payment_intent_id") val paymentIntentId: String?,
+)
+```
+
+* successful barcode request result
+
 ```Kotlin
 data class BarcodeResult (
     @SerializedName("BarcodeUid") val barcodeUid: String,
@@ -463,37 +509,43 @@ data class BarcodeResult (
     @SerializedName("barcode") val barcode: String,
     @SerializedName("barcodeFee") val barcodeFee: String,
     @SerializedName("Merchant") val merchant: String,
-    @SerializedName("MapUrl") val mapUrl : String
+    @SerializedName("mapUrl") val mapUrl : String
 )
 ```
 
-*   payment confirmation data
+* successful payment method token result
+
 ```Kotlin
-data class PaymentConfirmation (
-    @SerializedName("bin") val bin: Bin,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("payment") val payment: Payment,
-    @SerializedName("payment-token") val paymentToken: String,
-    @SerializedName("payment_intent_id") val paymentIntentId: String,
+data class PaymentMethodTokenResults (
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("expiration") val expiration: String?,
+    @SerializedName("payment_type") val paymentType: String
 )
 ```
 
-*   failed ach/card payment result
+*   failed card, bank, barcode, and token request results
 
 ```Kotlin
-data class PaymentResultFailure (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
+data class FailedTransactionResult (
     @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
 )
+
 ```
 
-*   error processing card, ach, or barcode results
+*   any processing error results
 
 ```Kotlin
-data class TransactionError (
+data class Error (
     @SerializedName("reason") val reason: String
 )
 ```
