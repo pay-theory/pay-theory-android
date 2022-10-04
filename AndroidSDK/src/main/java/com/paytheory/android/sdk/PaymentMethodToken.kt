@@ -4,11 +4,8 @@ import ActionRequest
 import PaymentMethodData
 import PaymentMethodTokenData
 import TokenizeRequest
-import TransferPartTwoRequest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
@@ -39,10 +36,10 @@ class PaymentMethodToken(
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>? = null
 ): WebsocketMessageHandler {
-    private val googleProjectNumber = 192992826889
-    private var originalConfirmation: ConfirmationMessage? = null
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
+    private val googleProjectNumber = 192992826889
+    private val headerMap = mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
     var queuedRequest: PaymentMethodTokenData? = null
     var publicKey: String? = null
     var sessionKey:String? = null
@@ -67,19 +64,11 @@ class PaymentMethodToken(
         var webSocketInteractor: WebsocketInteractor? = null
     }
 
-    private fun buildApiHeaders(): Map<String, String> {
-        val headerMap = mutableMapOf<String, String>()
-        headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = apiKey
-        return headerMap
-    }
-
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
 
-        val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
+        val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
 
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
@@ -104,7 +93,6 @@ class PaymentMethodToken(
     }
 
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
@@ -152,16 +140,14 @@ class PaymentMethodToken(
      * Initiate Transaction Class and calls pt-token endpoint
      */
     @ExperimentalCoroutinesApi
-    @RequiresApi(Build.VERSION_CODES.O)
     fun init() {
         ptTokenApiCall(context)
     }
 
     /**
      * Final api call to complete transaction
-     * @param payment payment object to transact
+     * @param paymentMethodTokenData payment method token object
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalCoroutinesApi
     fun tokenize(
         paymentMethodTokenData: PaymentMethodTokenData
@@ -169,7 +155,7 @@ class PaymentMethodToken(
 
         messageReactors!!.activePaymentToken = paymentMethodTokenData
 
-        val actionRequest =  generateQueuedActionRequest(paymentMethodTokenData)
+        val actionRequest =  generateInitialActionRequest(paymentMethodTokenData)
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
@@ -183,10 +169,10 @@ class PaymentMethodToken(
 
     /**
      * Generate the initial action request
-     * @param payment payment object to transact
+     * @param paymentMethodTokenData payment method token object
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun generateQueuedActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
+    private fun generateInitialActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)

@@ -10,10 +10,11 @@ Before you can use Pay Theory Android SDK you must register your app in Pay Theo
 
 ![App Registration](https://assets.paytheory.com/android/android-registration.png)
 
-For each mobile app, you want to register 
-*   enter SHA-256 digest of release signing key
-*   enter SHA-256 digest of debug signing key
-*   enter your application package name
+For each mobile app, you want to register
+
+- enter SHA-256 digest of release signing key
+- enter SHA-256 digest of debug signing key
+- enter your application package name
 
 ### Find signing key digest
 
@@ -450,7 +451,7 @@ try {
 
 The transaction results will come back through as these classes:
 
-*   successful card/bank payment result
+- successful card/bank payment result
  
 ```Kotlin
 data class SuccessfulTransactionResult (
@@ -468,7 +469,7 @@ data class SuccessfulTransactionResult (
 )
 ```
 
-* confirmation step result
+- confirmation step result
 
 ```Kotlin
 data class ConfirmationMessage (
@@ -500,7 +501,7 @@ data class ConfirmationMessage (
 )
 ```
 
-* successful barcode request result
+- successful barcode request result
 
 ```Kotlin
 data class BarcodeResult (
@@ -513,7 +514,7 @@ data class BarcodeResult (
 )
 ```
 
-* successful payment method token result
+- successful payment method token result
 
 ```Kotlin
 data class PaymentMethodTokenResults (
@@ -528,7 +529,7 @@ data class PaymentMethodTokenResults (
 )
 ```
 
-*   failed card, bank, barcode, and token request results
+- failed card, bank, barcode, and token request results
 
 ```Kotlin
 data class FailedTransactionResult (
@@ -542,7 +543,7 @@ data class FailedTransactionResult (
 
 ```
 
-*   any processing error results
+- any processing error results
 
 ```Kotlin
 data class Error (
@@ -550,19 +551,21 @@ data class Error (
 )
 ```
 
-## Testing
+# Testing
 A Java version between 8 and 16 is required to execute Gradle commands.
 
-### Unit testing
+## Unit testing
 
 Run this line in the command prompt:
 
 Windows
+
 ```powershell
 gradlew unitTesting
 ```
 
 Linux
+
 ```shell
 ./gradlew unitTesting
 ```
@@ -572,11 +575,13 @@ Linux
 Run this line in the command prompt:
 
 Windows
+
 ```powershell
 gradlew completeTesting
 ```
 
 Linux
+
 ```shell
 ./gradlew completeTesting
 ```

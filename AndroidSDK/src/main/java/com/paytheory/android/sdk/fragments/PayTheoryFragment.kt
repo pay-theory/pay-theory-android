@@ -4,16 +4,13 @@ import Address
 import PayorInfo
 import Payment
 import PaymentMethodTokenData
-import android.os.Build
 import android.os.Bundle
-import android.provider.ContactsContract.Directory.PACKAGE_NAME
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +23,21 @@ import com.paytheory.android.sdk.configuration.*
 import com.paytheory.android.sdk.validation.*
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+private const val PAYTHEORYLAB = "paytheorylab"
+private const val PAYTHEORYSTUDY = "paytheorystudy"
+private const val PAYTHEORY = "paytheory"
+private const val INVALID_APIKEY = "Invalid apikey"
+private const val INVALID_AMOUNT = "Invalid amount"
+private const val INVALID_CARD_NUMBER = "Invalid Card Number"
+private const val INVALID_CVV = "Invalid CVV"
+private const val INVALID_EXPIRATION = "Invalid Expiration"
+private const val INVALID_ZIP_CODE = "Invalid Zip Code"
+private const val INVALID_ACCOUNT_NUMBER = "Invalid Account Number"
+private const val INVALID_NAME = "Invalid Name"
+private const val INVALID_CONTACT_INFO = "Invalid Contact Info"
+private const val INVALID_ACCOUNT_TYPE = "Invalid Account Type"
+private const val INVALID_ROUTING_NUMBER = "Invalid Routing Number"
 
 /**
  * PayTheoryFragment populates required transaction input fields.
@@ -109,7 +121,6 @@ class PayTheoryFragment : Fragment() {
      * @param sendReceipt Enable a receipt to be sent to a payor for the transaction
      * @param receiptDescription Add description to receipt for transaction
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(Exception::class)
     fun configure(
@@ -197,16 +208,16 @@ class PayTheoryFragment : Fragment() {
 
         //Validation checks for PayTheoryFragment configs
         if (this.apiKey.isNullOrBlank()) {
-            throw Exception("Invalid apikey")
+            throw Exception(INVALID_APIKEY)
         }
-        if (!this.apiKey!!.contains("paytheory")) {
-            throw Exception("Invalid apikey")
+        if (!this.apiKey!!.contains(PAYTHEORY)) {
+            throw Exception(INVALID_APIKEY)
         }
         if (this.amount == null) {
-            throw Exception("Invalid amount")
+            throw Exception(INVALID_AMOUNT)
         }
         if (this.amount == 0) {
-            throw Exception("Invalid amount")
+            throw Exception(INVALID_AMOUNT)
         }
 
         val startIndex: Int = apiKey.indexOf('-')
@@ -214,8 +225,8 @@ class PayTheoryFragment : Fragment() {
         val endIndex = apiKey.indexOf('-', apiKey.indexOf('-') + 1)
         val stage: String = apiKey.substring(startIndex + 1, endIndex)
 
-        if (stage != "paytheorylab" && stage != "paytheorystudy" && stage != "paytheory") {
-            throw Exception("Invalid apikey")
+        if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
+            throw Exception(INVALID_APIKEY)
         }
 
         this.constants = Constants(partner, stage)
@@ -460,8 +471,17 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
+    /**
+     * Create configurations to execute a tokenization of the payment method
+     * @param apiKey Your Pay Theory api-key
+     * @param tokenizationType TokenizationType.CARD or TokenizationType.BANK
+     * @param requireAccountName Enable account name for the transaction
+     * @param requireBillingAddress Enable billing address for the transaction
+     * @param payorInfo Optional details about the payor
+     * @param payorId Optional Pay Theory payorId
+     * @param metadata Optional Transaction metadata
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    @RequiresApi(Build.VERSION_CODES.O)
     fun tokenizePaymentMethod(
         apiKey: String,
         tokenizationType: TokenizationType? = TokenizationType.CARD,
@@ -512,10 +532,10 @@ class PayTheoryFragment : Fragment() {
 
         //Validation checks for PayTheoryFragment configs
         if (this.apiKey.isNullOrBlank()) {
-            throw Exception("Invalid apikey")
+            throw Exception(INVALID_APIKEY)
         }
-        if (!this.apiKey!!.contains("paytheory")) {
-            throw Exception("Invalid apikey")
+        if (!this.apiKey!!.contains(PAYTHEORY)) {
+            throw Exception(INVALID_APIKEY)
         }
 
         val startIndex: Int = apiKey.indexOf('-')
@@ -523,8 +543,8 @@ class PayTheoryFragment : Fragment() {
         val endIndex = apiKey.indexOf('-', apiKey.indexOf('-') + 1)
         val stage: String = apiKey.substring(startIndex + 1, endIndex)
 
-        if (stage != "paytheorylab" && stage != "paytheorystudy" && stage != "paytheory") {
-            throw Exception("Invalid apikey")
+        if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
+            throw Exception(INVALID_APIKEY)
         }
 
         this.constants = Constants(partner, stage)
@@ -732,13 +752,11 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePayment(payment: Payment) {
         payTheoryTransaction!!.transact(payment)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePaymentMethodToken(paymentMethodTokenData: PaymentMethodTokenData) {
         payTheoryTokenizeTransaction!!.tokenize(paymentMethodTokenData)
@@ -806,16 +824,16 @@ class PayTheoryFragment : Fragment() {
             val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
             val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
             return if (ccNumber.text.isNullOrBlank() || !ccNumber.error.isNullOrBlank()) {
-                ccNumber.error = "Invalid Card Number"
+                ccNumber.error = INVALID_CARD_NUMBER
                 false
             } else if (ccCVV.text.isNullOrBlank() || !ccCVV.error.isNullOrBlank()) {
-                ccCVV.error = "Invalid CVV"
+                ccCVV.error = INVALID_CVV
                 false
             } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank()) {
-                ccExpiration.error = "Invalid Expiration"
+                ccExpiration.error = INVALID_EXPIRATION
                 false
             } else if (billingZip.text.isNullOrBlank() || !billingZip.error.isNullOrBlank()) {
-                billingZip.error = "Invalid Zip Code"
+                billingZip.error = INVALID_ZIP_CODE
                 false
             } else {
                 true
@@ -829,13 +847,13 @@ class PayTheoryFragment : Fragment() {
             val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
 
             return if (achAccount.text.isNullOrBlank() || !achAccount.error.isNullOrBlank()) {
-                achAccount.error = "Invalid Account Number"
+                achAccount.error = INVALID_ACCOUNT_NUMBER
                 false
             } else if (achRouting.text.isNullOrBlank() || !achRouting.error.isNullOrBlank() || achRouting.text.toString().length != 9) {
-                achRouting.error = "Invalid Routing Number"
+                achRouting.error = INVALID_ROUTING_NUMBER
                 false
             } else if (achChooser.text.toString() != "Checking" && achChooser.text.toString() != "Savings") {
-                achChooser.error = "Invalid Account Type"
+                achChooser.error = INVALID_ACCOUNT_TYPE
                 false
             } else {
                 true
@@ -848,10 +866,10 @@ class PayTheoryFragment : Fragment() {
                 requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
             val cashBuyer = requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer)
             return if (cashBuyerContact.text.isNullOrBlank() || !cashBuyerContact.error.isNullOrBlank()) {
-                cashBuyerContact.error = "Invalid Contact Info"
+                cashBuyerContact.error = INVALID_CONTACT_INFO
                 false
             } else if (cashBuyer.text.isNullOrBlank() || !cashBuyer.error.isNullOrBlank()) {
-                cashBuyer.error = "Invalid Name"
+                cashBuyer.error = INVALID_NAME
                 false
             } else {
                 true

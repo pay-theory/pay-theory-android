@@ -2,15 +2,13 @@ package com.paytheory.android.sdk
 
 import ActionRequest
 import CashRequest
-import PaymentMethodData
 import Payment
 import PaymentData
+import PaymentMethodData
 import TransferPartOneRequest
 import TransferPartTwoRequest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
@@ -19,15 +17,15 @@ import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
-import com.paytheory.android.sdk.reactors.*
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
+import com.paytheory.android.sdk.reactors.ConnectionReactors
+import com.paytheory.android.sdk.reactors.MessageReactors
 import com.paytheory.android.sdk.websocket.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -48,15 +46,15 @@ class Transaction(
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>? = null
 ): WebsocketMessageHandler {
-    private val googleProjectNumber = 192992826889
-    private var originalConfirmation: ConfirmationMessage? = null
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
+    private val googleProjectNumber = 192992826889
+    private var originalConfirmation: ConfirmationMessage? = null
+    private val headerMap = mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
     var queuedRequest: Payment? = null
     var publicKey: String? = null
     var sessionKey:String? = null
     var hostToken:String? = null
-
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -81,18 +79,11 @@ class Transaction(
         var webSocketInteractor: WebsocketInteractor? = null
     }
 
-    private fun buildApiHeaders(): Map<String, String> {
-        val headerMap = mutableMapOf<String, String>()
-        headerMap["Content-Type"] = "application/json"
-        headerMap["X-API-Key"] = apiKey
-        return headerMap
-    }
-
     @ExperimentalCoroutinesApi
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
 
-    val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(buildApiHeaders())
+    val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
 
     observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
@@ -121,8 +112,7 @@ class Transaction(
     private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
-        val integrityManager =
-            IntegrityManagerFactory.create(this.context)
+        val integrityManager = IntegrityManagerFactory.create(this.context)
 
         // Request the integrity token by providing the nonce as Pay Theory challenge string.
         val integrityTokenResponse: Task<IntegrityTokenResponse> =
@@ -179,7 +169,7 @@ class Transaction(
     ) {
         messageReactors!!.activePayment = payment
 
-        val actionRequest =  generateQueuedActionRequest(payment)
+        val actionRequest =  generateInitialActionRequest(payment)
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
@@ -196,7 +186,7 @@ class Transaction(
      * @param payment payment object to transact
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun generateQueuedActionRequest(payment: Payment): ActionRequest {
+    private fun generateInitialActionRequest(payment: Payment): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
