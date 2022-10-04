@@ -2,6 +2,10 @@ package com.paytheory.android.sdk.websocket
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paytheory.android.sdk.Error
+import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PaymentMethodToken
+import com.paytheory.android.sdk.Transaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -18,7 +22,9 @@ class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
     var payTheoryToken: String,
     private val partner: String,
-    private val stage: String
+    private val stage: String,
+    private val transaction: Transaction?,
+    private val paymentMethodToken: PaymentMethodToken?
 ):
     ViewModel() {
 
@@ -82,6 +88,20 @@ class WebSocketViewModel(
 
     private fun onSocketError(ex: Throwable) {
         println("Error occurred : ${ex.message}")
+        interactor.stopSocket()
+
+        // error for transaction request
+        if (transaction != null){
+            if (transaction.context is Payable){
+                transaction.context.handleError(Error(ex.message.toString()))
+            }
+        }
+        // error for tokenization request
+        if (paymentMethodToken != null){
+            if (paymentMethodToken.context is Payable){
+                paymentMethodToken.context.handleError(Error(ex.message.toString()))
+            }
+        }
     }
 
     override fun onCleared() {

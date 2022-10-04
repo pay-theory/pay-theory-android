@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285"
+    private val apiKey = "API_KEY"
     private var dialog : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +66,20 @@ class MainActivity : AppCompatActivity(), Payable {
                 apiKey = apiKey,
                 amount = 5050,
                 transactionType = TransactionType.CARD,
+//                transactionType = TransactionType.BANK,
+                requireAccountName = false,
+                requireBillingAddress = false,
+                confirmation = false,
                 feeMode = FeeMode.INTERCHANGE,
                 metadata = metadata,
-                payorInfo = payorInfo
+                payorInfo = payorInfo,
+                accountCode = "Test Account Code",
+                reference = "Test Reference",
+                sendReceipt = true,
+                receiptDescription = "Android Payment Receipt Test",
+//                paymentParameters = "TEST_PARAMS",
+//                invoiceId = "TEST_INVOICE",
+//                payorId = "TEST_PAYOR_ID"
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -99,6 +110,13 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun handleError(error: Error) {
         println(error)
         showToast(error.reason)
+        val errorTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
+        val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
+        errorTextView.text = error.reason
+        yesBtn.setOnClickListener { dialog!!.dismiss() }
+        noBtn.setOnClickListener { dialog!!.dismiss() }
+        runOnUiThread { dialog!!.show() }
     }
 
     //DEMO - function to display payment confirmation message to user

@@ -11,7 +11,6 @@ import com.paytheory.android.sdk.nacl.decryptBox
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
 
 /**
  * Creates reactions based on WebSocket messages
@@ -84,11 +83,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     fun onError(message: String, transaction: Transaction? = null) {
-        print("Error with WebSocket: $message")
         /* fail if unknown websocket message */
         if (transaction != null) {
             if (transaction.context is Payable){
-                transaction.context.handleError(Error("Error processing payment"))
+                transaction.context.handleError(Error(message))
             }
         }
     }
@@ -98,11 +96,10 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     fun onTokenError(message: String, paymentMethodToken: PaymentMethodToken? = null) {
-        print("Error with WebSocket: $message")
         /* fail if unknown websocket message */
         if (paymentMethodToken != null) {
             if (paymentMethodToken.context is Payable){
-                paymentMethodToken.context.handleError(Error("Error tokenizing payment method"))
+                paymentMethodToken.context.handleError(Error(message))
             }
         }
     }
