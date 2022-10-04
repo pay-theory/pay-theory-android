@@ -38,7 +38,9 @@ Copy your SHA-256 digest
 
 ## Installation
 
-The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.maven.org/maven2/com/paytheory/). The latest version is available via `mavenCentral()`:
+The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.maven.org/maven2/com/paytheory/)
+
+The latest version is available via `mavenCentral()`:
 
 - Add mavenCentral() to your project level build.gradle file
 
@@ -267,7 +269,9 @@ payTheoryFragment.configure(
 
 ### Payor Info
 
-Optionally pass additional customer data to Pay Theory. Use PayorInfo and Address data model from Pay Theory SDK
+Optionally pass additional customer data to Pay Theory.
+
+Use data models **PayorInfo** and **Address** from Pay Theory SDK
 
 ```Kotlin
 //Set optional payorInfo configuration
