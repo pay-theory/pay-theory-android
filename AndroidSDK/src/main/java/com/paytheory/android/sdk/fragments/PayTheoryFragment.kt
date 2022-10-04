@@ -208,16 +208,16 @@ class PayTheoryFragment : Fragment() {
 
         //Validation checks for PayTheoryFragment configs
         if (this.apiKey.isNullOrBlank()) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
         if (!this.apiKey!!.contains(PAYTHEORY)) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
         if (this.amount == null) {
-            throw Exception(INVALID_AMOUNT)
+            throw IllegalArgumentException(INVALID_AMOUNT)
         }
         if (this.amount == 0) {
-            throw Exception(INVALID_AMOUNT)
+            throw IllegalArgumentException(INVALID_AMOUNT)
         }
 
         val startIndex: Int = apiKey.indexOf('-')
@@ -226,7 +226,7 @@ class PayTheoryFragment : Fragment() {
         val stage: String = apiKey.substring(startIndex + 1, endIndex)
 
         if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
 
         this.constants = Constants(partner, stage)
@@ -532,10 +532,10 @@ class PayTheoryFragment : Fragment() {
 
         //Validation checks for PayTheoryFragment configs
         if (this.apiKey.isNullOrBlank()) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
         if (!this.apiKey!!.contains(PAYTHEORY)) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
 
         val startIndex: Int = apiKey.indexOf('-')
@@ -544,7 +544,7 @@ class PayTheoryFragment : Fragment() {
         val stage: String = apiKey.substring(startIndex + 1, endIndex)
 
         if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
-            throw Exception(INVALID_APIKEY)
+            throw IllegalArgumentException(INVALID_APIKEY)
         }
 
         this.constants = Constants(partner, stage)

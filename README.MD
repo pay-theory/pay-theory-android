@@ -6,7 +6,7 @@ Pay Theory's Android SDK is available for Android SDK >= 26
 
 ## Register your application
 
-Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
+Register your app in Pay Theory's merchant portal to use Pay Theory Android SDK
 
 ![App Registration](https://assets.paytheory.com/android/android-registration.png)
 
@@ -57,7 +57,7 @@ dependencies {
 }
 ```
 
-### Update minimum sdk version to 26 or higher in application level build.gradle file
+### Update minimum sdk version to 26 or higher in your app level build.gradle
 
 ```Kotlin
 android {
@@ -154,7 +154,7 @@ payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
 
 Optionally set the transaction type
 
-* by default the SDK provides a simple card input
+- by default the SDK provides a simple card input
 
 ```Kotlin
 // debit/credit card fields
@@ -175,7 +175,7 @@ transactionType = TransactionType.CASH
 
 Optionally set the transaction to require the account name input field
 
-* by default the SDK sets requireAccountName to false
+- by default the SDK sets requireAccountName to false
 
 ```Kotlin
 // will include account name field
@@ -191,7 +191,7 @@ requireAccountName = false
 
 Optionally set the transaction to require input fields for a full billing address
 
-* by default the SDK sets requireBillingAddress to false
+- by default the SDK sets requireBillingAddress to false
 
 ```Kotlin
 // will include billing address fields
@@ -205,9 +205,9 @@ requireBillingAddress = false
 
 ### Confirmation
 
-Optionally set the transaction to require a confirmation step (confirmation function from Payable interface)
+Optionally set the transaction to require a confirmation step
 
-* by default the SDK sets confirmation to false
+- by default the SDK sets confirmation to false
 
 ```Kotlin
 // will include a confirmation step 
@@ -219,23 +219,23 @@ confirmation = true
 confirmation = false 
 ```
 
-Once you have completed the user confirmation you call transaction.completeTransfer() to send Pay Theory confirmation to complete the transaction
+Complete Pay Theory transaction after user confirmation
 
 ```Kotlin
-    override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
-        // YOUR USER CONFIRMATION STEP...
-            
-        if (userAgrees == true) {
-            transaction.completeTransfer()  //This will confirm and continue processing the transaction 
-        }
+override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+    // YOUR USER CONFIRMATION STEP...
+        
+    if (userAgrees == true) {
+        transaction.completeTransfer()  //This will confirm and continue processing the transaction 
     }
+}
 ```
 
 ### Fee Mode
 
 Optionally set the fee mode
 
-* By default FeeMode.INTERCHANGE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+- By default FeeMode.INTERCHANGE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
 
 ```Kotlin
 //set fee mode as interchange
@@ -296,7 +296,7 @@ payTheoryFragment.configure(
 
 Optionally set the payor id
 
-* By default a new payorId is created with payorInfo
+- By default a new payorId is created with payorInfo
 
 ```Kotlin
 //set payor id
@@ -311,7 +311,7 @@ payTheoryFragment.configure(
 
 Optionally set the account code
 
-* accountCode is tracked for each transaction in Pay Theory portals
+- accountCode is tracked for each transaction in Pay Theory portals
 
 ```Kotlin
 //set account code
@@ -326,7 +326,7 @@ payTheoryFragment.configure(
 
 Optionally set the reference
 
-* reference is tracked for each transaction in Pay Theory portals
+- reference is tracked for each transaction in Pay Theory portals
 
 ```Kotlin
 //set reference
@@ -341,7 +341,7 @@ payTheoryFragment.configure(
 
 Optionally set payment parameters
 
-* By default your Pay Theory defaulted payment parameter is used for all transactions
+- By default your Pay Theory defaulted payment parameter is used for all transactions
 
 ```Kotlin
 //set payment parameter
@@ -356,7 +356,7 @@ payTheoryFragment.configure(
 
 Optionally set an invoice id
 
-* Set an invoice id to submit the transaction for a Pay Theory invoice
+- Set an invoice id to submit the transaction for a Pay Theory invoice
 
 ```Kotlin
 //set invoice id
@@ -371,8 +371,8 @@ payTheoryFragment.configure(
 
 Optionally enable receipts
 
-* By default sendReceipt is set to false
-* The default receipt message will send if receiptDescription is not included
+- By default sendReceipt is set to false
+- The default receipt message will send if receiptDescription is not included
 
 ```Kotlin
 //set invoice id
@@ -452,7 +452,7 @@ try {
 The transaction results will come back through as these classes:
 
 - successful card/bank payment result
- 
+
 ```Kotlin
 data class SuccessfulTransactionResult (
     @SerializedName("state") val state: String,
@@ -551,10 +551,11 @@ data class Error (
 )
 ```
 
-# Testing
+## Testing
+
 A Java version between 8 and 16 is required to execute Gradle commands.
 
-## Unit testing
+### Unit testing
 
 Run this line in the command prompt:
 
@@ -590,8 +591,8 @@ Linux
 
 Feel free to get in touch:
 
-* [GitHub Issues](https://github.com/pay-theory/pay-theory-android/issues) - For any issues or feedback
-* [Support](https://paytheory.com/) / [support@paytheory.com](mailto:support@paytheory.com) -
+- [GitHub Issues](https://github.com/pay-theory/pay-theory-android/issues) - For any issues or feedback
+- [Support](https://paytheory.com/) / [support@paytheory.com](mailto:support@paytheory.com)
 
 ## License
 

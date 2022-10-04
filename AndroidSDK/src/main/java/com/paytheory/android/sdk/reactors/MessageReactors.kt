@@ -67,7 +67,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedMessage::class.java)
         val decryptedMessage = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
         val confirmationMessage = Gson().fromJson(decryptedMessage, ConfirmationMessage::class.java)
-        //set original confirmation message from Pay Theory
+        //set original confirmation/transaction with correct fee from Pay Theory
         transaction!!.setConfirmation(confirmationMessage)
         //Remove service_fee for any interchange transaction
         if (transaction.feeMode == FeeMode.INTERCHANGE) {

@@ -82,18 +82,16 @@ class Transaction(
     @ExperimentalCoroutinesApi
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
-
     val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
-
     observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-
+        // handle success pt-token request
         .subscribe({ ptTokenResponse: PTTokenResponse ->
             if (queuedRequest != null) {
                 establishViewModel(ptTokenResponse)
             } else {
                 googlePlayIntegrity(ptTokenResponse)
             }
-
+        // handle failed pt-token request
         }, { error ->
             if (context is Payable) {
                 if(error.message == "HTTP 404 "){
@@ -113,7 +111,6 @@ class Transaction(
         val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
         val integrityManager = IntegrityManagerFactory.create(this.context)
-
         // Request the integrity token by providing the nonce as Pay Theory challenge string.
         val integrityTokenResponse: Task<IntegrityTokenResponse> =
             integrityManager.requestIntegrityToken(
@@ -121,11 +118,11 @@ class Transaction(
                     .setNonce(challenge)
                     .setCloudProjectNumber(googleProjectNumber)
                     .build())
-
+        // handle success integrity token request
         integrityTokenResponse.addOnSuccessListener {
             establishViewModel(ptTokenResponse, it.token())
         }
-
+        // handle failed integrity token request
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true){
@@ -142,7 +139,6 @@ class Transaction(
         webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
-
         viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage)
         connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
@@ -168,9 +164,7 @@ class Transaction(
         payment: Payment
     ) {
         messageReactors!!.activePayment = payment
-
         val actionRequest =  generateInitialActionRequest(payment)
-
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
             println("Pay Theory Payment Requested")
@@ -205,17 +199,12 @@ class Transaction(
         //if payment type is not "CASH" return transfer ActionRequest
         else {
             val requestAction = TRANSFER_PART_ONE_ACTION
-
             val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
-
             val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
-
             val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
-
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -239,17 +228,13 @@ class Transaction(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer() {
-
         // only for ach payments, need to set expiration to null back to tags-secure-socket
         if (originalConfirmation!!.expiration.isNullOrBlank() && originalConfirmation!!.brand == "ACH"){
             originalConfirmation!!.expiration = ""
         }
         val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
-
         val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
-
         val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
-
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else{

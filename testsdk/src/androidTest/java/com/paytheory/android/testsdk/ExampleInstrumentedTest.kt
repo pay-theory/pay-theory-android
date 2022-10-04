@@ -15,6 +15,9 @@ import org.junit.Assert.*
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
+    /**
+     * Instrumented test, which will execute on an Android device.
+     */
     @Test
     fun useAppContext() {
         // Context of the app under test.
