@@ -20,7 +20,8 @@ class ConnectionReactors(
     private val ptToken: String,
     private val attestation: String,
     private val viewModel: WebSocketViewModel,
-    private val websocketInteractor: WebsocketInteractor) {
+    private val websocketInteractor: WebsocketInteractor,
+    private val applicationPackageName: String) {
 
     companion object {
         private const val HOST_ACTION = "host:hostToken"
@@ -32,13 +33,10 @@ class ConnectionReactors(
     @ExperimentalCoroutinesApi
     fun onConnected() {
 
-        val requestData = HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
+        val requestData = HostTokenRequest(ptToken, attestation, System.currentTimeMillis(), "android", applicationPackageName)
 
-        val encodedBody = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val encodedBody =
             Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())
-        } else {
-            android.util.Base64.encodeToString(Gson().toJson(requestData).toByteArray(),android.util.Base64.DEFAULT)
-        }
 
         val actionRequest = ActionRequest(HOST_ACTION, encodedBody)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))

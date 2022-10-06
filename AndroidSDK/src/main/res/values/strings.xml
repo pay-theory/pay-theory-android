@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="name_on_account">Name on Account</string>
-    <string name="billing_address">Address</string>
-    <string name="billing_address_cont">Address Cont.</string>
+    <string name="billing_address">Address Line 1</string>
+    <string name="billing_address_cont">Address Line 2</string>
     <string name="city">City</string>
     <string name="state">State</string>
     <string name="billing_zipcode">Zip</string>

@@ -4,11 +4,7 @@ package com.paytheory.android.sdk
  * Object that contains constant variables
  */
 class Constants(partner: String, stage: String) {
-    val API_BASE_PATH: String
-    val NO_INTERNET_ERROR: String
+    val API_BASE_PATH: String = "https://$partner.$stage.com/"
+    val NO_INTERNET_ERROR: String = "No internet connection"
 
-    init {
-         API_BASE_PATH = "https://$partner.rest.$stage.com/token-service/"
-         NO_INTERNET_ERROR = "No internet connection"
-    }
 }

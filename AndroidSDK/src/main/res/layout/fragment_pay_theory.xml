@@ -59,17 +59,6 @@
                             android:autofillHints="addressRegion" />
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/billing_zip"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/billing_zipcode"
-                            android:digits="1234567890"
-                            android:maxLength="5"
-                            android:visibility="gone"
-                            android:inputType="number"
-                            android:autofillHints="postalCode" />
-
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cc_number"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -77,7 +66,7 @@
                             android:hint="@string/card_number"
                             android:visibility="gone"
                             android:inputType="number"
-                            android:autofillHints="creditCardNumber"  />
+                            android:autofillHints="creditCardNumber" />
 
                         <LinearLayout
                             android:id="@+id/cvv_and_expiration"
@@ -94,7 +83,7 @@
                                     android:hint="@string/expiration"
                                     android:inputType="number"
                                     android:visibility="gone"
-                                    android:layout_weight="1"/>
+                                    android:layout_weight="1" />
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
                                     android:id="@+id/cc_cvv"
                                     android:layout_width="match_parent"
@@ -104,7 +93,7 @@
                                     android:hint="@string/cvv"
                                     android:inputType="number"
                                     android:visibility="gone"
-                                    android:layout_weight="1"/>
+                                    android:layout_weight="1" />
                         </LinearLayout>
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
@@ -126,22 +115,6 @@
                             android:visibility="gone"
                             android:inputType="number" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/ach_type_choice_layout"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/account_type"
-                            android:visibility="gone">
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/ach_type_choice"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:cursorVisible="false"
-                                android:focusable="false"
-                                android:inputType="none"/>
-                        </com.google.android.material.textfield.TextInputLayout>
-
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cash_buyer"
                             android:layout_width="match_parent"
@@ -158,6 +131,32 @@
                             android:visibility="gone"
                             android:inputType="text" />
 
+                        <com.paytheory.android.sdk.view.PayTheoryEditText
+                            android:id="@+id/billing_zip"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/billing_zipcode"
+                            android:digits="1234567890"
+                            android:maxLength="5"
+                            android:visibility="gone"
+                            android:inputType="number"
+                            android:autofillHints="postalCode" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/ach_type_choice_layout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/account_type"
+                            android:visibility="gone">
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/ach_type_choice"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:cursorVisible="false"
+                                android:focusable="false"
+                                android:inputType="none"/>
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/submitButton"
@@ -165,7 +164,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="24dp"
                             android:textColor="#000000"
-                            android:text="@string/submit_payment" />
+                            android:text="@string/submit_payment"
+                            android:enabled="false"/>
                 </LinearLayout>
         </TableLayout>
 </ScrollView>

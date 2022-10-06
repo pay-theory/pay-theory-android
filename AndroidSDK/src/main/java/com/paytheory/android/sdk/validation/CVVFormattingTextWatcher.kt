@@ -2,15 +2,17 @@ package com.paytheory.android.sdk.validation
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CVVFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
+class CVVFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
+    private var submitButton = submitButton
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -35,9 +37,7 @@ class CVVFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
 
         lock = false
         val isValidNumber = validCVV(s.toString())
-        if (!isValidNumber) {
-            ptText!!.error = "invalid CVV"
-        }
+        handleButton(isValidNumber)
     }
 
     private fun validCVV(number: String): Boolean {
@@ -48,5 +48,14 @@ class CVVFormattingTextWatcher(pt: PayTheoryEditText) : TextWatcher {
             return false
         }
         return true
+    }
+    private fun handleButton(valid: Boolean){
+        if (valid) {
+            submitButton.isEnabled = true
+        }
+        if (!valid) {
+            submitButton.isEnabled = false
+            ptText!!.error = "Invalid CVV"
+        }
     }
 }
