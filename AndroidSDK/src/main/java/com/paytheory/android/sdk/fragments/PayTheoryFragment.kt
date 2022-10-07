@@ -348,10 +348,13 @@ class PayTheoryFragment : Fragment() {
                 { pt -> CVVFormattingTextWatcher(pt, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationFormattingTextWatcher =
                 { pt -> ExpirationFormattingTextWatcher(pt, submitButton) }
+            val zipCodeValidation: (PayTheoryEditText) -> ZipCodeFormattingTextWatcher =
+                { pt -> ZipCodeFormattingTextWatcher(pt, submitButton) }
 
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+            billingZip.addTextChangedListener(zipCodeValidation(billingZip))
         }
 
         //if bank payment fields are active add text watcher validation
@@ -624,10 +627,13 @@ class PayTheoryFragment : Fragment() {
                 { pt -> CVVFormattingTextWatcher(pt, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationFormattingTextWatcher =
                 { pt -> ExpirationFormattingTextWatcher(pt, submitButton) }
+            val zipCodeValidation: (PayTheoryEditText) -> ZipCodeFormattingTextWatcher =
+                { pt -> ZipCodeFormattingTextWatcher(pt, submitButton) }
 
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+            billingZip.addTextChangedListener(zipCodeValidation(billingZip))
         }
 
         submitButton.setOnClickListener {

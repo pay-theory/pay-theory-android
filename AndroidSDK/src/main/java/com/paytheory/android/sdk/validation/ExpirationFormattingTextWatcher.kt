@@ -54,9 +54,6 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
     }
 
     private fun handleButton(valid: Boolean){
-        if (valid) {
-            submitButton.isEnabled = true
-        }
         if (!valid) {
             submitButton.isEnabled = false
             ptText!!.error = "Invalid Expiration"
