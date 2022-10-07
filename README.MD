@@ -555,41 +555,13 @@ data class Error (
 )
 ```
 
+## Development
+
+If you are using a virtual device for development, it must have google play store installed.
+
 ## Testing
 
 A Java version between 8 and 16 is required to execute Gradle commands.
-
-### Unit testing
-
-Run this line in the command prompt:
-
-Windows
-
-```powershell
-gradlew unitTesting
-```
-
-Linux
-
-```shell
-./gradlew unitTesting
-```
-
-### Unit and UI testing (Requires an android device or emulator)
-
-Run this line in the command prompt:
-
-Windows
-
-```powershell
-gradlew completeTesting
-```
-
-Linux
-
-```shell
-./gradlew completeTesting
-```
 
 ## Support/Feedback
 

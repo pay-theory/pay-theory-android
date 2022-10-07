@@ -356,10 +356,13 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
                 { pt -> CVVFormattingTextWatcher(pt, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationFormattingTextWatcher =
                 { pt -> ExpirationFormattingTextWatcher(pt, submitButton) }
+            val zipCodeValidation: (PayTheoryEditText) -> ZipCodeFormattingTextWatcher =
+                { pt -> ZipCodeFormattingTextWatcher(pt, submitButton) }
 
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+            billingZip.addTextChangedListener(zipCodeValidation(billingZip))
         }
 
         //if bank payment fields are active add text watcher validation
@@ -420,7 +423,7 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
 
                     val expirationString = ccExpiration.text.toString()
                     val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = expirationString.split("/").last()
+                    val expirationYear = "20" + expirationString.split("/").last()
 
                     val payment = Payment(
                         timing = System.currentTimeMillis(),
@@ -474,7 +477,7 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
                 }
             } else { // if fieldsValid = false
                 //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID *******************************************************************************************************************************")
+                println("INPUT FIELDS ARE INVALID ************************")
             }
         }
     }
@@ -632,10 +635,13 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
                 { pt -> CVVFormattingTextWatcher(pt, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationFormattingTextWatcher =
                 { pt -> ExpirationFormattingTextWatcher(pt, submitButton) }
+            val zipCodeValidation: (PayTheoryEditText) -> ZipCodeFormattingTextWatcher =
+                { pt -> ZipCodeFormattingTextWatcher(pt, submitButton) }
 
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+            billingZip.addTextChangedListener(zipCodeValidation(billingZip))
         }
 
         submitButton.setOnClickListener {
@@ -673,7 +679,7 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
                 if (isCardPayment) {
                     val expirationString = ccExpiration.text.toString()
                     val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = expirationString.split("/").last()
+                    val expirationYear = "20" + expirationString.split("/").last()
                     val paymentToken = PaymentMethodTokenData(
                         timing = System.currentTimeMillis(),
                         type = PAYMENT_CARD,
@@ -704,7 +710,7 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
                 }
             } else { // if fieldsValid = false
                 //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID *******************************************************************************************************************************")
+                println("INPUT FIELDS ARE INVALID ************************")
             }
         }
     }
@@ -837,7 +843,7 @@ class PayTheoryFragment (apiKey: String) : Fragment() {
             } else if (ccCVV.text.isNullOrBlank() || !ccCVV.error.isNullOrBlank()) {
                 ccCVV.error = INVALID_CVV
                 false
-            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank()) {
+            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank() || ccExpiration.text.toString().length != 5) {
                 ccExpiration.error = INVALID_EXPIRATION
                 false
             } else if (billingZip.text.isNullOrBlank() || !billingZip.error.isNullOrBlank()) {

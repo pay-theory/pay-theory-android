@@ -102,7 +102,7 @@ class Transaction(
                 }
                 else {
                     println(error.message)
-                    context.handleError(Error("Access Denied"))
+                    context.handleError(Error(error.message.toString()))
                 }
             }
         }

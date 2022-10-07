@@ -1,16 +1,16 @@
 package com.paytheory.android.sdk.validation
 
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Patterns
 import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
- * Text watcher class to validate buyer contact edit text field
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
  */
-class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class ZipCodeFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+    private var lock = false
     private var ptText: PayTheoryEditText? = pt
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -22,26 +22,39 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButto
     }
 
     override fun afterTextChanged(s: Editable) {
-        val isValid = isValidEmail(s.toString())
-        handleButton(isValid)
-    }
-
-    private fun isValidEmail(target: CharSequence): Boolean {
-        return if (TextUtils.isEmpty(target)) {
-            false
-        } else {
-            Patterns.EMAIL_ADDRESS.matcher(target).matches() || Patterns.PHONE.matcher(target).matches()
+        if (lock || s.isEmpty()) {
+            return
         }
+
+        val maxLength = 5
+
+        lock = true
+
+        if (s.length > maxLength) {
+            s.delete(maxLength,s.length)
+        }
+
+        lock = false
+        val isValidNumber = validZip(s.toString())
+        handleButton(isValidNumber)
     }
 
+    private fun validZip(number: String): Boolean {
+        val (digits, _) = number
+            .partition(Char::isDigit)
+
+        if (digits.length != 5) {
+            return false
+        }
+        return true
+    }
     private fun handleButton(valid: Boolean){
         if (valid) {
             submitButton.isEnabled = true
         }
         if (!valid) {
             submitButton.isEnabled = false
-            ptText!!.error = "Invalid email or phone number"
+            ptText!!.error = "Invalid ZIP Code"
         }
     }
-
 }

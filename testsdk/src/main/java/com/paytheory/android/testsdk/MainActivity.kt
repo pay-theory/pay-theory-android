@@ -21,18 +21,26 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 class MainActivity : AppCompatActivity(), Payable {
 
     private val apiKey = "API_KEY"
-    private var dialog : Dialog? = null
+    private var confirmationPopUp : Dialog? = null
+    private var errorPopUp : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //DEMO - Create confirmation view
-        dialog = Dialog(this)
-        dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog!!.setCancelable(false)
-        dialog!!.setContentView(R.layout.confirmation_layout)
-        dialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        confirmationPopUp = Dialog(this)
+        confirmationPopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        confirmationPopUp!!.setCancelable(false)
+        confirmationPopUp!!.setContentView(R.layout.confirmation_layout)
+        confirmationPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        //DEMO - Create error view
+        errorPopUp = Dialog(this)
+        errorPopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        errorPopUp!!.setCancelable(false)
+        errorPopUp!!.setContentView(R.layout.error_layout)
+        errorPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         //Set optional PayorInfo configuration
         val payorInfo = PayorInfo(
@@ -89,7 +97,7 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    //DEMO - function to display payment response
+    //DEMO - function to display a message
     private fun showToast(message: String?) {
         runOnUiThread {
             Toast.makeText(
@@ -113,20 +121,18 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun handleError(error: Error) {
         println(error)
         showToast(error.reason)
-        val errorTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
-        val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
-        val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
+        val errorTextView = errorPopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = errorPopUp!!.findViewById(R.id.btn_ok) as Button
         errorTextView.text = error.reason
-        yesBtn.setOnClickListener { dialog!!.dismiss() }
-        noBtn.setOnClickListener { dialog!!.dismiss() }
-        runOnUiThread { dialog!!.show() }
+        okBtn.setOnClickListener { errorPopUp!!.dismiss() }
+        runOnUiThread { errorPopUp!!.show() }
     }
 
     //DEMO - function to display payment confirmation message to user
     override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
         Log.d("Pay Theory Demo", confirmationMessage.toString())
 
-        val confirmationTextView = dialog!!.findViewById(R.id.popup_window_text) as TextView
+        val confirmationTextView = confirmationPopUp!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
             "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
                     " including the fee of ${getFormattedAmount(confirmationMessage.fee)} " +
@@ -137,22 +143,22 @@ class MainActivity : AppCompatActivity(), Payable {
                     "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 
-        val yesBtn = dialog!!.findViewById(R.id.btn_yes) as Button
-        val noBtn = dialog!!.findViewById(R.id.btn_no) as Button
+        val yesBtn = confirmationPopUp!!.findViewById(R.id.btn_yes) as Button
+        val noBtn = confirmationPopUp!!.findViewById(R.id.btn_no) as Button
 
         yesBtn.setOnClickListener {
-            dialog!!.dismiss()
+            confirmationPopUp!!.dismiss()
             transaction.completeTransfer()
         }
 
         noBtn.setOnClickListener {
-            dialog!!.dismiss()
+            confirmationPopUp!!.dismiss()
             showToast("payment canceled")
             transaction.disconnect()
         }
 
         runOnUiThread {
-            dialog!!.show()
+            confirmationPopUp!!.show()
         }
     }
 

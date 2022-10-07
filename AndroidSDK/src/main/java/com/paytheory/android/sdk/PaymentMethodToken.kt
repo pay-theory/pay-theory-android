@@ -85,7 +85,7 @@ class PaymentMethodToken(
                         context.handleError(Error("Access Denied"))
                     }
                     else {
-                        context.handleError(Error("Failed to connect to payment system"))
+                        context.handleError(Error(error.message.toString()))
                     }
                 }
             }
