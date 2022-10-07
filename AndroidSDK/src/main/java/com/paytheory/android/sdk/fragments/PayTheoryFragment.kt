@@ -43,7 +43,7 @@ private const val INVALID_ROUTING_NUMBER = "Invalid Routing Number"
  * PayTheoryFragment populates required transaction input fields.
  * Flexible display that adds inputs dynamically as requested.
  */
-class PayTheoryFragment : Fragment() {
+class PayTheoryFragment (apiKey: String) : Fragment() {
     companion object {
         const val PAYMENT_CARD = "card"
         const val BANK_ACCOUNT = "ach"
@@ -75,6 +75,14 @@ class PayTheoryFragment : Fragment() {
     private var billingAddress: Address? = Address()
     private var accountName: String? = null
     private var model: ConfigurationViewModel? = null
+
+    // initializer block
+    init {
+        println("In initializer")
+        this.apiKey = apiKey
+        // Call Pay Theory PT Token and Google Play Integrity
+        payTheoryTransaction!!.init()
+    }
 
     /**
      * Display requested card fields

@@ -34,9 +34,6 @@ class MainActivity : AppCompatActivity(), Payable {
         dialog!!.setContentView(R.layout.confirmation_layout)
         dialog!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        //Create PayTheoryFragment
-        val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
-
         //Set optional PayorInfo configuration
         val payorInfo = PayorInfo(
             "John",
@@ -61,10 +58,16 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
+            //Create PayTheoryFragment
+//            val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
+
+            // Initialize PayTheoryFragment
+            val payTheoryFragment = PayTheoryFragment("API_KEY")
+
             //PayTheoryFragment configuration for card payments
             payTheoryFragment.configure(
                 apiKey = apiKey,
-                amount = 5050,
+                amount = 10000,
                 transactionType = TransactionType.CARD,
 //                transactionType = TransactionType.BANK,
                 requireAccountName = false,
@@ -81,7 +84,7 @@ class MainActivity : AppCompatActivity(), Payable {
 //                invoiceId = "TEST_INVOICE",
 //                payorId = "TEST_PAYOR_ID"
             )
-        } catch (e: Exception) {
+            } catch (e: Exception) {
             e.printStackTrace()
         }
     }

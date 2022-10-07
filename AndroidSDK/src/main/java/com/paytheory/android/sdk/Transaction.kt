@@ -84,14 +84,17 @@ class Transaction(
     private fun ptTokenApiCall(context: Context){
     val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
     observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-        // handle success pt-token request
+        // success pt-token request
         .subscribe({ ptTokenResponse: PTTokenResponse ->
-            if (queuedRequest != null) {
-                establishViewModel(ptTokenResponse)
-            } else {
+            // after retrieving pt-token and challenge call Google Play Integrity Api
+            if (ptTokenResponse.ptToken.isNotBlank() && ptTokenResponse.challengeOptions.challenge.isNotBlank()){
                 googlePlayIntegrity(ptTokenResponse)
+            } else { // pt-token or challenge not available in PTTokenResponse
+                if (context is Payable) {
+                    context.handleError(Error("Access Denied"))
+                }
             }
-        // handle failed pt-token request
+        // failed pt-token request
         }, { error ->
             if (context is Payable) {
                 if(error.message == "HTTP 404 "){
@@ -99,7 +102,7 @@ class Transaction(
                 }
                 else {
                     println(error.message)
-                    context.handleError(Error("Failed to connect to payment system"))
+                    context.handleError(Error("Access Denied"))
                 }
             }
         }
@@ -135,12 +138,12 @@ class Transaction(
     }
 
     @ExperimentalCoroutinesApi
-    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
+    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestation: String) {
         webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
         viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage, this, null)
-        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
+        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestation, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
         if (queuedRequest != null)
@@ -148,7 +151,7 @@ class Transaction(
     }
 
     /**
-     * Initiate Transaction Class and calls pt-token endpoint
+     * Initiate Transaction
      */
     @ExperimentalCoroutinesApi
     fun init() {
