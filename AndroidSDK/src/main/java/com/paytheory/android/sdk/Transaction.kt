@@ -99,7 +99,7 @@ class Transaction(
                 }
                 else {
                     println(error.message)
-                    context.handleError(Error("Failed to connect to payment system"))
+                    context.handleError(Error(error.message.toString()))
                 }
             }
         }
