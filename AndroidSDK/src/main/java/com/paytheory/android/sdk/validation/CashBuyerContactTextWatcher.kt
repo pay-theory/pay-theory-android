@@ -10,9 +10,8 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
 /**
  * Text watcher class to validate buyer contact edit text field
  */
-class CashBuyerContactTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
+class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt
-    private var submitButton = submitButton
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -23,7 +22,7 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText, submitButton: Button) :
     }
 
     override fun afterTextChanged(s: Editable) {
-        var isValid = isValidEmail(s.toString())
+        val isValid = isValidEmail(s.toString())
         handleButton(isValid)
     }
 

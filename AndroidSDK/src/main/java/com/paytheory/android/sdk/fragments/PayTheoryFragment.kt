@@ -412,7 +412,7 @@ class PayTheoryFragment : Fragment() {
 
                     val expirationString = ccExpiration.text.toString()
                     val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = expirationString.split("/").last()
+                    val expirationYear = "20" + expirationString.split("/").last()
 
                     val payment = Payment(
                         timing = System.currentTimeMillis(),
@@ -466,7 +466,7 @@ class PayTheoryFragment : Fragment() {
                 }
             } else { // if fieldsValid = false
                 //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID *******************************************************************************************************************************")
+                println("INPUT FIELDS ARE INVALID ************************")
             }
         }
     }
@@ -665,7 +665,7 @@ class PayTheoryFragment : Fragment() {
                 if (isCardPayment) {
                     val expirationString = ccExpiration.text.toString()
                     val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = expirationString.split("/").last()
+                    val expirationYear = "20" + expirationString.split("/").last()
                     val paymentToken = PaymentMethodTokenData(
                         timing = System.currentTimeMillis(),
                         type = PAYMENT_CARD,
@@ -696,7 +696,7 @@ class PayTheoryFragment : Fragment() {
                 }
             } else { // if fieldsValid = false
                 //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID *******************************************************************************************************************************")
+                println("INPUT FIELDS ARE INVALID ************************")
             }
         }
     }
@@ -829,7 +829,7 @@ class PayTheoryFragment : Fragment() {
             } else if (ccCVV.text.isNullOrBlank() || !ccCVV.error.isNullOrBlank()) {
                 ccCVV.error = INVALID_CVV
                 false
-            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank()) {
+            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank() || ccExpiration.text.toString().length < 5) {
                 ccExpiration.error = INVALID_EXPIRATION
                 false
             } else if (billingZip.text.isNullOrBlank() || !billingZip.error.isNullOrBlank()) {
