@@ -50,7 +50,7 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
             ptText!!.setText(stringBuilder)
             ptText!!.setSelection(ptText!!.text!!.length)
         }
-        return true
+        return ptText!!.text!!.length == 5
     }
 
     private fun handleButton(valid: Boolean){
@@ -59,7 +59,7 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
         }
         if (!valid) {
             submitButton.isEnabled = false
-            ptText!!.error = "Invalid CVV"
+            ptText!!.error = "Invalid Expiration"
         }
     }
 }

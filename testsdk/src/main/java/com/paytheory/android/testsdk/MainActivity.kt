@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), Payable {
         confirmationPopUp!!.setContentView(R.layout.confirmation_layout)
         confirmationPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        //DEMO - Create confirmation view
+        //DEMO - Create error view
         errorPopUp = Dialog(this)
         errorPopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         errorPopUp!!.setCancelable(false)
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    //DEMO - function to display payment response
+    //DEMO - function to display a message
     private fun showToast(message: String?) {
         runOnUiThread {
             Toast.makeText(

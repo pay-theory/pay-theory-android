@@ -829,7 +829,7 @@ class PayTheoryFragment : Fragment() {
             } else if (ccCVV.text.isNullOrBlank() || !ccCVV.error.isNullOrBlank()) {
                 ccCVV.error = INVALID_CVV
                 false
-            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank() || ccExpiration.text.toString().length < 5) {
+            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank() || ccExpiration.text.toString().length != 5) {
                 ccExpiration.error = INVALID_EXPIRATION
                 false
             } else if (billingZip.text.isNullOrBlank() || !billingZip.error.isNullOrBlank()) {
