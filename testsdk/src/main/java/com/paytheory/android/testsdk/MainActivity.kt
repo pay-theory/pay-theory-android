@@ -20,12 +20,15 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "API_KEY"
+    private val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
     private var confirmationPopUp : Dialog? = null
     private var errorPopUp : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Create PayTheoryFragment
+        val payTheoryFragment =  PayTheoryFragment(apiKey, TransactionType.CARD, FeeMode.INTERCHANGE)
+
         setContentView(R.layout.activity_main)
 
         //DEMO - Create confirmation view
@@ -41,6 +44,8 @@ class MainActivity : AppCompatActivity(), Payable {
         errorPopUp!!.setCancelable(false)
         errorPopUp!!.setContentView(R.layout.error_layout)
         errorPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+
 
         //Set optional PayorInfo configuration
         val payorInfo = PayorInfo(
@@ -66,33 +71,41 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
-            //Create PayTheoryFragment
-//            val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
-            // Initialize PayTheoryFragment
-            val payTheoryFragment = PayTheoryFragment("API_KEY")
+            val submitButton = this.findViewById<Button>(R.id.submitButton)
 
-            //PayTheoryFragment configuration for card payments
-            payTheoryFragment.configure(
-                apiKey = apiKey,
-                amount = 10000,
-                transactionType = TransactionType.CARD,
-//                transactionType = TransactionType.BANK,
-                requireAccountName = false,
-                requireBillingAddress = false,
-                confirmation = false,
-                feeMode = FeeMode.INTERCHANGE,
-                metadata = metadata,
-                payorInfo = payorInfo,
-                accountCode = "Test Account Code",
-                reference = "Test Reference",
-                sendReceipt = true,
-                receiptDescription = "Android Payment Receipt Test",
-//                paymentParameters = "TEST_PARAMS",
-//                invoiceId = "TEST_INVOICE",
-//                payorId = "TEST_PAYOR_ID"
-            )
-            } catch (e: Exception) {
+            submitButton.setOnClickListener {
+                if (payTheoryFragment.areFieldsValid()){
+                    println("Fields Valid!")
+//                    //PayTheoryFragment configuration for card payments
+//                    payTheoryFragment.configure(
+//                        apiKey = apiKey,
+//                        amount = 5050,
+//                        transactionType = TransactionType.CARD,
+////                        transactionType = TransactionType.BANK,
+//                        requireAccountName = false,
+//                        requireBillingAddress = false,
+//                        confirmation = false,
+//                        feeMode = FeeMode.INTERCHANGE,
+//                        metadata = metadata,
+//                        payorInfo = payorInfo,
+//                        accountCode = "Test Account Code",
+//                        reference = "Test Reference",
+//                        sendReceipt = true,
+//                        receiptDescription = "Android Payment Receipt Test",
+////                        paymentParameters = "TEST_PARAMS",
+////                        invoiceId = "TEST_INVOICE",
+////                        payorId = "TEST_PAYOR_ID"
+//                    )
+                } else {
+                    showToast("Invalid input fields, Please try again")
+                }
+
+
+            }
+
+
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

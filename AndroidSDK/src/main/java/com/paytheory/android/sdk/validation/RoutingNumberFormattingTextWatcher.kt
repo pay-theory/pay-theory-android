@@ -3,14 +3,14 @@ package com.paytheory.android.sdk.validation
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class RoutingNumberFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
-    private var ptText: PayTheoryEditText? = pt
+class RoutingNumberFormattingTextWatcher(var payTheoryFragment: PayTheoryFragment, var pt: PayTheoryEditText) : TextWatcher {
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -24,18 +24,13 @@ class RoutingNumberFormattingTextWatcher(pt: PayTheoryEditText, private var subm
         if (s.isEmpty()) {
             return
         }
-
-        val isValidNumber = s.toString().length == 9
-        handleButton(isValidNumber)
-    }
-
-    private fun handleButton(valid: Boolean){
-        if (valid) {
-            submitButton.isEnabled = true
-        }
-        if (!valid) {
-            submitButton.isEnabled = false
-            ptText!!.error = "Invalid Routing Number"
+        val isValid= s.toString().length == 9
+        if (isValid) {
+            payTheoryFragment.bankRoutingNumberValid = true
+        } else {
+            payTheoryFragment.bankRoutingNumberValid = false
+            pt.error = "Invalid routing number"
         }
     }
+
 }

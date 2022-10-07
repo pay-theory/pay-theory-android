@@ -3,12 +3,12 @@ package com.paytheory.android.sdk.validation
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 
-class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class ExpirationFormattingTextWatcher(var payTheoryFragment: PayTheoryFragment, var pt: PayTheoryEditText) : TextWatcher {
     private var lock = false
-    private var ptText: PayTheoryEditText? = pt
     private var isDelete = false
 
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
@@ -34,8 +34,13 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
 
         lock = false
 
-        val isValidNumber = validExp(s.toString())
-        handleButton(isValidNumber)
+        val isValid = validExp(s.toString())
+        if (isValid) {
+            payTheoryFragment.cardExpirationValid = true
+        } else {
+            payTheoryFragment.cardExpirationValid = false
+            pt.error = "Invalid expiration"
+        }
     }
 
     private fun validExp(number: String): Boolean {
@@ -47,16 +52,9 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
                 length - 1,
                 "/"
             )
-            ptText!!.setText(stringBuilder)
-            ptText!!.setSelection(ptText!!.text!!.length)
+            pt.setText(stringBuilder)
+            pt.setSelection(pt.text!!.length)
         }
-        return ptText!!.text!!.length == 5
-    }
-
-    private fun handleButton(valid: Boolean){
-        if (!valid) {
-            submitButton.isEnabled = false
-            ptText!!.error = "Invalid Expiration"
-        }
+        return pt.text!!.length == 5
     }
 }

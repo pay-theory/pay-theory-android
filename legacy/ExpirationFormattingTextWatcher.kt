@@ -10,7 +10,7 @@ import java.util.*
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class ExpirationFormattingTextWatcher(payTheoryFragment: PayTheoryFragment, pt: PayTheoryEditText) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
 

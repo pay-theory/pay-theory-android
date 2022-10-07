@@ -35,16 +35,10 @@ import java.util.*
  */
 class Transaction(
     val context: Context,
-    private val partner: String,
-    private val stage: String,
     private val apiKey: String,
-    val feeMode: String,
     private val constants: Constants,
-    private val confirmation: Boolean,
-    private val sendReceipt: Boolean,
-    private val receiptDescription: String?,
-    private val metadata: HashMap<Any, Any>?,
-    private val payTheoryData: HashMap<Any, Any>? = null
+    private val partner: String,
+    private val stage: String
 ): WebsocketMessageHandler {
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
@@ -55,6 +49,14 @@ class Transaction(
     var publicKey: String? = null
     var sessionKey:String? = null
     var hostToken:String? = null
+
+
+    val feeMode: String? = null
+    val confirmation: Boolean? = null
+    val sendReceipt: Boolean? = null
+    val receiptDescription: String? = null
+    val metadata: HashMap<Any, Any>? = null
+    val payTheoryData: HashMap<Any, Any>? = null
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -79,6 +81,17 @@ class Transaction(
         var webSocketInteractor: WebsocketInteractor? = null
     }
 
+    /**
+     * Call Pay Theory system to retrieve a ptToken
+     */
+    init {
+        ptTokenApiCall(context)
+    }
+
+    /**
+     * Call Pay Theory system to retrieve a ptToken
+     * @param context applications resources
+     */
     @ExperimentalCoroutinesApi
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
@@ -151,71 +164,71 @@ class Transaction(
     }
 
     /**
-     * Initiate Transaction
+     * Initiate pt token call
      */
     @ExperimentalCoroutinesApi
     fun init() {
         ptTokenApiCall(context)
     }
 
-    /**
-     * Final api call to complete transaction
-     * @param payment payment object to transact
-     */
-    @ExperimentalCoroutinesApi
-    fun transact(
-        payment: Payment
-    ) {
-        messageReactors!!.activePayment = payment
-        val actionRequest =  generateInitialActionRequest(payment)
-        if (viewModel.connected) {
-            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Payment Requested")
-        } else {
-            queuedRequest = payment
-            ptTokenApiCall(context)
-            println("Pay Theory Resetting Connection")
-        }
-    }
-
-    /**
-     * Generate the initial action request
-     * @param payment payment object to transact
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun generateInitialActionRequest(payment: Payment): ActionRequest {
-        //generate public key
-        val keyPair = generateLocalKeyPair()
-        publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        //if payment type is "CASH" return cash ActionRequest
-        if (payment.type == CASH){
-            val requestAction = BARCODE_ACTION
-            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, this.payTheoryData, metadata)
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-            return ActionRequest(
-                requestAction,
-                encryptedBody,
-                publicKey,
-                sessionKey
-            )
-        }
-        //if payment type is not "CASH" return transfer ActionRequest
-        else {
-            val requestAction = TRANSFER_PART_ONE_ACTION
-            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
-            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
-                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
-                metadata, sessionKey, System.currentTimeMillis())
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
-            return ActionRequest(
-                requestAction,
-                encryptedBody,
-                publicKey,
-                sessionKey
-            )
-        }
-    }
+//    /**
+//     * Final api call to complete transaction
+//     * @param payment payment object to transact
+//     */
+//    @ExperimentalCoroutinesApi
+//    fun transact(
+//        payment: Payment
+//    ) {
+//        messageReactors!!.activePayment = payment
+//        val actionRequest =  generateInitialActionRequest(payment)
+//        if (viewModel.connected) {
+//            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+//            println("Pay Theory Payment Requested")
+//        } else {
+//            queuedRequest = payment
+//            ptTokenApiCall(context)
+//            println("Pay Theory Resetting Connection")
+//        }
+//    }
+//
+//    /**
+//     * Generate the initial action request
+//     * @param payment payment object to transact
+//     */
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    private fun generateInitialActionRequest(payment: Payment): ActionRequest {
+//        //generate public key
+//        val keyPair = generateLocalKeyPair()
+//        publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
+//        //if payment type is "CASH" return cash ActionRequest
+//        if (payment.type == CASH){
+//            val requestAction = BARCODE_ACTION
+//            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, this.payTheoryData, metadata)
+//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+//            return ActionRequest(
+//                requestAction,
+//                encryptedBody,
+//                publicKey,
+//                sessionKey
+//            )
+//        }
+//        //if payment type is not "CASH" return transfer ActionRequest
+//        else {
+//            val requestAction = TRANSFER_PART_ONE_ACTION
+//            val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
+//            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
+//                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
+//            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
+//                metadata, sessionKey, System.currentTimeMillis())
+//            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+//            return ActionRequest(
+//                requestAction,
+//                encryptedBody,
+//                publicKey,
+//                sessionKey
+//            )
+//        }
+//    }
 
     /**
      * Set confirmation message to send host:transfer_part2 action request after user confirmation
