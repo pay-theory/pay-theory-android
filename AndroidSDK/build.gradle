@@ -65,8 +65,8 @@ dependencies {
     //Gson
     implementation 'com.google.code.gson:gson:2.9.1'
     //Okhttp
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.10'
     //Lazy sodium
     implementation "com.goterl:lazysodium-android:5.0.2@aar"
     implementation "net.java.dev.jna:jna:5.12.1@aar"

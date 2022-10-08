@@ -9,7 +9,7 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CreditCardFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class CardNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
 
@@ -80,11 +80,7 @@ class CreditCardFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
         return checksum % 10 == 0
     }
     private fun handleButton(valid: Boolean){
-        if (valid) {
-            submitButton.isEnabled = true
-        }
         if (!valid) {
-            submitButton.isEnabled = false
             ptText!!.error = "Invalid Card Number"
         }
     }

@@ -42,9 +42,9 @@ class Transaction(
     private val constants: Constants,
     private val confirmation: Boolean,
     private val sendReceipt: Boolean,
-    private val receiptDescription: String?,
-    private val metadata: HashMap<Any, Any>?,
-    private val payTheoryData: HashMap<Any, Any>? = null
+    private val receiptDescription: String,
+    private val metadata: HashMap<Any, Any>,
+    private val payTheoryData: HashMap<Any, Any>
 ): WebsocketMessageHandler {
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
@@ -77,6 +77,13 @@ class Transaction(
         private var webServicesProvider: WebServicesProvider? = null
         private var webSocketRepository: WebsocketRepository? = null
         var webSocketInteractor: WebsocketInteractor? = null
+    }
+
+    /**
+     * Initialize a transaction
+     */
+    init{
+        ptTokenApiCall(context)
     }
 
     @ExperimentalCoroutinesApi
@@ -147,13 +154,13 @@ class Transaction(
             messageReactors!!.activePayment = queuedRequest
     }
 
-    /**
-     * Initiate Transaction Class and calls pt-token endpoint
-     */
-    @ExperimentalCoroutinesApi
-    fun init() {
-        ptTokenApiCall(context)
-    }
+//    /**
+//     * Initiate Transaction Class and calls pt-token endpoint
+//     */
+//    @ExperimentalCoroutinesApi
+//    fun init() {
+//        ptTokenApiCall(context)
+//    }
 
     /**
      * Final api call to complete transaction

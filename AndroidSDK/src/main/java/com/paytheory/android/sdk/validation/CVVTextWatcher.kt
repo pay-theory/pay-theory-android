@@ -9,7 +9,7 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ZipCodeFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
 
@@ -26,7 +26,7 @@ class ZipCodeFormattingTextWatcher(pt: PayTheoryEditText, private var submitButt
             return
         }
 
-        val maxLength = 5
+        val maxLength = 4
 
         lock = true
 
@@ -35,26 +35,22 @@ class ZipCodeFormattingTextWatcher(pt: PayTheoryEditText, private var submitButt
         }
 
         lock = false
-        val isValidNumber = validZip(s.toString())
+        val isValidNumber = validCVV(s.toString())
         handleButton(isValidNumber)
     }
 
-    private fun validZip(number: String): Boolean {
+    private fun validCVV(number: String): Boolean {
         val (digits, _) = number
             .partition(Char::isDigit)
 
-        if (digits.length != 5) {
+        if (digits.length < 3 || digits.length > 4) {
             return false
         }
         return true
     }
     private fun handleButton(valid: Boolean){
-        if (valid) {
-            submitButton.isEnabled = true
-        }
         if (!valid) {
-            submitButton.isEnabled = false
-            ptText!!.error = "Invalid ZIP Code"
+            ptText!!.error = "Invalid CVV"
         }
     }
 }

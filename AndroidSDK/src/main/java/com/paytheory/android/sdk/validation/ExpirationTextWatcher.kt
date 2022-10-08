@@ -6,7 +6,7 @@ import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 
-class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
     private var isDelete = false
@@ -55,7 +55,6 @@ class ExpirationFormattingTextWatcher(pt: PayTheoryEditText, private var submitB
 
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            submitButton.isEnabled = false
             ptText!!.error = "Invalid Expiration"
         }
     }

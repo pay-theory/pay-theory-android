@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), Payable {
         //Keep in try catch for any additional errors
         try {
             //PayTheoryFragment configuration for card payments
-            payTheoryFragment.configure(
+            payTheoryFragment.transact(
                 apiKey = apiKey,
                 amount = 5050,
                 transactionType = TransactionType.CARD,
