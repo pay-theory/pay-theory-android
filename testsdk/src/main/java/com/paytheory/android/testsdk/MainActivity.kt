@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity(), Payable {
 //                transactionType = TransactionType.CARD,
 //                requireAccountName = false,
 //                requireBillingAddress = false,
-//                confirmation = false,
+//                confirmation = true,
 //                feeMode = FeeMode.INTERCHANGE,
 //                metadata = metadata,
 //                payorInfo = payorInfo
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), Payable {
     //Inherited from Payable interface
     override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
         println(successfulTransactionResult)
-        showToast("Transaction Complete on Account XXXX${successfulTransactionResult.lastFour}")
+//        showToast("Transaction Complete on Account XXXX${successfulTransactionResult.lastFour}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = successfulTransactionResult.toString()
@@ -113,12 +113,21 @@ class MainActivity : AppCompatActivity(), Payable {
 
     override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
         println(failedTransactionResult)
-        showToast("Payment Failed on Account XXXX${failedTransactionResult.lastFour}")
+//        showToast("Payment Failed on Account XXXX${failedTransactionResult.lastFour}")
+        val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
+        messageTextView.text = failedTransactionResult.toString()
+        okBtn.setOnClickListener {
+            messagePopUp!!.dismiss()
+            finish()
+            startActivity(intent)
+        }
+        runOnUiThread { messagePopUp!!.show() }
     }
 
     override fun handleError(error: Error) {
         println(error)
-        showToast(error.reason)
+//        showToast(error.reason)
         val errorTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         errorTextView.text = error.reason
@@ -132,8 +141,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
     //DEMO - function to display payment confirmation message to user
     override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
-        Log.d("Pay Theory Demo", confirmationMessage.toString())
-
+//        showToast(confirmationMessage.toString())
         val confirmationTextView = confirmationPopUp!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
             "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
@@ -166,8 +174,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
 
     override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
-        println(barcodeResult)
-        showToast("Barcode Request Successful $barcodeResult")
+//        showToast("Barcode Request Successful $barcodeResult")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = barcodeResult.toString()
@@ -180,8 +187,7 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
-        println(paymentMethodToken)
-        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
+//        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = paymentMethodToken.toString()
