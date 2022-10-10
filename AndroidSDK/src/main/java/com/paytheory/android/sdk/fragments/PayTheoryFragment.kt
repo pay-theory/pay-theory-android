@@ -230,11 +230,11 @@ class PayTheoryFragment : Fragment() {
                 this.apiKey!!,
                 this.feeMode!!,
                 this.constants!!,
-                this.confirmation!!,
-                this.sendReceipt!!,
-                this.receiptDescription!!,
-                this.metadata!!,
-                this.payTheoryData!!
+                this.confirmation,
+                this.sendReceipt,
+                this.receiptDescription,
+                this.metadata,
+                this.payTheoryData
             )
 
 //        payTheoryTransaction!!.init()

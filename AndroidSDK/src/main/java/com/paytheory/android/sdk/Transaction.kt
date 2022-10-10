@@ -40,11 +40,11 @@ class Transaction(
     private val apiKey: String,
     val feeMode: String,
     private val constants: Constants,
-    private val confirmation: Boolean,
-    private val sendReceipt: Boolean,
-    private val receiptDescription: String,
-    private val metadata: HashMap<Any, Any>,
-    private val payTheoryData: HashMap<Any, Any>
+    private val confirmation: Boolean? = false,
+    private val sendReceipt: Boolean? = false,
+    private val receiptDescription: String? = "",
+    private val metadata: HashMap<Any, Any>? = hashMapOf(),
+    private val payTheoryData: HashMap<Any, Any>? = hashMapOf()
 ): WebsocketMessageHandler {
     @OptIn(ExperimentalCoroutinesApi::class)
     lateinit var viewModel: WebSocketViewModel
@@ -209,7 +209,8 @@ class Transaction(
             val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
             val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
                 payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData, confirmation, payment.payorInfo, this.payTheoryData,
+            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData,
+                confirmation!!, payment.payorInfo, this.payTheoryData,
                 metadata, sessionKey, System.currentTimeMillis())
             val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
             return ActionRequest(

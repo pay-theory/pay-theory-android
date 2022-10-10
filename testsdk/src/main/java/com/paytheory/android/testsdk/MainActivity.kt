@@ -20,9 +20,9 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "API_KEY"
+    private val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
     private var confirmationPopUp : Dialog? = null
-    private var errorPopUp : Dialog? = null
+    private var messagePopUp : Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +36,11 @@ class MainActivity : AppCompatActivity(), Payable {
         confirmationPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         //DEMO - Create error view
-        errorPopUp = Dialog(this)
-        errorPopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        errorPopUp!!.setCancelable(false)
-        errorPopUp!!.setContentView(R.layout.error_layout)
-        errorPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        messagePopUp = Dialog(this)
+        messagePopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        messagePopUp!!.setCancelable(false)
+        messagePopUp!!.setContentView(R.layout.message_layout)
+        messagePopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         //Create PayTheoryFragment
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
@@ -73,21 +73,13 @@ class MainActivity : AppCompatActivity(), Payable {
             payTheoryFragment.transact(
                 apiKey = apiKey,
                 amount = 5050,
-                transactionType = TransactionType.CARD,
-//                transactionType = TransactionType.BANK,
-                requireAccountName = false,
-                requireBillingAddress = false,
-                confirmation = false,
-                feeMode = FeeMode.INTERCHANGE,
-                metadata = metadata,
-                payorInfo = payorInfo,
-                accountCode = "Test Account Code",
-                reference = "Test Reference",
-                sendReceipt = true,
-                receiptDescription = "Android Payment Receipt Test",
-//                paymentParameters = "TEST_PARAMS",
-//                invoiceId = "TEST_INVOICE",
-//                payorId = "TEST_PAYOR_ID"
+//                transactionType = TransactionType.CARD,
+//                requireAccountName = false,
+//                requireBillingAddress = false,
+//                confirmation = false,
+//                feeMode = FeeMode.INTERCHANGE,
+//                metadata = metadata,
+//                payorInfo = payorInfo
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -108,6 +100,15 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
         println(successfulTransactionResult)
         showToast("Transaction Complete on Account XXXX${successfulTransactionResult.lastFour}")
+        val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
+        messageTextView.text = successfulTransactionResult.toString()
+        okBtn.setOnClickListener {
+            messagePopUp!!.dismiss()
+            finish()
+            startActivity(intent)
+        }
+        runOnUiThread { messagePopUp!!.show() }
     }
 
     override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
@@ -118,11 +119,15 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun handleError(error: Error) {
         println(error)
         showToast(error.reason)
-        val errorTextView = errorPopUp!!.findViewById(R.id.popup_window_text) as TextView
-        val okBtn = errorPopUp!!.findViewById(R.id.btn_ok) as Button
+        val errorTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         errorTextView.text = error.reason
-        okBtn.setOnClickListener { errorPopUp!!.dismiss() }
-        runOnUiThread { errorPopUp!!.show() }
+        okBtn.setOnClickListener {
+            messagePopUp!!.dismiss()
+            finish()
+            startActivity(intent)
+        }
+        runOnUiThread { messagePopUp!!.show() }
     }
 
     //DEMO - function to display payment confirmation message to user
@@ -163,11 +168,29 @@ class MainActivity : AppCompatActivity(), Payable {
     override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
         println(barcodeResult)
         showToast("Barcode Request Successful $barcodeResult")
+        val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
+        messageTextView.text = barcodeResult.toString()
+        okBtn.setOnClickListener {
+            messagePopUp!!.dismiss()
+            finish()
+            startActivity(intent)
+        }
+        runOnUiThread { messagePopUp!!.show() }
     }
 
     override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
         println(paymentMethodToken)
         showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
+        val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
+        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
+        messageTextView.text = paymentMethodToken.toString()
+        okBtn.setOnClickListener {
+            messagePopUp!!.dismiss()
+            finish()
+            startActivity(intent)
+        }
+        runOnUiThread { messagePopUp!!.show() }
     }
 
     //DEMO - function to format dollar amount
@@ -183,3 +206,24 @@ class MainActivity : AppCompatActivity(), Payable {
         return "$$dollars.${centsString}"
     }
 }
+
+
+
+//payTheoryFragment.transact(
+//apiKey = apiKey,
+//amount = 5050,
+//transactionType = TransactionType.CARD,
+//requireAccountName = false,
+//requireBillingAddress = false,
+//confirmation = false,
+//feeMode = FeeMode.INTERCHANGE,
+//metadata = metadata,
+//payorInfo = payorInfo,
+//accountCode = "Test Account Code",
+//reference = "Test Reference",
+//sendReceipt = true,
+//receiptDescription = "Android Payment Receipt Test",
+//paymentParameters = "TEST_PARAMS",
+//invoiceId = "TEST_INVOICE",
+//payorId = "TEST_PAYOR_ID"
+//)
