@@ -69,6 +69,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.10'
     //Java-Websocket
     implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    //Java-Websocket Logging
+    implementation 'org.slf4j:slf4j-android:1.7.36'
     //Lazy sodium
     implementation "com.goterl:lazysodium-android:5.0.2@aar"
     implementation "net.java.dev.jna:jna:5.12.1@aar"

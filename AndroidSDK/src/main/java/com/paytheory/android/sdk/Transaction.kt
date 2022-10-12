@@ -5,11 +5,11 @@ import CashRequest
 import Payment
 import PaymentData
 import PaymentMethodData
-import SocketClient
 import TransferPartOneRequest
 import TransferPartTwoRequest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.webkit.WebView
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
@@ -29,7 +29,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.net.URI
+import java.nio.ByteBuffer
 import java.util.*
+
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -81,6 +83,8 @@ class Transaction(
         private var webServicesProvider: WebServicesProvider? = null
         private var webSocketRepository: WebsocketRepository? = null
         var webSocketInteractor: WebsocketInteractor? = null
+
+        private lateinit var webSocketClient: WebSocketClient
 
     }
 
@@ -146,44 +150,102 @@ class Transaction(
         }
     }
 
-//    private fun createWebSocketClient(uri: URI?) {
-//        webSocketClient = object : WebSocketClient(uri) {
-//
-//            override fun onOpen(handshakedata: ServerHandshake?) {
-//                print( "onOpen")
+
+    private fun createWebSocketClient(socketUrl: String) {
+        val secureSocketUri = URI(socketUrl)
+        webSocketClient = object : WebSocketClient(secureSocketUri) {
+
+            override fun onOpen(handshakedata: ServerHandshake) {
+                println("Pay Theory Connected")
 //                subscribe()
-//            }
-//
-//            override fun onMessage(message: String?) {
-//                print( "onMessage: $message")
-//            }
-//
-//            override fun onClose(code: Int, reason: String?, remote: Boolean) {
-//                print( "onClose")
-//                webSocketClient.close()
-//            }
-//
-//            override fun onError(ex: Exception?) {
-//                print( "onError: ${ex?.message}")
-//            }
-//
-//        }
-//    }
-//
-//    private fun subscribe() {
-//        webSocketClient.send(
-//            "{\n" +
-//                    "    \"type\": \"subscribe\",\n" +
-//                    "    \"channels\": [{ \"name\": \"ticker\", \"product_ids\": [\"BTC-EUR\"] }]\n" +
-//                    "}"
-//        )
-//    }
+            }
+
+            override fun onClose(code: Int, reason: String, remote: Boolean) {
+                println("closed with exit code $code additional info: $reason")
+//                unsubscribe()
+            }
+
+            override fun onMessage(message: String) {
+                println("received message: $message")
+            }
+
+            override fun onMessage(message: ByteBuffer) {
+                println("received ByteBuffer")
+            }
+
+            override fun onError(ex: Exception) {
+                println("error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                System.err.println("an error occurred:$ex")
+            }
+
+        }
+    }
+
+    private fun subscribe() {
+        webSocketClient.send(
+            "{\n" +
+                    "    \"type\": \"subscribe\",\n" +
+                    "    \"channels\": [{ \"name\": \"ticker\", \"product_ids\": [\"BTC-EUR\"] }]\n" +
+                    "}"
+        )
+    }
+
+    private fun unsubscribe() {
+        webSocketClient.send(
+            "{\n" +
+                    "    \"type\": \"unsubscribe\",\n" +
+                    "    \"channels\": [\"ticker\"]\n" +
+                    "}"
+        )
+    }
+
+
 
     @ExperimentalCoroutinesApi
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
-//        createWebSocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}"))
 
-        val webSocketClient = SocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}"))
+        createWebSocketClient("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}")
+        val userAgent = System.getProperty( "http.agent" )
+        webSocketClient.addHeader("User-Agent", userAgent)
+        webSocketClient.connect()
+//        webSocketClient.connect()
+
+//        val webSocketClient = SocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}"))
+//        val webSocketClient = SocketClient(URI("wss://demo.piesocket.com/v3/channel_1?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self"))
+
+//        val webSocketClient = object : WebSocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}")) {
+//
+//            override fun onOpen(handshakedata: ServerHandshake) {
+//                println(handshakedata)
+//                println("new connection opened")
+//            }
+//
+//            override fun onClose(code: Int, reason: String, remote: Boolean) {
+//                println("closed with exit code $code additional info: $reason")
+//            }
+//
+//            override fun onMessage(message: String) {
+//                println("received message: $message")
+//            }
+//
+//            override fun onMessage(message: ByteBuffer) {
+//                println("received ByteBuffer")
+//            }
+//
+//            override fun onError(ex: Exception) {
+//                System.err.println("an error occurred:$ex")
+//            }
+//        }
+//
+//        try {
+//            webSocketClient.setSocketFactory(SocketFactory.getDefault())
+//        } catch (e: NoSuchAlgorithmException) {
+//            e.printStackTrace()
+//        }
+//
+//        webSocketClient.connect()
+
+
 
 //        webServicesProvider = WebServicesProvider()
 //        webSocketRepository = WebsocketRepository(webServicesProvider!!)
