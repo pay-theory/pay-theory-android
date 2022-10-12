@@ -64,6 +64,17 @@ class PaymentMethodToken(
         var webSocketInteractor: WebsocketInteractor? = null
     }
 
+    /**
+     * Initialize a transaction
+     */
+    init{
+        ptTokenApiCall(context)
+    }
+
+    fun resetSocket(){
+        ptTokenApiCall(context=this.context)
+    }
+
     @ExperimentalCoroutinesApi
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
@@ -71,14 +82,15 @@ class PaymentMethodToken(
         val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
 
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-
+            // handle success pt-token request
             .subscribe({ ptTokenResponse: PTTokenResponse ->
-                if (queuedRequest != null) {
-                    establishViewModel(ptTokenResponse)
-                } else {
-                    googlePlayIntegrity(ptTokenResponse)
-                }
-
+                googlePlayIntegrity(ptTokenResponse)
+//            if (queuedRequest != null) {
+//                establishViewModel(ptTokenResponse)
+//            } else {
+//                googlePlayIntegrity(ptTokenResponse)
+//            }
+                // handle failed pt-token request
             }, { error ->
                 if (context is Payable) {
                     if(error.message == "HTTP 404 "){
@@ -137,14 +149,6 @@ class PaymentMethodToken(
     }
 
     /**
-     * Initiate Transaction Class and calls pt-token endpoint
-     */
-    @ExperimentalCoroutinesApi
-    fun init() {
-        ptTokenApiCall(context)
-    }
-
-    /**
      * Final api call to complete transaction
      * @param paymentMethodTokenData payment method token object
      */
@@ -159,7 +163,7 @@ class PaymentMethodToken(
 
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Payment Token Requested")
+            println("Pay Theory Token Requested")
         } else {
             queuedRequest = paymentMethodTokenData
             ptTokenApiCall(context)

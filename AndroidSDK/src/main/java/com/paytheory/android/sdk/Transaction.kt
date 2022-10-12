@@ -86,6 +86,10 @@ class Transaction(
         ptTokenApiCall(context)
     }
 
+    fun resetSocket(){
+        ptTokenApiCall(context=this.context)
+    }
+
     @ExperimentalCoroutinesApi
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context){
@@ -93,11 +97,12 @@ class Transaction(
     observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         // handle success pt-token request
         .subscribe({ ptTokenResponse: PTTokenResponse ->
-            if (queuedRequest != null) {
-                establishViewModel(ptTokenResponse)
-            } else {
-                googlePlayIntegrity(ptTokenResponse)
-            }
+            googlePlayIntegrity(ptTokenResponse)
+//            if (queuedRequest != null) {
+//                establishViewModel(ptTokenResponse)
+//            } else {
+//                googlePlayIntegrity(ptTokenResponse)
+//            }
         // handle failed pt-token request
         }, { error ->
             if (context is Payable) {
@@ -105,7 +110,7 @@ class Transaction(
                     context.handleError(Error("Access Denied"))
                 }
                 else {
-                    println(error.message)
+                    println("ptTokenApiCall " + error.message)
                     context.handleError(Error(error.message.toString()))
                 }
             }
@@ -141,6 +146,9 @@ class Transaction(
         }
     }
 
+    /**
+     * Create Pay Theory websocket host:hostToken message
+     */
     @ExperimentalCoroutinesApi
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
         webServicesProvider = WebServicesProvider()
@@ -153,14 +161,6 @@ class Transaction(
         if (queuedRequest != null)
             messageReactors!!.activePayment = queuedRequest
     }
-
-//    /**
-//     * Initiate Transaction Class and calls pt-token endpoint
-//     */
-//    @ExperimentalCoroutinesApi
-//    fun init() {
-//        ptTokenApiCall(context)
-//    }
 
     /**
      * Final api call to complete transaction

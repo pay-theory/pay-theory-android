@@ -87,19 +87,33 @@ class WebSocketViewModel(
     }
 
     private fun onSocketError(ex: Throwable) {
-        println("Error occurred : ${ex.message}")
+        val error = ex.message.toString()
+        println("Error occurred : $error")
+
         interactor.stopSocket()
 
-        // error for transaction request
-        if (transaction != null){
-            if (transaction.context is Payable){
-                transaction.context.handleError(Error(ex.message.toString()))
+        // catch error "Read error: ssl=0x7340b644c8: I/O error during system call, Software caused connection abort"
+        if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true)){
+            if (transaction != null){ // error for transaction request
+                if (transaction.context is Payable){
+                    transaction.resetSocket()
+                }
+            } else if (paymentMethodToken != null){
+                if (paymentMethodToken.context is Payable){
+                    paymentMethodToken.resetSocket()
+                }
             }
-        }
-        // error for tokenization request
-        if (paymentMethodToken != null){
-            if (paymentMethodToken.context is Payable){
-                paymentMethodToken.context.handleError(Error(ex.message.toString()))
+        } else { //if error is not ssl error
+            // error for transaction request
+            if (transaction != null) {
+                if (transaction.context is Payable){
+                    transaction.context.handleError(Error(error))
+                }
+            // error for tokenization request
+            } else if (paymentMethodToken != null){
+                if (paymentMethodToken.context is Payable){
+                    paymentMethodToken.context.handleError(Error(error))
+                }
             }
         }
     }
