@@ -5,6 +5,7 @@ import CashRequest
 import Payment
 import PaymentData
 import PaymentMethodData
+import SocketClient
 import TransferPartOneRequest
 import TransferPartTwoRequest
 import android.annotation.SuppressLint
@@ -25,6 +26,9 @@ import com.paytheory.android.sdk.websocket.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.java_websocket.client.WebSocketClient
+import org.java_websocket.handshake.ServerHandshake
+import java.net.URI
 import java.util.*
 
 /**
@@ -77,6 +81,7 @@ class Transaction(
         private var webServicesProvider: WebServicesProvider? = null
         private var webSocketRepository: WebsocketRepository? = null
         var webSocketInteractor: WebsocketInteractor? = null
+
     }
 
     /**
@@ -141,17 +146,54 @@ class Transaction(
         }
     }
 
+//    private fun createWebSocketClient(uri: URI?) {
+//        webSocketClient = object : WebSocketClient(uri) {
+//
+//            override fun onOpen(handshakedata: ServerHandshake?) {
+//                print( "onOpen")
+//                subscribe()
+//            }
+//
+//            override fun onMessage(message: String?) {
+//                print( "onMessage: $message")
+//            }
+//
+//            override fun onClose(code: Int, reason: String?, remote: Boolean) {
+//                print( "onClose")
+//                webSocketClient.close()
+//            }
+//
+//            override fun onError(ex: Exception?) {
+//                print( "onError: ${ex?.message}")
+//            }
+//
+//        }
+//    }
+//
+//    private fun subscribe() {
+//        webSocketClient.send(
+//            "{\n" +
+//                    "    \"type\": \"subscribe\",\n" +
+//                    "    \"channels\": [{ \"name\": \"ticker\", \"product_ids\": [\"BTC-EUR\"] }]\n" +
+//                    "}"
+//        )
+//    }
+
     @ExperimentalCoroutinesApi
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
-        webServicesProvider = WebServicesProvider()
-        webSocketRepository = WebsocketRepository(webServicesProvider!!)
-        webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage, this, null)
-        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
-        messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
-        viewModel.subscribeToSocketEvents(this)
-        if (queuedRequest != null)
-            messageReactors!!.activePayment = queuedRequest
+//        createWebSocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}"))
+
+        val webSocketClient = SocketClient(URI("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptTokenResponse.ptToken}"))
+
+//        webServicesProvider = WebServicesProvider()
+//        webSocketRepository = WebsocketRepository(webServicesProvider!!)
+//        webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
+//        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage, this, null)
+//        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
+//        messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
+//        viewModel.subscribeToSocketEvents(this)
+//        if (queuedRequest != null)
+//            messageReactors!!.activePayment = queuedRequest
     }
 
 //    /**
