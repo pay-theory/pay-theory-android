@@ -15,6 +15,7 @@ import com.google.android.play.core.integrity.IntegrityTokenRequest
 import com.google.android.play.core.integrity.IntegrityTokenResponse
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
+import com.paytheory.android.sdk.PaymentMethodToken.Companion.webSocketInteractor
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
 import com.paytheory.android.sdk.nacl.encryptBox
@@ -55,6 +56,7 @@ class Transaction(
     var publicKey: String? = null
     var sessionKey:String? = null
     var hostToken:String? = null
+    var resetCounter = 0
 
     companion object {
         private const val CONNECTED = "connected to socket"
@@ -87,7 +89,12 @@ class Transaction(
     }
 
     fun resetSocket(){
-        ptTokenApiCall(this.context)
+        resetCounter++
+        if (resetCounter < 50){
+            ptTokenApiCall(this.context)
+        } else {
+            messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
+        }
     }
 
     @ExperimentalCoroutinesApi
@@ -107,6 +114,12 @@ class Transaction(
         }, { error ->
             if (context is Payable) {
                 if(error.message.toString().contains("Unable to resolve host")){
+                    println(error.message.toString())
+                    println("ptTokenApiCall reset socket")
+                    disconnect()
+                    resetSocket()
+                } else if(error.message.toString().contains("HTTP 500")){
+                    println(error.message.toString())
                     println("ptTokenApiCall reset socket")
                     disconnect()
                     resetSocket()
@@ -157,7 +170,7 @@ class Transaction(
      */
     @ExperimentalCoroutinesApi
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
-        webServicesProvider = WebServicesProvider()
+        webServicesProvider = WebServicesProvider(this, null)
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
         viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage, this, null)
@@ -280,7 +293,7 @@ class Transaction(
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
             DISCONNECTED -> { connectionReactors!!.onDisconnected() }
-            INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message) }
+            INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message, this) }
             else -> {
                 when (discoverMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)

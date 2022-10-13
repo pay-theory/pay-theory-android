@@ -1,5 +1,7 @@
 package com.paytheory.android.sdk.websocket
 
+import com.paytheory.android.sdk.PaymentMethodToken
+import com.paytheory.android.sdk.Transaction
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import okhttp3.OkHttpClient
@@ -11,7 +13,7 @@ import javax.net.ssl.HostnameVerifier
 /**
  * Class that manages WebSocket actions: start, send message, stop
  */
-class WebServicesProvider {
+class WebServicesProvider(private val transaction: Transaction?, private val paymentMethodToken: PaymentMethodToken?) {
 
     private var _webSocket: WebSocket? = null
 
@@ -32,7 +34,7 @@ class WebServicesProvider {
      */
     @ExperimentalCoroutinesApi
     fun startSocket(ptToken: String, partner: String, stage: String): Channel<SocketUpdate> =
-        with(WebSocketListener()) {
+        with(WebSocketListener(transaction, paymentMethodToken)) {
             startSocket(this, ptToken, partner, stage)
             this@with.socketEventChannel
         }
@@ -68,13 +70,13 @@ class WebServicesProvider {
      */
     @ExperimentalCoroutinesApi
     fun stopSocket() {
-        println("Pay Theory Disconnecting")
+        println("Pay Theory Requested Disconnect")
         try {
             _webSocket?.close(NORMAL_CLOSURE_STATUS, null)
             _webSocket = null
             _webSocketListener?.socketEventChannel?.close()
             _webSocketListener = null
-            println("Pay Theory Disconnected")
+            println("Pay Theory Disconnected stopSocket")
         } catch (ex: IllegalArgumentException) {
             println("error closing socket ${ex.message}")
             _webSocket = null

@@ -136,7 +136,7 @@ class PaymentMethodToken(
 
     @ExperimentalCoroutinesApi
     private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
-        webServicesProvider = WebServicesProvider()
+        webServicesProvider = WebServicesProvider(null, this)
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
 
@@ -216,7 +216,7 @@ class PaymentMethodToken(
         when (message) {
             CONNECTED -> { connectionReactors!!.onConnected() }
             DISCONNECTED -> { connectionReactors!!.onDisconnected() }
-            INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message) }
+            INTERNAL_SERVER_ERROR -> { messageReactors!!.onTokenError(message, this) }
             else -> {
                 when (discoverMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onTokenizeHostToken(message, this)

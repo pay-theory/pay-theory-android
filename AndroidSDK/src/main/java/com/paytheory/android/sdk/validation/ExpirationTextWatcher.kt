@@ -59,7 +59,7 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: But
         val currentTwoDigitYear: Int = SimpleDateFormat("yy").format(Calendar.getInstance().time).toInt()
         //get month value and check
         val currentText = ptText!!.text.toString()
-        return (currentText.length == 5) && (currentText.substringBefore("/").toInt() < 13) && (currentText.substringAfter("/").toInt() >= currentTwoDigitYear)
+        return (currentText.length == 5) && (currentText.substringBefore("/").toInt() < 13) && (currentText.substringBefore("/").toInt() != 0) && (currentText.substringAfter("/").toInt() >= currentTwoDigitYear)
     }
 
     private fun handleButton(valid: Boolean){
