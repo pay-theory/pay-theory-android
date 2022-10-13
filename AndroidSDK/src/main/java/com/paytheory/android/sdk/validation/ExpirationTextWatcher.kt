@@ -1,9 +1,12 @@
 package com.paytheory.android.sdk.validation
 
+import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
@@ -38,6 +41,7 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: But
         handleButton(isValidNumber)
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun validExp(number: String): Boolean {
         val length = number.length
         val stringBuilder = StringBuilder()
@@ -50,7 +54,12 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: But
             ptText!!.setText(stringBuilder)
             ptText!!.setSelection(ptText!!.text!!.length)
         }
-        return ptText!!.text!!.length == 5
+
+        //get current two digit year
+        val currentTwoDigitYear: Int = SimpleDateFormat("yy").format(Calendar.getInstance().time).toInt()
+        //get month value and check
+        val currentText = ptText!!.text.toString()
+        return (currentText.length == 5) && (currentText.substringBefore("/").toInt() < 13) && (currentText.substringAfter("/").toInt() >= currentTwoDigitYear)
     }
 
     private fun handleButton(valid: Boolean){

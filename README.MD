@@ -42,7 +42,7 @@ The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.
 
 The latest version is available via `mavenCentral()`:
 
-- Add mavenCentral() to your project level build.gradle file
+- Add mavenCentral() to your project level `build.gradle` file
 
 ```kotlin
 buildscript {
@@ -59,7 +59,7 @@ dependencies {
 }
 ```
 
-### Update minimum sdk version to 26 or higher in your app level build.gradle
+### Update minimum sdk version to 26 or higher in your app level `build.gradle`
 
 ```Kotlin
 android {
@@ -134,13 +134,13 @@ Set your api key.
 private val apiKey = "API_KEY"
 ```
 
-Set PayTheoryFragment inside your onCreate method.
+Set PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
 val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-Configure PayTheoryFragment inside your onCreate method.
+Configure PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
 payTheoryFragment.configure(apiKey = apiKey, amount = 1000)

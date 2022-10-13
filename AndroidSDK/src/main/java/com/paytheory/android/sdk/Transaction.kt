@@ -108,12 +108,11 @@ class Transaction(
             if (context is Payable) {
                 if(error.message.toString().contains("Unable to resolve host")){
                     println("ptTokenApiCall reset socket")
+                    disconnect()
                     resetSocket()
-                }
-                if(error.message == "HTTP 404 "){
+                } else if(error.message == "HTTP 404 "){
                     context.handleError(Error("Access Denied"))
-                }
-                else {
+                } else {
                     println("ptTokenApiCall " + error.message)
                     context.handleError(Error(error.message.toString()))
                 }
@@ -142,7 +141,10 @@ class Transaction(
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true){
-                    context.handleError(Error("Google Play Integrity: Please Check Network Connection"))
+                    println("googlePlayIntegrity - Network error - reset socket")
+                    disconnect()
+                    resetSocket()
+//                    context.handleError(Error("Google Play Integrity: Please Check Network Connection"))
                 } else {
                     context.handleError(Error(it.message!!))
                 }
