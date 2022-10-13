@@ -5,14 +5,11 @@ import PayorInfo
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.paytheory.android.sdk.*
-import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -70,7 +67,7 @@ class MainActivity : AppCompatActivity(), Payable {
         //Keep in try catch for any additional errors
         try {
             //PayTheoryFragment configuration for card payments
-            payTheoryFragment.transact(
+            payTheoryFragment.configure(
                 apiKey = apiKey,
                 amount = 5050,
 //                transactionType = TransactionType.CARD,
@@ -215,7 +212,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
 
 
-//payTheoryFragment.transact(
+//payTheoryFragment.configure(
 //apiKey = apiKey,
 //amount = 5050,
 //transactionType = TransactionType.CARD,

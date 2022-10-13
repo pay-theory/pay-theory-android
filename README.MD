@@ -102,52 +102,48 @@ Add Payable interface along with its functions to your activity
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
-...
-
     fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult){
-        
+        println(successfulTransactionResult)
     }
 
     fun handleFailure(failedTransactionResult: FailedTransactionResult){
-        
-    }
-
-    fun handleBarcodeSuccess(barcodeResult: BarcodeResult){
-        
-    }
-
-    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults){
-        
+        println(failedTransactionResult)
     }
 
     fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction){
-        
+        println(confirmationMessage)
     }
 
     fun handleError(error: Error){
-        
+        println(error)
     }
-...
 
+    fun handleBarcodeSuccess(barcodeResult: BarcodeResult){
+        println(barcodeResult)
+    }
+
+    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults){
+        println(paymentMethodToken)
+    }
 }
 ```
 
-Set your api key
+Set your api key.
 
 ```Kotlin
 private val apiKey = "API_KEY"
 ```
 
-Set PayTheoryFragment inside your onCreate method
+Set PayTheoryFragment inside your onCreate method.
 
 ```Kotlin
 val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-Configure PayTheoryFragment inside your onCreate method
+Configure PayTheoryFragment inside your onCreate method.
 
 ```Kotlin
-payTheoryFragment.transact(apiKey = apiKey, amount = 1000)
+payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
 ```
 
 ## Additional Configurations
@@ -260,7 +256,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
     "courseId" to "course_1859034"
 )
 
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     metadata = metadata
@@ -289,7 +285,7 @@ val payorInfo = PayorInfo(
         "USA")
 )
 
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     payorInfo = payorInfo
@@ -304,7 +300,7 @@ Optionally set the payor id
 
 ```Kotlin
 //set payor id
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     payorId = "PAYOR_ID"
@@ -319,7 +315,7 @@ Optionally set the account code
 
 ```Kotlin
 //set account code
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     accountCode = "ACCOUNT_CODE"
@@ -334,7 +330,7 @@ Optionally set the reference
 
 ```Kotlin
 //set reference
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     reference = "REFERENCE"
@@ -349,7 +345,7 @@ Optionally set payment parameters
 
 ```Kotlin
 //set payment parameter
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     paymentParameters = "PAYMENT_PARAMETERS"
@@ -364,7 +360,7 @@ Optionally set an invoice id
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     invoiceId = "INVOICE_ID"
@@ -380,7 +376,7 @@ Optionally enable receipts
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.transact(
+payTheoryFragment.configure(
     apiKey = "API_KEY",
     amount = 1000,
     sendReceipt = true,
@@ -417,7 +413,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
 
 try {
     //PayTheoryFragment configuration for card payments
-    payTheoryFragment.transact(
+    payTheoryFragment.configure(
         apiKey = apiKey,
         amount = 1000,
         transactionType = TransactionType.CARD,

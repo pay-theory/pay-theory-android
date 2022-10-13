@@ -96,10 +96,12 @@ class WebSocketViewModel(
         if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true)){
             if (transaction != null){ // error for transaction request
                 if (transaction.context is Payable){
+                    println("transaction reset socket")
                     transaction.resetSocket()
                 }
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
+                    println("paymentMethodToken reset socket")
                     paymentMethodToken.resetSocket()
                 }
             }
@@ -107,11 +109,13 @@ class WebSocketViewModel(
             // error for transaction request
             if (transaction != null) {
                 if (transaction.context is Payable){
+                    println("transaction standard error")
                     transaction.context.handleError(Error(error))
                 }
             // error for tokenization request
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
+                    println("paymentMethodToken standard error")
                     paymentMethodToken.context.handleError(Error(error))
                 }
             }

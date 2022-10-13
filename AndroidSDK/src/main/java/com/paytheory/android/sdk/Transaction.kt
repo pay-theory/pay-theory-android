@@ -87,7 +87,7 @@ class Transaction(
     }
 
     fun resetSocket(){
-        ptTokenApiCall(context=this.context)
+        ptTokenApiCall(this.context)
     }
 
     @ExperimentalCoroutinesApi
@@ -106,6 +106,10 @@ class Transaction(
         // handle failed pt-token request
         }, { error ->
             if (context is Payable) {
+                if(error.message.toString().contains("Unable to resolve host")){
+                    println("ptTokenApiCall reset socket")
+                    resetSocket()
+                }
                 if(error.message == "HTTP 404 "){
                     context.handleError(Error("Access Denied"))
                 }
