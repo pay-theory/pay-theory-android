@@ -89,8 +89,8 @@ class Transaction(
      * Reset socket connection on network failures
      */
     fun resetSocket() {
-        if (resetCounter < 5000) {
-            println("Reconnect Counter: $resetCounter")
+        if (resetCounter < 10000) {
+            //println("Reconnect Counter: $resetCounter")
             resetCounter++
             ptTokenApiCall(this.context)
         } else {
@@ -108,13 +108,13 @@ class Transaction(
             }, { error ->
                 if (context is Payable) {
                     if (error.message.toString().contains("Unable to resolve host")) {
-                        println(error.message.toString())
-                        println("ptTokenApiCall reset socket")
+//                        println(error.message.toString())
+                        //println("ptTokenApiCall reset socket")
                         disconnect()
                         resetSocket()
                     } else if (error.message.toString().contains("HTTP 500")) {
                         println(error.message.toString())
-                        println("ptTokenApiCall reset socket")
+                        //println("ptTokenApiCall reset socket")
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
@@ -148,7 +148,7 @@ class Transaction(
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true) {
-                    println("Google Play Integrity API Error - Network error - restarting socket")
+                    println("Google Play Integrity API Network Error. Reconnecting...")
                     disconnect()
                     resetSocket()
                 } else {
@@ -306,7 +306,7 @@ class Transaction(
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else {
             if (context is Payable) {
-                context.handleError(Error("Failed to complete transaction"))
+                context.handleError(Error("System Connection Failed"))
             } else {
                 return
             }
@@ -331,7 +331,7 @@ class Transaction(
     override fun receiveMessage(message: String) {
         when (message) {
             CONNECTED -> {
-                println("Reconnect Counter: $resetCounter")
+                //println("Reconnect Counter: $resetCounter")
                 connectionReactors!!.onConnected()
             }
             DISCONNECTED -> {

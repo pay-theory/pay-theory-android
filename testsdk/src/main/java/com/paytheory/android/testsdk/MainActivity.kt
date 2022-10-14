@@ -5,6 +5,7 @@ import PayorInfo
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
@@ -136,17 +137,7 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     override fun handleError(error: Error) {
-        println(error)
-//        showToast(error.reason)
-        val errorTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
-        val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
-        errorTextView.text = error.reason
-        okBtn.setOnClickListener {
-            messagePopUp!!.dismiss()
-            finish()
-            startActivity(intent)
-        }
-        runOnUiThread { messagePopUp!!.show() }
+        System.err.println(error)
     }
 
     //DEMO - function to display payment confirmation message to user

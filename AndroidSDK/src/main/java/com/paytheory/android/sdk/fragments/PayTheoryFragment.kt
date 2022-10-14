@@ -4,6 +4,7 @@ import Address
 import Payment
 import PaymentMethodTokenData
 import PayorInfo
+import android.accounts.NetworkErrorException
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -148,10 +149,8 @@ class PayTheoryFragment : Fragment() {
     ) {
         //Check internet
         if (!isNetworkAvailable(this.requireContext())) {
-            println("CHECK!!!!!!!!!!!!! $NO_NETWORK_CONNECTION")
-//            throw IllegalArgumentException(NO_NETWORK_CONNECTION)
+            throw NetworkErrorException(NO_NETWORK_CONNECTION)
         }
-
         // Validation checks for input parameters
         if (apiKey.isBlank()) {
             throw IllegalArgumentException(INVALID_APIKEY)

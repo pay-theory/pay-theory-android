@@ -70,13 +70,13 @@ class WebServicesProvider(private val transaction: Transaction?, private val pay
      */
     @ExperimentalCoroutinesApi
     fun stopSocket() {
-        println("Pay Theory Requested Disconnect")
+//        println("Pay Theory Requested Disconnect")
         try {
             _webSocket?.close(NORMAL_CLOSURE_STATUS, null)
             _webSocket = null
             _webSocketListener?.socketEventChannel?.close()
             _webSocketListener = null
-            println("Pay Theory Disconnected stopSocket")
+//            println("Pay Theory Disconnected stopSocket")
         } catch (ex: IllegalArgumentException) {
             println("error closing socket ${ex.message}")
             _webSocket = null

@@ -148,6 +148,11 @@ payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
 
 ## Additional Configurations
 
+Configurations are modified inside `payTheoryFragment.configure()` or `payTheoryFragment.tokenize()` methods.
+
+*Note if any configurations are incorrectly set PayTheoryFragment will throw IllegalArgumentException*
+*Note if the device's network connection is not available PayTheoryFragment will throw NetworkErrorException*
+
 ### Transaction Type
 
 Optionally set the transaction type

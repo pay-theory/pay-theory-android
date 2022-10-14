@@ -72,9 +72,9 @@ class PaymentMethodToken(
      * Reset socket connection on network failures
      */
     fun resetSocket() {
-        resetCounter++
-        if (resetCounter < 5000) {
-            println("Reset Counter: $resetCounter")
+        if (resetCounter < 10000) {
+            //println("Reconnect Counter: $resetCounter")
+            resetCounter++
             ptTokenApiCall(this.context)
         } else {
             messageReactors?.onTokenError("NETWORK_ERROR: Please check device connection", this)
@@ -91,13 +91,13 @@ class PaymentMethodToken(
             }, { error ->
                 if (context is Payable) {
                     if (error.message.toString().contains("Unable to resolve host")) {
-                        println(error.message.toString())
-                        println("ptTokenApiCall reset socket")
+//                        println(error.message.toString())
+                        //println("ptTokenApiCall reset socket")
                         disconnect()
                         resetSocket()
                     } else if (error.message.toString().contains("HTTP 500")) {
                         println(error.message.toString())
-                        println("ptTokenApiCall reset socket")
+                        //println("ptTokenApiCall reset socket")
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
@@ -131,7 +131,7 @@ class PaymentMethodToken(
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true) {
-                    println("Google Play Integrity API Error - Network error - restarting socket")
+                    println("Google Play Integrity API Network Error. Reconnecting...")
                     disconnect()
                     resetSocket()
                 } else {

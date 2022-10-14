@@ -88,20 +88,17 @@ class WebSocketViewModel(
 
     private fun onSocketError(ex: Throwable) {
         val error = ex.message.toString()
-        println("Error: $error")
-
         interactor.stopSocket()
-
-        // catch error "Read error: ssl=0x7340b644c8: I/O error during system call, Software caused connection abort"
+        // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call, Software caused connection abort", "null", "Unable to resolve host"
         if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)){
             if (transaction != null){ // error for transaction request
                 if (transaction.context is Payable){
-                    println("transaction reset socket")
+                    println("Network Connection Error - Reconnecting...")
                     transaction.resetSocket()
                 }
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
-                    println("paymentMethodToken reset socket")
+                    println("Network Connection Error - Reconnecting...")
                     paymentMethodToken.resetSocket()
                 }
             }
@@ -109,13 +106,13 @@ class WebSocketViewModel(
             // error for transaction request
             if (transaction != null) {
                 if (transaction.context is Payable){
-                    println("transaction standard error")
+                    println("Error: $error")
                     transaction.context.handleError(Error(error))
                 }
             // error for tokenization request
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
-                    println("paymentMethodToken standard error")
+                    println("Error: $error")
                     paymentMethodToken.context.handleError(Error(error))
                 }
             }
