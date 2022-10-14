@@ -44,23 +44,22 @@ class WebSocketListener(private val transaction: Transaction?, private val payme
             GlobalScope.launch {
                 try {
                     socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
-                    println("Pay Theory Disconnected onClosing")
+                    println("Pay Theory Disconnected")
                 } catch (e: ClosedSendChannelException) {
-                    println("Pay Theory Already Disconnected")
                     val error = e.message.toString()
-                    println(error)
                     if (error.contains("Channel was closed")){
                         if (transaction != null){ // error for transaction request
                             if (transaction.context is Payable){
-                                println("transaction reset socket")
+                                println("Socket Disconnected - Reconnecting...")
                                 transaction.resetSocket()
                             }
                         } else if (paymentMethodToken != null){
                             if (paymentMethodToken.context is Payable){
-                                println("paymentMethodToken reset socket")
+                                println("Socket Disconnected - Reconnecting...")
                                 paymentMethodToken.resetSocket()
                             }
                         } else {
+                            println(error)
                             println("Cannot Reconnect to Pay Theory")
                         }
                     }
