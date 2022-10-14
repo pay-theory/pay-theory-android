@@ -7,7 +7,6 @@ import PaymentData
 import PaymentMethodData
 import TransferPartOneRequest
 import TransferPartTwoRequest
-import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
@@ -15,7 +14,6 @@ import com.google.android.play.core.integrity.IntegrityTokenRequest
 import com.google.android.play.core.integrity.IntegrityTokenResponse
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
-import com.paytheory.android.sdk.PaymentMethodToken.Companion.webSocketInteractor
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
 import com.paytheory.android.sdk.nacl.encryptBox
@@ -34,6 +32,7 @@ import java.util.*
  * @param context the applications resources
  * @param apiKey the api-key that will be used to create payment transaction
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class Transaction(
     val context: Context,
     private val partner: String,
@@ -46,19 +45,25 @@ class Transaction(
     private val receiptDescription: String? = "",
     private val metadata: HashMap<Any, Any>? = hashMapOf(),
     private val payTheoryData: HashMap<Any, Any>? = hashMapOf()
-): WebsocketMessageHandler {
-    @OptIn(ExperimentalCoroutinesApi::class)
+) : WebsocketMessageHandler {
     lateinit var viewModel: WebSocketViewModel
     private val googleProjectNumber = 192992826889
     private var originalConfirmation: ConfirmationMessage? = null
-    private val headerMap = mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
+    private val headerMap =
+        mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
     var queuedRequest: Payment? = null
     var publicKey: String? = null
-    var sessionKey:String? = null
-    var hostToken:String? = null
+    var sessionKey: String? = null
+    var hostToken: String? = null
     var resetCounter = 0
 
     companion object {
+        private var messageReactors: MessageReactors? = null
+        private var connectionReactors: ConnectionReactors? = null
+        private var webServicesProvider: WebServicesProvider? = null
+        private var webSocketRepository: WebsocketRepository? = null
+        var webSocketInteractor: WebsocketInteractor? = null
+
         private const val CONNECTED = "connected to socket"
         private const val DISCONNECTED = "disconnected from socket"
         private const val INTERNAL_SERVER_ERROR = "Internal server error"
@@ -71,70 +76,58 @@ class Transaction(
         private const val COMPLETED_TRANSFER = "transfer_complete"
         private const val UNKNOWN = "unknown"
         private const val CASH = "cash"
-
-        @OptIn(ExperimentalCoroutinesApi::class)
-        private var messageReactors: MessageReactors? = null
-        @OptIn(ExperimentalCoroutinesApi::class)
-        private var connectionReactors: ConnectionReactors? = null
-        private var webServicesProvider: WebServicesProvider? = null
-        private var webSocketRepository: WebsocketRepository? = null
-        var webSocketInteractor: WebsocketInteractor? = null
     }
 
     /**
      * Initialize a transaction
      */
-    init{
+    init {
         ptTokenApiCall(context)
     }
 
-    fun resetSocket(){
+    /**
+     * Reset socket connection on network failures
+     */
+    fun resetSocket() {
         resetCounter++
-        if (resetCounter < 50){
+        if (resetCounter < 5000) {
+            println("Reset Counter: $resetCounter")
             ptTokenApiCall(this.context)
         } else {
             messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
         }
     }
 
-    @ExperimentalCoroutinesApi
-    @SuppressLint("CheckResult")
-    private fun ptTokenApiCall(context: Context){
-    val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
-    observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-        // handle success pt-token request
-        .subscribe({ ptTokenResponse: PTTokenResponse ->
-            googlePlayIntegrity(ptTokenResponse)
-//            if (queuedRequest != null) {
-//                establishViewModel(ptTokenResponse)
-//            } else {
-//                googlePlayIntegrity(ptTokenResponse)
-//            }
-        // handle failed pt-token request
-        }, { error ->
-            if (context is Payable) {
-                if(error.message.toString().contains("Unable to resolve host")){
-                    println(error.message.toString())
-                    println("ptTokenApiCall reset socket")
-                    disconnect()
-                    resetSocket()
-                } else if(error.message.toString().contains("HTTP 500")){
-                    println(error.message.toString())
-                    println("ptTokenApiCall reset socket")
-                    disconnect()
-                    resetSocket()
-                } else if(error.message == "HTTP 404 "){
-                    context.handleError(Error("Access Denied"))
-                } else {
-                    println("ptTokenApiCall " + error.message)
-                    context.handleError(Error(error.message.toString()))
+    private fun ptTokenApiCall(context: Context) {
+        val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
+        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            // handle success pt-token request
+            .subscribe({ ptTokenResponse: PTTokenResponse ->
+                googlePlayIntegrity(ptTokenResponse)
+                // handle failed pt-token request
+            }, { error ->
+                if (context is Payable) {
+                    if (error.message.toString().contains("Unable to resolve host")) {
+                        println(error.message.toString())
+                        println("ptTokenApiCall reset socket")
+                        disconnect()
+                        resetSocket()
+                    } else if (error.message.toString().contains("HTTP 500")) {
+                        println(error.message.toString())
+                        println("ptTokenApiCall reset socket")
+                        disconnect()
+                        resetSocket()
+                    } else if (error.message == "HTTP 404 ") {
+                        context.handleError(Error("Access Denied"))
+                    } else {
+                        println("ptTokenApiCall " + error.message)
+                        context.handleError(Error(error.message.toString()))
+                    }
                 }
             }
-        }
-        )
+            )
     }
 
-    @ExperimentalCoroutinesApi
     private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
         val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
@@ -145,7 +138,8 @@ class Transaction(
                 IntegrityTokenRequest.builder()
                     .setNonce(challenge)
                     .setCloudProjectNumber(googleProjectNumber)
-                    .build())
+                    .build()
+            )
         // handle success integrity token request
         integrityTokenResponse.addOnSuccessListener {
             establishViewModel(ptTokenResponse, it.token())
@@ -153,11 +147,10 @@ class Transaction(
         // handle failed integrity token request
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
-                if (it.message?.contains("Network error") == true){
-                    println("googlePlayIntegrity - Network error - reset socket")
+                if (it.message?.contains("Network error") == true) {
+                    println("Google Play Integrity API Error - Network error - restarting socket")
                     disconnect()
                     resetSocket()
-//                    context.handleError(Error("Google Play Integrity: Please Check Network Connection"))
                 } else {
                     context.handleError(Error(it.message!!))
                 }
@@ -168,13 +161,28 @@ class Transaction(
     /**
      * Create Pay Theory websocket host:hostToken message
      */
-    @ExperimentalCoroutinesApi
-    private fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "") {
+    private fun establishViewModel(
+        ptTokenResponse: PTTokenResponse,
+        attestationResult: String? = ""
+    ) {
         webServicesProvider = WebServicesProvider(this, null)
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
-        viewModel = WebSocketViewModel(webSocketInteractor!!, ptTokenResponse.ptToken, partner, stage, this, null)
-        connectionReactors = ConnectionReactors(ptTokenResponse.ptToken, attestationResult!!, viewModel, webSocketInteractor!!, this.context.applicationContext.packageName)
+        viewModel = WebSocketViewModel(
+            webSocketInteractor!!,
+            ptTokenResponse.ptToken,
+            partner,
+            stage,
+            this,
+            null
+        )
+        connectionReactors = ConnectionReactors(
+            ptTokenResponse.ptToken,
+            attestationResult!!,
+            viewModel,
+            webSocketInteractor!!,
+            this.context.applicationContext.packageName
+        )
         messageReactors = MessageReactors(viewModel, webSocketInteractor!!)
         viewModel.subscribeToSocketEvents(this)
         if (queuedRequest != null)
@@ -185,12 +193,11 @@ class Transaction(
      * Final api call to complete transaction
      * @param payment payment object to transact
      */
-    @ExperimentalCoroutinesApi
     fun transact(
         payment: Payment
     ) {
         messageReactors!!.activePayment = payment
-        val actionRequest =  generateInitialActionRequest(payment)
+        val actionRequest = generateInitialActionRequest(payment)
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
             println("Pay Theory Payment Requested")
@@ -205,16 +212,26 @@ class Transaction(
      * Generate the initial action request
      * @param payment payment object to transact
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun generateInitialActionRequest(payment: Payment): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
         //if payment type is "CASH" return cash ActionRequest
-        if (payment.type == CASH){
+        if (payment.type == CASH) {
             val requestAction = BARCODE_ACTION
-            val paymentRequest = CashRequest(this.hostToken, sessionKey ,payment, System.currentTimeMillis(), payment.payorInfo, this.payTheoryData, metadata)
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+            val paymentRequest = CashRequest(
+                this.hostToken,
+                sessionKey,
+                payment,
+                System.currentTimeMillis(),
+                payment.payorInfo,
+                this.payTheoryData,
+                metadata
+            )
+            val encryptedBody = encryptBox(
+                Gson().toJson(paymentRequest),
+                Key.fromBase64String(messageReactors!!.socketPublicKey)
+            )
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -226,12 +243,27 @@ class Transaction(
         else {
             val requestAction = TRANSFER_PART_ONE_ACTION
             val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)
-            val paymentMethodData = PaymentMethodData(payment.name, payment.number, payment.security_code, payment.type, payment.expiration_year,
-                payment.expiration_month, payment.address, payment.account_number, payment.account_type, payment.bank_code )
-            val paymentRequest = TransferPartOneRequest(this.hostToken, paymentMethodData, paymentData,
+            val paymentMethodData = PaymentMethodData(
+                payment.name,
+                payment.number,
+                payment.security_code,
+                payment.type,
+                payment.expiration_year,
+                payment.expiration_month,
+                payment.address,
+                payment.account_number,
+                payment.account_type,
+                payment.bank_code
+            )
+            val paymentRequest = TransferPartOneRequest(
+                this.hostToken, paymentMethodData, paymentData,
                 confirmation!!, payment.payorInfo, this.payTheoryData,
-                metadata, sessionKey, System.currentTimeMillis())
-            val encryptedBody = encryptBox(Gson().toJson(paymentRequest), Key.fromBase64String(messageReactors!!.socketPublicKey))
+                metadata, sessionKey, System.currentTimeMillis()
+            )
+            val encryptedBody = encryptBox(
+                Gson().toJson(paymentRequest),
+                Key.fromBase64String(messageReactors!!.socketPublicKey)
+            )
             return ActionRequest(
                 requestAction,
                 encryptedBody,
@@ -244,7 +276,7 @@ class Transaction(
     /**
      * Set confirmation message to send host:transfer_part2 action request after user confirmation
      */
-    fun setConfirmation(confirmationMessage: ConfirmationMessage){
+    fun setConfirmation(confirmationMessage: ConfirmationMessage) {
         this.originalConfirmation = confirmationMessage.copy()
     }
 
@@ -253,28 +285,35 @@ class Transaction(
      * Function called from override fun paymentConfirmation
      * @param
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun completeTransfer() {
         // only for ach payments, need to set expiration to null back to tags-secure-socket
-        if (originalConfirmation!!.expiration.isNullOrBlank() && originalConfirmation!!.brand == "ACH"){
+        if (originalConfirmation!!.expiration.isNullOrBlank() && originalConfirmation!!.brand == "ACH") {
             originalConfirmation!!.expiration = ""
         }
-        val requestBody = TransferPartTwoRequest(originalConfirmation!!, metadata, sessionKey, System.currentTimeMillis())
-        val encryptedBody = encryptBox(Gson().toJson(requestBody), Key.fromBase64String(messageReactors!!.socketPublicKey))
-        val actionRequest = ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
+        val requestBody = TransferPartTwoRequest(
+            originalConfirmation!!,
+            metadata,
+            sessionKey,
+            System.currentTimeMillis()
+        )
+        val encryptedBody = encryptBox(
+            Gson().toJson(requestBody),
+            Key.fromBase64String(messageReactors!!.socketPublicKey)
+        )
+        val actionRequest =
+            ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
         if (viewModel.connected) {
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-        } else{
+        } else {
             if (context is Payable) {
                 context.handleError(Error("Failed to complete transaction"))
-            }
-            else{
+            } else {
                 return
             }
         }
     }
 
-    private fun discoverMessageType(message: String): String  {
+    private fun discoverMessageType(message: String): String {
         return when {
             message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
@@ -291,15 +330,25 @@ class Transaction(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun receiveMessage(message: String) {
         when (message) {
-            CONNECTED -> { connectionReactors!!.onConnected() }
-            DISCONNECTED -> { connectionReactors!!.onDisconnected() }
-            INTERNAL_SERVER_ERROR -> { messageReactors!!.onError(message, this) }
+            CONNECTED -> {
+                connectionReactors!!.onConnected()
+            }
+            DISCONNECTED -> {
+                connectionReactors!!.onDisconnected()
+            }
+            INTERNAL_SERVER_ERROR -> {
+                messageReactors!!.onError(message, this)
+            }
             else -> {
                 when (discoverMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
-                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message,this)
-                    BARCODE_RESULT -> messageReactors!!.onBarcode(message,viewModel,this)
-                    COMPLETED_TRANSFER -> messageReactors!!.completeTransaction(message,viewModel, this)
+                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message, this)
+                    BARCODE_RESULT -> messageReactors!!.onBarcode(message, viewModel, this)
+                    COMPLETED_TRANSFER -> messageReactors!!.completeTransaction(
+                        message,
+                        viewModel,
+                        this
+                    )
                     else -> messageReactors!!.onError(message, this)
                 }
             }
