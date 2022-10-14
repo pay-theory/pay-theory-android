@@ -428,12 +428,12 @@ try {
 
 ## Tokenization Requests
 
-Here is an example on how to use PayTheoryFragment class method tokenizePaymentMethod():
+Here is an example on how to use PayTheoryFragment class method tokenize():
 
 ```kotlin
 try {
     //PayTheoryFragment configuration for creating a payment method token
-    payTheoryFragment.tokenizePaymentMethod(
+    payTheoryFragment.tokenize(
         apiKey = apiKey,
         tokenizationType = TokenizationType.CARD,
         requireAccountName = true,

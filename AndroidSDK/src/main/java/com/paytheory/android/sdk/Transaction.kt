@@ -89,9 +89,9 @@ class Transaction(
      * Reset socket connection on network failures
      */
     fun resetSocket() {
-        resetCounter++
         if (resetCounter < 5000) {
-            println("Reset Counter: $resetCounter")
+            println("Reconnect Counter: $resetCounter")
+            resetCounter++
             ptTokenApiCall(this.context)
         } else {
             messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
@@ -331,6 +331,7 @@ class Transaction(
     override fun receiveMessage(message: String) {
         when (message) {
             CONNECTED -> {
+                println("Reconnect Counter: $resetCounter")
                 connectionReactors!!.onConnected()
             }
             DISCONNECTED -> {

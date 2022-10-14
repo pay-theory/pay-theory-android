@@ -10,6 +10,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.paytheory.android.sdk.*
+import com.paytheory.android.sdk.configuration.TokenizationType
+import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 
 /**
@@ -66,7 +68,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
-            //PayTheoryFragment configuration for card payments
+            //PayTheoryFragment configure for card and bank payments
             payTheoryFragment.configure(
                 apiKey = apiKey,
                 amount = 5050,
@@ -78,6 +80,17 @@ class MainActivity : AppCompatActivity(), Payable {
 //                metadata = metadata,
 //                payorInfo = payorInfo
             )
+
+            //PayTheoryFragment tokenize for card and bank payment methods
+//            payTheoryFragment.tokenize(
+//                apiKey = apiKey,
+//                tokenizationType = TokenizationType.CARD,
+////                requireAccountName = true,
+////                requireBillingAddress = true,
+////                payorInfo = payorInfo,
+////                metadata = metadata
+//            )
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
