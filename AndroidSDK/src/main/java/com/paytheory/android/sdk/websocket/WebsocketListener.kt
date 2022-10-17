@@ -47,26 +47,28 @@ class WebSocketListener(private val transaction: Transaction?, private val payme
                     println("Pay Theory Disconnected")
                 } catch (e: ClosedSendChannelException) {
                     val error = e.message.toString()
-                    if (error.contains("Channel was closed")){
-                        if (transaction != null){ // error for transaction request
-                            if (transaction.context is Payable){
-                                println("Socket Disconnected - Reconnecting...")
-                                transaction.resetSocket()
-                            }
-                        } else if (paymentMethodToken != null){
-                            if (paymentMethodToken.context is Payable){
-                                println("Socket Disconnected - Reconnecting...")
-                                paymentMethodToken.resetSocket()
-                            }
-                        } else {
-                            println(error)
-                            println("Cannot Reconnect to Pay Theory")
-                        }
-                    }
+                    println(error)
+////                     When successful payment is made "Channel was closed" message comes in
+//                    if (error.contains("Channel was closed")){
+//                        if (transaction != null){ // error for transaction request
+//                            if (transaction.context is Payable){
+//                                println("Socket Disconnected - Reconnecting...")
+//                                transaction.resetSocket()
+//                            }
+//                        } else if (paymentMethodToken != null){
+//                            if (paymentMethodToken.context is Payable){
+//                                println("Socket Disconnected - Reconnecting...")
+//                                paymentMethodToken.resetSocket()
+//                            }
+//                        } else {
+//                            println("Cannot Reconnect to Pay Theory")
+//                        }
+//                    }
                 }
             }
         webSocket.close(NORMAL_CLOSURE_STATUS, null)
         socketEventChannel.close()
+        println("Pay Theory Disconnected")
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
