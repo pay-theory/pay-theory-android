@@ -32,7 +32,7 @@ fun encryptBox(message: String, publicKey: Key): String {
 }
 
 /**
- * Function to decrypt messages from websocket
+ * Function to decrypt message
  * @param message the message to be encrypted
  * @param base64socketPublicKey a base 64 encoded key
  */
