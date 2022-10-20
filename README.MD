@@ -55,7 +55,7 @@ buildscript {
 
 ```kotlin
 dependencies {
-  implementation 'com.paytheory:pay-theory-android:2.7.1'
+  implementation 'com.paytheory:pay-theory-android:2.7.2'
 }
 ```
 
