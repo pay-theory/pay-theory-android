@@ -20,7 +20,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
+    private val apiKey = "MY_API_KEY"
     private var confirmationPopUp : Dialog? = null
     private var messagePopUp : Dialog? = null
 
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity(), Payable {
             payTheoryFragment.configure(
                 apiKey = apiKey,
                 amount = 5050,
-//                transactionType = TransactionType.CARD,
+                transactionType = TransactionType.BANK,
 //                requireAccountName = false,
 //                requireBillingAddress = false,
 //                confirmation = true,

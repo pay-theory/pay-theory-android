@@ -56,6 +56,7 @@ class Transaction(
     var sessionKey: String? = null
     var hostToken: String? = null
     var resetCounter = 0
+    var ptResetCounter = 0
 
     companion object {
         private var messageReactors: MessageReactors? = null
@@ -85,12 +86,22 @@ class Transaction(
         ptTokenApiCall(context)
     }
 
+    private fun resetPtToken() {
+        if (ptResetCounter < 2000) {
+//            println("PT Token Reconnect Counter: $ptResetCounter")
+            ptResetCounter++
+            ptTokenApiCall(this.context)
+        } else {
+            messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
+        }
+    }
+
     /**
      * Reset socket connection on network failures
      */
     fun resetSocket() {
-        if (resetCounter < 10000) {
-            //println("Reconnect Counter: $resetCounter")
+        if (resetCounter < 50) {
+//            println("Reconnect Counter: $resetCounter")
             resetCounter++
             ptTokenApiCall(this.context)
         } else {
@@ -103,18 +114,18 @@ class Transaction(
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             // handle success pt-token request
             .subscribe({ ptTokenResponse: PTTokenResponse ->
+                ptResetCounter = 0
                 googlePlayIntegrity(ptTokenResponse)
                 // handle failed pt-token request
             }, { error ->
                 if (context is Payable) {
+                    // error "Unable to resolve host "evolve.paytheorystudy.com": No address associated with hostname"
                     if (error.message.toString().contains("Unable to resolve host")) {
 //                        println(error.message.toString())
-                        //println("ptTokenApiCall reset socket")
                         disconnect()
-                        resetSocket()
+                        resetPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
-                        println(error.message.toString())
-                        //println("ptTokenApiCall reset socket")
+//                        println(error.message.toString())
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
@@ -142,13 +153,14 @@ class Transaction(
             )
         // handle success integrity token request
         integrityTokenResponse.addOnSuccessListener {
+            resetCounter = 0
             establishViewModel(ptTokenResponse, it.token())
         }
         // handle failed integrity token request
         integrityTokenResponse.addOnFailureListener {
             if (context is Payable) {
                 if (it.message?.contains("Network error") == true) {
-                    println("Google Play Integrity API Network Error. Reconnecting...")
+                    println("Google Play Integrity API Network Error. Retrying...")
                     disconnect()
                     resetSocket()
                 } else {
