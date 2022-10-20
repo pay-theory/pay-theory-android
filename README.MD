@@ -59,7 +59,11 @@ dependencies {
 }
 ```
 
-### Update minimum sdk version to 26 or higher in your app level `build.gradle`
+### Update your app level `build.gradle`
+
+- change minSdk version to 26 or higher
+
+- change targetSdk and compileSdk to 33 or higher
 
 ```Kotlin
 android {
