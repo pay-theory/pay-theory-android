@@ -42,7 +42,7 @@ The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.
 
 The latest version is available via `mavenCentral()`:
 
-- Add mavenCentral() to your project level build.gradle file
+- Add mavenCentral() to your project level `build.gradle` file
 
 ```kotlin
 buildscript {
@@ -55,11 +55,15 @@ buildscript {
 
 ```kotlin
 dependencies {
-  implementation 'com.paytheory:pay-theory-android:2.7.1'
+  implementation 'com.paytheory:pay-theory-android:2.7.2'
 }
 ```
 
-### Update minimum sdk version to 26 or higher in your app level build.gradle
+### Update your app level `build.gradle`
+
+- change minSdk version to 26 or higher
+
+- change targetSdk and compileSdk to 33 or higher
 
 ```Kotlin
 android {
@@ -102,55 +106,56 @@ Add Payable interface along with its functions to your activity
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
-...
-
     fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult){
-        
+        println(successfulTransactionResult)
     }
 
     fun handleFailure(failedTransactionResult: FailedTransactionResult){
-        
-    }
-
-    fun handleBarcodeSuccess(barcodeResult: BarcodeResult){
-        
-    }
-
-    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults){
-        
+        println(failedTransactionResult)
     }
 
     fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction){
-        
+        println(confirmationMessage)
     }
 
     fun handleError(error: Error){
-        
+        println(error)
     }
-...
 
+    fun handleBarcodeSuccess(barcodeResult: BarcodeResult){
+        println(barcodeResult)
+    }
+
+    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults){
+        println(paymentMethodToken)
+    }
 }
 ```
 
-Set your api key
+Set your api key.
 
 ```Kotlin
 private val apiKey = "API_KEY"
 ```
 
-Set PayTheoryFragment inside your onCreate method
+Set PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
 val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-Configure PayTheoryFragment inside your onCreate method
+Configure PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
 payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
 ```
 
 ## Additional Configurations
+
+Configurations are modified inside `payTheoryFragment.configure()` or `payTheoryFragment.tokenize()` methods.
+
+*Note if any configurations are incorrectly set PayTheoryFragment will throw IllegalArgumentException*
+*Note if the device's network connection is not available PayTheoryFragment will throw NetworkErrorException*
 
 ### Transaction Type
 
@@ -432,12 +437,12 @@ try {
 
 ## Tokenization Requests
 
-Here is an example on how to use PayTheoryFragment class method tokenizePaymentMethod():
+Here is an example on how to use PayTheoryFragment class method tokenize():
 
 ```kotlin
 try {
     //PayTheoryFragment configuration for creating a payment method token
-    payTheoryFragment.tokenizePaymentMethod(
+    payTheoryFragment.tokenize(
         apiKey = apiKey,
         tokenizationType = TokenizationType.CARD,
         requireAccountName = true,
@@ -555,41 +560,13 @@ data class Error (
 )
 ```
 
+## Development
+
+If you are using a virtual device for development, it must have google play store installed.
+
 ## Testing
 
 A Java version between 8 and 16 is required to execute Gradle commands.
-
-### Unit testing
-
-Run this line in the command prompt:
-
-Windows
-
-```powershell
-gradlew unitTesting
-```
-
-Linux
-
-```shell
-./gradlew unitTesting
-```
-
-### Unit and UI testing (Requires an android device or emulator)
-
-Run this line in the command prompt:
-
-Windows
-
-```powershell
-gradlew completeTesting
-```
-
-Linux
-
-```shell
-./gradlew completeTesting
-```
 
 ## Support/Feedback
 

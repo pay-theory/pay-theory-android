@@ -9,9 +9,9 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class RoutingNumberFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
+class ZipCodeTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
+    private var lock = false
     private var ptText: PayTheoryEditText? = pt
-    private var submitButton = submitButton
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -22,21 +22,39 @@ class RoutingNumberFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Bu
     }
 
     override fun afterTextChanged(s: Editable) {
-        if (s.isEmpty()) {
+        if (lock || s.isEmpty()) {
             return
         }
 
-        val isValidNumber = s.toString().length == 9
+        val maxLength = 5
+
+        lock = true
+
+        if (s.length > maxLength) {
+            s.delete(maxLength,s.length)
+        }
+
+        lock = false
+        val isValidNumber = validZip(s.toString())
         handleButton(isValidNumber)
     }
 
+    private fun validZip(number: String): Boolean {
+        val (digits, _) = number
+            .partition(Char::isDigit)
+
+        if (digits.length != 5) {
+            return false
+        }
+        return true
+    }
     private fun handleButton(valid: Boolean){
         if (valid) {
             submitButton.isEnabled = true
         }
         if (!valid) {
             submitButton.isEnabled = false
-            ptText!!.error = "Invalid Routing Number"
+            ptText!!.error = "Invalid ZIP Code"
         }
     }
 }

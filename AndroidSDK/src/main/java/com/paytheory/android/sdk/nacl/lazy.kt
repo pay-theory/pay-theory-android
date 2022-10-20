@@ -7,10 +7,10 @@ import com.goterl.lazysodium.utils.Base64MessageEncoder
 import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
 
-
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 private val boxLazy = lazySodium as Box.Lazy
 private lateinit var keyPair: KeyPair
+
 /**
  * Function to generate KeyPair
  */
@@ -31,6 +31,12 @@ fun encryptBox(message: String, publicKey: Key): String {
     )
 }
 
+/**
+ * Function to decrypt messages
+ * @param message the message to be encrypted
+ * @param base64socketPublicKey a base 64 encoded key
+ * @return the decrypted string
+ */
 fun decryptBox(message: String, base64socketPublicKey: String): String {
     //Take public key passed from tag-secure-socket and base64 decode it and convert to lazysodium key
     val socketPublicKey = Key.fromBase64String(base64socketPublicKey)

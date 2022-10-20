@@ -9,10 +9,8 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CVVFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : TextWatcher {
-    private var lock = false
+class RoutingNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt
-    private var submitButton = submitButton
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -23,39 +21,20 @@ class CVVFormattingTextWatcher(pt: PayTheoryEditText, submitButton: Button) : Te
     }
 
     override fun afterTextChanged(s: Editable) {
-        if (lock || s.isEmpty()) {
+        if (s.isEmpty()) {
             return
         }
 
-        val maxLength = 4
-
-        lock = true
-
-        if (s.length > maxLength) {
-            s.delete(maxLength,s.length)
-        }
-
-        lock = false
-        val isValidNumber = validCVV(s.toString())
+        val isValidNumber = s.toString().length == 9
         handleButton(isValidNumber)
     }
 
-    private fun validCVV(number: String): Boolean {
-        val (digits, _) = number
-            .partition(Char::isDigit)
-
-        if (digits.length < 3 || digits.length > 4) {
-            return false
-        }
-        return true
-    }
     private fun handleButton(valid: Boolean){
         if (valid) {
             submitButton.isEnabled = true
         }
         if (!valid) {
-            submitButton.isEnabled = false
-            ptText!!.error = "Invalid CVV"
+            ptText!!.error = "Invalid Routing Number"
         }
     }
 }
