@@ -2,18 +2,19 @@
 
 ## Requirements
 
-Written in Kotlin and requires Android 8.0 (API level 26)
+Pay Theory's Android SDK is available for Android SDK >= 26
 
 ## Register your application
 
-Before you can use Pay Theory Android SDK you must register your app in Pay Theory's merchant portal
+Register your app in Pay Theory's merchant portal to use Pay Theory Android SDK
 
 ![App Registration](https://assets.paytheory.com/android/android-registration.png)
 
-For each mobile app, you want to register 
-*   enter SHA-256 digest of release signing key
-*   enter SHA-256 digest of debug signing key
-*   enter your application package name
+For each mobile app, you want to register
+
+- enter SHA-256 digest of release signing key
+- enter SHA-256 digest of debug signing key
+- enter your application package name
 
 ### Find signing key digest
 
@@ -35,196 +36,482 @@ Right-click and choose run
 
 Copy your SHA-256 digest
 
-## Install SDK to Gradle
+## Installation
 
-### Install jitpack to project level build.gradle file
+The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.maven.org/maven2/com/paytheory/)
 
-```gradle
-allprojects {
+The latest version is available via `mavenCentral()`:
+
+- Add mavenCentral() to your project level `build.gradle` file
+
+```kotlin
+buildscript {
     repositories {
-        google()
-        maven { url 'https://jitpack.io' }
-        jcenter()
+        ...
+        mavenCentral()
     }
 }
 ```
 
-### Install SDK to application level build.gradle file
-
-```gradle
+```kotlin
 dependencies {
-    ...
-    implementation ('com.github.pay-theory:pay-theory-android:PAY-THEORY-RELEASE') {
-        exclude group: 'net.java.dev.jna', module:'jna'
-    }
-    implementation 'net.java.dev.jna:jna:JNA-RELEASE@aar'
-    ...
+  implementation 'com.paytheory:pay-theory-android:2.7.2'
 }
 ```
 
-[![](https://jitpack.io/v/pay-theory/pay-theory-android.svg)](https://jitpack.io/#pay-theory/pay-theory-android)
+### Update your app level `build.gradle`
 
-_replace PAY-THEORY-RELEASE with the release version shown above_
+- change minSdk version to 26 or higher
 
-[![](https://jitpack.io/v/java-native-access/jna.svg)](https://jitpack.io/#java-native-access/jna)
-
-_replace JNA-RELEASE with the release version shown above_
-
-### Update minimum sdk version to 21 in application level build.gradle file
+- change targetSdk and compileSdk to 33 or higher
 
 ```Kotlin
-defaultConfig {
-    applicationId "com.example.testapp"
-    minSdkVersion 21
-    targetSdkVersion 30
-    versionCode 1
-    versionName "1.0"
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-}
+android {
+    ...
+    compileSdk 33
+    ...
+    defaultConfig {
+        applicationId "com.example.pay_theory_android_sdk_kotlin_demo"
+        minSdk 26
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
 ```
 
 ## Usage
 
 ### Layout
 
-add the Pay Theory Fragment container to your layout xml file
+Add PayTheoryFragment as a fragment in your activity's xml layout file
 
 ```xml
-<fragment
+    <fragment
     android:id="@+id/payTheoryFragment"
     android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 ```
 
 ### Code
 
-*   set your API key
-
-```Kotlin
-private val apiKey = "YOUR-API-KEY"
-```
-
-*   inside your onCreate method set PayTheoryFragment
-
-```Kotlin
-val payTheoryFragment = this.supportFragmentManager
-    .findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
-```
-
-*   inside your onCreate method configure Pay Theory
-*   applying optional settings allows customization
-
-```Kotlin
-val amount = 5236
-val apiKey = "PT-API-Key"
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
-```
-
-*   by default the SDK provides a simple credit card input
-
-React to events by implementing the Payable interface
+Add Payable interface along with its functions to your activity
 
 ```Kotlin
 class MainActivity : AppCompatActivity() , Payable {
 
-...
-    override fun paymentComplete(paymentResult: PaymentResult) {
+    fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult){
+        println(successfulTransactionResult)
     }
 
-    override fun barcodeComplete(barcodeResult: BarcodeResult) {
+    fun handleFailure(failedTransactionResult: FailedTransactionResult){
+        println(failedTransactionResult)
     }
 
-    override fun paymentFailed(paymentFailure: PaymentResult) {
+    fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction){
+        println(confirmationMessage)
     }
 
-    override fun paymentError(paymentError: PaymentError) {
+    fun handleError(error: Error){
+        println(error)
     }
-...
 
+    fun handleBarcodeSuccess(barcodeResult: BarcodeResult){
+        println(barcodeResult)
+    }
+
+    fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults){
+        println(paymentMethodToken)
+    }
 }
 ```
-## Fee Mode
-*   optionally set the fee mode. By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory
+
+Set your api key.
+
 ```Kotlin
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE)
-```
-```Kotlin
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SURCHARGE)
+private val apiKey = "API_KEY"
 ```
 
-## Buyer Options
-*   optionally pass additional customer data to Pay Theory
-```Kotlin
-val buyerOptions = BuyerOptions("Jim", "Smith", "jim.smith@gmail.com", "513-123-4567",
-    Address("123 Testing Lane", "Apt 2", "Cincinnati", "OH", "45236", "USA"))
-
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, false, false, FeeMode.SERVICE_FEE, buyerOptions)
-```
-## Custom Tags
-To track payments with custom tags simply add the following when initializing the SDK:
--   **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
--   **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+Set PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
-// using credit card, require account name, require billing address, buyer options and tags
-val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
-
-// using bank account, require account name, require billing address, buyer options and tags
-val tags = hashMapOf("pay-theory-account-code" to "ABC12345", "pay-theory-reference" to "12345ABC")
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true, FeeMode.SERVICE_FEE, buyerOptions, tags)
+val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 ```
 
-### Example Configurations
+Configure PayTheoryFragment inside your `onCreate` method.
+
+```Kotlin
+payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
+```
+
+## Additional Configurations
+
+Configurations are modified inside `payTheoryFragment.configure()` or `payTheoryFragment.tokenize()` methods.
+
+*Note if any configurations are incorrectly set PayTheoryFragment will throw IllegalArgumentException*
+*Note if the device's network connection is not available PayTheoryFragment will throw NetworkErrorException*
+
+### Transaction Type
+
+Optionally set the transaction type
+
+- by default the SDK provides a simple card input
+
+```Kotlin
+// debit/credit card fields
+transactionType = TransactionType.CARD 
+```
+
+```Kotlin
+// bank account fields
+transactionType = TransactionType.BANK 
+```
+
+```Kotlin
+// cash/barcode fields
+transactionType = TransactionType.CASH 
+```
+
+### Account Name
+
+Optionally set the transaction to require the account name input field
+
+- by default the SDK sets requireAccountName to false
+
+```Kotlin
+// will include account name field
+requireAccountName = true 
+```
+
+```Kotlin
+// will not include account name field
+requireAccountName = false 
+```
+
+### Billing Address
+
+Optionally set the transaction to require input fields for a full billing address
+
+- by default the SDK sets requireBillingAddress to false
+
+```Kotlin
+// will include billing address fields
+requireBillingAddress = true 
+```
+
+```Kotlin
+// will not include billing address fields
+requireBillingAddress = false 
+```
+
+### Confirmation
+
+Optionally set the transaction to require a confirmation step
+
+- by default the SDK sets confirmation to false
+
+```Kotlin
+// will include a confirmation step 
+confirmation = true 
+```
+
+```Kotlin
+// will not include a confirmation step 
+confirmation = false 
+```
+
+Complete Pay Theory transaction after user confirmation
+
+```Kotlin
+override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
+    // YOUR USER CONFIRMATION STEP...
+        
+    if (userAgrees == true) {
+        transaction.completeTransfer()  //This will confirm and continue processing the transaction 
+    }
+}
+```
+
+### Fee Mode
+
+Optionally set the fee mode
+
+- By default FeeMode.INTERCHANGE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+
+```Kotlin
+//set fee mode as interchange
+feeMode = FeeMode.INTERCHANGE
+```
+
+```Kotlin
+//set fee mode as service fee (enabled by Pay Theory)
+feeMode = FeeMode.SERVICE_FEE
+```
+
+### Metadata
+
+Optionally track payments with custom metadata, simply add metadata with a HashMap:
+
+```Kotlin
+//Set optional metadata configuration
+val metadata: HashMap<Any,Any> = hashMapOf(
+    "studentId" to "student_1859034",
+    "courseId" to "course_1859034"
+)
+
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    metadata = metadata
+)
+```
+
+### Payor Info
+
+Optionally pass additional customer data to Pay Theory.
+
+Use data models **PayorInfo** and **Address** from Pay Theory SDK
+
+```Kotlin
+//Set optional payorInfo configuration
+val payorInfo = PayorInfo(
+    "John",
+    "Smith",
+    "john@gmail.com",
+    "5135555555",
+    Address(
+        "10549 Reading Rd",
+        "Apt 1",
+        "Cincinnati",
+        "OH",
+        "45241",
+        "USA")
+)
+
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    payorInfo = payorInfo
+)
+```
+
+### Payor Id
+
+Optionally set the payor id
+
+- By default a new payorId is created with payorInfo
+
+```Kotlin
+//set payor id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    payorId = "PAYOR_ID"
+)
+```
+
+### Account Code
+
+Optionally set the account code
+
+- accountCode is tracked for each transaction in Pay Theory portals
+
+```Kotlin
+//set account code
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    accountCode = "ACCOUNT_CODE"
+)
+```
+
+### Reference
+
+Optionally set the reference
+
+- reference is tracked for each transaction in Pay Theory portals
+
+```Kotlin
+//set reference
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    reference = "REFERENCE"
+)
+```
+
+### Payment Parameters
+
+Optionally set payment parameters
+
+- By default your Pay Theory defaulted payment parameter is used for all transactions
+
+```Kotlin
+//set payment parameter
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    paymentParameters = "PAYMENT_PARAMETERS"
+)
+```
+
+### Invoice Id
+
+Optionally set an invoice id
+
+- Set an invoice id to submit the transaction for a Pay Theory invoice
+
+```Kotlin
+//set invoice id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    invoiceId = "INVOICE_ID"
+)
+```
+
+### Receipts
+
+Optionally enable receipts
+
+- By default sendReceipt is set to false
+- The default receipt message will send if receiptDescription is not included
+
+```Kotlin
+//set invoice id
+payTheoryFragment.configure(
+    apiKey = "API_KEY",
+    amount = 1000,
+    sendReceipt = true,
+    receiptDescription = "School Fees"
+)
+```
+
+### Example Configuration
+
+Here is an example on how to use PayTheoryFragment class method configure():
+
 ```Kotlin
 
-// use ACH bank account
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK)
+//PayorInfo configuration
+val payorInfo = PayorInfo(
+    "John",
+    "Doe",
+    "johndoe@paytheory.com",
+    "5135555555",
+    Address(
+        "10549 Reading Rd",
+        "Apt 1",
+        "Cincinnati",
+        "OH",
+        "45241",
+        "USA")
+)
 
-// use ACH bank account and require account name
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true)
+//metadata configuration
+val metadata: HashMap<Any,Any> = hashMapOf(
+    "studentId" to "student_1859034",
+    "courseId" to "course_1859034"
+)
 
-// use ACH bank account and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, PaymentType.BANK, requireAccountName = true, requireBillingAddress = true)
+try {
+    //PayTheoryFragment configuration for card payments
+    payTheoryFragment.configure(
+        apiKey = apiKey,
+        amount = 1000,
+        transactionType = TransactionType.CARD,
+        metadata = metadata,
+        payorInfo = payorInfo
+    )
 
-// use credit card account
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT)
+} catch (e: Exception) {
+    e.printStackTrace()
+}
+```
 
-// use credit card and require account name
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true)
+## Tokenization Requests
 
-// use credit card and require account name and billing address
-payTheoryFragment.configure(apiKey, amount, PaymentType.CREDIT, requireAccountName = true, requireBillingAddress = true)
+Here is an example on how to use PayTheoryFragment class method tokenize():
 
-// use cash
-payTheoryFragment.configure(apiKey, amount, PaymentType.CASH)
+```kotlin
+try {
+    //PayTheoryFragment configuration for creating a payment method token
+    payTheoryFragment.tokenize(
+        apiKey = apiKey,
+        tokenizationType = TokenizationType.CARD,
+        requireAccountName = true,
+        requireBillingAddress = true,
+        payorInfo = payorInfo,
+        metadata = metadata
+    )
 
+} catch (e: Exception) {
+    e.printStackTrace()
+}
 ```
 
 ## Results
 
-The payment or barcode results will come back complete or failed
+The transaction results will come back through as these classes:
 
-*   complete ach/card payment result
- 
+- successful card/bank payment result
+
 ```Kotlin
-data class PaymentResult (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
+data class SuccessfulTransactionResult (
     @SerializedName("state") val state: String,
-    @SerializedName("amount") val amount: Int?,
-    @SerializedName("service_fee") val service_fee: String?,
-    @SerializedName("tags") val tags: Map<String,String>?,
-    @SerializedName("created_at") val created_at: String?,
-    @SerializedName("updated_at") val updated_at: String?
+    @SerializedName("amount") val amount: String,
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("service_fee") val serviceFee: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
 )
 ```
 
-*   complete cash barcode result
+- confirmation step result
+
+```Kotlin
+data class ConfirmationMessage (
+    @SerializedName("payment_token") val paymentToken: String,
+    @SerializedName("payer_id") val payerId: String?,
+    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String?,
+    @SerializedName("merchant_uid") val merchantUid: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("session_key") val sessionKey: String,
+    @SerializedName("processor") val processor: String,
+    @SerializedName("expiration") var expiration: String?,
+    @SerializedName("idempotency") val idempotency: String,
+    @SerializedName("billing_name") val billingName: String?,
+    @SerializedName("billing_address") val billingAddress: Address?,
+    @SerializedName("amount") val amount: String,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("fee_mode") val fee_mode: String,
+    @SerializedName("fee") var fee: String,
+    @SerializedName("processor_merchant_id") val processor_merchant_id: String?,
+    @SerializedName("payment_method") val payment_method: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("pay_theory_data") val pay_theory_data: HashMap<Any, Any>?,
+    @SerializedName("payor_info") val payorInfo: PayorInfo?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("invoice_id") val invoice_id: String?,
+    @SerializedName("payment_intent_id") val paymentIntentId: String?,
+)
+```
+
+- successful barcode request result
+
 ```Kotlin
 data class BarcodeResult (
     @SerializedName("BarcodeUid") val barcodeUid: String,
@@ -232,60 +519,64 @@ data class BarcodeResult (
     @SerializedName("barcode") val barcode: String,
     @SerializedName("barcodeFee") val barcodeFee: String,
     @SerializedName("Merchant") val merchant: String,
+    @SerializedName("mapUrl") val mapUrl : String
 )
 ```
 
-*   failed ach/card payment result
+- successful payment method token result
 
 ```Kotlin
-data class PaymentResultFailure (
-    @SerializedName("receipt_number") val receipt_number: String,
-    @SerializedName("last_four") val last_four: String,
-    @SerializedName("brand") val brand: String,
+data class PaymentMethodTokenResults (
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("payor_id") var payor_id: String?,
+    @SerializedName("last_four") val lastFour: String?,
+    @SerializedName("first_six") val firstSix: String?,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("expiration") val expiration: String?,
+    @SerializedName("payment_type") val paymentType: String
+)
+```
+
+- failed card, bank, barcode, and token request results
+
+```Kotlin
+data class FailedTransactionResult (
     @SerializedName("state") val state: String,
-    @SerializedName("type") val type: String?
+    @SerializedName("brand") val brand: String,
+    @SerializedName("last_four") val lastFour: String,
+    @SerializedName("receipt_number") val receiptNumber: String,
+    @SerializedName("payment_method_id") val paymentMethodId: String,
+    @SerializedName("payor_id") val payorId: String,
 )
+
 ```
 
-*   error processing card, ach, or barcode results
+- any processing error results
 
 ```Kotlin
-data class TransactionError (
+data class Error (
     @SerializedName("reason") val reason: String
 )
 ```
 
+## Development
+
+If you are using a virtual device for development, it must have google play store installed.
+
 ## Testing
+
 A Java version between 8 and 16 is required to execute Gradle commands.
 
-### Unit testing
+## Support/Feedback
 
-The following commands can be ran in the command prompt:
+Feel free to get in touch:
 
-Windows
-```powershell
-gradlew unitTesting
-```
-
-Linux
-```shell
-./gradlew unitTesting
-```
-
-### Unit and UI testing (Requires an android device or emulator)
-
-The following commands can be ran in the command prompt:
-
-Windows
-```powershell
-gradlew completeTesting
-```
-
-Linux
-```shell
-./gradlew completeTesting
-```
+- [GitHub Issues](https://github.com/pay-theory/pay-theory-android/issues) - For any issues or feedback
+- [Support](https://paytheory.com/) / [support@paytheory.com](mailto:support@paytheory.com)
 
 ## License
 
-MIT © [pay theory](https://github.com/pay-theory)
+The Pay Theory Android SDK is open source and available under the MIT license. See [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
+
+MIT © [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)

@@ -15,28 +15,30 @@ import java.util.*
  * @param viewModel viewModel for WebSocket
  * @param websocketInteractor interactor for the WebSocket
  */
+@ExperimentalCoroutinesApi
 class ConnectionReactors(
     private val ptToken: String,
     private val attestation: String,
     private val viewModel: WebSocketViewModel,
-    private val websocketInteractor: WebsocketInteractor) {
+    private val websocketInteractor: WebsocketInteractor,
+    private val applicationPackageName: String) {
+
+    companion object {
+        private const val HOST_ACTION = "host:hostToken"
+    }
 
     /**
-     * Function that will send socket message when connected
+     * Called on websocket connection, creates the host token action request
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
-        val hostTokenRequest =
-            HostTokenRequest(ptToken, "native", attestation, System.currentTimeMillis())
 
-        val encoded = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(Gson().toJson(hostTokenRequest).toByteArray())
-        } else {
-            android.util.Base64.encodeToString(Gson().toJson(hostTokenRequest).toByteArray(),android.util.Base64.DEFAULT)
-        }
+        val requestData = HostTokenRequest(ptToken, attestation, System.currentTimeMillis(), "android", applicationPackageName)
 
+        val encodedBody =
+            Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())
 
-        val actionRequest = ActionRequest("host:hostToken", encoded)
+        val actionRequest = ActionRequest(HOST_ACTION, encodedBody)
         viewModel.sendSocketMessage(Gson().toJson(actionRequest))
     }
 

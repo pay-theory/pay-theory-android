@@ -2,6 +2,10 @@ package com.paytheory.android.sdk.websocket
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paytheory.android.sdk.Error
+import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PaymentMethodToken
+import com.paytheory.android.sdk.Transaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -13,11 +17,14 @@ import kotlinx.coroutines.launch
  * @param interactor WebSocket interactor
  * @param payTheoryToken token used for security
  */
+@ExperimentalCoroutinesApi
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
     var payTheoryToken: String,
     private val partner: String,
-    private val stage: String
+    private val stage: String,
+    private val transaction: Transaction?,
+    private val paymentMethodToken: PaymentMethodToken?
 ):
     ViewModel() {
 
@@ -80,10 +87,38 @@ class WebSocketViewModel(
     }
 
     private fun onSocketError(ex: Throwable) {
-        println("Error occurred : ${ex.message}")
+        val error = ex.message.toString()
+        interactor.stopSocket()
+        // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call", "Software caused connection abort", "null", "Unable to resolve host"
+        if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)){
+            if (transaction != null){ // error for transaction request
+                if (transaction.context is Payable){
+                    println("Network Connection Error - Reconnecting...")
+                    transaction.resetSocket()
+                }
+            } else if (paymentMethodToken != null){
+                if (paymentMethodToken.context is Payable){
+                    println("Network Connection Error - Reconnecting...")
+                    paymentMethodToken.resetSocket()
+                }
+            }
+        } else { //if error is not ssl error
+            // error for transaction request
+            if (transaction != null) {
+                if (transaction.context is Payable){
+                    println("Error: $error")
+                    transaction.context.handleError(Error(error))
+                }
+            // error for tokenization request
+            } else if (paymentMethodToken != null){
+                if (paymentMethodToken.context is Payable){
+                    println("Error: $error")
+                    paymentMethodToken.context.handleError(Error(error))
+                }
+            }
+        }
     }
 
-    @ExperimentalCoroutinesApi
     override fun onCleared() {
         disconnect()
         super.onCleared()

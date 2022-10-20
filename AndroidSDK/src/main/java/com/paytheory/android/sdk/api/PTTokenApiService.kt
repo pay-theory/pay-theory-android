@@ -11,7 +11,7 @@ interface PTTokenApiService {
      * Function that takes headers map and creates observable for the pt-token response
      * @param headers headers map for api call
      */
-    @GET("token")
+    @GET("pt-token-service/")
     fun doToken(@HeaderMap headers: Map<String, String>): Observable<PTTokenResponse>
 }
 

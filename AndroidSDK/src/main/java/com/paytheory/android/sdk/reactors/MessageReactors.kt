@@ -1,130 +1,107 @@
 package com.paytheory.android.sdk.reactors
 
-import ActionRequest
 import BarcodeMessage
 import HostTokenMessage
-import IdempotencyMessage
-import IdempotencyRequest
-import InstrumentMessage
 import Payment
-import Transfer
-import TransferMessage
-import TransferRequest
+import PaymentMethodTokenData
 import com.google.gson.Gson
-import com.goterl.lazycode.lazysodium.utils.Key
 import com.paytheory.android.sdk.*
-import com.paytheory.android.sdk.nacl.encryptBox
-import com.paytheory.android.sdk.nacl.generateLocalKeyPair
+import com.paytheory.android.sdk.configuration.FeeMode
+import com.paytheory.android.sdk.nacl.decryptBox
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.json.JSONObject
-import java.util.*
 
 /**
  * Creates reactions based on WebSocket messages
  * @param viewModel view model of WebSocket
  * @param webSocketInteractor interactor for WebSocket
  */
+@ExperimentalCoroutinesApi
 class MessageReactors(private val viewModel: WebSocketViewModel, private val webSocketInteractor: WebsocketInteractor) {
     var activePayment: Payment? = null
+    var activePaymentToken: PaymentMethodTokenData? = null
     var hostToken = ""
     var sessionKey = ""
     var socketPublicKey = ""
+    private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
     /**
-     * Function that creates a message for a host token action
-     * @param message message to be sent
+     * Called when host token message received from websocket
+     * @param
      */
     @ExperimentalCoroutinesApi
-    fun onHostToken(message: String, transaction: Transaction? = null): HostTokenMessage {
+    fun onHostToken(message: String, transaction: Transaction): HostTokenMessage {
         val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
-        socketPublicKey = hostTokenMessage.publicKey
-        sessionKey = hostTokenMessage.sessionKey
-        hostToken = hostTokenMessage.hostToken
-
-        if (transaction?.queuedRequest != null) {
-
-            val actionRequest = transaction.generateQueuedActionRequest(transaction.queuedRequest!!)
-            transaction.viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Queued Payment Requested")
-        }
+        socketPublicKey = hostTokenMessage.body.publicKey
+        sessionKey = hostTokenMessage.body.sessionKey
+        hostToken = hostTokenMessage.body.hostToken
+        transaction.publicKey = hostTokenMessage.body.publicKey
+        transaction.sessionKey = hostTokenMessage.body.sessionKey
+        transaction.hostToken = hostTokenMessage.body.hostToken
         return hostTokenMessage
+    }
+
+    /**
+     * Called when host token message received from websocket
+     * @param
+     */
+    @ExperimentalCoroutinesApi
+    fun onTokenizeHostToken(message: String, paymentMethodToken: PaymentMethodToken): HostTokenMessage {
+        val hostTokenMessage = Gson().fromJson(message, HostTokenMessage::class.java)
+        socketPublicKey = hostTokenMessage.body.publicKey
+        sessionKey = hostTokenMessage.body.sessionKey
+        hostToken = hostTokenMessage.body.hostToken
+        paymentMethodToken.publicKey = hostTokenMessage.body.publicKey
+        paymentMethodToken.sessionKey = hostTokenMessage.body.sessionKey
+        paymentMethodToken.hostToken = hostTokenMessage.body.hostToken
+        return hostTokenMessage
+    }
+    /**
+     * Sends payment confirmation to paymentConfirmation override method
+     * @param
+     */
+    fun confirmPayment(message: String, transaction: Transaction? = null){
+        //decrypt message
+        val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedMessage::class.java)
+        val decryptedMessage = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
+        val confirmationMessage = Gson().fromJson(decryptedMessage, ConfirmationMessage::class.java)
+        //set original confirmation/transaction with correct fee from Pay Theory
+        transaction!!.setConfirmation(confirmationMessage)
+        //Remove service_fee for any interchange transaction
+        if (transaction.feeMode == FeeMode.INTERCHANGE) {
+            confirmationMessage.fee = "0"
+        }
+        //send user confirmation of payment
+        if (transaction.context is Payable){
+            transaction.context.confirmation(confirmationMessage, transaction)
+        }
     }
 
     /**
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
-    fun onUnknown(message: String): Any {
-        return Gson().fromJson(message, Any::class.java)
+    fun onError(message: String, transaction: Transaction? = null) {
+        /* fail if unknown websocket message */
+        if (transaction != null) {
+            if (transaction.context is Payable){
+                transaction.context.handleError(Error(message))
+            }
+        }
     }
 
     /**
-     * Function that instrument message and creates idempotency request
-     * @param message message to be sent
-     * @param apiKey api-key used for transaction
-     */
-    @ExperimentalCoroutinesApi
-    fun onInstrument(message:String, apiKey:String): InstrumentMessage {
-        println("Pay Theory Instrument Token")
-        val instrumentMessage = Gson().fromJson(message, InstrumentMessage::class.java)
-        activePayment!!.ptInstrument = instrumentMessage.ptInstrument
-
-        val keyPair = generateLocalKeyPair()
-        val idempotencyRequest = IdempotencyRequest(apiKey,
-            activePayment!!,
-            hostToken,
-            sessionKey,
-            System.currentTimeMillis())
-        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
-        }
-
-        val boxed = encryptBox(Gson().toJson(idempotencyRequest), Key.fromBase64String(socketPublicKey))
-
-        val actionRequest = ActionRequest(
-            "host:idempotency",
-            boxed,
-            localPublicKey)
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-
-        return instrumentMessage
-    }
-
-    /**
-     * Function that idempotency message and creates transfer request
+     * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
-    @ExperimentalCoroutinesApi
-    fun onIdempotency(message: String, tags: HashMap<String, String>?): IdempotencyMessage {
-        println("Pay Theory Idempotency")
-        val idempotencyMessage = Gson().fromJson(message, IdempotencyMessage::class.java)
-
-        tags!!["pt-number"] = idempotencyMessage.idempotency
-        val keyPair = generateLocalKeyPair()
-        val localPublicKey = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        } else {
-            android.util.Base64.encodeToString(keyPair.publicKey.asBytes,android.util.Base64.DEFAULT)
+    fun onTokenError(message: String, paymentMethodToken: PaymentMethodToken? = null) {
+        /* fail if unknown websocket message */
+        if (paymentMethodToken != null) {
+            if (paymentMethodToken.context is Payable){
+                paymentMethodToken.context.handleError(Error(message))
+            }
         }
-        val transferRequest = TransferRequest(Transfer(idempotencyMessage.paymentToken, idempotencyMessage.idempotency), System.currentTimeMillis(),
-            tags
-        )
-
-
-        val boxed = encryptBox(Gson().toJson(transferRequest), Key.fromBase64String(socketPublicKey))
-
-        val actionRequest = ActionRequest(
-            "host:transfer",
-            boxed,
-            localPublicKey)
-
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-
-        return idempotencyMessage
     }
 
     /**
@@ -132,44 +109,37 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * @param message message to be sent
      */
     @ExperimentalCoroutinesApi
-    fun onTransfer(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
-        println("Pay Theory Payment Result")
+    fun completeTransaction(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         viewModel.disconnect()
-        val responseJson = JSONObject(message)
-        if (transaction.context is Payable) when (responseJson["state"]) {
+        val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+        //decrypt message
+        val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
+
+        val transactionResult = Gson().fromJson(decryptedMessage, TransactionResult::class.java)
+
+        //Remove service_fee for any interchange transaction
+        if (transaction.feeMode == FeeMode.INTERCHANGE) {
+            transactionResult.serviceFee = "0"
+        }
+
+        if (transaction.context is Payable) when (transactionResult.state) {
             "SUCCEEDED" -> {
-                val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
-                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
-                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
-                    transferResponse.createdAt, transferResponse.updatedAt, "Card")
-                transaction.context.paymentComplete(paymentResponse)
+                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                transaction.context.handleSuccess(successfulTransactionResult)
             }
             "PENDING" -> {
-                val transferResponse = Gson().fromJson(message, TransferMessage::class.java)
-                val paymentResponse = PaymentResult(transferResponse.tags["pt-number"].toString(),
-                    transferResponse.lastFour, transferResponse.cardBrand, transferResponse.state,
-                    transferResponse.amount, transferResponse.serviceFee, transferResponse.tags,
-                    transferResponse.createdAt, transferResponse.updatedAt, "ACH")
-                transaction.context.paymentComplete(paymentResponse)
+                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                transaction.context.handleSuccess(successfulTransactionResult)
             }
             "FAILURE" -> {
-                val failedResponse = PaymentResultFailure(responseJson["receipt_number"] as String,
-                    responseJson["last_four"] as String,
-                    responseJson["brand"] as String, responseJson["state"] as String, responseJson["type"] as String
-                )
-                transaction.context.paymentFailed(failedResponse)
+                val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
+                transaction.context.handleFailure(failedTransactionResult)
             }
 
-            else -> {
-                val json = """
-                { 
-                    "error": ${responseJson["error"]}, 
-                 }"""
-
-                val errorResponse = Gson().fromJson(json, TransactionError::class.java)
-                transaction.context.transactionError(errorResponse)
-            }
+        else -> {
+            val errorResponse = Error("Error retrieving payment confirmation")
+            transaction.context.handleError(errorResponse)
+        }
         }
     }
 
@@ -181,23 +151,32 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     fun onBarcode(message: String, viewModel: WebSocketViewModel, transaction: Transaction) {
         println("Pay Theory Barcode Result")
         viewModel.disconnect()
+        val encryptedBarcodeMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+        val decryptedMessage = decryptBox(encryptedBarcodeMessage.body, encryptedBarcodeMessage.publicKey)
+        val barcodeMessageResult = Gson().fromJson(decryptedMessage, BarcodeMessage::class.java)
 
-        val responseJson = JSONObject(message)
-        if (transaction.context is Payable && responseJson["BarcodeUid"].toString().isNotBlank()) {
-            val transferResponse = Gson().fromJson(message, BarcodeMessage::class.java)
-            val mapUrl = "https://pay.vanilladirect.com/pages/locations"
-            val barcodeResponse = BarcodeResult(transferResponse.barcodeUid, transferResponse.barcodeUrl,
-                transferResponse.barcode, transferResponse.barcodeFee, transferResponse.merchant, mapUrl)
-            transaction.context.barcodeComplete(barcodeResponse)
+        if (transaction.context is Payable && barcodeMessageResult.barcode.isNotBlank() && barcodeMessageResult.barcodeUrl.isNotBlank()) {
+            val barcodeResult = BarcodeResult(barcodeMessageResult.barcodeUid, barcodeMessageResult.barcodeUrl,
+                barcodeMessageResult.barcode, barcodeMessageResult.barcodeFee, barcodeMessageResult.merchant, mapUrl)
+            transaction.context.handleBarcodeSuccess(barcodeResult)
 
         } else if (transaction.context is Payable) {
-            val json = """
-                { 
-                    "error": "Cannot Create Barcode", 
-                 }"""
-
-            val errorResponse = Gson().fromJson(json, TransactionError::class.java)
-            transaction.context.transactionError(errorResponse)
-        }
+            val errorResponse = Error("Failed to Create Barcode")
+            transaction.context.handleError(errorResponse)
         }
     }
+
+    /**
+     * Sends payment confirmation to paymentConfirmation override method
+     * @param
+     */
+    fun onCompleteToken(message: String, paymentMethodToken: PaymentMethodToken){
+        //decrypt message
+        val encryptedPaymentToken = Gson().fromJson(message, EncryptedPaymentToken::class.java)
+        val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
+        val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
+        if (paymentMethodToken.context is Payable) {
+            paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
+        }
+    }
+}
