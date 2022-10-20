@@ -217,10 +217,6 @@ class Transaction(
         }
     }
 
-    /**
-     * Generate the initial action request
-     * @param payment payment object to transact
-     */
     private fun generateInitialActionRequest(payment: Payment): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()

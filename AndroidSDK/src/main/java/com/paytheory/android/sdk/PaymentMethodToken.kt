@@ -200,10 +200,6 @@ class PaymentMethodToken(
         }
     }
 
-    /**
-     * Generate the initial action request
-     * @param paymentMethodTokenData payment method token object
-     */
     private fun generateInitialActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
