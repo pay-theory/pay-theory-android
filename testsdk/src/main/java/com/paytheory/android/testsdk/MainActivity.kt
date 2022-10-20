@@ -5,15 +5,13 @@ import PayorInfo
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.paytheory.android.sdk.*
-import com.paytheory.android.sdk.configuration.TokenizationType
-import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
+import com.paytheory.android.sdk.view.PayTheoryButton
 
 /**
  * Demo Activity class using Pay Theory Android SDK
@@ -42,6 +40,9 @@ class MainActivity : AppCompatActivity(), Payable {
         messagePopUp!!.setContentView(R.layout.message_layout)
         messagePopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
+        //Create submit button
+        val submitButton = this.findViewById(R.id.submit) as PayTheoryButton
+
         //Create PayTheoryFragment
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
@@ -69,18 +70,32 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
-            //PayTheoryFragment configure for card and bank payments
-            payTheoryFragment.configure(
+            payTheoryFragment.configureTransact(
+                paymentButton = submitButton,
                 apiKey = apiKey,
                 amount = 5050,
-//                transactionType = TransactionType.CARD,
-//                requireAccountName = false,
-//                requireBillingAddress = false,
-//                confirmation = true,
-//                feeMode = FeeMode.INTERCHANGE,
-//                metadata = metadata,
-//                payorInfo = payorInfo
+                //transactionType = TransactionType.CARD,
+                //requireAccountName = false,
+                //requireBillingAddress = false,
+                //confirmation = false,
+                //feeMode = FeeMode.INTERCHANGE,
+                //metadata = metadata,
+                //payorInfo = payorInfo,
+                //accountCode = "Test Account Code",
+                //reference = "Test Reference",
+                //sendReceipt = true,
+                //receiptDescription = "Android Payment Receipt Test",
+                //paymentParameters = "TEST_PARAMS",
+                //invoiceId = "TEST_INVOICE",
+                //payorId = "TEST_PAYOR_ID"
             )
+            payTheoryFragment.setFields(
+                submitButton
+            )
+
+            submitButton.setOnClickListener{
+                payTheoryFragment.transact()
+            }
 
             //PayTheoryFragment tokenize for card and bank payment methods
 //            payTheoryFragment.tokenize(
@@ -216,7 +231,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
 
 
-//payTheoryFragment.configure(
+//payTheoryFragment.transact(
 //apiKey = apiKey,
 //amount = 5050,
 //transactionType = TransactionType.CARD,

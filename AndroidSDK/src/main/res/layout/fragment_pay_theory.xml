@@ -159,14 +159,14 @@
                                 android:inputType="none"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/submitButton"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="24dp"
-                            android:textColor="#000000"
-                            android:text="@string/submit_payment"
-                            android:enabled="false"/>
+<!--                        <com.google.android.material.button.MaterialButton-->
+<!--                            android:id="@+id/submitButton"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_marginBottom="24dp"-->
+<!--                            android:textColor="#000000"-->
+<!--                            android:text="@string/submit_payment"-->
+<!--                            android:enabled="false"/>-->
                 </LinearLayout>
         </TableLayout>
 </ScrollView>
