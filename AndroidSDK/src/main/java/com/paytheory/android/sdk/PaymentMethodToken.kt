@@ -153,9 +153,6 @@ class PaymentMethodToken(
         }
     }
 
-    /**
-     * Create Pay Theory websocket host:hostToken message
-     */
     private fun establishViewModel(
         ptTokenResponse: PTTokenResponse,
         attestationResult: String? = ""

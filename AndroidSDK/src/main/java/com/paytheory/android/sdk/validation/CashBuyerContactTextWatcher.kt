@@ -8,7 +8,8 @@ import android.widget.Button
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
- * Text watcher class to validate buyer contact edit text field
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
  */
 class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButton: Button) : TextWatcher {
     private var ptText: PayTheoryEditText? = pt

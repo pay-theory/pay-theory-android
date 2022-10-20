@@ -89,7 +89,7 @@ class WebSocketViewModel(
     private fun onSocketError(ex: Throwable) {
         val error = ex.message.toString()
         interactor.stopSocket()
-        // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call, Software caused connection abort", "null", "Unable to resolve host"
+        // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call", "Software caused connection abort", "null", "Unable to resolve host"
         if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)){
             if (transaction != null){ // error for transaction request
                 if (transaction.context is Payable){
