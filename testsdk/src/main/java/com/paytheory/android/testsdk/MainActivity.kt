@@ -10,6 +10,9 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.paytheory.android.sdk.*
+import com.paytheory.android.sdk.configuration.FeeMode
+import com.paytheory.android.sdk.configuration.TokenizationType
+import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 
@@ -50,7 +53,7 @@ class MainActivity : AppCompatActivity(), Payable {
         val payorInfo = PayorInfo(
             "John",
             "Doe",
-            "johndoe@paytheory.com",
+            "abel@paytheory.com",
             "5135555555",
             Address(
                 "10549 Reading Rd",
@@ -70,42 +73,51 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
-            payTheoryFragment.configureTransact(
-                paymentButton = submitButton,
-                apiKey = apiKey,
-                amount = 5050,
-                //transactionType = TransactionType.CARD,
-                //requireAccountName = false,
-                //requireBillingAddress = false,
-                //confirmation = false,
-                //feeMode = FeeMode.INTERCHANGE,
-                //metadata = metadata,
-                //payorInfo = payorInfo,
-                //accountCode = "Test Account Code",
-                //reference = "Test Reference",
-                //sendReceipt = true,
-                //receiptDescription = "Android Payment Receipt Test",
-                //paymentParameters = "TEST_PARAMS",
-                //invoiceId = "TEST_INVOICE",
-                //payorId = "TEST_PAYOR_ID"
-            )
-            payTheoryFragment.setFields(
-                submitButton
-            )
+//            payTheoryFragment.configureTransact(
+//                paymentButton = submitButton,
+//                apiKey = apiKey,
+//                amount = 5050,
+//                transactionType = TransactionType.CASH,
+//                requireAccountName = true,
+//                requireBillingAddress = true,
+//                confirmation = true,
+//                feeMode = FeeMode.INTERCHANGE,
+//                metadata = metadata,
+//                payorInfo = payorInfo,
+//                accountCode = "Test Account Code",
+//                reference = "Test Reference",
+//                sendReceipt = true,
+//                receiptDescription = "Android Payment Receipt Test",
+//                //paymentParameters = "TEST_PARAMS",
+//                //invoiceId = "TEST_INVOICE",
+//                //payorId = "TEST_PAYOR_ID"
+//            )
+//
+//            submitButton.setOnClickListener{
+//                payTheoryFragment.transact()
+//            }
 
-            submitButton.setOnClickListener{
-                payTheoryFragment.transact()
-            }
+
+
 
             //PayTheoryFragment tokenize for card and bank payment methods
-//            payTheoryFragment.tokenize(
-//                apiKey = apiKey,
-//                tokenizationType = TokenizationType.CARD,
-////                requireAccountName = true,
-////                requireBillingAddress = true,
-////                payorInfo = payorInfo,
-////                metadata = metadata
-//            )
+            payTheoryFragment.configureTokenize(
+                tokenizeButton = submitButton,
+                apiKey = apiKey,
+                tokenizationType = TokenizationType.CARD,
+                requireAccountName = false,
+                requireBillingAddress = false,
+                payorInfo = payorInfo,
+                metadata = metadata
+            )
+
+
+            submitButton.setOnClickListener{
+                payTheoryFragment.tokenize()
+            }
+
+
+
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -190,6 +202,7 @@ class MainActivity : AppCompatActivity(), Payable {
 
 
     override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
+        println(barcodeResult)
 //        showToast("Barcode Request Successful $barcodeResult")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
@@ -203,6 +216,7 @@ class MainActivity : AppCompatActivity(), Payable {
     }
 
     override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
+        println(paymentMethodToken)
 //        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button

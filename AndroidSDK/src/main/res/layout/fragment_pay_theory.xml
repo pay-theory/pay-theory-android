@@ -9,8 +9,10 @@
             android:layout_height="wrap_content"
             android:stretchColumns="1">
                 <LinearLayout
-                    android:layout_width="match_parent" android:layout_height="match_parent"
-                    android:orientation="vertical" android:id="@+id/PayTheoryFragment">
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:id="@+id/PayTheoryFragment">
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/account_name"
@@ -117,18 +119,18 @@
                             android:inputType="number" />
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cash_buyer"
+                            android:id="@+id/cashName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/buyer"
+                            android:hint="@string/cashName"
                             android:visibility="gone"
                             android:inputType="text" />
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cash_buyer_contact"
+                            android:id="@+id/cashContact"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/cash_buyer_contact"
+                            android:hint="@string/cashContact"
                             android:visibility="gone"
                             android:inputType="text" />
 

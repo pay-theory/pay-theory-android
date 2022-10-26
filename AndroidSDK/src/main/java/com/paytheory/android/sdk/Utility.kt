@@ -58,10 +58,10 @@ class Utility {
     }
 
     private fun enableCash(view: View) {
-        val cashBuyerContact: PayTheoryEditText? = view.findViewById(R.id.cash_buyer_contact)
-        cashBuyerContact!!.visibility = View.VISIBLE
-        val cashBuyer: PayTheoryEditText? = view.findViewById(R.id.cash_buyer)
-        cashBuyer!!.visibility = View.VISIBLE
+        val cashContact: PayTheoryEditText? = view.findViewById(R.id.cashContact)
+        cashContact!!.visibility = View.VISIBLE
+        val cashName: PayTheoryEditText? = view.findViewById(R.id.cashName)
+        cashName!!.visibility = View.VISIBLE
     }
 
     fun enablePaymentFields(
@@ -84,7 +84,7 @@ class Utility {
             enableCash(view)
         }
 
-        if (requireBillingAddress) {
+        if (requireBillingAddress && transactionType != TransactionType.CASH) {
             enableBillingAddress(view)
         }
     }

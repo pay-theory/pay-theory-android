@@ -9,10 +9,11 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
 
 var cashContactFieldValid: Boolean = false
 var cashFieldsValid: Boolean = false
+var cashNameFieldValid: Boolean = false
 
 private fun areFieldsValid(button: PayTheoryButton){
     //check if all card fields are valid
-    cashFieldsValid = cashContactFieldValid
+    cashFieldsValid = cashContactFieldValid && cashNameFieldValid
     //if all card fields are valid enable
     if (cashFieldsValid){
         button.enable()
@@ -23,7 +24,7 @@ private fun areFieldsValid(button: PayTheoryButton){
 /**
  * Text watcher class to validate buyer contact edit text field
  */
-class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) :
+class CashContactTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: PayTheoryEditText? = pt
 
@@ -54,6 +55,43 @@ class CashBuyerContactTextWatcher(pt: PayTheoryEditText, private var submitButto
             ptText!!.error = "Invalid Contact"
         } else {
             cashContactFieldValid = true
+        }
+        areFieldsValid(submitButton)
+    }
+
+}
+
+
+/**
+ * Text watcher class to validate buyer contact edit text field
+ */
+class CashNameTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) :
+    TextWatcher {
+    private var ptText: PayTheoryEditText? = pt
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        // no-op comment in an unused listener function
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        // no-op comment in an unused listener function
+    }
+
+    override fun afterTextChanged(s: Editable) {
+        val isValid = isValid(s.toString())
+        handleButton(isValid)
+    }
+
+    private fun isValid(target: CharSequence): Boolean {
+        return !TextUtils.isEmpty(target)
+    }
+
+    private fun handleButton(valid: Boolean){
+        if (!valid) {
+            cashNameFieldValid = false
+            ptText!!.error = "Invalid Name"
+        } else {
+            cashNameFieldValid = true
         }
         areFieldsValid(submitButton)
     }
