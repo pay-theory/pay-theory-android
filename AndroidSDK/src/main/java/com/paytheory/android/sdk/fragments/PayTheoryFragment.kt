@@ -13,36 +13,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputLayout
-import com.paytheory.android.sdk.Constants
-import com.paytheory.android.sdk.PaymentMethodToken
-import com.paytheory.android.sdk.R
-import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.*
-import com.paytheory.android.sdk.validation.*
+import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.paytheory.android.sdk.watchers.*
 
+private val Utility = Utility()
 private const val PAYTHEORYLAB = "paytheorylab"
 private const val PAYTHEORYSTUDY = "paytheorystudy"
 private const val PAYTHEORY = "paytheory"
 private const val NO_NETWORK_CONNECTION = "No valid network connection"
 private const val INVALID_APIKEY = "Invalid apikey"
 private const val INVALID_AMOUNT = "Invalid amount"
-private const val INVALID_CARD_NUMBER = "Invalid Card Number"
-private const val INVALID_CVV = "Invalid CVV"
-private const val INVALID_EXPIRATION = "Invalid Expiration"
-private const val INVALID_ZIP_CODE = "Invalid Zip Code"
-private const val INVALID_ACCOUNT_NUMBER = "Invalid Account Number"
-private const val INVALID_NAME = "Invalid Name"
-private const val INVALID_CONTACT_INFO = "Invalid Contact Info"
-private const val INVALID_ACCOUNT_TYPE = "Invalid Account Type"
-private const val INVALID_ROUTING_NUMBER = "Invalid Routing Number"
 
 /**
  * PayTheoryFragment populates required transaction input fields.
@@ -80,6 +66,7 @@ class PayTheoryFragment : Fragment() {
     private var payTheoryTransaction: Transaction? = null
     private var payTheoryTokenizeTransaction: PaymentMethodToken? = null
     private var model: ConfigurationViewModel? = null
+    private lateinit var submitButton: PayTheoryButton
 
 
     /**
@@ -127,9 +114,9 @@ class PayTheoryFragment : Fragment() {
      * @param sendReceipt Enable a receipt to be sent to a payor for the transaction
      * @param receiptDescription Add description to receipt for transaction
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(Exception::class)
-    fun configure(
+    fun configureTransact(
+        paymentButton: PayTheoryButton,
         apiKey: String,
         amount: Int,
         transactionType: TransactionType? = TransactionType.CARD,
@@ -159,19 +146,20 @@ class PayTheoryFragment : Fragment() {
             throw IllegalArgumentException(INVALID_APIKEY)
         }
 
-        partner = apiKey.substring(0, apiKey.indexOf('-'))
-        stage = apiKey.substring(apiKey.indexOf('-') + 1, apiKey.indexOf('-', apiKey.indexOf('-') + 1))
+        val partnerName = apiKey.substring(0, apiKey.indexOf('-'))
+        val stageName = apiKey.substring(apiKey.indexOf('-') + 1, apiKey.indexOf('-', apiKey.indexOf('-') + 1))
 
-        if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
+        if (stageName != PAYTHEORYLAB && stageName != PAYTHEORYSTUDY && stageName != PAYTHEORY) {
             throw IllegalArgumentException(INVALID_APIKEY)
         }
         if (amount == 0) {
             throw IllegalArgumentException(INVALID_AMOUNT)
         }
 
-        // Create pay_theory_data object for transaction message
-        payTheoryData = createPayTheoryData(sendReceipt, receiptDescription, paymentParameters, payorId, invoiceId, accountCode, reference)
         // Set private variables
+        //ensure button is disabled before validation
+        this.submitButton = paymentButton
+        this.submitButton.disable()
         this.apiKey = apiKey
         this.amount = amount
         this.transactionType = transactionType
@@ -181,10 +169,21 @@ class PayTheoryFragment : Fragment() {
         this.feeMode = feeMode
         this.metadata = metadata
         this.payorInfo = payorInfo
-        this.payorId = payorId
-        this.partner = partner
-        this.stage = stage
+        this.partner = partnerName
+        this.stage = stageName
         this.constants = Constants(partner!!, stage!!)
+
+        // Set private variables for payTheoryData
+        this.sendReceipt = sendReceipt
+        this.receiptDescription = receiptDescription
+        this.paymentParameters = paymentParameters
+        this.payorId = payorId
+        this.invoiceId = invoiceId
+        this.accountCode = accountCode
+        this.reference = reference
+
+        // Create pay_theory_data object for transaction message
+        payTheoryData = Utility.createPayTheoryData(sendReceipt, receiptDescription, paymentParameters, payorId, invoiceId, accountCode, reference)
 
         model = ViewModelProvider(
             this,
@@ -229,64 +228,16 @@ class PayTheoryFragment : Fragment() {
                 this.payTheoryData
             )
 
-//        payTheoryTransaction!!.init()
-
-        enablePaymentFields(this.transactionType!!, this.requireAccountName!!, this.requireBillingAddress!!)
-
-        val submitButton = requireActivity().findViewById<Button>(R.id.submitButton)
-
-        // credit card fields
-        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-        val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
-
-        val isCardPayment = (ccNumber.visibility == View.VISIBLE
-                && ccCVV.visibility == View.VISIBLE
-                && ccExpiration.visibility == View.VISIBLE
-                && billingZip.visibility == View.VISIBLE)
-
-        // ach fields
-        val (achAccount, achRouting) = getAchFields()
-
-        val achChooser: AppCompatAutoCompleteTextView =
-            requireActivity().findViewById(R.id.ach_type_choice)
-
-        val items = listOf(getString(R.string.checking), getString(R.string.savings))
-
-        val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
-        achChooser.setAdapter(adapter)
-
-        val isBankPayment = (achAccount.visibility == View.VISIBLE
-                && achRouting.visibility == View.VISIBLE)
-
-        // cash fields
-        val cashBuyerContact =
-            requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
-        val cashBuyer = requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer)
-
-        val isCashPayment = (cashBuyerContact.visibility == View.VISIBLE
-                && cashBuyer.visibility == View.VISIBLE)
-
-        // buyer options
-        val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
-        val billingAddress1 =
-            requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_1)
-        val billingAddress2 =
-            requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-        val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
-        val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
-
-        val hasAccountName = accountName.visibility == View.VISIBLE
-
-        val hasBillingAddress = (billingAddress1.visibility == View.VISIBLE
-                && billingAddress2.visibility == View.VISIBLE
-                && billingCity.visibility == View.VISIBLE
-                && billingState.visibility == View.VISIBLE
-                && billingZip.visibility == View.VISIBLE)
+        Utility.enablePaymentFields(this.requireView(),this.transactionType!!, this.requireAccountName!!, this.requireBillingAddress!!)
 
         //if card payment fields are active add text watcher validation
-        if (isCardPayment) {
+        if (this.transactionType==TransactionType.CARD) {
+            // get credit card fields
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
+
             val ccNumberValidation: (PayTheoryEditText) -> CardNumberTextWatcher =
                 { pt -> CardNumberTextWatcher(pt, submitButton)  }
             val cvvNumberValidation: (PayTheoryEditText) -> CVVTextWatcher =
@@ -295,7 +246,6 @@ class PayTheoryFragment : Fragment() {
                 { pt -> ExpirationTextWatcher(pt, submitButton) }
             val zipCodeValidation: (PayTheoryEditText) -> ZipCodeTextWatcher =
                 { pt -> ZipCodeTextWatcher(pt, submitButton) }
-
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
@@ -303,173 +253,152 @@ class PayTheoryFragment : Fragment() {
         }
 
         //if bank payment fields are active add text watcher validation
-        if (isBankPayment) {
+        if (this.transactionType==TransactionType.BANK) {
+            // get ach fields
+            val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
+            val achChooser: AppCompatAutoCompleteTextView =
+                requireActivity().findViewById(R.id.ach_type_choice)
+            val items = listOf(getString(R.string.checking), getString(R.string.savings))
+            val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
+            achChooser.setAdapter(adapter)
+
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
                 { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
-
+            val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
+                { pt -> AccountNumberTextWatcher(pt, submitButton)  }
             achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
+            achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
         }
 
         //if cash payment fields are active add text watcher validation
-        if (isCashPayment) {
-            val cashBuyerContactValidation: (PayTheoryEditText) -> CashBuyerContactTextWatcher =
-                { pt -> CashBuyerContactTextWatcher(pt, submitButton) }
+        if (this.transactionType==TransactionType.CASH) {
+            // get cash fields
+            val cashContact =
+                requireActivity().findViewById<PayTheoryEditText>(R.id.cashContact)
+            val cashName = requireActivity().findViewById<PayTheoryEditText>(R.id.cashName)
 
-            cashBuyerContact.addTextChangedListener(
-                cashBuyerContactValidation(
-                    cashBuyerContact
+            val cashContactValidation: (PayTheoryEditText) -> CashContactTextWatcher =
+                { pt -> CashContactTextWatcher(pt, submitButton) }
+
+            val cashNameValidation: (PayTheoryEditText) -> CashNameTextWatcher =
+                { pt -> CashNameTextWatcher(pt, submitButton) }
+
+            cashContact.addTextChangedListener(
+                cashContactValidation(
+                    cashContact
+                )
+            )
+            cashName.addTextChangedListener(
+                cashNameValidation(
+                    cashName
                 )
             )
         }
+    }
 
-        submitButton.setOnClickListener {
-            //text field validation
-            val fieldsValid = validateFields(isCardPayment, isBankPayment, isCashPayment)
+    fun transact(){
+        if (this.requireAccountName==true) {
+            val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
+            this.accountName = accountName.text.toString()
+        }
+        // Zipcode required for all payments
+        val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
+        //If all billing address fields are visible get all field data
+        if (this.requireBillingAddress==true) {
+            val billingAddress1 =
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+            val billingAddress2 =
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
+            val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
+            val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
 
-            //if payment requested fields are valid
-            if (fieldsValid){
-                if (hasAccountName) {
-                    this.accountName = accountName.text.toString()
-                }
+            this.billingAddress = Address(
+                billingAddress1.text.toString().ifBlank { "" },
+                billingAddress2.text.toString().ifBlank { "" },
+                billingCity.text.toString().ifBlank { "" },
+                billingState.text.toString().ifBlank { "" },
+                billingZip.text.toString().ifBlank { "" },
+                "USA"
+            )
+        // else just get zip code
+        } else {
+            this.billingAddress = Address(
+                "",
+                "",
+                "",
+                "",
+                billingZip.text.toString().ifBlank { "" },
+                "USA"
+            )
+        }
+        //Create card payment
+        if (transactionType==TransactionType.CARD) {
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val expirationMonth = ccExpiration.text.toString().split("/").first()
+            val expirationYear = "20" + ccExpiration.text.toString().split("/").last()
 
-                //If all billing address fields are visible get all field data
-                if (hasBillingAddress) {
-                    billingAddress = Address(
-                        billingAddress1.text.toString().ifBlank { "" },
-                        billingAddress2.text.toString().ifBlank { "" },
-                        billingCity.text.toString().ifBlank { "" },
-                        billingState.text.toString().ifBlank { "" },
-                        billingZip.text.toString().ifBlank { "" },
-                        "USA"
-                    )
+            val payment = Payment(
+                timing = System.currentTimeMillis(),
+                amount = this.amount!!,
+                type = PAYMENT_CARD,
+                name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
+                number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
+                security_code = ccCVV.text.toString(),
+                expiration_month = expirationMonth,
+                expiration_year = expirationYear,
+                fee_mode = this.feeMode,
+                address = this.billingAddress,
+                payorInfo = this.payorInfo
+            )
+            makePayment(payment)
+        }
+        //Create bank paymentToken
+        if (transactionType==TransactionType.BANK) {
+            val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
+            val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
+            val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
+            this.accountName = accountName.text.toString()
+            val accountType = achChooser.text.toString()
 
-                    // else just get zip code
-                } else {
-                    billingAddress = Address(
-                        "",
-                        "",
-                        "",
-                        "",
-                        billingZip.text.toString().ifBlank { "" },
-                        "USA"
-                    )
-                }
+            val payment = Payment(
+                timing = System.currentTimeMillis(),
+                amount = this.amount!!,
+                account_type = accountType,
+                type = BANK_ACCOUNT,
+                name = this.accountName,
+                account_number = achAccount.text.toString(),
+                bank_code = achRouting.text.toString(),
+                address = this.billingAddress,
+                fee_mode = this.feeMode,
+                payorInfo = this.payorInfo
+            )
+            makePayment(payment)
+        }
+        //Create cash payment
+        if (transactionType==TransactionType.CASH) {
+            val cashContact = requireActivity().findViewById<PayTheoryEditText>(R.id.cashContact)
+            val cashName = requireActivity().findViewById<PayTheoryEditText>(R.id.cashName)
 
-                //Create card payment
-                if (isCardPayment) {
+            val contact = cashContact.text.toString()
+            val buyer = cashName.text.toString()
 
-                    val expirationString = ccExpiration.text.toString()
-                    val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = "20" + expirationString.split("/").last()
-
-                    val payment = Payment(
-                        timing = System.currentTimeMillis(),
-                        amount = amount,
-                        type = PAYMENT_CARD,
-                        name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
-                        number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
-                        security_code = ccCVV.text.toString(),
-                        expiration_month = expirationMonth,
-                        expiration_year = expirationYear,
-                        fee_mode = feeMode,
-                        address = billingAddress,
-                        payorInfo = payorInfo
-                    )
-                    makePayment(payment)
-                }
-
-                //Create cash payment
-                if (isCashPayment) {
-                    val contact = cashBuyerContact.text.toString()
-                    val buyer = cashBuyer.text.toString()
-
-                    val payment = Payment(
-                        timing = System.currentTimeMillis(),
-                        amount = amount,
-                        type = CASH,
-                        buyer = buyer,
-                        fee_mode = feeMode,
-                        address = billingAddress,
-                        buyerContact = contact,
-                        payorInfo = payorInfo
-                    )
-                    makePayment(payment)
-                }
-
-                //Create bank paymentToken
-                if (isBankPayment) {
-                    val payment = Payment(
-                        timing = System.currentTimeMillis(),
-                        amount = amount,
-                        account_type = achChooser.text.toString(),
-                        type = BANK_ACCOUNT,
-                        name = this.accountName,
-                        account_number = achAccount.text.toString(),
-                        bank_code = achRouting.text.toString(),
-                        address = billingAddress,
-                        fee_mode = feeMode,
-                        payorInfo = payorInfo
-                    )
-                    makePayment(payment)
-                }
-            } else { // if fieldsValid = false
-                //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID ************************")
-            }
+            val payment = Payment(
+                timing = System.currentTimeMillis(),
+                amount = this.amount!!,
+                type = CASH,
+                buyer = buyer,
+                fee_mode = this.feeMode,
+                address = this.billingAddress,
+                buyerContact = contact,
+                payorInfo = this.payorInfo
+            )
+            makePayment(payment)
         }
     }
 
-    private fun isNetworkAvailable(context: Context) =
-        (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).run {
-            getNetworkCapabilities(activeNetwork)?.run {
-                hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                        || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-            } ?: false
-        }
 
-
-    private fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?): HashMap<Any, Any> {
-        //create pay_theory_data object for host:transfer_part1 action request
-        val payTheoryData = hashMapOf<Any, Any>()
-        //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
-        if (sendReceipt == true) {
-            payTheoryData["send_receipt"] = sendReceipt
-            if (!receiptDescription.isNullOrBlank()){
-                payTheoryData["receipt_description"] = receiptDescription
-            }
-        }
-        // if paymentParameters is given add to pay_theory_data
-        if (!paymentParameters.isNullOrBlank()) {
-            payTheoryData["payment_parameters"] = paymentParameters
-        }
-        // if payorId is given add to pay_theory_data
-        if (!payorId.isNullOrBlank()) {
-            payTheoryData["payor_id"] = payorId
-        }
-        // if invoiceId is given add to pay_theory_data
-        if (!invoiceId.isNullOrBlank()) {
-            payTheoryData["invoice_id"] = invoiceId
-        }
-        // if account_code is given add to pay_theory_data
-        if (!accountCode.isNullOrBlank()) {
-            payTheoryData["account_code"] = accountCode
-        }
-        // if reference is given add to pay_theory_data
-        if (!reference.isNullOrBlank()) {
-            payTheoryData["reference"] = reference
-        }
-
-        this.sendReceipt = sendReceipt
-        this.receiptDescription = receiptDescription
-        this.paymentParameters = paymentParameters
-        this.payorId = payorId
-        this.invoiceId = invoiceId
-        this.accountCode = accountCode
-        this.reference = reference
-
-        return payTheoryData
-    }
 
     /**
      * Create configurations to execute a tokenization of the payment method
@@ -481,8 +410,9 @@ class PayTheoryFragment : Fragment() {
      * @param payorId Optional Pay Theory payorId
      * @param metadata Optional Transaction metadata
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun tokenize(
+    @Throws(Exception::class)
+    fun configureTokenize(
+        tokenizeButton: PayTheoryButton,
         apiKey: String,
         tokenizationType: TokenizationType? = TokenizationType.CARD,
         requireAccountName: Boolean? = false,
@@ -493,10 +423,8 @@ class PayTheoryFragment : Fragment() {
     ) {
         //Check internet
         if (!isNetworkAvailable(this.requireContext())) {
-            println("CHECK!!!!!!!!!!!!! $NO_NETWORK_CONNECTION")
-//            throw IllegalArgumentException(NO_NETWORK_CONNECTION)
+            throw NetworkErrorException(NO_NETWORK_CONNECTION)
         }
-
         // Validation checks for input parameters
         if (apiKey.isBlank()) {
             throw IllegalArgumentException(INVALID_APIKEY)
@@ -505,26 +433,35 @@ class PayTheoryFragment : Fragment() {
             throw IllegalArgumentException(INVALID_APIKEY)
         }
 
-        partner = apiKey.substring(0, apiKey.indexOf('-'))
-        stage = apiKey.substring(apiKey.indexOf('-') + 1, apiKey.indexOf('-', apiKey.indexOf('-') + 1))
+        val partnerName = apiKey.substring(0, apiKey.indexOf('-'))
+        val stageName = apiKey.substring(apiKey.indexOf('-') + 1, apiKey.indexOf('-', apiKey.indexOf('-') + 1))
 
-        if (stage != PAYTHEORYLAB && stage != PAYTHEORYSTUDY && stage != PAYTHEORY) {
+        if (stageName != PAYTHEORYLAB && stageName != PAYTHEORYSTUDY && stageName != PAYTHEORY) {
             throw IllegalArgumentException(INVALID_APIKEY)
         }
+        if (amount == 0) {
+            throw IllegalArgumentException(INVALID_AMOUNT)
+        }
 
-        // Create pay_theory_data object for transaction message
-        payTheoryData = createPayTheoryData(null, null, null, payorId, null, null, null)
         // Set private variables
+        //ensure button is disabled before validation
+        this.submitButton = tokenizeButton
+        this.submitButton.disable()
         this.apiKey = apiKey
         this.tokenizationType = tokenizationType
         this.metadata = metadata
         this.payorInfo = payorInfo
-        this.payorId = payorId
         this.requireAccountName = requireAccountName
         this.requireBillingAddress = requireBillingAddress
-        this.partner = partner
-        this.stage = stage
+        this.partner = partnerName
+        this.stage = stageName
         this.constants = Constants(partner!!, stage!!)
+
+        // Set private variables for payTheoryData
+        this.payorId = payorId
+
+        // Create pay_theory_data object for transaction message
+        payTheoryData = Utility.createPayTheoryData(null, null, null, payorId, null, null, null)
 
         model = ViewModelProvider(
             this,
@@ -535,13 +472,13 @@ class PayTheoryFragment : Fragment() {
         // update Configuration Details object with payment data
         model!!.update(
             ConfigurationDetail(
-                apiKey = apiKey,
-                tokenizationType = tokenizationType,
-                metadata = metadata,
-                payorInfo = payorInfo,
-                payorId = payorId,
-                requireAccountName = requireAccountName,
-                requireBillingAddress = requireBillingAddress
+                apiKey = this.apiKey,
+                tokenizationType = this.tokenizationType,
+                metadata = this.metadata,
+                payorInfo = this.payorInfo,
+                payorId = this.payorId,
+                requireAccountName = this.requireAccountName,
+                requireBillingAddress = this.requireBillingAddress
             )
         )
 
@@ -556,58 +493,17 @@ class PayTheoryFragment : Fragment() {
                 this.payTheoryData
             )
 
-//        payTheoryTokenizeTransaction!!.init()
-
-        enableTokenizationFields(this.tokenizationType!!, this.requireAccountName!!,
-            this.requireBillingAddress!!
-        )
-
-        val submitButton = requireActivity().findViewById<Button>(R.id.submitButton)
-
-        // credit card fields
-        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-        val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
-
-        val isCardPayment = (ccNumber.visibility == View.VISIBLE
-                && ccCVV.visibility == View.VISIBLE
-                && ccExpiration.visibility == View.VISIBLE
-                && billingZip.visibility == View.VISIBLE)
-
-        // ach fields
-        val (achAccount, achRouting) = getAchFields()
-
-        val achChooser: AppCompatAutoCompleteTextView =
-            requireActivity().findViewById(R.id.ach_type_choice)
-
-        val items = listOf(getString(R.string.checking), getString(R.string.savings))
-
-        val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
-        achChooser.setAdapter(adapter)
-
-        val isBankPayment = (achAccount.visibility == View.VISIBLE
-                && achRouting.visibility == View.VISIBLE)
-
-        // buyer options
-        val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
-        val billingAddress1 =
-            requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_1)
-        val billingAddress2 =
-            requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-        val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
-        val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
-
-        val hasAccountName = accountName.visibility == View.VISIBLE
-
-        val hasBillingAddress = (billingAddress1.visibility == View.VISIBLE
-                && billingAddress2.visibility == View.VISIBLE
-                && billingCity.visibility == View.VISIBLE
-                && billingState.visibility == View.VISIBLE
-                && billingZip.visibility == View.VISIBLE)
+        Utility.enableTokenizationFields(this.requireView(), this.tokenizationType!!, this.requireAccountName!!,
+            this.requireBillingAddress!!)
 
         //if card payment fields are active add text watcher validation
-        if (isCardPayment) {
+        if (this.tokenizationType==TokenizationType.CARD) {
+            // get credit card fields
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
+
             val ccNumberValidation: (PayTheoryEditText) -> CardNumberTextWatcher =
                 { pt -> CardNumberTextWatcher(pt, submitButton)  }
             val cvvNumberValidation: (PayTheoryEditText) -> CVVTextWatcher =
@@ -616,7 +512,6 @@ class PayTheoryFragment : Fragment() {
                 { pt -> ExpirationTextWatcher(pt, submitButton) }
             val zipCodeValidation: (PayTheoryEditText) -> ZipCodeTextWatcher =
                 { pt -> ZipCodeTextWatcher(pt, submitButton) }
-
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
@@ -624,259 +519,119 @@ class PayTheoryFragment : Fragment() {
         }
 
         //if bank payment fields are active add text watcher validation
-        if (isBankPayment) {
+        if (this.tokenizationType==TokenizationType.BANK) {
+            // get ach fields
+            val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
+            val achChooser: AppCompatAutoCompleteTextView =
+                requireActivity().findViewById(R.id.ach_type_choice)
+            val items = listOf(getString(R.string.checking), getString(R.string.savings))
+            val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
+            achChooser.setAdapter(adapter)
+
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
                 { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
-
+            val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
+                { pt -> AccountNumberTextWatcher(pt, submitButton)  }
             achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
-        }
-
-        submitButton.setOnClickListener {
-            //text field validation
-            val fieldsValid = validateFields(isCardPayment, isBankPayment, false)
-
-            //if payment requested fields are valid
-            if (fieldsValid){
-                if (hasAccountName) {
-                    this.accountName = accountName.text.toString()
-                }
-                //If all billing address fields are visible get all field data
-                if (hasBillingAddress) {
-                    billingAddress = Address(
-                        billingAddress1.text.toString().ifBlank { "" },
-                        billingAddress2.text.toString().ifBlank { "" },
-                        billingCity.text.toString().ifBlank { "" },
-                        billingState.text.toString().ifBlank { "" },
-                        billingZip.text.toString().ifBlank { "" },
-                        "USA"
-                    )
-                    // else just get zip code
-                } else {
-                    billingAddress = Address(
-                        "",
-                        "",
-                        "",
-                        "",
-                        billingZip.text.toString().ifBlank { "" },
-                        "USA"
-                    )
-                }
-
-                //Create card paymentToken
-                if (isCardPayment) {
-                    val expirationString = ccExpiration.text.toString()
-                    val expirationMonth = expirationString.split("/").first()
-                    val expirationYear = "20" + expirationString.split("/").last()
-                    val paymentToken = PaymentMethodTokenData(
-                        timing = System.currentTimeMillis(),
-                        type = PAYMENT_CARD,
-                        name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
-                        number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
-                        security_code = ccCVV.text.toString(),
-                        expiration_month = expirationMonth,
-                        expiration_year = expirationYear,
-                        address = billingAddress,
-                        payorInfo = payorInfo
-                    )
-                    makePaymentMethodToken(paymentToken)
-                }
-
-                //Create bank paymentToken
-                if (isBankPayment) {
-                    val paymentToken = PaymentMethodTokenData(
-                        timing = System.currentTimeMillis(),
-                        account_type = achChooser.text.toString(),
-                        type = BANK_ACCOUNT,
-                        name = this.accountName,
-                        account_number = achAccount.text.toString(),
-                        bank_code = achRouting.text.toString(),
-                        address = billingAddress,
-                        payorInfo = payorInfo
-                    )
-                    makePaymentMethodToken(paymentToken)
-                }
-            } else { // if fieldsValid = false
-                //TODO - send message to user fields invalid
-                println("INPUT FIELDS ARE INVALID ************************")
-            }
+            achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
         }
     }
 
-    private fun getAchFields(): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_routing_number)
-        return Pair(achAccount, achRouting)
+    fun tokenize(){
+        if (this.requireAccountName==true) {
+            val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
+            this.accountName = accountName.text.toString()
+        }
+        // Zipcode required for all payments
+        val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
+        //If all billing address fields are visible get all field data
+        if (this.requireBillingAddress==true) {
+            val billingAddress1 =
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+            val billingAddress2 =
+                requireActivity().findViewById<PayTheoryEditText>(R.id.billing_address_2)
+            val billingCity = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_city)
+            val billingState = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_state)
+
+            this.billingAddress = Address(
+                billingAddress1.text.toString().ifBlank { "" },
+                billingAddress2.text.toString().ifBlank { "" },
+                billingCity.text.toString().ifBlank { "" },
+                billingState.text.toString().ifBlank { "" },
+                billingZip.text.toString().ifBlank { "" },
+                "USA"
+            )
+            // else just get zip code
+        } else {
+            this.billingAddress = Address(
+                "",
+                "",
+                "",
+                "",
+                billingZip.text.toString().ifBlank { "" },
+                "USA"
+            )
+        }
+
+        //Create card paymentToken
+        if (this.tokenizationType==TokenizationType.CARD) {
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val expirationMonth = ccExpiration.text.toString().split("/").first()
+            val expirationYear = "20" + ccExpiration.text.toString().split("/").last()
+
+            val paymentToken = PaymentMethodTokenData(
+                timing = System.currentTimeMillis(),
+                type = PAYMENT_CARD,
+                name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
+                number = ccNumber.text.toString().replace("\\s".toRegex(), ""),
+                security_code = ccCVV.text.toString(),
+                expiration_month = expirationMonth,
+                expiration_year = expirationYear,
+                address = this.billingAddress,
+                payorInfo = this.payorInfo
+            )
+            makePaymentMethodToken(paymentToken)
+        }
+
+        //Create bank paymentToken
+        if (this.tokenizationType==TokenizationType.BANK) {
+            val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
+            val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
+            val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
+            this.accountName = accountName.text.toString()
+            val accountType = achChooser.text.toString()
+
+            val paymentToken = PaymentMethodTokenData(
+                timing = System.currentTimeMillis(),
+                account_type = accountType,
+                type = BANK_ACCOUNT,
+                name = if (!this.accountName.isNullOrBlank()) this.accountName else "",
+                account_number = achAccount.text.toString(),
+                bank_code = achRouting.text.toString(),
+                address = this.billingAddress,
+                payorInfo = this.payorInfo
+            )
+            makePaymentMethodToken(paymentToken)
+        }
     }
-
-    private fun enablePaymentFields(
-        transactionType: TransactionType,
-        requireAccountName: Boolean,
-        requireBillingAddress: Boolean
-    ) {
-        if (transactionType == TransactionType.BANK) {
-            enableAccountName()
-            enableACH()
-        }
-        if (transactionType == TransactionType.CARD) {
-            if (requireAccountName) {
-                enableAccountName()
-            }
-            enableCC()
-        }
-        if (transactionType == TransactionType.CASH) {
-            enableCash()
-        }
-
-        if (requireBillingAddress) {
-            enableBillingAddress()
-        }
-    }
-
-    private fun enableTokenizationFields(
-        tokenizationType: TokenizationType,
-        requireAccountName: Boolean,
-        requireBillingAddress: Boolean
-    ) {
-        if (tokenizationType == TokenizationType.BANK) {
-            enableAccountName()
-            enableACH()
-        }
-        if (tokenizationType == TokenizationType.CARD) {
-            if (requireAccountName) {
-                enableAccountName()
-            }
-            enableCC()
-        }
-
-        if (requireBillingAddress) {
-            enableBillingAddress()
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePayment(payment: Payment) {
         payTheoryTransaction!!.transact(payment)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun makePaymentMethodToken(paymentMethodTokenData: PaymentMethodTokenData) {
         payTheoryTokenizeTransaction!!.tokenize(paymentMethodTokenData)
     }
-
-    private fun enableCC() {
-        val ccNumber: PayTheoryEditText? = view?.findViewById(R.id.cc_number)
-        ccNumber!!.visibility = View.VISIBLE
-        val ccCVV: PayTheoryEditText? = view?.findViewById(R.id.cc_cvv)
-        ccCVV!!.visibility = View.VISIBLE
-        val ccExpiration: PayTheoryEditText? = view?.findViewById(R.id.cc_expiration)
-        ccExpiration!!.visibility = View.VISIBLE
-        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
-        billingZip!!.visibility = View.VISIBLE
-        val cvvAndExpiration: LinearLayout? = view?.findViewById(R.id.cvv_and_expiration)
-        cvvAndExpiration!!.visibility = View.VISIBLE
-    }
-
-    private fun enableBillingAddress() {
-        val line1: PayTheoryEditText? = view?.findViewById(R.id.billing_address_1)
-        line1!!.visibility = View.VISIBLE
-        val line2: PayTheoryEditText? = view?.findViewById(R.id.billing_address_2)
-        line2!!.visibility = View.VISIBLE
-        val city: PayTheoryEditText? = view?.findViewById(R.id.billing_city)
-        city!!.visibility = View.VISIBLE
-        val state: PayTheoryEditText? = view?.findViewById(R.id.billing_state)
-        state!!.visibility = View.VISIBLE
-        val billingZip: PayTheoryEditText? = view?.findViewById(R.id.billing_zip)
-        billingZip!!.visibility = View.VISIBLE
-    }
-
-    private fun enableAccountName() {
-        val accountName: PayTheoryEditText? = view?.findViewById(R.id.account_name)
-        accountName!!.visibility = View.VISIBLE
-    }
-
-    private fun enableACH() {
-        val achAccount: PayTheoryEditText? = view?.findViewById(R.id.ach_account_number)
-        achAccount!!.visibility = View.VISIBLE
-        val achRouting: PayTheoryEditText? = view?.findViewById(R.id.ach_routing_number)
-        achRouting!!.visibility = View.VISIBLE
-        val achChoice: TextInputLayout? = view?.findViewById(R.id.ach_type_choice_layout)
-        achChoice!!.visibility = View.VISIBLE
-    }
-
-    private fun enableCash() {
-        val cashBuyerContact: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer_contact)
-        cashBuyerContact!!.visibility = View.VISIBLE
-        val cashBuyer: PayTheoryEditText? = view?.findViewById(R.id.cash_buyer)
-        cashBuyer!!.visibility = View.VISIBLE
-    }
-
-    private fun validateFields(
-        isCardPayment: Boolean,
-        isBankPayment: Boolean,
-        isCashPayment: Boolean
-    ): Boolean {
-
-        //If transaction is card payment validate card fields
-        if (isCardPayment) {
-            //Required zipcode field
-            val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
-            //card fields
-            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-            return if (ccNumber.text.isNullOrBlank() || !ccNumber.error.isNullOrBlank()) {
-                ccNumber.error = INVALID_CARD_NUMBER
-                false
-            } else if (ccCVV.text.isNullOrBlank() || !ccCVV.error.isNullOrBlank()) {
-                ccCVV.error = INVALID_CVV
-                false
-            } else if (ccExpiration.text.isNullOrBlank() || !ccExpiration.error.isNullOrBlank() || ccExpiration.text.toString().length != 5) {
-                ccExpiration.error = INVALID_EXPIRATION
-                false
-            } else if (billingZip.text.isNullOrBlank() || !billingZip.error.isNullOrBlank()) {
-                billingZip.error = INVALID_ZIP_CODE
-                false
-            } else {
-                true
-            }
-        }
-
-        if (isBankPayment) {
-            //Bank fields
-            val achAccount = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_account_number)
-            val achRouting = requireActivity().findViewById<PayTheoryEditText>(R.id.ach_routing_number)
-            val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
-
-            return if (achAccount.text.isNullOrBlank() || !achAccount.error.isNullOrBlank()) {
-                achAccount.error = INVALID_ACCOUNT_NUMBER
-                false
-            } else if (achRouting.text.isNullOrBlank() || !achRouting.error.isNullOrBlank() || achRouting.text.toString().length != 9) {
-                achRouting.error = INVALID_ROUTING_NUMBER
-                false
-            } else if (achChooser.text.toString() != "Checking" && achChooser.text.toString() != "Savings") {
-                achChooser.error = INVALID_ACCOUNT_TYPE
-                false
-            } else {
-                true
-            }
-        }
-
-        if (isCashPayment) {
-            // cash fields
-            val cashBuyerContact =
-                requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer_contact)
-            val cashBuyer = requireActivity().findViewById<PayTheoryEditText>(R.id.cash_buyer)
-            return if (cashBuyerContact.text.isNullOrBlank() || !cashBuyerContact.error.isNullOrBlank()) {
-                cashBuyerContact.error = INVALID_CONTACT_INFO
-                false
-            } else if (cashBuyer.text.isNullOrBlank() || !cashBuyer.error.isNullOrBlank()) {
-                cashBuyer.error = INVALID_NAME
-                false
-            } else {
-                true
-            }
-        }
-        // If payment is not CARD BANK or CASH
-        return false
-    }
 }
+
+
+
+private fun isNetworkAvailable(context: Context) =
+    (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).run {
+        getNetworkCapabilities(activeNetwork)?.run {
+            hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                    || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        } ?: false
+    }

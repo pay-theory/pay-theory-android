@@ -147,12 +147,12 @@ val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payThe
 Configure PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
-payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
+payTheoryFragment.transact(apiKey = apiKey, amount = 1000)
 ```
 
 ## Additional Configurations
 
-Configurations are modified inside `payTheoryFragment.configure()` or `payTheoryFragment.tokenize()` methods.
+Configurations are modified inside `payTheoryFragment.transact()` or `payTheoryFragment.tokenize()` methods.
 
 *Note if any configurations are incorrectly set PayTheoryFragment will throw IllegalArgumentException*
 *Note if the device's network connection is not available PayTheoryFragment will throw NetworkErrorException*
@@ -265,7 +265,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
     "courseId" to "course_1859034"
 )
 
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     metadata = metadata
@@ -294,7 +294,7 @@ val payorInfo = PayorInfo(
         "USA")
 )
 
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     payorInfo = payorInfo
@@ -309,7 +309,7 @@ Optionally set the payor id
 
 ```Kotlin
 //set payor id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     payorId = "PAYOR_ID"
@@ -324,7 +324,7 @@ Optionally set the account code
 
 ```Kotlin
 //set account code
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     accountCode = "ACCOUNT_CODE"
@@ -339,7 +339,7 @@ Optionally set the reference
 
 ```Kotlin
 //set reference
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     reference = "REFERENCE"
@@ -354,7 +354,7 @@ Optionally set payment parameters
 
 ```Kotlin
 //set payment parameter
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     paymentParameters = "PAYMENT_PARAMETERS"
@@ -369,7 +369,7 @@ Optionally set an invoice id
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     invoiceId = "INVOICE_ID"
@@ -385,7 +385,7 @@ Optionally enable receipts
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     sendReceipt = true,
@@ -395,7 +395,7 @@ payTheoryFragment.configure(
 
 ### Example Configuration
 
-Here is an example on how to use PayTheoryFragment class method configure():
+Here is an example on how to use PayTheoryFragment class method transact():
 
 ```Kotlin
 
@@ -422,7 +422,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
 
 try {
     //PayTheoryFragment configuration for card payments
-    payTheoryFragment.configure(
+    payTheoryFragment.transact(
         apiKey = apiKey,
         amount = 1000,
         transactionType = TransactionType.CARD,
