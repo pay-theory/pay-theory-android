@@ -7,7 +7,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.paytheory'
-    PUBLISH_VERSION = '2.7.2'
+    PUBLISH_VERSION = '2.8.0'
     PUBLISH_ARTIFACT_ID = 'pay-theory-android'
     PUBLISH_DESCRIPTION = 'Pay Theory Android SDK'
     PUBLISH_URL = 'https://github.com/pay-theory/pay-theory-android'
