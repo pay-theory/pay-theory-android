@@ -10,7 +10,17 @@ import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.*
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
+/**
+ * Contains utility functions for pay theory transactions
+ * handles enabling fields based on request types
+ * creates payTheoryData object for requests
+ * NOT FOR PUBLIC SDK USE
+ */
 class Utility {
+
+    /**
+     * Retrieves bank account and routing fields
+     */
     fun getAchFields(activity: Activity): Pair<PayTheoryEditText, PayTheoryEditText> {
         val achAccount = activity.findViewById<PayTheoryEditText>(R.id.ach_account_number)
         val achRouting = activity.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
@@ -64,6 +74,9 @@ class Utility {
         cashName!!.visibility = View.VISIBLE
     }
 
+    /**
+     * Enables payment fields based on transaction type
+     */
     fun enablePaymentFields(
         view: View,
         transactionType: TransactionType,
@@ -89,6 +102,9 @@ class Utility {
         }
     }
 
+    /**
+     * Enables tokenization fields based on tokenization type
+     */
     fun enableTokenizationFields(
         view: View,
         tokenizationType: TokenizationType,
@@ -111,6 +127,9 @@ class Utility {
         }
     }
 
+    /**
+     * Creates payTheoryData object for transfer requests
+     */
     fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
