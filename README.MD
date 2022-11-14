@@ -8,33 +8,11 @@ Pay Theory's Android SDK is available for Android SDK >= 26
 
 Register your app in Pay Theory's merchant portal to use Pay Theory Android SDK
 
-![App Registration](https://assets.paytheory.com/android/android-registration.png)
-
 For each mobile app, you want to register
 
-- enter SHA-256 digest of release signing key
-- enter SHA-256 digest of debug signing key
 - enter your application package name
 
-### Find signing key digest
-
-You can find you signing key digests using Android Studio
-
-![Open Gradle](https://assets.paytheory.com/android/open-gradle)
-
-In upper right corner of Android Studio click on Gradle
-
-![Signing Report](https://assets.paytheory.com/android/signing-report)
-
-Select Signing Report
-
-![Run Report](https://assets.paytheory.com/android/run-report)
-
-Right-click and choose run
-
-![SHA-256](https://assets.paytheory.com/android/sha-256)
-
-Copy your SHA-256 digest
+- enter your application description
 
 ## Installation
 
@@ -55,7 +33,7 @@ buildscript {
 
 ```kotlin
 dependencies {
-  implementation 'com.paytheory:pay-theory-android:2.7.2'
+  implementation 'com.paytheory:pay-theory-android:2.8.0'
 }
 ```
 
@@ -147,12 +125,12 @@ val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payThe
 Configure PayTheoryFragment inside your `onCreate` method.
 
 ```Kotlin
-payTheoryFragment.configure(apiKey = apiKey, amount = 1000)
+payTheoryFragment.transact(apiKey = apiKey, amount = 1000)
 ```
 
 ## Additional Configurations
 
-Configurations are modified inside `payTheoryFragment.configure()` or `payTheoryFragment.tokenize()` methods.
+Configurations are modified inside `payTheoryFragment.transact()` or `payTheoryFragment.tokenize()` methods.
 
 *Note if any configurations are incorrectly set PayTheoryFragment will throw IllegalArgumentException*
 *Note if the device's network connection is not available PayTheoryFragment will throw NetworkErrorException*
@@ -265,7 +243,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
     "courseId" to "course_1859034"
 )
 
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     metadata = metadata
@@ -294,7 +272,7 @@ val payorInfo = PayorInfo(
         "USA")
 )
 
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     payorInfo = payorInfo
@@ -309,7 +287,7 @@ Optionally set the payor id
 
 ```Kotlin
 //set payor id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     payorId = "PAYOR_ID"
@@ -324,7 +302,7 @@ Optionally set the account code
 
 ```Kotlin
 //set account code
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     accountCode = "ACCOUNT_CODE"
@@ -339,7 +317,7 @@ Optionally set the reference
 
 ```Kotlin
 //set reference
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     reference = "REFERENCE"
@@ -354,7 +332,7 @@ Optionally set payment parameters
 
 ```Kotlin
 //set payment parameter
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     paymentParameters = "PAYMENT_PARAMETERS"
@@ -369,7 +347,7 @@ Optionally set an invoice id
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     invoiceId = "INVOICE_ID"
@@ -385,7 +363,7 @@ Optionally enable receipts
 
 ```Kotlin
 //set invoice id
-payTheoryFragment.configure(
+payTheoryFragment.transact(
     apiKey = "API_KEY",
     amount = 1000,
     sendReceipt = true,
@@ -395,7 +373,7 @@ payTheoryFragment.configure(
 
 ### Example Configuration
 
-Here is an example on how to use PayTheoryFragment class method configure():
+Here is an example on how to use PayTheoryFragment class method transact():
 
 ```Kotlin
 
@@ -422,7 +400,7 @@ val metadata: HashMap<Any,Any> = hashMapOf(
 
 try {
     //PayTheoryFragment configuration for card payments
-    payTheoryFragment.configure(
+    payTheoryFragment.transact(
         apiKey = apiKey,
         amount = 1000,
         transactionType = TransactionType.CARD,

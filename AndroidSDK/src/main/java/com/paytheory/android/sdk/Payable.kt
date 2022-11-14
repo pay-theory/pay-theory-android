@@ -165,7 +165,7 @@ interface Payable {
     fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
     /**
      * function to handle a confirmation when requested in transaction configuration
-     * @param confirmationMessage payment confirmation step, enabled using PayTheoryFragment's configure function confirmation set to true
+     * @param confirmationMessage payment confirmation step, enabled using PayTheoryFragment's transact function confirmation set to true
      */
     fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction)
     /**
