@@ -296,6 +296,9 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
+    /**
+     * This function is used to submit a payment to Pay Theory or generate a barcode.
+     */
     fun transact(){
         if (this.requireAccountName==true) {
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
@@ -537,6 +540,9 @@ class PayTheoryFragment : Fragment() {
         }
     }
 
+    /**
+     * This function is used to tokenize a card or bank account.
+     */
     fun tokenize(){
         if (this.requireAccountName==true) {
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)

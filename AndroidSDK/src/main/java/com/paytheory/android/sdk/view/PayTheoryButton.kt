@@ -4,6 +4,9 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatButton
 
+/**
+ * PayTheoryButton Class is used to create a submit button to handle the transact or tokenize function
+ */
 class PayTheoryButton: AppCompatButton {
 
     constructor(context: Context) : super(context){
@@ -29,10 +32,16 @@ class PayTheoryButton: AppCompatButton {
         this.isEnabled = false
     }
 
+    /**
+     * Function to disable use PayTheoryButton
+     */
     fun disable(){
         this.isEnabled = false
     }
 
+    /**
+     * Function to enable use PayTheoryButton
+     */
     fun enable(){
         this.isEnabled = true
     }
