@@ -26,7 +26,7 @@ class WebSocketListener(private val transaction: Transaction?, private val payme
     override fun onOpen(webSocket: WebSocket, response: Response) {
         if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
-                println("Pay Theory Connected")
+                println("PAYTHEORY - onOpen - Pay Theory Connected")
                 socketEventChannel.send(SocketUpdate("connected to socket"))
             }
         }
@@ -44,10 +44,10 @@ class WebSocketListener(private val transaction: Transaction?, private val payme
             GlobalScope.launch {
                 try {
                     socketEventChannel.send(SocketUpdate(exception = SocketAbortedException()))
-                    println("Pay Theory Disconnected")
+                    println("PAYTHEORY - onClosing - Pay Theory Disconnected")
                 } catch (e: ClosedSendChannelException) {
                     val error = e.message.toString()
-                    println(error)
+                    println("PAYTHEORY - onClosing - error - $error")
 ////                     When successful payment is made "Channel was closed" message comes in
 //                    if (error.contains("Channel was closed")){
 //                        if (transaction != null){ // error for transaction request

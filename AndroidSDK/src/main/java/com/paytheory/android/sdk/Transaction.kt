@@ -101,7 +101,7 @@ class Transaction(
      */
     fun resetSocket() {
         if (resetCounter < 50) {
-//            println("Reconnect Counter: $resetCounter")
+            println("Reconnect Counter: $resetCounter")
             resetCounter++
             ptTokenApiCall(this.context)
         } else {
@@ -366,5 +366,11 @@ class Transaction(
         if (webSocketInteractor != null) {
             webSocketInteractor!!.stopSocket()
         }
+    }
+
+    fun reconnect() {
+        disconnect()
+        println("PAYTHEORY - reconnect - Disconnected, attempting to reconnect...")
+        resetSocket()
     }
 }

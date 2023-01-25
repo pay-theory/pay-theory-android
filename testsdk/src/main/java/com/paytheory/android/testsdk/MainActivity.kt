@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity(), Payable {
         noBtn.setOnClickListener {
             confirmationPopUp!!.dismiss()
             showToast("payment canceled")
-            transaction.disconnect()
+            transaction.reconnect()
         }
 
         runOnUiThread {
