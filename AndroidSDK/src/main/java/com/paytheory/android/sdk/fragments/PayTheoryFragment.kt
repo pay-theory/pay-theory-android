@@ -134,7 +134,7 @@ class PayTheoryFragment : Fragment() {
         sendReceipt: Boolean? = false,
         receiptDescription: String? = null
     ) {
-        //Check internet
+        // Check network connection
         if (!isNetworkAvailable(this.requireContext())) {
             throw NetworkErrorException(NO_NETWORK_CONNECTION)
         }
@@ -256,16 +256,20 @@ class PayTheoryFragment : Fragment() {
         if (this.transactionType==TransactionType.BANK) {
             // get ach fields
             val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
-            val achChooser: AppCompatAutoCompleteTextView =
+            val achSelector: AppCompatAutoCompleteTextView =
                 requireActivity().findViewById(R.id.ach_type_choice)
             val items = listOf(getString(R.string.checking), getString(R.string.savings))
             val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
-            achChooser.setAdapter(adapter)
+            achSelector.setAdapter(adapter)
 
+            val bankSelectorValidation: (AppCompatAutoCompleteTextView) -> BankAccountTypeWatcher =
+                { pt -> BankAccountTypeWatcher(pt, submitButton)  }
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
                 { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
             val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
                 { pt -> AccountNumberTextWatcher(pt, submitButton)  }
+
+            achSelector.addTextChangedListener(bankSelectorValidation(achSelector))
             achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
             achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
         }
@@ -359,11 +363,11 @@ class PayTheoryFragment : Fragment() {
         }
         //Create bank paymentToken
         if (transactionType==TransactionType.BANK) {
-            val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
+            val achSelector: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
             val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
             this.accountName = accountName.text.toString()
-            val accountType = achChooser.text.toString()
+            val accountType = achSelector.text.toString()
 
             val payment = Payment(
                 timing = System.currentTimeMillis(),
@@ -525,11 +529,11 @@ class PayTheoryFragment : Fragment() {
         if (this.tokenizationType==TokenizationType.BANK) {
             // get ach fields
             val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
-            val achChooser: AppCompatAutoCompleteTextView =
+            val achSelector: AppCompatAutoCompleteTextView =
                 requireActivity().findViewById(R.id.ach_type_choice)
             val items = listOf(getString(R.string.checking), getString(R.string.savings))
             val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
-            achChooser.setAdapter(adapter)
+            achSelector.setAdapter(adapter)
 
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
                 { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
@@ -603,11 +607,11 @@ class PayTheoryFragment : Fragment() {
 
         //Create bank paymentToken
         if (this.tokenizationType==TokenizationType.BANK) {
-            val achChooser: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
+            val achSelector: AppCompatAutoCompleteTextView = requireActivity().findViewById(R.id.ach_type_choice)
             val (achAccount, achRouting) = Utility.getAchFields(this.requireActivity())
             val accountName = requireActivity().findViewById<PayTheoryEditText>(R.id.account_name)
             this.accountName = accountName.text.toString()
-            val accountType = achChooser.text.toString()
+            val accountType = achSelector.text.toString()
 
             val paymentToken = PaymentMethodTokenData(
                 timing = System.currentTimeMillis(),

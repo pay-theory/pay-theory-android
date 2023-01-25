@@ -125,19 +125,23 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         if (transaction.context is Payable) when (transactionResult.state) {
             "SUCCEEDED" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                println("PAYTHEORY - completeTransaction - successfulTransactionResult - $successfulTransactionResult")
                 transaction.context.handleSuccess(successfulTransactionResult)
             }
             "PENDING" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                println("PAYTHEORY - completeTransaction - successfulTransactionResult - $successfulTransactionResult")
                 transaction.context.handleSuccess(successfulTransactionResult)
             }
             "FAILURE" -> {
                 val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
+                println("PAYTHEORY - completeTransaction - failedTransactionResult - $failedTransactionResult")
                 transaction.context.handleFailure(failedTransactionResult)
             }
 
         else -> {
             val errorResponse = Error("Error retrieving payment confirmation")
+            println("PAYTHEORY - completeTransaction - errorResponse - $errorResponse - transactionResult - $transactionResult")
             transaction.context.handleError(errorResponse)
         }
         }

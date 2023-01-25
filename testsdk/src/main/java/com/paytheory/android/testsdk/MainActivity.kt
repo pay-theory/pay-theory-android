@@ -11,7 +11,6 @@ import android.widget.TextView
 import android.widget.Toast
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.FeeMode
-import com.paytheory.android.sdk.configuration.TokenizationType
 import com.paytheory.android.sdk.configuration.TransactionType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
@@ -78,7 +77,7 @@ class MainActivity : AppCompatActivity(), Payable {
                 paymentButton = submitButton,
                 apiKey = apiKey,
                 amount = 10000,
-                transactionType = TransactionType.CARD,
+                transactionType = TransactionType.BANK,
                 requireAccountName = false,
                 requireBillingAddress = false,
                 confirmation = true,
@@ -94,7 +93,7 @@ class MainActivity : AppCompatActivity(), Payable {
                 //payorId = "TEST_PAYOR_ID"
             )
 
-            // START TRANSACTION ON SUBMIT BUTTON
+            // TRANSACT ON SUBMIT BUTTON
             submitButton.setOnClickListener{
                 payTheoryFragment.transact()
             }
@@ -110,7 +109,7 @@ class MainActivity : AppCompatActivity(), Payable {
 //                metadata = metadata
 //            )
 //
-//            // START TOKENIZATION ON SUBMIT BUTTON
+//            // TOKENIZE ON SUBMIT BUTTON
 //            submitButton.setOnClickListener{
 //                payTheoryFragment.tokenize()
 //            }
@@ -120,7 +119,7 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    //DEMO - function to display a message
+    // GENERIC FUNCTION TO DISPLAY A MESSAGE
     private fun showToast(message: String?) {
         runOnUiThread {
             Toast.makeText(
@@ -130,10 +129,8 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-    //Inherited from Payable interface
+    // SUCCESSFUL CARD AND BANK PAYMENT RESPONSE HANDLER
     override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
-        println(successfulTransactionResult)
-//        showToast("Transaction Complete on Account XXXX${successfulTransactionResult.lastFour}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = successfulTransactionResult.toString()
@@ -145,9 +142,8 @@ class MainActivity : AppCompatActivity(), Payable {
         runOnUiThread { messagePopUp!!.show() }
     }
 
+    // FAILURE RESPONSE HANDLER
     override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
-        println(failedTransactionResult)
-//        showToast("Payment Failed on Account XXXX${failedTransactionResult.lastFour}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = failedTransactionResult.toString()
@@ -159,21 +155,21 @@ class MainActivity : AppCompatActivity(), Payable {
         runOnUiThread { messagePopUp!!.show() }
     }
 
+    // SYSTEM ERROR RESPONSE HANDLER
     override fun handleError(error: Error) {
         System.err.println(error)
     }
 
-    //DEMO - function to display payment confirmation message to user
+    // GENERIC FUNCTION TO DISPLAY THE CONFIRMATION MESSAGE POP UP
     override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
-//        showToast(confirmationMessage.toString())
         val confirmationTextView = confirmationPopUp!!.findViewById(R.id.popup_window_text) as TextView
         confirmationTextView.text = if (confirmationMessage.brand == "ACH") {
-            "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
-                    " including the fee of ${getFormattedAmount(confirmationMessage.fee)} " +
+            "Are you sure you want to make a payment of ${formatDollarAmount(confirmationMessage.amount)}" +
+                    " including the fee of ${formatDollarAmount(confirmationMessage.fee)} " +
                     "on account ending in ${confirmationMessage.lastFour}?"
         } else {
-            "Are you sure you want to make a payment of ${getFormattedAmount(confirmationMessage.amount)}" +
-                    " including the fee of ${getFormattedAmount(confirmationMessage.fee)} " +
+            "Are you sure you want to make a payment of ${formatDollarAmount(confirmationMessage.amount)}" +
+                    " including the fee of ${formatDollarAmount(confirmationMessage.fee)} " +
                     "on ${confirmationMessage.brand} account beginning with ${confirmationMessage.firstSix}?"
         }
 
@@ -196,10 +192,9 @@ class MainActivity : AppCompatActivity(), Payable {
         }
     }
 
-
+    // SUCCESSFUL BARCODE RESPONSE HANDLER
     override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
         println(barcodeResult)
-//        showToast("Barcode Request Successful $barcodeResult")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = barcodeResult.toString()
@@ -211,9 +206,9 @@ class MainActivity : AppCompatActivity(), Payable {
         runOnUiThread { messagePopUp!!.show() }
     }
 
+    // SUCCESSFUL TOKENIZATION RESPONSE HANDLER
     override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
         println(paymentMethodToken)
-//        showToast("Payment Method Tokenization Complete: ${paymentMethodToken.paymentMethodId}")
         val messageTextView = messagePopUp!!.findViewById(R.id.popup_window_text) as TextView
         val okBtn = messagePopUp!!.findViewById(R.id.btn_ok) as Button
         messageTextView.text = paymentMethodToken.toString()
@@ -225,8 +220,8 @@ class MainActivity : AppCompatActivity(), Payable {
         runOnUiThread { messagePopUp!!.show() }
     }
 
-    //DEMO - function to format dollar amount
-    private fun getFormattedAmount(amount: String): String {
+    // GENERIC FUNCTION TO FORMAT DOLLAR AMOUNT
+    private fun formatDollarAmount(amount: String): String {
         val centsString: String?
         val cents = amount.toInt() % 100
         val dollars = (amount.toInt() - cents) / 100
