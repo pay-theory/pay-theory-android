@@ -17,11 +17,12 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 
 /**
- * Demo Activity class using Pay Theory Android SDK
+ * Example Activity class using Pay Theory Android SDK
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "MY_API_KEY"
+    // PAY THEORY API KEY
+    private val apiKey = "evolve-paytheorylab-d65599d803b25e048140dcd8b21455db"
     private var confirmationPopUp : Dialog? = null
     private var messagePopUp : Dialog? = null
 
@@ -29,32 +30,32 @@ class MainActivity : AppCompatActivity(), Payable {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //DEMO - Create confirmation view
+        // CREATE CONFIRMATION POP UP VIEW
         confirmationPopUp = Dialog(this)
         confirmationPopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         confirmationPopUp!!.setCancelable(false)
         confirmationPopUp!!.setContentView(R.layout.confirmation_layout)
         confirmationPopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        //DEMO - Create error view
+        // CREATE MESSAGE POP UP VIEW
         messagePopUp = Dialog(this)
         messagePopUp!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         messagePopUp!!.setCancelable(false)
         messagePopUp!!.setContentView(R.layout.message_layout)
         messagePopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        //Create submit button
+        // CREATE SUBMIT BUTTON TO INITIALIZE THE TRANSACTION
         val submitButton = this.findViewById(R.id.submit) as PayTheoryButton
 
-        //Create PayTheoryFragment
+        // CREATE PayTheoryFragment
         val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
 
-        //Set optional PayorInfo configuration
+        // OPTIONAL PAYOR INFO FOR A TRANSACTION
         val payorInfo = PayorInfo(
-            "John",
-            "Doe",
+            "Abel",
+            "Collins",
             "abel@paytheory.com",
-            "5135555555",
+            "5131231234",
             Address(
                 "10549 Reading Rd",
                 "Apt 1",
@@ -65,59 +66,54 @@ class MainActivity : AppCompatActivity(), Payable {
             )
         )
 
-        //Set optional metadata configuration
+        // OPTIONAL METADATA FOR A TRANSACTION
         val metadata: HashMap<Any,Any> = hashMapOf(
             "studentId" to "student_1859034",
             "courseId" to "course_1859034"
         )
 
-        //Keep in try catch for any additional errors
         try {
-//            payTheoryFragment.configureTransact(
-//                paymentButton = submitButton,
-//                apiKey = apiKey,
-//                amount = 5050,
-//                transactionType = TransactionType.CASH,
-//                requireAccountName = true,
-//                requireBillingAddress = true,
-//                confirmation = true,
-//                feeMode = FeeMode.INTERCHANGE,
-//                metadata = metadata,
-//                payorInfo = payorInfo,
-//                accountCode = "Test Account Code",
-//                reference = "Test Reference",
-//                sendReceipt = true,
-//                receiptDescription = "Android Payment Receipt Test",
-//                //paymentParameters = "TEST_PARAMS",
-//                //invoiceId = "TEST_INVOICE",
-//                //payorId = "TEST_PAYOR_ID"
-//            )
-//
-//            submitButton.setOnClickListener{
-//                payTheoryFragment.transact()
-//            }
-
-
-
-
-            //PayTheoryFragment tokenize for card and bank payment methods
-            payTheoryFragment.configureTokenize(
-                tokenizeButton = submitButton,
+            // CONFIGURE TRANSACTION
+            payTheoryFragment.configureTransact(
+                paymentButton = submitButton,
                 apiKey = apiKey,
-                tokenizationType = TokenizationType.CARD,
+                amount = 10000,
+                transactionType = TransactionType.CARD,
                 requireAccountName = false,
                 requireBillingAddress = false,
+                confirmation = true,
+                feeMode = FeeMode.SERVICE_FEE,
+                metadata = metadata,
                 payorInfo = payorInfo,
-                metadata = metadata
+                accountCode = "Test Account Code",
+                reference = "Test Reference",
+                sendReceipt = true,
+                receiptDescription = "Android Payment Receipt Test",
+                //paymentParameters = "TEST_PARAMS",
+                //invoiceId = "TEST_INVOICE",
+                //payorId = "TEST_PAYOR_ID"
             )
 
-
+            // START TRANSACTION ON SUBMIT BUTTON
             submitButton.setOnClickListener{
-                payTheoryFragment.tokenize()
+                payTheoryFragment.transact()
             }
 
-
-
+//            // CONFIGURE TOKENIZATION
+//            payTheoryFragment.configureTokenize(
+//                tokenizeButton = submitButton,
+//                apiKey = apiKey,
+//                tokenizationType = TokenizationType.CARD,
+//                requireAccountName = false,
+//                requireBillingAddress = false,
+//                payorInfo = payorInfo,
+//                metadata = metadata
+//            )
+//
+//            // START TOKENIZATION ON SUBMIT BUTTON
+//            submitButton.setOnClickListener{
+//                payTheoryFragment.tokenize()
+//            }
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -242,24 +238,3 @@ class MainActivity : AppCompatActivity(), Payable {
         return "$$dollars.${centsString}"
     }
 }
-
-
-
-//payTheoryFragment.transact(
-//apiKey = apiKey,
-//amount = 5050,
-//transactionType = TransactionType.CARD,
-//requireAccountName = false,
-//requireBillingAddress = false,
-//confirmation = false,
-//feeMode = FeeMode.INTERCHANGE,
-//metadata = metadata,
-//payorInfo = payorInfo,
-//accountCode = "Test Account Code",
-//reference = "Test Reference",
-//sendReceipt = true,
-//receiptDescription = "Android Payment Receipt Test",
-//paymentParameters = "TEST_PARAMS",
-//invoiceId = "TEST_INVOICE",
-//payorId = "TEST_PAYOR_ID"
-//)
