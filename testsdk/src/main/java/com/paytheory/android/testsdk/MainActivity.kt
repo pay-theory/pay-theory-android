@@ -73,48 +73,48 @@ class MainActivity : AppCompatActivity(), Payable {
 
         //Keep in try catch for any additional errors
         try {
-//            payTheoryFragment.configureTransact(
-//                paymentButton = submitButton,
-//                apiKey = apiKey,
-//                amount = 5050,
-//                transactionType = TransactionType.CASH,
-//                requireAccountName = true,
-//                requireBillingAddress = true,
-//                confirmation = true,
-//                feeMode = FeeMode.MERCHANT_FEE,
-//                metadata = metadata,
-//                payorInfo = payorInfo,
-//                accountCode = "Test Account Code",
-//                reference = "Test Reference",
-//                sendReceipt = true,
-//                receiptDescription = "Android Payment Receipt Test",
-//                //paymentParameters = "TEST_PARAMS",
-//                //invoiceId = "TEST_INVOICE",
-//                //payorId = "TEST_PAYOR_ID"
-//            )
-//
-//            submitButton.setOnClickListener{
-//                payTheoryFragment.transact()
-//            }
+            payTheoryFragment.configureTransact(
+                paymentButton = submitButton,
+                apiKey = apiKey,
+                amount = 15000,
+                transactionType = TransactionType.CARD,
+                requireAccountName = true,
+                requireBillingAddress = false,
+                confirmation = true,
+                feeMode = FeeMode.SERVICE_FEE,
+                metadata = metadata,
+                payorInfo = payorInfo,
+                accountCode = "Test Account Code",
+                reference = "Test Reference",
+                sendReceipt = true,
+                receiptDescription = "Android Payment Receipt Test",
+                //paymentParameters = "TEST_PARAMS",
+                //invoiceId = "TEST_INVOICE",
+                //payorId = "TEST_PAYOR_ID"
+            )
+
+            submitButton.setOnClickListener{
+                payTheoryFragment.transact()
+            }
 
 
 
 
             //PayTheoryFragment tokenize for card and bank payment methods
-            payTheoryFragment.configureTokenize(
-                tokenizeButton = submitButton,
-                apiKey = apiKey,
-                tokenizationType = TokenizationType.CARD,
-                requireAccountName = false,
-                requireBillingAddress = false,
-                payorInfo = payorInfo,
-                metadata = metadata
-            )
-
-
-            submitButton.setOnClickListener{
-                payTheoryFragment.tokenize()
-            }
+//            payTheoryFragment.configureTokenize(
+//                tokenizeButton = submitButton,
+//                apiKey = apiKey,
+//                tokenizationType = TokenizationType.CARD,
+//                requireAccountName = false,
+//                requireBillingAddress = false,
+//                payorInfo = payorInfo,
+//                metadata = metadata
+//            )
+//
+//
+//            submitButton.setOnClickListener{
+//                payTheoryFragment.tokenize()
+//            }
 
 
 
