@@ -220,11 +220,11 @@ override fun confirmation(confirmationMessage: ConfirmationMessage, transaction:
 
 Optionally set the fee mode
 
-- By default FeeMode.INTERCHANGE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
+- By default FeeMode.MERCHANT_FEE mode is used, FeeMode.SERVICE_FEE mode is available only when enabled by Pay Theory
 
 ```Kotlin
-//set fee mode as interchange
-feeMode = FeeMode.INTERCHANGE
+//set fee mode as merchant_fee
+feeMode = FeeMode.MERCHANT_FEE
 ```
 
 ```Kotlin

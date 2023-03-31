@@ -20,7 +20,7 @@ enum class TokenizationType {
  * Object that holds the fee mode values
  */
 object FeeMode {
-    const val INTERCHANGE = "interchange"
+    const val MERCHANT_FEE = "merchant_fee"
     const val SERVICE_FEE = "service_fee"
 }
 /**
