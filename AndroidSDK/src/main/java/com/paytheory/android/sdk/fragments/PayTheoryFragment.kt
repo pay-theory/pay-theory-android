@@ -103,7 +103,7 @@ class PayTheoryFragment : Fragment() {
      * @param requireAccountName Enable account name for the transaction
      * @param requireBillingAddress Enable billing address for the transaction
      * @param confirmation: Enable a user confirmation step for the transaction
-     * @param feeMode Pay Theory Fee Mode (FeeMode.INTERCHANGE or FeeMode.SERVICE_FEE)
+     * @param feeMode Pay Theory Fee Mode (FeeMode.MERCHANT_FEE or FeeMode.SERVICE_FEE)
      * @param metadata Optional Transaction metadata
      * @param payorInfo Optional details about the payor
      * @param payorId Optional Pay Theory payorId
@@ -123,7 +123,7 @@ class PayTheoryFragment : Fragment() {
         requireAccountName: Boolean? = false,
         requireBillingAddress: Boolean? = false,
         confirmation: Boolean? = false,
-        feeMode: String? = FeeMode.INTERCHANGE,
+        feeMode: String? = FeeMode.MERCHANT_FEE,
         metadata: HashMap<Any, Any>? = HashMap(),
         payorInfo: PayorInfo? = PayorInfo(),
         payorId: String? = null,
