@@ -239,7 +239,7 @@ data class Payment (
     @SerializedName("expiration_year") val expiration_year: String? = null,
     @SerializedName("expiration_month") val expiration_month: String? = null,
     @SerializedName("address") val address: Address? = null,
-    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.INTERCHANGE,
+    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.MERCHANT_FEE,
     @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
     @SerializedName("buyer") val buyer: String? = null,
     @SerializedName("buyer_contact") val buyerContact: String? = null,
