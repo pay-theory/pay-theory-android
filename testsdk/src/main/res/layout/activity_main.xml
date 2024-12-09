@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <fragment
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/payTheoryFragment"
             android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
             android:layout_width="match_parent"

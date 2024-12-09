@@ -6,7 +6,7 @@ import android.text.TextWatcher
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
 
 var cardFieldValid: Boolean = false
 var expFieldValid: Boolean = false
@@ -217,10 +217,7 @@ class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryB
         val (digits, _) = number
             .partition(Char::isDigit)
 
-        if (digits.length < 3 || digits.length > 4) {
-            return false
-        }
-        return true
+        return !(digits.length < 3 || digits.length > 4)
     }
     private fun handleButton(valid: Boolean){
         if (!valid) {
@@ -271,10 +268,7 @@ class ZipCodeTextWatcher(pt: PayTheoryEditText, private var submitButton: PayThe
         val (digits, _) = number
             .partition(Char::isDigit)
 
-        if (digits.length != 5) {
-            return false
-        }
-        return true
+        return digits.length == 5
     }
     private fun handleButton(valid: Boolean){
         if (!valid) {

@@ -1,6 +1,6 @@
 package com.paytheory.android.sdk.api
-
 import com.google.gson.GsonBuilder
+import com.google.gson.Strictness
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.converter.gson.GsonConverterFactory
@@ -40,7 +40,7 @@ object ApiWorker {
                 mGsonConverter = GsonConverterFactory
                     .create(
                         GsonBuilder()
-                        .setLenient()
+                        .setStrictness(Strictness.LENIENT)
                         .disableHtmlEscaping()
                         .create())
             }

@@ -8,6 +8,7 @@ import android.util.AttributeSet
  * PayTheory Edit Text is an extended EditText class providing a foundation for
  * the different text editors needed
  */
+@Suppress("EmptyMethod")
 open class PayTheoryEditText : androidx.appcompat.widget.AppCompatEditText{
 
     companion object {

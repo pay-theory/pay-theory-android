@@ -5,11 +5,11 @@ import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 
 /**
  * Class that contains functions to create api calls
- * @param _basePath base path for pt token call
+ * @param basePathIn base path for pt token call
  */
-class ApiService(_basePath: String) {
+class ApiService(basePathIn: String) {
 
-    val basePath = _basePath
+    private val basePath: String = basePathIn
 
     /**
      * Function that creates the pt token api call

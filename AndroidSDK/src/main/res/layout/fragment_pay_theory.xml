@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -12,7 +13,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:id="@+id/PayTheoryFragment">
+                    android:id="@+id/PayTheoryFragment"
+                    tools:ignore="UselessParent">
 
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/account_name"

@@ -1,7 +1,7 @@
 package com.paytheory.android.sdk
 
-import Address
-import PayorInfo
+import com.paytheory.android.sdk.data.Address
+import com.paytheory.android.sdk.data.PayorInfo
 import com.google.gson.annotations.SerializedName
 
 /**

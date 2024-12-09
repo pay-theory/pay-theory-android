@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
-    var payTheoryToken: String,
+    private var payTheoryToken: String,
     private val partner: String,
     private val stage: String,
     private val transaction: Transaction?,
@@ -130,7 +130,7 @@ class WebSocketViewModel(
  * Creates WebSocket interactor to start, stop and send messages
  * @param repository WebSocket repository
  */
-class WebsocketInteractor constructor(private val repository: WebsocketRepository) {
+class WebsocketInteractor(private val repository: WebsocketRepository) {
 
     /**
      * Function to close WebSocket
@@ -161,7 +161,7 @@ class WebsocketInteractor constructor(private val repository: WebsocketRepositor
  * Creates WebSocket repository to start, stop and send messages
  * @param webServicesProvider WebSocket web services provider
  */
-class WebsocketRepository constructor(private val webServicesProvider: WebServicesProvider) {
+class WebsocketRepository(private val webServicesProvider: WebServicesProvider) {
 
     /**
      * Function to start WebSocket

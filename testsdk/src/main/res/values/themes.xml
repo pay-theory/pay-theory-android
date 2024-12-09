@@ -19,7 +19,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.PayTheoryLibrary.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.PayTheoryLibrary.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" tools:ignore="UnusedResources" />
 
-    <style name="Theme.PayTheoryLibrary.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.PayTheoryLibrary.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" tools:ignore="UnusedResources" />
 </resources>

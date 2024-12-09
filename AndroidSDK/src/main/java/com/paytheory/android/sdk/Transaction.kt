@@ -1,12 +1,6 @@
 package com.paytheory.android.sdk
 
-import ActionRequest
-import CashRequest
-import Payment
-import PaymentData
-import PaymentMethodData
-import TransferPartOneRequest
-import TransferPartTwoRequest
+import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
@@ -16,15 +10,26 @@ import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
+import com.paytheory.android.sdk.data.ActionRequest
+import com.paytheory.android.sdk.data.CashRequest
+import com.paytheory.android.sdk.data.Payment
+import com.paytheory.android.sdk.data.PaymentData
+import com.paytheory.android.sdk.data.PaymentMethodData
+import com.paytheory.android.sdk.data.TransferPartOneRequest
+import com.paytheory.android.sdk.data.TransferPartTwoRequest
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.reactors.ConnectionReactors
 import com.paytheory.android.sdk.reactors.MessageReactors
-import com.paytheory.android.sdk.websocket.*
+import com.paytheory.android.sdk.websocket.WebServicesProvider
+import com.paytheory.android.sdk.websocket.WebSocketViewModel
+import com.paytheory.android.sdk.websocket.WebsocketInteractor
+import com.paytheory.android.sdk.websocket.WebsocketMessageHandler
+import com.paytheory.android.sdk.websocket.WebsocketRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import java.util.*
+import java.util.Base64
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -41,22 +46,20 @@ class Transaction(
     val feeMode: String,
     private val constants: Constants,
     private val confirmation: Boolean? = false,
-    private val sendReceipt: Boolean? = false,
-    private val receiptDescription: String? = "",
     private val metadata: HashMap<Any, Any>? = hashMapOf(),
     private val payTheoryData: HashMap<Any, Any>? = hashMapOf()
 ) : WebsocketMessageHandler {
-    lateinit var viewModel: WebSocketViewModel
+    private lateinit var viewModel: WebSocketViewModel
     private val googleProjectNumber = 192992826889
     private var originalConfirmation: ConfirmationMessage? = null
     private val headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
-    var queuedRequest: Payment? = null
+    private var queuedRequest: Payment? = null
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
-    var resetCounter = 0
-    var ptResetCounter = 0
+    private var resetCounter = 0
+    private var ptResetCounter = 0
 
     companion object {
         private var messageReactors: MessageReactors? = null
@@ -109,6 +112,7 @@ class Transaction(
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context) {
         val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -174,7 +178,7 @@ class Transaction(
         ptTokenResponse: PTTokenResponse,
         attestationResult: String? = ""
     ) {
-        webServicesProvider = WebServicesProvider(this, null)
+        webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
         viewModel = WebSocketViewModel(
@@ -221,7 +225,7 @@ class Transaction(
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        //if payment type is "CASH" return cash ActionRequest
+        //if payment type is "CASH" return cash com.paytheory.android.sdk.data.ActionRequest
         if (payment.type == CASH) {
             val requestAction = BARCODE_ACTION
             val paymentRequest = CashRequest(
@@ -244,7 +248,7 @@ class Transaction(
                 sessionKey
             )
         }
-        //if payment type is not "CASH" return transfer ActionRequest
+        //if payment type is not "CASH" return transfer com.paytheory.android.sdk.data.ActionRequest
         else {
             val requestAction = TRANSFER_PART_ONE_ACTION
             val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)

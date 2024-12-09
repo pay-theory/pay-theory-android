@@ -1,12 +1,22 @@
 package com.paytheory.android.sdk.reactors
-
-import BarcodeMessage
-import HostTokenMessage
-import Payment
-import PaymentMethodTokenData
 import com.google.gson.Gson
-import com.paytheory.android.sdk.*
+import com.paytheory.android.sdk.BarcodeResult
+import com.paytheory.android.sdk.ConfirmationMessage
+import com.paytheory.android.sdk.EncryptedMessage
+import com.paytheory.android.sdk.EncryptedPaymentToken
+import com.paytheory.android.sdk.Error
+import com.paytheory.android.sdk.FailedTransactionResult
+import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PaymentMethodToken
+import com.paytheory.android.sdk.PaymentMethodTokenResults
+import com.paytheory.android.sdk.SuccessfulTransactionResult
+import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.TransactionResult
 import com.paytheory.android.sdk.configuration.FeeMode
+import com.paytheory.android.sdk.data.BarcodeMessage
+import com.paytheory.android.sdk.data.HostTokenMessage
+import com.paytheory.android.sdk.data.Payment
+import com.paytheory.android.sdk.data.PaymentMethodTokenData
 import com.paytheory.android.sdk.nacl.decryptBox
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
@@ -21,8 +31,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class MessageReactors(private val viewModel: WebSocketViewModel, private val webSocketInteractor: WebsocketInteractor) {
     var activePayment: Payment? = null
     var activePaymentToken: PaymentMethodTokenData? = null
-    var hostToken = ""
-    var sessionKey = ""
+    private var hostToken = ""
+    private var sessionKey = ""
     var socketPublicKey = ""
     private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 

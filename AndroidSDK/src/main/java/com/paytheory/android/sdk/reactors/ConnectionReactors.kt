@@ -1,12 +1,12 @@
 package com.paytheory.android.sdk.reactors
 
-import ActionRequest
-import HostTokenRequest
 import com.google.gson.Gson
+import com.paytheory.android.sdk.data.ActionRequest
+import com.paytheory.android.sdk.data.HostTokenRequest
 import com.paytheory.android.sdk.websocket.WebSocketViewModel
 import com.paytheory.android.sdk.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import java.util.*
+import java.util.Base64
 
 /**
  * Creates WebSocket connection reactors

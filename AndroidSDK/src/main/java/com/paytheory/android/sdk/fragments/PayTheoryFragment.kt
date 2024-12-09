@@ -1,9 +1,5 @@
 package com.paytheory.android.sdk.fragments
 
-import Address
-import Payment
-import PaymentMethodTokenData
-import PayorInfo
 import android.accounts.NetworkErrorException
 import android.content.Context
 import android.net.ConnectivityManager
@@ -18,6 +14,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.paytheory.android.sdk.*
 import com.paytheory.android.sdk.configuration.*
+import com.paytheory.android.sdk.data.Address
+import com.paytheory.android.sdk.data.Payment
+import com.paytheory.android.sdk.data.PaymentMethodTokenData
+import com.paytheory.android.sdk.data.PayorInfo
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import com.paytheory.android.sdk.watchers.*
@@ -222,8 +222,6 @@ class PayTheoryFragment : Fragment() {
                 this.feeMode!!,
                 this.constants!!,
                 this.confirmation,
-                this.sendReceipt,
-                this.receiptDescription,
                 this.metadata,
                 this.payTheoryData
             )

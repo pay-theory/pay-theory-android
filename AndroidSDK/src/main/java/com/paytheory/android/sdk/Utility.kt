@@ -3,11 +3,9 @@ package com.paytheory.android.sdk
 import android.app.Activity
 import android.view.View
 import android.widget.LinearLayout
-import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
 import com.paytheory.android.sdk.configuration.TokenizationType
 import com.paytheory.android.sdk.configuration.TransactionType
-import com.paytheory.android.sdk.fragments.*
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
