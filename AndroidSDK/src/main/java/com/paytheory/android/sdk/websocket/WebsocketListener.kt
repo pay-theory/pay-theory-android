@@ -51,6 +51,11 @@ class WebSocketListener : WebSocketListener() {
         println("Pay Theory Disconnected")
     }
 
+
+    /*
+    * Modernization
+    * This is where we need to manage session renewal
+    * */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
@@ -58,6 +63,7 @@ class WebSocketListener : WebSocketListener() {
             }
         }
     }
+
     companion object {
         const val NORMAL_CLOSURE_STATUS = 1000
     }

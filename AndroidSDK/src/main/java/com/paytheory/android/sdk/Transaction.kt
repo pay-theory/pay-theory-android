@@ -30,6 +30,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64
+import java.util.UUID
 
 /**
  * Transaction Class is created after data validation and click listener is activated.
@@ -52,7 +53,7 @@ class Transaction(
     private lateinit var viewModel: WebSocketViewModel
     private val googleProjectNumber = 192992826889
     private var originalConfirmation: ConfirmationMessage? = null
-    private val headerMap =
+    private var headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
     private var queuedRequest: Payment? = null
     var publicKey: String? = null
@@ -62,6 +63,7 @@ class Transaction(
     private var ptResetCounter = 0
 
     companion object {
+        var sessionIsDirty = true
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
         private var webServicesProvider: WebServicesProvider? = null
@@ -112,8 +114,20 @@ class Transaction(
         }
     }
 
+    /*
+    * Modernization
+    * Is this sufficient for managing session?
+    * */
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context) {
+        // UUID.randomUUID() utilizes a cryptographically strong pseudo-random number generator
+        // (CSPRNG) to ensure the uniqueness and randomness of the generated UUIDs.
+        if (sessionIsDirty) {
+            headerMap.put("x-session-key",UUID.randomUUID().toString())
+            sessionIsDirty = false
+        }
+
+
         val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             // handle success pt-token request
@@ -133,10 +147,10 @@ class Transaction(
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(Error("Access Denied"))
+                        context.handleError(PTError(ErrorCode.socketError,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(Error(error.message.toString()))
+                        context.handleError(PTError(ErrorCode.socketError,error.message.toString()))
                     }
                 }
             }
@@ -168,7 +182,7 @@ class Transaction(
                     disconnect()
                     resetSocket()
                 } else {
-                    context.handleError(Error(it.message!!))
+                    context.handleError(PTError(ErrorCode.socketError,it.message!!))
                 }
             }
         }
@@ -315,7 +329,7 @@ class Transaction(
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
         } else {
             if (context is Payable) {
-                context.handleError(Error("System Connection Failed"))
+                context.handleError(PTError(ErrorCode.socketError,"System Connection Failed"))
             } else {
                 return
             }

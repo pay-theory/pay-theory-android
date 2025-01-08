@@ -12,8 +12,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.paytheory.android.sdk.BarcodeResult
 import com.paytheory.android.sdk.ConfirmationMessage
-import com.paytheory.android.sdk.Error
 import com.paytheory.android.sdk.FailedTransactionResult
+import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentMethodTokenResults
 import com.paytheory.android.sdk.SuccessfulTransactionResult
@@ -30,7 +30,7 @@ import com.paytheory.android.sdk.view.PayTheoryButton
  */
 class MainActivity : AppCompatActivity(), Payable {
 
-    private val apiKey = "MY_API_KEY"
+    private val apiKey = "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285"
     private var confirmationPopUp : Dialog? = null
     private var messagePopUp : Dialog? = null
 
@@ -52,6 +52,11 @@ class MainActivity : AppCompatActivity(), Payable {
         messagePopUp!!.setContentView(R.layout.message_layout)
         messagePopUp!!.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         //Create submit button
         val submitButton: PayTheoryButton = this.findViewById(R.id.submit)
 
@@ -80,6 +85,7 @@ class MainActivity : AppCompatActivity(), Payable {
             "courseId" to "course_1859034"
         )
 
+
         //Keep in try catch for any additional errors
         try {
             payTheoryFragment.configureTransact(
@@ -89,8 +95,8 @@ class MainActivity : AppCompatActivity(), Payable {
                 transactionType = TransactionType.CARD,
                 requireAccountName = true,
                 requireBillingAddress = false,
-                confirmation = true,
-                feeMode = FeeMode.SERVICE_FEE,
+                confirmation = false,
+                feeMode = FeeMode.MERCHANT_FEE,
                 metadata = metadata,
                 payorInfo = payorInfo,
                 accountCode = "Test Account Code",
@@ -154,9 +160,6 @@ class MainActivity : AppCompatActivity(), Payable {
         runOnUiThread { messagePopUp!!.show() }
     }
 
-    override fun handleError(error: Error) {
-        System.err.println(error)
-    }
 
     //DEMO - function to display payment confirmation message to user
     override fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction) {
@@ -190,6 +193,12 @@ class MainActivity : AppCompatActivity(), Payable {
             confirmationPopUp!!.show()
         }
     }
+
+    override fun handleError(error: PTError) {
+        System.err.println(error)
+    }
+
+
 
 
     @SuppressLint("UnsafeIntentLaunch")

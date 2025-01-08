@@ -27,6 +27,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  *
@@ -67,6 +69,10 @@ class PaymentMethodToken(
         private const val TOKENIZE_RESULT = "tokenize_complete"
         private const val UNKNOWN = "unknown"
     }
+    /*
+    * Modernization
+    * This is where we reset our token
+    * */
 
     /**
      * Initialize a transaction
@@ -108,10 +114,9 @@ class PaymentMethodToken(
                 googlePlayIntegrity(ptTokenResponse)
                 // handle failed pt-token request
             }, { error ->
+                Logger.getLogger("ptTokenApiCall").log(Level.WARNING,error.message.toString())
                 if (context is Payable) {
-                    // error "Unable to resolve host "evolve.paytheorystudy.com": No address associated with hostname"
                     if (error.message.toString().contains("Unable to resolve host")) {
-//                        println(error.message.toString())
                         disconnect()
                         resetPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
@@ -119,10 +124,10 @@ class PaymentMethodToken(
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(Error("Access Denied"))
+                        context.handleError(PTError(ErrorCode.socketError,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(Error(error.message.toString()))
+                        context.handleError(PTError(ErrorCode.socketError,error.message.toString()))
                     }
                 }
             }
@@ -154,7 +159,7 @@ class PaymentMethodToken(
                     disconnect()
                     resetSocket()
                 } else {
-                    context.handleError(Error(it.message!!))
+                    context.handleError(PTError(ErrorCode.attestationFailed,it.message!!))
                 }
             }
         }
@@ -162,7 +167,7 @@ class PaymentMethodToken(
 
     private fun establishViewModel(
         ptTokenResponse: PTTokenResponse,
-        attestationResult: String? = ""
+            attestationResult: String? = ""
     ) {
         webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)

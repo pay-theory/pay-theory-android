@@ -3,6 +3,7 @@ package com.paytheory.android.sdk.watchers
 import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.text.SimpleDateFormat
@@ -13,6 +14,12 @@ var expFieldValid: Boolean = false
 var cvvFieldValid: Boolean = false
 var zipCodeFieldValid: Boolean = false
 var cardFieldsValid: Boolean = false
+
+/*
+* Modernization
+* Watchers have been updated to support ValidAndEmpty protocol
+* changes are in afterTextChanged
+* */
 
 private fun areFieldsValid(button: PayTheoryButton){
     //check if all card fields are valid
@@ -29,10 +36,10 @@ private fun areFieldsValid(button: PayTheoryButton){
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CardNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) : TextWatcher {
+class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
-
+    private var ptFragment: PayTheoryFragment? = fragment
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
@@ -43,6 +50,8 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
 
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
+            ptFragment!!.card.cardNumber.setEmpty(true)
+            ptFragment!!.card.cardNumber.setValid(false)
             return
         }
         var changes = arrayOf(5,5,5,5)
@@ -77,6 +86,8 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
 
         lock = false
         val isValidNumber = validLuhn(s.toString())
+        ptFragment!!.card.cardNumber.setEmpty(false)
+        ptFragment!!.card.cardNumber.setValid(isValidNumber)
         handleButton(isValidNumber)
     }
 
@@ -114,10 +125,11 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) : TextWatcher {
+class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
     private var isDelete = false
+    private var ptFragment: PayTheoryFragment? = fragment
 
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
@@ -129,6 +141,8 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
 
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
+            ptFragment!!.card.expirationDate.setEmpty(true)
+            ptFragment!!.card.expirationDate.setValid(false)
             return
         }
 
@@ -143,6 +157,8 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
         lock = false
 
         val isValidNumber = validExp(s.toString())
+        ptFragment!!.card.expirationDate.setEmpty(false)
+        ptFragment!!.card.expirationDate.setValid(isValidNumber)
         handleButton(isValidNumber)
     }
 
@@ -183,9 +199,10 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, private var submitButton: Pay
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) : TextWatcher {
+class CVVTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
+    private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -197,6 +214,8 @@ class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryB
 
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
+            ptFragment!!.card.expirationDate.setEmpty(true)
+            ptFragment!!.card.expirationDate.setValid(false)
             return
         }
 
@@ -210,6 +229,8 @@ class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryB
 
         lock = false
         val isValidNumber = validCVV(s.toString())
+        ptFragment!!.card.cvv.setEmpty(false)
+        ptFragment!!.card.cvv.setValid(isValidNumber)
         handleButton(isValidNumber)
     }
 
@@ -234,9 +255,10 @@ class CVVTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryB
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ZipCodeTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) : TextWatcher {
+class ZipCodeTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
+    private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -248,6 +270,8 @@ class ZipCodeTextWatcher(pt: PayTheoryEditText, private var submitButton: PayThe
 
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
+            ptFragment!!.card.postalCode.setEmpty(true)
+            ptFragment!!.card.postalCode.setValid(false)
             return
         }
 
@@ -261,6 +285,8 @@ class ZipCodeTextWatcher(pt: PayTheoryEditText, private var submitButton: PayThe
 
         lock = false
         val isValidNumber = validZip(s.toString())
+        ptFragment!!.card.postalCode.setEmpty(false)
+        ptFragment!!.card.postalCode.setValid(isValidNumber)
         handleButton(isValidNumber)
     }
 

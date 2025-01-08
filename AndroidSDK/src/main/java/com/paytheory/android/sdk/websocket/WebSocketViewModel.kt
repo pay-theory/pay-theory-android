@@ -2,7 +2,8 @@ package com.paytheory.android.sdk.websocket
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paytheory.android.sdk.Error
+import com.paytheory.android.sdk.ErrorCode
+import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentMethodToken
 import com.paytheory.android.sdk.Transaction
@@ -11,6 +12,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+
+/*
+* Modernization
+* modified to add the error code enum in errors sent to client
+* */
 
 /**
  * Creates a view model of WebSocket
@@ -107,13 +113,13 @@ class WebSocketViewModel(
             if (transaction != null) {
                 if (transaction.context is Payable){
                     println("Error: $error")
-                    transaction.context.handleError(Error(error))
+                    transaction.context.handleError(PTError(ErrorCode.socketError,error))
                 }
             // error for tokenization request
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
                     println("Error: $error")
-                    paymentMethodToken.context.handleError(Error(error))
+                    paymentMethodToken.context.handleError(PTError(ErrorCode.socketError,error))
                 }
             }
         }

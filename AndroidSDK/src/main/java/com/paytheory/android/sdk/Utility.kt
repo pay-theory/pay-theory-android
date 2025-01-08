@@ -1,6 +1,7 @@
 package com.paytheory.android.sdk
 
 import android.app.Activity
+import android.icu.util.TimeZone
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.textfield.TextInputLayout
@@ -128,7 +129,7 @@ class Utility {
     /**
      * Creates payTheoryData object for transfer requests
      */
-    fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?): HashMap<Any, Any> {
+    fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?, serviceFee: Int = 0): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
@@ -158,6 +159,10 @@ class Utility {
         if (!reference.isNullOrBlank()) {
             payTheoryData["reference"] = reference
         }
+
+        payTheoryData["fee"] = serviceFee as Any
+
+        payTheoryData["timezone"] = TimeZone.getDefault().id
 
         return payTheoryData
     }

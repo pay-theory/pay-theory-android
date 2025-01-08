@@ -33,6 +33,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payTheoryFragment" />
 
+        <CheckBox
+            android:id="@+id/is_service_fee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_service_fee" />
+
     </LinearLayout>
 
 </ScrollView>

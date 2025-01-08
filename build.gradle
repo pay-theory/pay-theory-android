@@ -1,9 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.vanniktech.maven.publish.SonatypeHost
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlin_version = '2.0.21'
     repositories {
+        maven {
+            url "${artifactory_context_url}pay-theory-android-gradle-release-local"
+            credentials {
+                username = "$artifactory_user"
+                password = "$artifactory_password"
+            }
+        }
+
+
         google()
         mavenCentral()
         mavenLocal()
@@ -11,7 +19,7 @@ buildscript {
     dependencies {
         //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:5.2.5"
-        classpath 'com.android.tools.build:gradle:8.7.2'
+        classpath 'com.android.tools.build:gradle:8.7.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
@@ -32,84 +40,79 @@ buildscript {
 }
 
 plugins {
-    id "signing"
+    id 'com.jfrog.artifactory' version "5.2.5" apply false
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
     id "org.jetbrains.dokka" version "1.9.20"
     id 'org.jetbrains.kotlin.android' version '2.0.21' apply false
-    id "com.vanniktech.maven.publish" version "0.30.0" apply false
-    id "com.gradleup.nmcp" version "0.0.8" apply false
 }
-
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'com.vanniktech.maven.publish'
-apply plugin: 'com.gradleup.nmcp'
-
-
-//tasks.register('androidSourcesJar', Jar) {
-//    archiveClassifier.set('sources')
-//    if (project.plugins.findPlugin("com.android.library")) {
-//        from android.sourceSets.main.java.srcDirs
-//        from android.sourceSets.main.kotlin.srcDirs
-//    } else {
-//        from sourceSets.main.java.srcDirs
-//        from sourceSets.main.kotlin.srcDirs
-//    }
-//}
-
-//tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
-//    pluginsMapConfiguration.set(
-//            ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
-//    )
-//}
-
-
-//nexusPublishing {
-//    repositories {
-//        sonatype {  //only for users registered in Sonatype after 24 Feb 2021
-//            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-//            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-//            username = "$sonatype_user"
-//            password = "$sonatype_pass"
-//        }
-//    }
-//}
-
-signing {
-    sign publishing.publications
-}
-
-
 allprojects {
     tasks.withType(KotlinCompile).configureEach {
         kotlinOptions {
             freeCompilerArgs += '-opt-in=kotlin.RequiresOptIn'
         }
     }
-
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'maven-publish'
+    version = currentVersion
     repositories {
+        maven {
+            url "${artifactory_context_url}pay-theory-android-gradle-release-local"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+
         google()
         mavenCentral()
         mavenLocal()
     }
-//    mavenPublishing {
-//        publishToMavenCentral(SonatypeHost.S01)
-//
-//        signAllPublications()
-//    }
-//    nmcp {
-//        publishAllProjectsProbablyBreakingProjectIsolation {
-//            username = "$mavenCentralUsername"
-//            password = "$mavenCentralPassword"
-//            publicationType = "AUTOMATIC"
-//        }
-//    }
-
 }
-//task clean(type: Delete) {
-//    delete rootProject.layout.buildDirectory
-//}
-//
-//// Maven publishing
-//apply from: "${rootDir}/scripts/publish-root.gradle"
+artifactoryPublish.skip = true
+project('testsdk') {
+    artifactoryPublish.skip = true
+}
+
+project('AndroidSDK') {
+    artifactoryPublish.dependsOn('build')
+    publishing {
+        publications {
+            aar(MavenPublication) {
+                groupId = group
+                artifactId = project.getName()
+                version = currentVersion
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
+}
+
+
+artifactory {
+    clientConfig.setIncludeEnvVars(true)
+    clientConfig.info.addEnvironmentProperty('test.adding.dynVar', new Date().toString())
+
+    publish {
+        contextUrl = "$artifactory_context_url"   //The base Artifactory URL if not overridden by the publisher/resolver
+        publish {
+            repository {
+                repoKey = 'pay-theory-android-gradle-release-local'
+                username = "$artifactory_user"
+                password = "$artifactory_password"
+                ivy {
+                    ivyLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).pom'
+                    artifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
+                    mavenCompatible = true
+                }
+            }
+        }
+        defaults {
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+}

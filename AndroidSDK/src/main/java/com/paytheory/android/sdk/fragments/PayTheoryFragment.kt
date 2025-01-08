@@ -18,6 +18,9 @@ import com.paytheory.android.sdk.data.Address
 import com.paytheory.android.sdk.data.Payment
 import com.paytheory.android.sdk.data.PaymentMethodTokenData
 import com.paytheory.android.sdk.data.PayorInfo
+import com.paytheory.android.sdk.state.ACHState
+import com.paytheory.android.sdk.state.CardState
+import com.paytheory.android.sdk.state.CashState
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 import com.paytheory.android.sdk.watchers.*
@@ -29,6 +32,12 @@ private const val PAYTHEORY = "paytheory"
 private const val NO_NETWORK_CONNECTION = "No valid network connection"
 private const val INVALID_APIKEY = "Invalid apikey"
 private const val INVALID_AMOUNT = "Invalid amount"
+
+/*
+* Modernization
+* Watcher calls have been updated to include fragment as parameter
+* this is to support ValidAndEmpty Protocol
+* */
 
 /**
  * PayTheoryFragment populates required transaction input fields.
@@ -68,6 +77,9 @@ class PayTheoryFragment : Fragment() {
     private var model: ConfigurationViewModel? = null
     private lateinit var submitButton: PayTheoryButton
 
+    var card: CardState = CardState()
+    var ach: ACHState = ACHState()
+    var cash: CashState = CashState()
 
     /**
      * Display requested card fields
@@ -113,6 +125,7 @@ class PayTheoryFragment : Fragment() {
      * @param invoiceId Optional Pay Theory invoiceId
      * @param sendReceipt Enable a receipt to be sent to a payor for the transaction
      * @param receiptDescription Add description to receipt for transaction
+     * @param serviceFee Add calculated service fee
      */
     @Throws(Exception::class)
     fun configureTransact(
@@ -132,7 +145,8 @@ class PayTheoryFragment : Fragment() {
         paymentParameters: String? = null,
         invoiceId: String? = null,
         sendReceipt: Boolean? = false,
-        receiptDescription: String? = null
+        receiptDescription: String? = null,
+        serviceFee: Int = 0
     ) {
         //Check internet
         if (!isNetworkAvailable(this.requireContext())) {
@@ -236,15 +250,15 @@ class PayTheoryFragment : Fragment() {
             val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
             val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
-            val ccNumberValidation: (PayTheoryEditText) -> CardNumberTextWatcher =
-                { pt -> CardNumberTextWatcher(pt, submitButton)  }
+            val ccNumberValidation: (PayTheoryEditText, PayTheoryFragment) -> CardNumberTextWatcher =
+                { ptText, ptFragment -> CardNumberTextWatcher(ptText, ptFragment, submitButton)  }
             val cvvNumberValidation: (PayTheoryEditText) -> CVVTextWatcher =
-                { pt -> CVVTextWatcher(pt, submitButton) }
+                { pt -> CVVTextWatcher(pt, this, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationTextWatcher =
-                { pt -> ExpirationTextWatcher(pt, submitButton) }
+                { pt -> ExpirationTextWatcher(pt, this, submitButton) }
             val zipCodeValidation: (PayTheoryEditText) -> ZipCodeTextWatcher =
-                { pt -> ZipCodeTextWatcher(pt, submitButton) }
-            ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
+                { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
+            ccNumber.addTextChangedListener(ccNumberValidation(ccNumber,this))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
             billingZip.addTextChangedListener(zipCodeValidation(billingZip))
@@ -261,9 +275,9 @@ class PayTheoryFragment : Fragment() {
             achChooser.setAdapter(adapter)
 
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
-                { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
+                { pt -> RoutingNumberTextWatcher(pt, this, submitButton)  }
             val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
-                { pt -> AccountNumberTextWatcher(pt, submitButton)  }
+                { pt -> AccountNumberTextWatcher(pt, this, submitButton)  }
             achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
             achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
         }
@@ -276,10 +290,10 @@ class PayTheoryFragment : Fragment() {
             val cashName = requireActivity().findViewById<PayTheoryEditText>(R.id.cashName)
 
             val cashContactValidation: (PayTheoryEditText) -> CashContactTextWatcher =
-                { pt -> CashContactTextWatcher(pt, submitButton) }
+                { pt -> CashContactTextWatcher(pt, this, submitButton) }
 
             val cashNameValidation: (PayTheoryEditText) -> CashNameTextWatcher =
-                { pt -> CashNameTextWatcher(pt, submitButton) }
+                { pt -> CashNameTextWatcher(pt, this, submitButton) }
 
             cashContact.addTextChangedListener(
                 cashContactValidation(
@@ -506,13 +520,13 @@ class PayTheoryFragment : Fragment() {
             val billingZip = requireActivity().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
             val ccNumberValidation: (PayTheoryEditText) -> CardNumberTextWatcher =
-                { pt -> CardNumberTextWatcher(pt, submitButton)  }
+                { pt -> CardNumberTextWatcher(pt, this, submitButton)  }
             val cvvNumberValidation: (PayTheoryEditText) -> CVVTextWatcher =
-                { pt -> CVVTextWatcher(pt, submitButton) }
+                { pt -> CVVTextWatcher(pt, this, submitButton) }
             val expirationValidation: (PayTheoryEditText) -> ExpirationTextWatcher =
-                { pt -> ExpirationTextWatcher(pt, submitButton) }
+                { pt -> ExpirationTextWatcher(pt, this, submitButton) }
             val zipCodeValidation: (PayTheoryEditText) -> ZipCodeTextWatcher =
-                { pt -> ZipCodeTextWatcher(pt, submitButton) }
+                { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
             ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
             ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
             ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
@@ -530,9 +544,9 @@ class PayTheoryFragment : Fragment() {
             achChooser.setAdapter(adapter)
 
             val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
-                { pt -> RoutingNumberTextWatcher(pt, submitButton)  }
+                { pt -> RoutingNumberTextWatcher(pt, this, submitButton)  }
             val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
-                { pt -> AccountNumberTextWatcher(pt, submitButton)  }
+                { pt -> AccountNumberTextWatcher(pt, this, submitButton)  }
             achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
             achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
         }
@@ -637,5 +651,5 @@ private fun isNetworkAvailable(context: Context) =
             hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
                     || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                     || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-        } ?: false
+        } == true
     }
