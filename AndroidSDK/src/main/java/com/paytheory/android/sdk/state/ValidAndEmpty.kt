@@ -6,6 +6,6 @@ package com.paytheory.android.sdk.state
 * */
 
 interface ValidAndEmpty {
-    fun isValid(): Boolean
+    /** Returns true if the object is valid, false otherwise. */ fun isValid(): Boolean
     fun isEmpty(): Boolean
 }
