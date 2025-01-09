@@ -1,41 +1,16 @@
+package com.paytheory.android.sdk.data
+
 import com.google.gson.annotations.SerializedName
 import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.configuration.FeeMode
 
-
-/**
- * Data class to store resulting transaction data
- * @param paymentDetailReference payment reference id
- * @param paymentSourceId payment source id
- * @param paymentApplicationId payment application id
- * @param state state of transaction
- * @param amount amount of transaction
- * @param cardBrand brand of the card
- * @param lastFour last four of card number
- * @param serviceFee service fee amount
- * @param currency currency type of transaction amount
- * @param createdAt transaction creation time
- * @param updatedAt transaction updated time
- * @param metadata optional metadata that are added to payment
- */
-data class TransferMessage (
-    @SerializedName("payment-detail-reference") val paymentDetailReference: String,
-    @SerializedName("payment-source-id") val paymentSourceId: String,
-    @SerializedName("payment-application-id") val paymentApplicationId: String,
-    @SerializedName("state") val state: String,
-    @SerializedName("amount") val amount: Int,
-    @SerializedName("card_brand") val cardBrand: String,
-    @SerializedName("last_four") val lastFour: String,
-    @SerializedName("service_fee") val serviceFee: String,
-    @SerializedName("currency") val currency: String,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String,
-    @SerializedName("metadata") var metadata: Map<String,String> = HashMap<String,String>()
-)
-
 /**
  * Data class to store resulting barcode data
- * @param
+ * @param barcodeUid
+ * @param barcodeUrl
+ * @param barcode
+ * @param barcodeFee
+ * @param merchant
  */
 data class BarcodeMessage (
     @SerializedName("BarcodeUid") val barcodeUid: String,
@@ -47,9 +22,8 @@ data class BarcodeMessage (
 
 /**
  * Data class to store host token message details
- * @param hostToken token with transaction details
- * @param publicKey encryption key to encode/decode messages
- * @param sessionKey encryption key to encode/decode messages
+ * @param type
+ * @param body
  */
 data class HostTokenMessage (
     @SerializedName("type") val type: String,
@@ -59,6 +33,8 @@ data class HostTokenMessage (
 /**
  * Data class to store host token message details
  * @param hostToken token with transaction details
+ * @param publicKey encryption key to encode/decode messages
+ * @param sessionKey encryption key to encode/decode messages
  */
 data class HostToken (
     @SerializedName("hostToken") val hostToken: String,
@@ -66,7 +42,6 @@ data class HostToken (
     @SerializedName("sessionKey") val sessionKey: String
 )
 
-//{"type": "host_token", "body": {"hostToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJob3N0VG9rZW4iOnsiZXhwIjoxNjYyMDQzODI4LCJtZXJjaGFudF91aWQiOiIxYjhjNjdlMC05ODcxLTQ0ZjUtOTViNC1jYWQ1NDVlOTM2ZTAiLCJjYXJkX3Byb2Nlc3NvciI6ImZpbml4IiwiYWNoX3Byb2Nlc3NvciI6ImZpbml4IiwiY2FzaF9wcm9jZXNzb3IiOiJwYXkgaXQgdG9kYXkiLCJjaGFsbGVuZ2UiOiJLcmV2OUtDaFBPeDN2Y1Qwb2JGLXRadGNpdW9wa3RHZmNqOFowSFo2d3NWQWRNV3RPdHRvbzFKSVhnSDIyN291ekxVQURaLUpjUkhJQ2FHX1Z1V1g0RUFhc3U1cldwMlktNUJ3ODNYOXIzWUtockFVSWgycl8wNU5qV29XeFloLVZnZlFzaC1RM2xYMXgxcXZUcDBHVm1uV1Jjb1c2YmJrQkJmcTQyY0NUa3M9Iiwib3JpZ2luIjoibmF0aXZlIiwiYXBpX2tleSI6ImFiZWwtcGF5dGhlb3J5bGFiLTVmNzVlOTRhNjZkYzVmODhhOGYyMDdmMzRmNjcwZWU3In0sImV4cCI6MTY2MjA0NDQzNC41MjI1MjM2LCJzZXNzaW9uS2V5IjoiWHlQT0NkamZJQU1DRV9nPSJ9.JRPzEKYe17Qo-XN2-Zr6-PvxfegwhsxUaMtNa5T2s6I", "publicKey": "vmE2tildFZaQeB/hXqGTfp3TeQalMQEeI60wqt1HYR0=", "sessionKey": "XyPOCdjfIAMCE_g="}}
 /**
  * Data class to store host token request
  */
@@ -76,6 +51,7 @@ data class HostTokenRequest(
     @SerializedName("timing") val timing: Long,
     @SerializedName("origin") val origin: String = "android",
     @SerializedName("application_package_name") val applicationPackageName: String,
+    @SerializedName("require_attestation") val requireAttestation: Boolean = true,
 )
 
 /**
@@ -116,7 +92,6 @@ data class CashRequest(
  * @param currency currency type of transaction amount
  * @param amount amount of payment
  * @param fee_mode fee mode that will be used for transaction
- * @param payorInfo optional buyer options data
  */
 data class PaymentData(
     @SerializedName("currency") val currency: String?,

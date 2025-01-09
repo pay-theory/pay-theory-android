@@ -2,7 +2,8 @@ package com.paytheory.android.sdk.websocket
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paytheory.android.sdk.Error
+import com.paytheory.android.sdk.ErrorCode
+import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentMethodToken
 import com.paytheory.android.sdk.Transaction
@@ -12,6 +13,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 
+/*
+* Modernization
+* modified to add the error code enum in errors sent to client
+* */
+
 /**
  * Creates a view model of WebSocket
  * @param interactor WebSocket interactor
@@ -20,7 +26,7 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 class WebSocketViewModel(
     private val interactor: WebsocketInteractor,
-    var payTheoryToken: String,
+    private var payTheoryToken: String,
     private val partner: String,
     private val stage: String,
     private val transaction: Transaction?,
@@ -107,13 +113,13 @@ class WebSocketViewModel(
             if (transaction != null) {
                 if (transaction.context is Payable){
                     println("Error: $error")
-                    transaction.context.handleError(Error(error))
+                    transaction.context.handleError(PTError(ErrorCode.socketError,error))
                 }
             // error for tokenization request
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
                     println("Error: $error")
-                    paymentMethodToken.context.handleError(Error(error))
+                    paymentMethodToken.context.handleError(PTError(ErrorCode.socketError,error))
                 }
             }
         }
@@ -130,7 +136,7 @@ class WebSocketViewModel(
  * Creates WebSocket interactor to start, stop and send messages
  * @param repository WebSocket repository
  */
-class WebsocketInteractor constructor(private val repository: WebsocketRepository) {
+class WebsocketInteractor(private val repository: WebsocketRepository) {
 
     /**
      * Function to close WebSocket
@@ -161,7 +167,7 @@ class WebsocketInteractor constructor(private val repository: WebsocketRepositor
  * Creates WebSocket repository to start, stop and send messages
  * @param webServicesProvider WebSocket web services provider
  */
-class WebsocketRepository constructor(private val webServicesProvider: WebServicesProvider) {
+class WebsocketRepository(private val webServicesProvider: WebServicesProvider) {
 
     /**
      * Function to start WebSocket

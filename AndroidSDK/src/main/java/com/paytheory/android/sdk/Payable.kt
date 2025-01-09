@@ -1,15 +1,36 @@
 package com.paytheory.android.sdk
 
-import Address
-import PayorInfo
 import com.google.gson.annotations.SerializedName
+import com.paytheory.android.sdk.data.Address
+import com.paytheory.android.sdk.data.PayorInfo
+/*
+* Modernization
+* Our legacy SDK did not include an error code
+* This is our error code enum
+* we are including this in errors, need to work through various scenarios and find where to use each
+* */
+enum class ErrorCode {
+    actionComplete, //The requested action has already been completed.
+    actionInProgress, //An action is currently in progress, preventing a new action.
+    attestationFailed, //The device attestation process failed.
+    inProgress, //The operation is still in progress.
+    invalidAPIKey, //The provided API key is invalid or not recognized.
+    invalidParam, //An invalid parameter was provided to the SDK.
+    noFields, //Required fields were not provided for the operation.
+    notReady, //The SDK is not in a ready state for the requested operation.
+    notValid, //The provided data failed validation checks.
+    socketError, //An error occurred with the WebSocket connection.
+    tokenFailed	//Token generation or validation failed.
+}
 
 /**
  * Data class that represents the error received if a transaction fails
- * @param reason reason the transaction failed
+ * @param code the PTErrorCode
+ * @param error a description of the error
  */
-data class Error (
-    @SerializedName("reason") val reason: String
+data class PTError (
+    @SerializedName("code") val code: ErrorCode,
+    @SerializedName("error") val error: String
 )
 
 /**
@@ -172,5 +193,5 @@ interface Payable {
      * function to handle any system errors from a user's device or Pay Theory
      * @param error reason for the failure
      */
-    fun handleError(error: Error)
+    fun handleError(error: PTError)
 }

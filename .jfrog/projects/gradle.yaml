@@ -1,0 +1,10 @@
+version: 1
+type: gradle
+deployer:
+    repo: pay-theory-android-gradle-release-local
+    serverId: artifactory
+    deployMavenDescriptors: true
+    ivyPattern: '[organization]/[module]/ivy-[revision].xml'
+    artifactPattern: '[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
+usePlugin: true
+useWrapper: true

@@ -1,38 +1,24 @@
+
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
+    id "com.vanniktech.maven.publish" version "0.30.0" apply false
+    id "com.gradleup.nmcp" version "0.0.8" apply false
 }
 
-
-ext {
-    PUBLISH_GROUP_ID = 'com.paytheory'
-    PUBLISH_VERSION = '2.8.0'
-    PUBLISH_ARTIFACT_ID = 'pay-theory-android'
-    PUBLISH_DESCRIPTION = 'Pay Theory Android SDK'
-    PUBLISH_URL = 'https://github.com/pay-theory/pay-theory-android'
-    PUBLISH_LICENSE_NAME = 'MIT License'
-    PUBLISH_LICENSE_URL = 'https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE'
-    PUBLISH_DEVELOPER_ID = 'paytheory'
-    PUBLISH_DEVELOPER_NAME = 'Abel Collins'
-    PUBLISH_DEVELOPER_EMAIL = 'abel@paytheory.com'
-    PUBLISH_SCM_CONNECTION = 'scm:git:github.com/pay-theory/pay-theory-android.git'
-    PUBLISH_SCM_DEVELOPER_CONNECTION = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
-    PUBLISH_SCM_URL = 'https://github.com/pay-theory/pay-theory-android/tree/main'
-}
-
-apply from: "${rootDir}/scripts/publish-module.gradle"
+//apply from: "${rootDir}/scripts/publish-module.gradle"
 
 android {
+
     namespace = "com.paytheory.android.sdk"
-    compileSdkVersion 33
-    buildToolsVersion "30.0.3"
+    compileSdk 35
     buildFeatures {
         prefab true
     }
     defaultConfig {
         minSdkVersion 26
-        targetSdkVersion 33
+        targetSdk 35
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -43,53 +29,51 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '21'
     }
 }
 
 dependencies {
     // Kotlin Usage
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.15.0'
     // Appcompat Layouts
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     // lifecycle (ViewModel, LiveData, Extension)
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //Google UI
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.12.0'
     //Gson
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.11.0'
     //Okhttp
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.10'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.14'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14'
     //Lazy sodium
-    implementation "com.goterl:lazysodium-android:5.0.2@aar"
-    implementation "net.java.dev.jna:jna:5.12.1@aar"
+    implementation 'com.goterl:lazysodium-android:5.1.0@aar'
+    implementation 'net.java.dev.jna:jna:5.15.0@aar'
     //Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.11.0'
     //Rx Java
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.9'
     //Google Play services
-    implementation "com.google.android.gms:play-services-base:18.1.0"
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
     //AWS Android SDK
-    implementation 'com.amazonaws:aws-android-sdk-kms:2.52.1'
+    implementation 'com.amazonaws:aws-android-sdk-kms:2.77.0'
     //Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    implementation "org.jetbrains.kotlin:kotlin-script-runtime:2.0.21"
     implementation "androidx.multidex:multidex:2.0.1"
     //Google Play Integrity Api
-    implementation "com.google.android.play:integrity:1.0.2"
+    implementation 'com.google.android.play:integrity:1.4.0'
 }
-
-
 

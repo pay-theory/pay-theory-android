@@ -1,9 +1,6 @@
 package com.paytheory.android.sdk
 
-import ActionRequest
-import PaymentMethodData
-import PaymentMethodTokenData
-import TokenizeRequest
+import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
@@ -13,14 +10,25 @@ import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
 import com.paytheory.android.sdk.api.PTTokenResponse
+import com.paytheory.android.sdk.data.ActionRequest
+import com.paytheory.android.sdk.data.PaymentMethodData
+import com.paytheory.android.sdk.data.PaymentMethodTokenData
+import com.paytheory.android.sdk.data.TokenizeRequest
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
-import com.paytheory.android.sdk.reactors.*
-import com.paytheory.android.sdk.websocket.*
+import com.paytheory.android.sdk.reactors.ConnectionReactors
+import com.paytheory.android.sdk.reactors.MessageReactors
+import com.paytheory.android.sdk.websocket.WebServicesProvider
+import com.paytheory.android.sdk.websocket.WebSocketViewModel
+import com.paytheory.android.sdk.websocket.WebsocketInteractor
+import com.paytheory.android.sdk.websocket.WebsocketMessageHandler
+import com.paytheory.android.sdk.websocket.WebsocketRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import java.util.*
+import java.util.Base64
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  *
@@ -30,21 +38,21 @@ class PaymentMethodToken(
     val context: Context,
     private val partner: String,
     private val stage: String,
-    private val apiKey: String,
+    apiKey: String,
     private val constants: Constants,
     private val metadata: HashMap<Any, Any>?,
     private val payTheoryData: HashMap<Any, Any>? = null
 ) : WebsocketMessageHandler {
-    lateinit var viewModel: WebSocketViewModel
+    private lateinit var viewModel: WebSocketViewModel
     private val googleProjectNumber = 192992826889
     private val headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
-    var queuedRequest: PaymentMethodTokenData? = null
+    private var queuedRequest: PaymentMethodTokenData? = null
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
-    var resetCounter = 0
-    var ptResetCounter = 0
+    private var resetCounter = 0
+    private var ptResetCounter = 0
 
     companion object {
         private var messageReactors: MessageReactors? = null
@@ -61,6 +69,10 @@ class PaymentMethodToken(
         private const val TOKENIZE_RESULT = "tokenize_complete"
         private const val UNKNOWN = "unknown"
     }
+    /*
+    * Modernization
+    * This is where we reset our token
+    * */
 
     /**
      * Initialize a transaction
@@ -92,6 +104,7 @@ class PaymentMethodToken(
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context) {
         val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -101,10 +114,9 @@ class PaymentMethodToken(
                 googlePlayIntegrity(ptTokenResponse)
                 // handle failed pt-token request
             }, { error ->
+                Logger.getLogger("ptTokenApiCall").log(Level.WARNING,error.message.toString())
                 if (context is Payable) {
-                    // error "Unable to resolve host "evolve.paytheorystudy.com": No address associated with hostname"
                     if (error.message.toString().contains("Unable to resolve host")) {
-//                        println(error.message.toString())
                         disconnect()
                         resetPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
@@ -112,10 +124,10 @@ class PaymentMethodToken(
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(Error("Access Denied"))
+                        context.handleError(PTError(ErrorCode.socketError,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(Error(error.message.toString()))
+                        context.handleError(PTError(ErrorCode.socketError,error.message.toString()))
                     }
                 }
             }
@@ -147,7 +159,7 @@ class PaymentMethodToken(
                     disconnect()
                     resetSocket()
                 } else {
-                    context.handleError(Error(it.message!!))
+                    context.handleError(PTError(ErrorCode.attestationFailed,it.message!!))
                 }
             }
         }
@@ -155,9 +167,9 @@ class PaymentMethodToken(
 
     private fun establishViewModel(
         ptTokenResponse: PTTokenResponse,
-        attestationResult: String? = ""
+            attestationResult: String? = ""
     ) {
-        webServicesProvider = WebServicesProvider(null, this)
+        webServicesProvider = WebServicesProvider()
         webSocketRepository = WebsocketRepository(webServicesProvider!!)
         webSocketInteractor = WebsocketInteractor(webSocketRepository!!)
         viewModel = WebSocketViewModel(

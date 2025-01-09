@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <fragment
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/payTheoryFragment"
             android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
             android:layout_width="match_parent"
@@ -32,6 +32,12 @@
             android:text="@string/submit_payment"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payTheoryFragment" />
+
+        <CheckBox
+            android:id="@+id/is_service_fee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_service_fee" />
 
     </LinearLayout>
 

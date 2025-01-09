@@ -1,6 +1,6 @@
 package com.paytheory.android.sdk.configuration
 
-import PayorInfo
+import com.paytheory.android.sdk.data.PayorInfo
 
 /**
  * Enum class that contains the types of payments

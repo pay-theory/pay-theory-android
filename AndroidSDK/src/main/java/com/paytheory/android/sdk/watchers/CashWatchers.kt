@@ -4,12 +4,19 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Patterns
+import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 var cashContactFieldValid: Boolean = false
 var cashFieldsValid: Boolean = false
 var cashNameFieldValid: Boolean = false
+
+/*
+* Modernization
+* Watchers have been updated to support ValidAndEmpty protocol
+* changes are in afterTextChanged
+* */
 
 private fun areFieldsValid(button: PayTheoryButton){
     //check if all card fields are valid
@@ -24,9 +31,10 @@ private fun areFieldsValid(button: PayTheoryButton){
 /**
  * Text watcher class to validate buyer contact edit text field
  */
-class CashContactTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) :
+class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: PayTheoryEditText? = pt
+    private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -37,7 +45,15 @@ class CashContactTextWatcher(pt: PayTheoryEditText, private var submitButton: Pa
     }
 
     override fun afterTextChanged(s: Editable) {
+        if (s.isEmpty()) {
+            ptFragment!!.ach.accountNumber.setEmpty(true)
+            ptFragment!!.ach.accountNumber.setValid(false)
+            return
+        }
         val isValid = isValidEmail(s.toString())
+
+        ptFragment!!.ach.routingNumber.setEmpty(false)
+        ptFragment!!.ach.routingNumber.setValid(isValid)
         handleButton(isValid)
     }
 
@@ -65,9 +81,10 @@ class CashContactTextWatcher(pt: PayTheoryEditText, private var submitButton: Pa
 /**
  * Text watcher class to validate buyer contact edit text field
  */
-class CashNameTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTheoryButton) :
+class CashNameTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: PayTheoryEditText? = pt
+    private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
@@ -78,7 +95,14 @@ class CashNameTextWatcher(pt: PayTheoryEditText, private var submitButton: PayTh
     }
 
     override fun afterTextChanged(s: Editable) {
+        if (s.isEmpty()) {
+            ptFragment!!.ach.accountNumber.setEmpty(true)
+            ptFragment!!.ach.accountNumber.setValid(false)
+            return
+        }
         val isValid = isValid(s.toString())
+        ptFragment!!.ach.routingNumber.setEmpty(false)
+        ptFragment!!.ach.routingNumber.setValid(isValid)
         handleButton(isValid)
     }
 

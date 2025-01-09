@@ -4,4 +4,5 @@
     <string name="btn_no_string">No</string>
     <string name="btn_yes_string">Yes</string>
     <string name="btn_ok_string">OK</string>
+    <string name="use_service_fee">use service fee</string>
 </resources>
