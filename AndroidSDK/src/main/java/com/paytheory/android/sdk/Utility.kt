@@ -129,7 +129,7 @@ class Utility {
     /**
      * Creates payTheoryData object for transfer requests
      */
-    fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?, serviceFee: Int = 0): HashMap<Any, Any> {
+    fun createPayTheoryData(data: PayTheoryData): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
