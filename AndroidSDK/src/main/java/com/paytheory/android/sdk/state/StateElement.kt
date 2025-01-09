@@ -8,7 +8,7 @@ package com.paytheory.android.sdk.state
 class StateElement: ValidAndEmpty {
     private var valid: Boolean = false
     private var empty: Boolean = true
-    fun setValid(_valid:Boolean) {
+    /** Sets the validity state of the StateElement. */ fun setValid(_valid:Boolean) {
         valid = _valid
     }
     fun setEmpty(_empty:Boolean) {
