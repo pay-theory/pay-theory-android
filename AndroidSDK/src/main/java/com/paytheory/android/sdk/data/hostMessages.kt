@@ -1,3 +1,5 @@
+@file:Suppress("PropertyName", "PropertyName")
+
 package com.paytheory.android.sdk.data
 
 import com.google.gson.annotations.SerializedName
@@ -6,18 +8,18 @@ import com.paytheory.android.sdk.configuration.FeeMode
 
 /**
  * Data class to store resulting barcode data
- * @param barcodeUid
+ * @param barcodeId
  * @param barcodeUrl
  * @param barcode
  * @param barcodeFee
  * @param merchant
  */
 data class BarcodeMessage (
-    @SerializedName("BarcodeUid") val barcodeUid: String,
-    @SerializedName("barcodeUrl") val barcodeUrl: String,
+    @SerializedName("barcode_id") val barcodeId: String,
+    @SerializedName("barcode_url") val barcodeUrl: String,
     @SerializedName("barcode") val barcode: String,
-    @SerializedName("barcodeFee") val barcodeFee: String,
-    @SerializedName("Merchant") val merchant: String,
+    @SerializedName("fees") val barcodeFee: String,
+    @SerializedName("merchant_uid") val merchant: String,
 )
 
 /**
@@ -73,14 +75,14 @@ data class PayorInfo (
 /**
  * Data class to store cash request
  * @param hostToken token with transaction details
- * @param payment object that contains payment details
+ * @param paymentDetail object that contains payment details
  * @param timing calculated timing
  * @param payorInfo optional buyer options data
  */
 data class CashRequest(
     @SerializedName("hostToken") val hostToken: String?,
     @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("payment") val payment: Payment,
+    @SerializedName("payment") val paymentDetail: PaymentDetail,
     @SerializedName("timing") val timing: Long,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
     @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
@@ -175,12 +177,12 @@ data class TokenizeRequest(
  * @param country billing country
  */
 data class Address (
-    @SerializedName("line1") val line1: String? = "",
-    @SerializedName("line2") val line2: String? = "",
-    @SerializedName("city") val city: String? = "",
-    @SerializedName("region") val region: String? = "",
-    @SerializedName("postal_code") val postal_code: String? = "",
-    @SerializedName("country") val country: String? = "USA"
+    @SerializedName("line1") val line1: String? = null,
+    @SerializedName("line2") val line2: String? = null,
+    @SerializedName("city") val city: String? = null,
+    @SerializedName("region") val region: String? = null,
+    @SerializedName("postal_code") val postal_code: String? = null,
+    @SerializedName("country") val country: String? = null
 )
 /**
  * Data class to store payment details
@@ -198,7 +200,7 @@ data class Address (
  * @param expiration_month card expiration month
  * @param address billing address
  */
-data class Payment (
+data class PaymentDetail (
     @SerializedName("type") val type: String,
     @SerializedName("timing") val timing: Long,
     @SerializedName("amount") val amount: Int,

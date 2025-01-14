@@ -12,6 +12,12 @@ class ConfigurationModelFactory(
     private val repo: ConfigurationRepository
 ): ViewModelProvider.NewInstanceFactory() {
 
+    /**
+     * Function that creates a configuration view model
+     * @param modelClass class that view model is being created for
+     * @return returns configuration view model
+     * @Suppress warns of unchecked cast
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
 

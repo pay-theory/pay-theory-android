@@ -7,6 +7,9 @@ import com.goterl.lazysodium.utils.Base64MessageEncoder
 import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
 
+/**
+ * Object that handles lazy sodium functions
+ */
 private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 private val boxLazy = lazySodium as Box.Lazy
 private lateinit var keyPair: KeyPair

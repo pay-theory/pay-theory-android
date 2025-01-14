@@ -16,4 +16,5 @@
 /ExampleApp/.idea/vcs.xml
 /AndroidSDK/publishingKey.gpg
 /local.properties
-signing-key
+*.keystore
+.env

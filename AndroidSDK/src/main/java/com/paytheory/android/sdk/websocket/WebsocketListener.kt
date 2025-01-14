@@ -18,7 +18,12 @@ import okio.ByteString
 @ExperimentalCoroutinesApi
 class WebSocketListener : WebSocketListener() {
     val socketEventChannel: Channel<SocketUpdate> = Channel(10)
-
+    /**
+     * normal closure status constant
+     *
+     * @constructor Create empty Normal closure status
+     */
+    val normalClosureStatus = 1000
     override fun onOpen(webSocket: WebSocket, response: Response) {
         if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
@@ -28,6 +33,13 @@ class WebSocketListener : WebSocketListener() {
         }
     }
 
+    /**
+     * On message
+     *
+     * @param webSocket web socket
+     * @param text text string
+     * Function that sends message update to channel
+     */
     override fun onMessage(webSocket: WebSocket, text: String) {
         if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
@@ -36,6 +48,14 @@ class WebSocketListener : WebSocketListener() {
         }
     }
 
+    /**
+     * On closing
+     *
+     * @param webSocket web socket
+     * @param code code
+     * @param reason reason
+     * Function that sends closing update to channel
+     */
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             GlobalScope.launch {
                 try {
@@ -46,26 +66,26 @@ class WebSocketListener : WebSocketListener() {
                     println(error)
                 }
             }
-        webSocket.close(NORMAL_CLOSURE_STATUS, null)
+        webSocket.close(normalClosureStatus, null)
         socketEventChannel.close()
         println("Pay Theory Disconnected")
     }
 
-
-    /*
-    * Modernization
-    * This is where we need to manage session renewal
-    * */
+    
+    /**
+     * On failure
+     *
+     * @param webSocket web socket
+     * @param t throwable
+     * @param response response
+     * Function that sends failure update to channel
+     */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         if (!socketEventChannel.isClosedForSend) {
             GlobalScope.launch {
                 socketEventChannel.send(SocketUpdate(exception = t))
             }
         }
-    }
-
-    companion object {
-        const val NORMAL_CLOSURE_STATUS = 1000
     }
 }
 

@@ -3,37 +3,57 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
-    id "com.vanniktech.maven.publish" version "0.30.0" apply false
-    id "com.gradleup.nmcp" version "0.0.8" apply false
 }
 
-//apply from: "${rootDir}/scripts/publish-module.gradle"
+File secretPropsFile = project.rootProject.file('local.properties')
+
+Properties p = new Properties()
+new FileInputStream(secretPropsFile).withCloseable { is -> p.load(is) }
+p.each { name, value -> ext[name] = value }
 
 android {
 
     namespace = "com.paytheory.android.sdk"
-    compileSdk 35
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+
+    compileSdk = 35
+
     buildFeatures {
-        prefab true
+        prefab = true
     }
     defaultConfig {
         minSdkVersion 26
-        targetSdk 35
+        targetSdk = 35
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        aarMetadata {
+            minCompileSdk = 29
+        }
+
+//        buildConfigField "String", "GOOGLE_PROJECT_NUMBER", "\"${System.getenv("GOOGLE_PROJECT_NUMBER")}\""
     }
     buildTypes {
+        debug {
+            resValue("string", "google_project_number", "${GOOGLE_PROJECT_NUMBER}")
+        }
         release {
-            minifyEnabled false
+            resValue("string", "google_project_number", "${GOOGLE_PROJECT_NUMBER}")
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_18
+        targetCompatibility JavaVersion.VERSION_18
     }
     kotlinOptions {
-        jvmTarget = '21'
+        jvmTarget = '18'
     }
 }
 
@@ -75,5 +95,53 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
     //Google Play Integrity Api
     implementation 'com.google.android.play:integrity:1.4.0'
+
+    implementation 'com.caverock:androidsvg-aar:1.4'
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from(components["release"])
+                groupId = 'com.paytheory.android.sdk'
+                artifactId = 'AndroidSDK'
+                version = '3.0.1'
+
+                pom {
+                    packaging = "aar"
+                    name = 'Pay Theory SDK'
+                    description = 'Pay Theory SDK for Android'
+                    url = 'https://github.com/pay-theory/pay-theory-android'
+                    inceptionYear = "2021"
+
+                    licenses {
+                        license {
+                            name = "MIT License"
+                            url = "https://opensource.org/licenses/MIT"
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'aron23'
+                            name = 'Aron Price'
+                            email = 'aron@paytheory.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git:github.com/pay-theory/pay-theory-android.git'
+                        developerConnection = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
+                        url = 'https://github.com/pay-theory/pay-theory-android/tree/main'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = layout.buildDirectory.dir('staging-deploy')
+            }
+        }
+    }
+}

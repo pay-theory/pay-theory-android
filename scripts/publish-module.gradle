@@ -1,6 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.android.library'
 
 tasks.register('androidSourcesJar', Jar) {
     archiveClassifier.set('sources')
@@ -30,62 +31,62 @@ artifacts {
     archives javadocJar
 }
 
-group = PUBLISH_GROUP_ID
-version = PUBLISH_VERSION
+//group = com.paytheory.android.sdk
+//version = 3.0.0
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                // The coordinates of the library, being set from variables that
-                // we'll set up later
-                groupId PUBLISH_GROUP_ID
-                artifactId PUBLISH_ARTIFACT_ID
-                version PUBLISH_VERSION
-
-                // Two artifacts, the `aar` (or `jar`) and the sources
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    from components.java
-                }
-
-                artifact androidSourcesJar
-                artifact javadocJar
-
-                // Mostly self-explanatory metadata
-                pom {
-                    name = PUBLISH_ARTIFACT_ID
-                    description = 'Pay Theory Android SDK'
-                    url = 'https://github.com/pay-theory/pay-theory-android'
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = 'https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'aron23'
-                            name = 'Aron Price'
-                            email = 'aron@paytheory.com'
-                        }
-                    }
-                    // Version control info
-                    scm {
-                        connection = 'scm:git:github.com/pay-theory/pay-theory-android.git'
-                        developerConnection = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
-                        url = 'https://github.com/pay-theory/pay-theory-android/tree/main'
-                    }
-                }
-            }
-        }
-    }
-}
-
-signing {
-    rootProject.ext["signing.keyId"]
-    rootProject.ext["signing.secretKeyRingFile"]
-    rootProject.ext["signing.password"]
-    sign publishing.publications
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                // The coordinates of the library, being set from variables that
+//                // we'll set up later
+//                groupId = 'com.paytheory.android.sdk'
+//                artifactId = 'AndroidSDK'
+//                version = '3.0.0-SNAPSHOT'
+//
+//                // Two artifacts, the `aar` (or `jar`) and the sources
+//                if (project.plugins.findPlugin("com.android.library")) {
+//                    from components.release
+//                } else {
+//                    from components.java
+//                }
+//
+//                artifact androidSourcesJar
+//                artifact javadocJar
+//
+//                // Mostly self-explanatory metadata
+//                pom {
+//                    name = 'AndroidSDK'
+//                    description = 'Pay Theory Android SDK'
+//                    url = 'https://github.com/pay-theory/pay-theory-android'
+//                    licenses {
+//                        license {
+//                            name = 'MIT License'
+//                            url = 'https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE'
+//                        }
+//                    }
+//                    developers {
+//                        developer {
+//                            id = 'aron23'
+//                            name = 'Aron Price'
+//                            email = 'aron@paytheory.com'
+//                        }
+//                    }
+//                    // Version control info
+//                    scm {
+//                        connection = 'scm:git:github.com/pay-theory/pay-theory-android.git'
+//                        developerConnection = 'scm:git:ssh://github.com/pay-theory/pay-theory-android.git'
+//                        url = 'https://github.com/pay-theory/pay-theory-android/tree/main'
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//signing {
+//    rootProject.ext["signing.keyId"]
+//    rootProject.ext["signing.secretKeyRingFile"]
+//    rootProject.ext["signing.password"]
+//    sign publishing.publications
+//}

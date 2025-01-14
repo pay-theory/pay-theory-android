@@ -10,17 +10,17 @@ import com.paytheory.android.sdk.data.PayorInfo
 * we are including this in errors, need to work through various scenarios and find where to use each
 * */
 enum class ErrorCode {
-    actionComplete, //The requested action has already been completed.
-    actionInProgress, //An action is currently in progress, preventing a new action.
-    attestationFailed, //The device attestation process failed.
-    inProgress, //The operation is still in progress.
-    invalidAPIKey, //The provided API key is invalid or not recognized.
-    invalidParam, //An invalid parameter was provided to the SDK.
-    noFields, //Required fields were not provided for the operation.
-    notReady, //The SDK is not in a ready state for the requested operation.
-    notValid, //The provided data failed validation checks.
-    socketError, //An error occurred with the WebSocket connection.
-    tokenFailed	//Token generation or validation failed.
+    ActionComplete, //The requested action has already been completed.
+    ActionInProgress, //An action is currently in progress, preventing a new action.
+    AttestationFailed, //The device attestation process failed.
+    InProgress, //The operation is still in progress.
+    InvalidAPIKey, //The provided API key is invalid or not recognized.
+    InvalidParam, //An invalid parameter was provided to the SDK.
+    NoFields, //Required fields were not provided for the operation.
+    NotReady, //The SDK is not in a ready state for the requested operation.
+    NotValid, //The provided data failed validation checks.
+    SocketError, //An error occurred with the WebSocket connection.
+    TokenFailed	//Token generation or validation failed.
 }
 
 /**
@@ -43,7 +43,7 @@ data class PTError (
  * @param mapUrl a url for a map to nearby barcode payment locations
  */
 data class BarcodeResult (
-    @SerializedName("BarcodeUid") val barcodeUid: String,
+    @SerializedName("BarcodeId") val barcodeId: String,
     @SerializedName("barcodeUrl") val barcodeUrl: String,
     @SerializedName("barcode") val barcode: String,
     @SerializedName("barcodeFee") val barcodeFee: String,
@@ -54,6 +54,9 @@ data class BarcodeResult (
 /**
  * Data class to store payment confirmation details
  */
+@Suppress("PropertyName", "PropertyName", "PropertyName", "PropertyName", "PropertyName",
+    "PropertyName", "PropertyName"
+)
 data class ConfirmationMessage (
     @SerializedName("payment_token") val paymentToken: String,
     @SerializedName("payer_id") val payerId: String?,
@@ -144,7 +147,7 @@ data class FailedTransactionResult (
 )
 
 /**
- * Data class to store received encrypted message
+ * Data class to store received encrypted message containing a payment token or payment method token
  */
 data class EncryptedMessage (
     @SerializedName("type") val type: String,
@@ -153,7 +156,7 @@ data class EncryptedMessage (
 )
 
 /**
- * Data class to store payment confirmation details
+ * Data class to store received encrypted payment token
  */
 data class EncryptedPaymentToken (
     @SerializedName("type") val type: String,
@@ -161,9 +164,27 @@ data class EncryptedPaymentToken (
     @SerializedName("public_key") val publicKey: String
 )
 /**
- * Interface that responds for any transaction request
+ * Interface that responds for any transaction request or tokenization request
  */
 interface Payable {
+    /**
+     * function to handle changes to SDK readiness
+     * @param isReady Boolean indicating if the SDK is ready to interact
+     */
+    fun handleReady(isReady: Boolean)
+
+    /**
+     * function to indicate payment process is started
+     * @param paymentType String indicating the type of payment started
+     */
+    fun handlePaymentStart(paymentType: String)
+
+    /**
+     * function to indicate tokenization process is started
+     * @param paymentType String indicating the type of payment method being tokenized
+     */
+    fun handleTokenStart(paymentType: String)
+
     /**
      * function to handle successful payment results
      * @param successfulTransactionResult result for a successful transaction
@@ -188,7 +209,7 @@ interface Payable {
      * function to handle a confirmation when requested in transaction configuration
      * @param confirmationMessage payment confirmation step, enabled using PayTheoryFragment's transact function confirmation set to true
      */
-    fun confirmation(confirmationMessage: ConfirmationMessage, transaction: Transaction)
+    fun confirmation(confirmationMessage: ConfirmationMessage, payment: Payment)
     /**
      * function to handle any system errors from a user's device or Pay Theory
      * @param error reason for the failure

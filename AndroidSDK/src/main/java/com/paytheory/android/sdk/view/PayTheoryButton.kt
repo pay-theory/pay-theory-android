@@ -9,10 +9,20 @@ import androidx.appcompat.widget.AppCompatButton
  */
 class PayTheoryButton: AppCompatButton {
 
+    /**
+     * constructor function
+     * @param context Context of application
+     */
     constructor(context: Context) : super(context){
         init()
     }
 
+    /**
+     * constructor function
+     * @param context Context of application
+     * @param attrs attributes of PayTheoryButton
+     *
+     */
     constructor(
         context: Context,
         attrs: AttributeSet?
@@ -20,6 +30,13 @@ class PayTheoryButton: AppCompatButton {
         init()
     }
 
+    /**
+     * constructor function
+     * @param context Context of application
+     * @param attrs attributes of PayTheoryButton
+     * @param defStyleAttr default style attributes of PayTheoryButton
+     *
+     */
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -28,6 +45,9 @@ class PayTheoryButton: AppCompatButton {
         init()
     }
 
+    /**
+     * Function to initial PayTheoryButton
+     */
     private fun init() {
         this.isEnabled = false
     }

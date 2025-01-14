@@ -1,12 +1,10 @@
 package com.paytheory.android.sdk
 
-import android.app.Activity
 import android.icu.util.TimeZone
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.textfield.TextInputLayout
-import com.paytheory.android.sdk.configuration.TokenizationType
-import com.paytheory.android.sdk.configuration.TransactionType
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
@@ -20,9 +18,9 @@ class Utility {
     /**
      * Retrieves bank account and routing fields
      */
-    fun getAchFields(activity: Activity): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = activity.findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = activity.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
+    fun getAchFields(view: View): Pair<PayTheoryEditText, PayTheoryEditText> {
+        val achAccount = view.findViewById<PayTheoryEditText>(R.id.ach_account_number)
+        val achRouting = view.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
         return Pair(achAccount, achRouting)
     }
 
@@ -78,25 +76,25 @@ class Utility {
      */
     fun enablePaymentFields(
         view: View,
-        transactionType: TransactionType,
+        paymentMethodType: PaymentMethodType,
         requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
-        if (transactionType == TransactionType.BANK) {
+        if (paymentMethodType == PaymentMethodType.BANK) {
             enableAccountName(view)
             enableACH(view)
         }
-        if (transactionType == TransactionType.CARD) {
+        if (paymentMethodType == PaymentMethodType.CARD) {
             if (requireAccountName) {
                 enableAccountName(view)
             }
             enableCC(view)
         }
-        if (transactionType == TransactionType.CASH) {
+        if (paymentMethodType == PaymentMethodType.CASH) {
             enableCash(view)
         }
 
-        if (requireBillingAddress && transactionType != TransactionType.CASH) {
+        if (requireBillingAddress && paymentMethodType != PaymentMethodType.CASH) {
             enableBillingAddress(view)
         }
     }
@@ -106,15 +104,15 @@ class Utility {
      */
     fun enableTokenizationFields(
         view: View,
-        tokenizationType: TokenizationType,
+        paymentMethodType: PaymentMethodType,
         requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
-        if (tokenizationType == TokenizationType.BANK) {
+        if (paymentMethodType == PaymentMethodType.BANK) {
             enableAccountName(view)
             enableACH(view)
         }
-        if (tokenizationType == TokenizationType.CARD) {
+        if (paymentMethodType == PaymentMethodType.CARD) {
             if (requireAccountName) {
                 enableAccountName(view)
             }
@@ -128,42 +126,51 @@ class Utility {
 
     /**
      * Creates payTheoryData object for transfer requests
+     * @param configuration PayTheoryConfiguration object
+     * @return HashMap<Any, Any> of pay theory data for the request
      */
-    fun createPayTheoryData(data: PayTheoryData): HashMap<Any, Any> {
+    fun createPayTheoryData(configuration: PayTheoryConfiguration): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
-        if (sendReceipt == true) {
-            payTheoryData["send_receipt"] = sendReceipt
-            if (!receiptDescription.isNullOrBlank()){
-                payTheoryData["receipt_description"] = receiptDescription
+        populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
+
+        if (configuration.sendReceipt == true) {
+            populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
+            if (configuration.receiptDescription.isNotBlank()){
+                populateKey("receipt_description", payTheoryData, configuration.receiptDescription)
             }
         }
         // if paymentParameters is given add to pay_theory_data
-        if (!paymentParameters.isNullOrBlank()) {
-            payTheoryData["payment_parameters"] = paymentParameters
+        if (!configuration.paymentParameters.isNullOrBlank()) {
+            populateKey("payment_parameters", payTheoryData, configuration.paymentParameters!!)
         }
         // if payorId is given add to pay_theory_data
-        if (!payorId.isNullOrBlank()) {
-            payTheoryData["payor_id"] = payorId
+        if (!configuration.payorId.isNullOrBlank()) {
+            populateKey("payor_id", payTheoryData, configuration.payorId!!)
         }
         // if invoiceId is given add to pay_theory_data
-        if (!invoiceId.isNullOrBlank()) {
-            payTheoryData["invoice_id"] = invoiceId
+        if (!configuration.invoiceId.isNullOrBlank()) {
+            populateKey("invoice_id", payTheoryData, configuration.invoiceId!!)
         }
         // if account_code is given add to pay_theory_data
-        if (!accountCode.isNullOrBlank()) {
-            payTheoryData["account_code"] = accountCode
+        if (!configuration.accountCode.isNullOrBlank()) {
+            populateKey("account_code", payTheoryData, configuration.accountCode!!)
         }
         // if reference is given add to pay_theory_data
-        if (!reference.isNullOrBlank()) {
-            payTheoryData["reference"] = reference
+        if (!configuration.reference.isNullOrBlank()) {
+            populateKey("reference", payTheoryData, configuration.reference!!)
         }
 
-        payTheoryData["fee"] = serviceFee as Any
+        payTheoryData["fee"] = configuration.serviceFee as Any
 
         payTheoryData["timezone"] = TimeZone.getDefault().id
 
         return payTheoryData
     }
+
+    private fun populateKey(key: String, payTheoryData: HashMap<Any,Any>, value: Any) {
+        payTheoryData.set(key,value)
+    }
+
 }

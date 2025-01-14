@@ -1,18 +1,15 @@
 package com.paytheory.android.sdk.state
 
-/*
-* Modernization
-* States use state elements to support ValidAndEmpty Protocol
-* States are accessible from PayTheoryFragment with the syntax:
-* payTheoryFragment.ach.accountNumber.isValid()
-* payTheoryFragment.ach.accountNumber.isEmpty()
-* */
-
+/**
+ * class that holds state of ACH fields
+ */
 class ACHState {
+    /**
+     * State element for account number field
+     */
     var accountNumber: StateElement = StateElement()
+    /**
+     * State element for routing number field
+     */
     var routingNumber: StateElement = StateElement()
-    var cvv: StateElement = StateElement()
-    var postalCode: StateElement = StateElement()
-    var accountHolderName: StateElement = StateElement()
-    var accountType: StateElement = StateElement()
 }

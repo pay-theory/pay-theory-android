@@ -9,22 +9,33 @@ import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
+/**
+ * Boolean to track card number field validation
+ */
 var cardFieldValid: Boolean = false
+/**
+ * Boolean to track expiration field validation
+ */
 var expFieldValid: Boolean = false
+/**
+ * Boolean to track cvv field validation
+ */
 var cvvFieldValid: Boolean = false
+/**
+ * Boolean to track zip code field validation
+ */
 var zipCodeFieldValid: Boolean = false
+/**
+ * Boolean to track all card field validation
+ */
 var cardFieldsValid: Boolean = false
 
-/*
-* Modernization
-* Watchers have been updated to support ValidAndEmpty protocol
-* changes are in afterTextChanged
-* */
-
+/**
+ * Function to enable or disable submit button based on all card field validation
+ * @param button pay theory button
+ */
 private fun areFieldsValid(button: PayTheoryButton){
-    //check if all card fields are valid
     cardFieldsValid = cardFieldValid && expFieldValid && cvvFieldValid && zipCodeFieldValid
-    //if all card fields are valid enable
     if (cardFieldsValid){
         button.enable()
     } else {
@@ -91,6 +102,10 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function to check if card number is valid using Luhn algorithm
+     * @param number card number string
+     */
     private fun validLuhn(number: String): Boolean {
         val (digits, others) = number
             .filterNot(Char::isWhitespace)
@@ -110,6 +125,11 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
 
         return checksum % 10 == 0
     }
+
+    /**
+     * Function to handle button state based on card number validation
+     * @param valid boolean for validity of card number
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             cardFieldValid = false
@@ -162,6 +182,10 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function to check if expiration date is valid
+     * @param number expiration date string
+     */
     @SuppressLint("SimpleDateFormat")
     private fun validExp(number: String): Boolean {
         val length = number.length
@@ -183,6 +207,10 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
         return (currentText.length == 5) && (currentText.substringBefore("/").toInt() < 13) && (currentText.substringBefore("/").toInt() != 0) && (currentText.substringAfter("/").toInt() >= currentTwoDigitYear)
     }
 
+    /**
+     * Function to handle button state based on expiration date validation
+     * @param valid boolean for validity of expiration date
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             expFieldValid = false
@@ -234,12 +262,21 @@ class CVVTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function to check if cvv is valid
+     * @param number cvv string
+     */
     private fun validCVV(number: String): Boolean {
         val (digits, _) = number
             .partition(Char::isDigit)
 
         return !(digits.length < 3 || digits.length > 4)
     }
+
+    /**
+     * Function to handle button state based on cvv validation
+     * @param valid boolean for validity of cvv
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             cvvFieldValid = false
@@ -290,12 +327,21 @@ class ZipCodeTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, pri
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function to check if zip code is valid
+     * @param number zip code string
+     */
     private fun validZip(number: String): Boolean {
         val (digits, _) = number
             .partition(Char::isDigit)
 
         return digits.length == 5
     }
+
+    /**
+     * Function to handle button state based on zip code validation
+     * @param valid boolean for validity of zip code
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             zipCodeFieldValid = false

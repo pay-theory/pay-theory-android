@@ -4,12 +4,15 @@ import com.google.gson.annotations.SerializedName
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.http.*
 /**
- * Interface that handles data for pay theory challenge service
+ * Interface that handles data for pay theory token service
  */
 interface PTTokenApiService {
     /**
-     * Function that takes headers map and creates observable for the pt-token response
-     * @param headers headers map for api call
+     * Sends get request to the pay theory token service and retrieves the challenge options.
+     *
+     * @param headers The headers for the API call, typically containing authorization and content type information.
+     *                For example:
+     *
      */
     @GET("pt-token-service/")
     fun doToken(@HeaderMap headers: Map<String, String>): Observable<PTTokenResponse>
