@@ -190,7 +190,7 @@ abstract class PaymentMethodProcessor (
             // handle success pt-token request
             .subscribe({ ptTokenResponse: PTTokenResponse ->
                 ptResetCounter = 0
-                googlePlayIntegrity(ptTokenResponse)
+                initiateGooglePlayIntegrityCheck(ptTokenResponse)
                 // handle failed pt-token request
             }, { error ->
                 if (context is Payable) {
@@ -245,7 +245,7 @@ abstract class PaymentMethodProcessor (
      * if the integrity check is successful.
      * @param ptTokenResponse The response containing the Pay Theory token.
      */
-    private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
+    private fun initiateGooglePlayIntegrityCheck(ptTokenResponse: PTTokenResponse) {
 
         // See above how to prepare integrityTokenProvider.
 

@@ -114,7 +114,7 @@ class PaymentMethodToken(
      * @return String of message type
      * @param message The incoming message from the socket.
      */
-    private fun discoverMessageType(message: String): String {
+    private fun determineWebSocketMessageType(message: String): String {
         return when {
             message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
             message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
@@ -138,7 +138,7 @@ class PaymentMethodToken(
                 messageReactors!!.onTokenError(message, this)
             }
             else -> {
-                when (discoverMessageType(message)) {
+                when (determineWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onTokenizeHostToken(message, this)
                     TOKENIZE_RESULT -> messageReactors!!.onCompleteToken(message, this)
                     else -> messageReactors!!.onTokenError(message, this)

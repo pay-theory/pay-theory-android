@@ -238,7 +238,7 @@ class PayTheoryFragment : Fragment() {
         this.constants = Constants(partner!!, stage!!)
 
         // Create pay_theory_data object for transaction message
-        payTheoryData = Utility.createPayTheoryData(sendReceipt, receiptDescription, paymentParameters, payorId, invoiceId, accountCode, reference)
+        payTheoryData = Utility.createPayTheoryData(configuration)
 
         model = ViewModelProvider(
             this,
@@ -477,7 +477,7 @@ class PayTheoryFragment : Fragment() {
         this.payorId = configuration.payorId
 
         // Create pay_theory_data object for transaction message
-        payTheoryData = Utility.createPayTheoryData(null, null, null, payorId, null, null, null)
+        payTheoryData = Utility.createPayTheoryData(configuration)
 
         model = ViewModelProvider(
             this,

@@ -180,7 +180,7 @@ class Payment(
      * @param message The message received from the websocket.
      * @return The type of message received, represented as a string.
      */
-    private fun discoverMessageType(message: String): String {
+    private fun determineWebSocketMessageType(message: String): String {
         return when {
             message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
@@ -208,7 +208,7 @@ class Payment(
                 messageReactors!!.onError(message, this)
             }
             else -> {
-                when (discoverMessageType(message)) {
+                when (determineWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message, this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message, viewModel, this)

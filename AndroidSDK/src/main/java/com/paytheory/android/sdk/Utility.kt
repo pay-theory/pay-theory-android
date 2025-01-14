@@ -126,51 +126,51 @@ class Utility {
 
     /**
      * Creates payTheoryData object for transfer requests
-     * @param sendReceipt boolean to send receipt
-     * @param receiptDescription description for receipt
-     * @param paymentParameters string of payment parameters
-     * @param payorId payor id for transaction
-     * @param invoiceId invoice id for transaction
-     * @param accountCode account code for transaction
-     * @param reference reference for transaction
-     * @param serviceFee service fee for transaction
-     * @return HashMap<Any, Any> of pay theory data
+     * @param configuration PayTheoryConfiguration object
+     * @return HashMap<Any, Any> of pay theory data for the request
      */
-    fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?, serviceFee: Int = 0): HashMap<Any, Any> {
+    fun createPayTheoryData(configuration: PayTheoryConfiguration): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
-        if (sendReceipt == true) {
-            payTheoryData["send_receipt"] = sendReceipt
-            if (!receiptDescription.isNullOrBlank()){
-                payTheoryData["receipt_description"] = receiptDescription
+        populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
+
+        if (configuration.sendReceipt == true) {
+            populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
+            if (configuration.receiptDescription.isNotBlank()){
+                populateKey("receipt_description", payTheoryData, configuration.receiptDescription)
             }
         }
         // if paymentParameters is given add to pay_theory_data
-        if (!paymentParameters.isNullOrBlank()) {
-            payTheoryData["payment_parameters"] = paymentParameters
+        if (!configuration.paymentParameters.isNullOrBlank()) {
+            populateKey("payment_parameters", payTheoryData, configuration.paymentParameters!!)
         }
         // if payorId is given add to pay_theory_data
-        if (!payorId.isNullOrBlank()) {
-            payTheoryData["payor_id"] = payorId
+        if (!configuration.payorId.isNullOrBlank()) {
+            populateKey("payor_id", payTheoryData, configuration.payorId!!)
         }
         // if invoiceId is given add to pay_theory_data
-        if (!invoiceId.isNullOrBlank()) {
-            payTheoryData["invoice_id"] = invoiceId
+        if (!configuration.invoiceId.isNullOrBlank()) {
+            populateKey("invoice_id", payTheoryData, configuration.invoiceId!!)
         }
         // if account_code is given add to pay_theory_data
-        if (!accountCode.isNullOrBlank()) {
-            payTheoryData["account_code"] = accountCode
+        if (!configuration.accountCode.isNullOrBlank()) {
+            populateKey("account_code", payTheoryData, configuration.accountCode!!)
         }
         // if reference is given add to pay_theory_data
-        if (!reference.isNullOrBlank()) {
-            payTheoryData["reference"] = reference
+        if (!configuration.reference.isNullOrBlank()) {
+            populateKey("reference", payTheoryData, configuration.reference!!)
         }
 
-        payTheoryData["fee"] = serviceFee as Any
+        payTheoryData["fee"] = configuration.serviceFee as Any
 
         payTheoryData["timezone"] = TimeZone.getDefault().id
 
         return payTheoryData
     }
+
+    private fun populateKey(key: String, payTheoryData: HashMap<Any,Any>, value: Any) {
+        payTheoryData.set(key,value)
+    }
+
 }
