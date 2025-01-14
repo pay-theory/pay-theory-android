@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
  * Class that manages WebSocket actions: start, send message, stop
  */
 class WebServicesProvider {
-
+    val normalClosureStatus = 1000
     private var webSocket: WebSocket? = null
 
 
@@ -74,7 +74,7 @@ class WebServicesProvider {
     fun stopSocket() {
 //        println("Pay Theory Requested Disconnect")
         try {
-            webSocket?.close(NORMAL_CLOSURE_STATUS, null)
+            webSocket?.close(normalClosureStatus, null)
             webSocket = null
             webSocketListener?.socketEventChannel?.close()
             webSocketListener = null
@@ -84,10 +84,6 @@ class WebServicesProvider {
             webSocket = null
             webSocketListener = null
         }
-    }
-
-    companion object {
-        const val NORMAL_CLOSURE_STATUS = 1000
     }
 
 }

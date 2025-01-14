@@ -15,6 +15,7 @@ object ApiWorker {
     private var mClient: OkHttpClient? = null
     private var mGsonConverter: GsonConverterFactory? = null
 
+
     val client: OkHttpClient
         @Throws(NoSuchAlgorithmException::class, KeyManagementException::class)
         get() {

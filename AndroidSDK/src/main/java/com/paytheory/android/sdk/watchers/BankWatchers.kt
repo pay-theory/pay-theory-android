@@ -7,16 +7,23 @@ import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 
+/**
+ * Boolean that tracks the validity of the account number
+ */
 var accountNumberValid: Boolean = false
+/**
+ * Boolean that tracks the validity of the routing number
+ */
 var routingNumberValid: Boolean = false
+/**
+ * Boolean that tracks the validity of all bank fields
+ */
 var bankFieldsValid: Boolean = false
 
-/*
-* Modernization
-* Watchers have been updated to support ValidAndEmpty protocol
-* changes are in afterTextChanged
-* */
-
+/**
+ * Function that checks the validity of all bank fields and enables/disables the pay button
+ * @param button pay theory button
+ */
 private fun areFieldsValid(button: PayTheoryButton){
     //check if all card fields are valid
     bankFieldsValid = accountNumberValid && routingNumberValid
@@ -28,8 +35,6 @@ private fun areFieldsValid(button: PayTheoryButton){
     }
 }
 
-
-
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
@@ -39,18 +44,32 @@ class RoutingNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragmen
     private var ptText: PayTheoryEditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
-    override fun afterTextChanged(s: Editable) {
+    /**
+     * Function that handles text changes after they happen
+     */
+    override fun afterTextChanged(editable: Editable) {
+        val s = editable.toString()
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountNumber.setEmpty(true)
-            ptFragment!!.ach.accountNumber.setValid(false)
+            ptFragment!!.ach.routingNumber.setEmpty(true)
+            ptFragment!!.ach.routingNumber.setValid(false)
             return
         }
 
@@ -60,6 +79,10 @@ class RoutingNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragmen
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function that that handles the pay button and field errors
+     * @param valid boolean that determines if the routing number is valid
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             routingNumberValid = false
@@ -71,7 +94,6 @@ class RoutingNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragmen
     }
 }
 
-
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
@@ -81,15 +103,29 @@ class AccountNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragmen
     private var ptText: PayTheoryEditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
-    override fun afterTextChanged(s: Editable) {
+    /**
+     * Function that handles text changes after they happen
+     */
+    override fun afterTextChanged(editable: Editable) {
+        val s = editable.toString()
         if (s.isEmpty()) {
             ptFragment!!.ach.accountNumber.setEmpty(true)
             ptFragment!!.ach.accountNumber.setValid(false)
@@ -102,6 +138,10 @@ class AccountNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragmen
         handleButton(isValidNumber)
     }
 
+    /**
+     * Function that that handles the pay button and field errors
+     * @param valid boolean that determines if the account number is valid
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             accountNumberValid = false

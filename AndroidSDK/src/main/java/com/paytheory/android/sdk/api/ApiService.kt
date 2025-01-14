@@ -13,6 +13,8 @@ class ApiService(basePathIn: String) {
 
     /**
      * Function that creates the pt token api call
+     * @return PTTokenApiService api service interface
+     *
      */
     fun ptTokenApiCall(): PTTokenApiService = Retrofit.Builder()
         .baseUrl(basePath)

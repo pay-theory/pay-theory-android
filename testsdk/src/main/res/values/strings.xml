@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">TestSDK</string>
-    <string name="confirm_payment">Confirm Payment</string>
-    <string name="btn_no_string">No</string>
-    <string name="btn_yes_string">Yes</string>
-    <string name="btn_ok_string">OK</string>
-    <string name="use_service_fee">use service fee</string>
+    <string name="card">card</string>
+    <string name="bank">bank</string>
+    <string name="cash">cash</string>
+    <string name="token">token</string>
 </resources>

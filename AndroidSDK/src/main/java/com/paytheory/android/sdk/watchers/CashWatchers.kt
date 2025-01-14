@@ -8,16 +8,23 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
+/**
+ * Variable to hold validation for cash contact information
+ */
 var cashContactFieldValid: Boolean = false
+/**
+ * Variable to hold validation for all cash fields
+ */
 var cashFieldsValid: Boolean = false
+/**
+ * Variable to hold validation for cash name
+ */
 var cashNameFieldValid: Boolean = false
 
-/*
-* Modernization
-* Watchers have been updated to support ValidAndEmpty protocol
-* changes are in afterTextChanged
-* */
-
+/**
+ * Function to check if all cash fields are valid
+ * @param button pay theory button
+ */
 private fun areFieldsValid(button: PayTheoryButton){
     //check if all card fields are valid
     cashFieldsValid = cashContactFieldValid && cashNameFieldValid
@@ -30,6 +37,9 @@ private fun areFieldsValid(button: PayTheoryButton){
 }
 /**
  * Text watcher class to validate buyer contact edit text field
+ * @param pt pay theory edit text
+ * @param fragment pay theory fragment
+ * @param submitButton pay theory button
  */
 class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
@@ -46,17 +56,22 @@ class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment,
 
     override fun afterTextChanged(s: Editable) {
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountNumber.setEmpty(true)
-            ptFragment!!.ach.accountNumber.setValid(false)
+            ptFragment!!.cash.contactInformation.setEmpty(true)
+            ptFragment!!.cash.contactInformation.setValid(false)
             return
         }
         val isValid = isValidEmail(s.toString())
 
-        ptFragment!!.ach.routingNumber.setEmpty(false)
-        ptFragment!!.ach.routingNumber.setValid(isValid)
+        ptFragment!!.cash.contactInformation.setEmpty(false)
+        ptFragment!!.cash.contactInformation.setValid(isValid)
         handleButton(isValid)
     }
 
+    /**
+     * Function to check if email or phone is valid
+     * @param target email or phone
+     * @return Boolean
+     */
     private fun isValidEmail(target: CharSequence): Boolean {
         return if (TextUtils.isEmpty(target)) {
             false
@@ -65,6 +80,10 @@ class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment,
         }
     }
 
+    /**
+     * Function to handle button state
+     * @param valid validation of field
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             cashContactFieldValid = false
@@ -80,6 +99,9 @@ class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment,
 
 /**
  * Text watcher class to validate buyer contact edit text field
+ * @param pt pay theory edit text
+ * @param fragment pay theory fragment
+ * @param submitButton pay theory button
  */
 class CashNameTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
@@ -96,20 +118,29 @@ class CashNameTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, pr
 
     override fun afterTextChanged(s: Editable) {
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountNumber.setEmpty(true)
-            ptFragment!!.ach.accountNumber.setValid(false)
+            ptFragment!!.cash.payerName.setEmpty(true)
+            ptFragment!!.cash.payerName.setValid(false)
             return
         }
         val isValid = isValid(s.toString())
-        ptFragment!!.ach.routingNumber.setEmpty(false)
-        ptFragment!!.ach.routingNumber.setValid(isValid)
+        ptFragment!!.cash.payerName.setEmpty(false)
+        ptFragment!!.cash.payerName.setValid(isValid)
         handleButton(isValid)
     }
 
+    /**
+     * Function to check if name is valid
+     * @param target name
+     * @return Boolean
+     */
     private fun isValid(target: CharSequence): Boolean {
         return !TextUtils.isEmpty(target)
     }
 
+    /**
+     * Function to handle button state
+     * @param valid validation of field
+     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
             cashNameFieldValid = false

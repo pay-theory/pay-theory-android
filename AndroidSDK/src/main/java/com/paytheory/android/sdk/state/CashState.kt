@@ -1,13 +1,15 @@
 package com.paytheory.android.sdk.state
 
-/*
-* Modernization
-* States use state elements to support ValidAndEmpty Protocol
-* States are accessible from PayTheoryFragment with the syntax:
-* payTheoryFragment.cash.contactInformation.isValid()
-* payTheoryFragment.card.contactInformation.isEmpty()
-* */
+/**
+ * Data class that holds state of cash payment fields
+ */
 class CashState {
+    /**
+     * Variable that holds state of payer name field
+     */
     var payerName: StateElement = StateElement()
+    /**
+     * Variable that holds state of contact information field
+     */
     var contactInformation: StateElement = StateElement()
 }

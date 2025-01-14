@@ -6,7 +6,7 @@ import com.paytheory.android.sdk.ErrorCode
 import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentMethodToken
-import com.paytheory.android.sdk.Transaction
+import com.paytheory.android.sdk.Payment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -29,7 +29,7 @@ class WebSocketViewModel(
     private var payTheoryToken: String,
     private val partner: String,
     private val stage: String,
-    private val transaction: Transaction?,
+    private val payment: Payment?,
     private val paymentMethodToken: PaymentMethodToken?
 ):
     ViewModel() {
@@ -97,10 +97,10 @@ class WebSocketViewModel(
         interactor.stopSocket()
         // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call", "Software caused connection abort", "null", "Unable to resolve host"
         if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)){
-            if (transaction != null){ // error for transaction request
-                if (transaction.context is Payable){
+            if (payment != null){ // error for transaction request
+                if (payment.context is Payable){
                     println("Network Connection Error - Reconnecting...")
-                    transaction.resetSocket()
+                    payment.resetSocket()
                 }
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
@@ -110,16 +110,16 @@ class WebSocketViewModel(
             }
         } else { //if error is not ssl error
             // error for transaction request
-            if (transaction != null) {
-                if (transaction.context is Payable){
+            if (payment != null) {
+                if (payment.context is Payable){
                     println("Error: $error")
-                    transaction.context.handleError(PTError(ErrorCode.socketError,error))
+                    payment.context.handleError(PTError(ErrorCode.SocketError,error))
                 }
             // error for tokenization request
             } else if (paymentMethodToken != null){
                 if (paymentMethodToken.context is Payable){
                     println("Error: $error")
-                    paymentMethodToken.context.handleError(PTError(ErrorCode.socketError,error))
+                    paymentMethodToken.context.handleError(PTError(ErrorCode.SocketError,error))
                 }
             }
         }

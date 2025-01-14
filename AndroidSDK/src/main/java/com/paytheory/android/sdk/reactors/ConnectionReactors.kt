@@ -9,11 +9,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64
 
 /**
- * Creates WebSocket connection reactors
- * @param ptToken pt-token string
- * @param attestation attestation string
- * @param viewModel viewModel for WebSocket
- * @param websocketInteractor interactor for the WebSocket
+ * Class that handles connection reactors for the WebSocket.
+ *
+ * @param ptToken The PayTheory token.
+ * @param attestation The attestation string.
+ * @param viewModel The WebSocketViewModel instance.
+ * @param websocketInteractor The WebsocketInteractor instance.
+ * @param applicationPackageName The application's package name.
  */
 @ExperimentalCoroutinesApi
 class ConnectionReactors(
@@ -28,7 +30,7 @@ class ConnectionReactors(
     }
 
     /**
-     * Called on websocket connection, creates the host token action request
+     * Called when the WebSocket is connected. Sends a host token action request.
      */
     @ExperimentalCoroutinesApi
     fun onConnected() {
@@ -43,7 +45,7 @@ class ConnectionReactors(
     }
 
     /**
-     * Function that will stop socket interactions when disconnected
+     * Called when the WebSocket is disconnected. Stops the socket interactions.
      */
     @ExperimentalCoroutinesApi
     fun onDisconnected() {

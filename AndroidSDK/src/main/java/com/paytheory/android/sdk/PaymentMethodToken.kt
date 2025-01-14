@@ -2,10 +2,14 @@ package com.paytheory.android.sdk
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.IntegrityManagerFactory
-import com.google.android.play.core.integrity.IntegrityTokenRequest
-import com.google.android.play.core.integrity.IntegrityTokenResponse
+import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityToken
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.android.sdk.api.ApiService
@@ -26,12 +30,22 @@ import com.paytheory.android.sdk.websocket.WebsocketRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.security.MessageDigest
 import java.util.Base64
 import java.util.logging.Level
 import java.util.logging.Logger
 
 /**
+ * PaymentMethodToken class that handles the communication and logic for tokenizing payment methods.
  *
+ * This class utilizes websockets to communicate with the Pay Theory platform for secure tokenization.
+ * It includes functionalities for establishing a connection, sending tokenization requests, and
+ * receiving responses.
+ *
+ * @param context The application context.
+ * @param partner The partner identifier.
+ * @param stage The environment stage (e.g., "sandbox", "production").
+ * @param apiKey The API key for authentication.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodToken(
@@ -44,16 +58,17 @@ class PaymentMethodToken(
     private val payTheoryData: HashMap<Any, Any>? = null
 ) : WebsocketMessageHandler {
     private lateinit var viewModel: WebSocketViewModel
-    private val googleProjectNumber = 192992826889
+    private val googleProjectNumber = context.resources.getString(R.string.google_project_number).toLong()
     private val headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to apiKey)
     private var queuedRequest: PaymentMethodTokenData? = null
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
+    var integrityTokenProvider: StandardIntegrityTokenProvider? = null
     private var resetCounter = 0
     private var ptResetCounter = 0
-
+    private var isWarm: Boolean = false
     companion object {
         private var messageReactors: MessageReactors? = null
         private var connectionReactors: ConnectionReactors? = null
@@ -75,12 +90,29 @@ class PaymentMethodToken(
     * */
 
     /**
-     * Initialize a transaction
+     * Initializes the PaymentMethodToken instance by warming up Play Integrity and setting the ready state.
      */
     init {
-        ptTokenApiCall(context)
+        if (!isWarm) {
+            warmUpPlayIntegrity()
+            isWarm = true
+        }
+        setReady(false)
     }
 
+    /**
+     * Sets the ready state of the Payable context, indicating whether the tokenization process is ready.
+     * @param isReady A boolean value representing the ready state.
+     */
+    private fun setReady(isReady: Boolean) {
+        if (context is Payable) {
+            context.handleReady(isReady)
+        }
+    }
+
+    /**
+     * Resets the Pay Theory token by making an API call to obtain a new token.
+     */
     private fun resetPtToken() {
         if (ptResetCounter < 2000) {
 //            println("PT Token Reconnect Counter: $ptResetCounter")
@@ -92,7 +124,7 @@ class PaymentMethodToken(
     }
 
     /**
-     * Reset socket connection on network failures
+     * Resets the socket connection on network failures by disconnecting and attempting to reconnect.
      */
     fun resetSocket() {
         if (resetCounter < 50) {
@@ -104,9 +136,13 @@ class PaymentMethodToken(
         }
     }
 
+    /**
+     * Makes an API call to obtain a Pay Theory token.
+     * @param context The application context.
+     */
     @SuppressLint("CheckResult")
     private fun ptTokenApiCall(context: Context) {
-        val observable = ApiService(constants.API_BASE_PATH).ptTokenApiCall().doToken(headerMap)
+        val observable = ApiService(constants.apiBasePath).ptTokenApiCall().doToken(headerMap)
         observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             // handle success pt-token request
             .subscribe({ ptTokenResponse: PTTokenResponse ->
@@ -124,47 +160,75 @@ class PaymentMethodToken(
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(PTError(ErrorCode.socketError,"Access Denied"))
+                        context.handleError(PTError(ErrorCode.SocketError,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(PTError(ErrorCode.socketError,error.message.toString()))
+                        context.handleError(PTError(ErrorCode.SocketError,error.message.toString()))
                     }
                 }
             }
             )
     }
+    /**
+     * Warms up Play Integrity by preparing an integrity token.
+     */
+    private fun warmUpPlayIntegrity() {
+        val googleProjectNumber: Long = context.resources.getString(R.string.google_project_number).toLong()
+        val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
 
+
+        // Prepare integrity token. Can be called once in a while to keep internal
+        // state fresh.
+        standardIntegrityManager.prepareIntegrityToken(
+            PrepareIntegrityTokenRequest.builder()
+                .setCloudProjectNumber(googleProjectNumber)
+                .build()
+        )
+            .addOnSuccessListener { tokenProvider ->
+                integrityTokenProvider = tokenProvider
+                ptTokenApiCall(context)
+            }
+            .addOnFailureListener { exception ->
+                Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
+            }
+    }
+    /**
+     * Performs Google Play Integrity check and establishes the WebSocketViewModel.
+     * @param ptTokenResponse The Pay Theory token response.
+     */
     private fun googlePlayIntegrity(ptTokenResponse: PTTokenResponse) {
-        val challenge = ptTokenResponse.challengeOptions.challenge
+//        val challenge = ptTokenResponse.challengeOptions.challenge
         // Create an instance of a manager.
-        val integrityManager = IntegrityManagerFactory.create(this.context)
-        // Request the integrity token by providing the nonce as Pay Theory challenge string.
-        val integrityTokenResponse: Task<IntegrityTokenResponse> =
-            integrityManager.requestIntegrityToken(
-                IntegrityTokenRequest.builder()
-                    .setNonce(challenge)
-                    .setCloudProjectNumber(googleProjectNumber)
+        val digest = MessageDigest.getInstance("SHA-256")
+        val requestHash = digest.digest(ptTokenResponse.challengeOptions.challenge.toByteArray(Charsets.UTF_8))
+
+        val integrityTokenResponse: Task<StandardIntegrityToken> =
+            integrityTokenProvider!!.request(
+                StandardIntegrityTokenRequest.builder()
+                    .setRequestHash(Base64.getEncoder().encodeToString(requestHash))
                     .build()
             )
-        // handle success integrity token request
-        integrityTokenResponse.addOnSuccessListener {
-            resetCounter = 0
-            establishViewModel(ptTokenResponse, it.token())
-        }
-        // handle failed integrity token request
-        integrityTokenResponse.addOnFailureListener {
-            if (context is Payable) {
-                if (it.message?.contains("Network error") == true) {
-                    println("Google Play Integrity API Network Error. Retrying...")
-                    disconnect()
-                    resetSocket()
-                } else {
-                    context.handleError(PTError(ErrorCode.attestationFailed,it.message!!))
+        integrityTokenResponse
+            .addOnSuccessListener(OnSuccessListener { response ->
+                establishViewModel(ptTokenResponse, response.token()) })
+            .addOnFailureListener(OnFailureListener { exception ->
+                if (context is Payable) {
+                    if (exception.message?.contains("Network error") == true) {
+                        println("Google Play Integrity API Network Error. Retrying...")
+                        disconnect()
+                        resetSocket()
+                    } else {
+                        context.handleError(PTError(ErrorCode.SocketError,exception.message!!))
+                    }
                 }
-            }
-        }
+            })
     }
 
+    /**
+     * Establishes the WebSocketViewModel and initiates the connection.
+     * @param ptTokenResponse The Pay Theory token response.
+     * @param attestationResult The attestation result from Play Integrity.
+     */
     private fun establishViewModel(
         ptTokenResponse: PTTokenResponse,
             attestationResult: String? = ""
@@ -203,6 +267,9 @@ class PaymentMethodToken(
         messageReactors!!.activePaymentToken = paymentMethodTokenData
         val actionRequest = generateInitialActionRequest(paymentMethodTokenData)
         if (viewModel.connected) {
+            if (context is Payable) {
+                context.handleTokenStart(paymentMethodTokenData.type)
+            }
             viewModel.sendSocketMessage(Gson().toJson(actionRequest))
             println("Pay Theory Token Requested")
         } else {
@@ -212,6 +279,10 @@ class PaymentMethodToken(
         }
     }
 
+    /**
+     * Generates the initial action request for tokenization.
+     * @param paymentMethodTokenData The payment method token data.
+     */
     private fun generateInitialActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
@@ -250,6 +321,10 @@ class PaymentMethodToken(
         )
     }
 
+    /**
+     * Discovers the message type based on the incoming message content.
+     * @param message The incoming message from the socket.
+     */
     private fun discoverMessageType(message: String): String {
         return when {
             message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
@@ -283,6 +358,9 @@ class PaymentMethodToken(
         }
     }
 
+    /**
+     * Disconnects the websocket connection.
+     */
     override fun disconnect() {
         if (webSocketInteractor != null) {
             webSocketInteractor!!.stopSocket()

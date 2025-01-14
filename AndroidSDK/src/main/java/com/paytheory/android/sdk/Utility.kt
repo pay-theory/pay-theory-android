@@ -1,12 +1,10 @@
 package com.paytheory.android.sdk
 
-import android.app.Activity
 import android.icu.util.TimeZone
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.textfield.TextInputLayout
-import com.paytheory.android.sdk.configuration.TokenizationType
-import com.paytheory.android.sdk.configuration.TransactionType
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
@@ -20,9 +18,9 @@ class Utility {
     /**
      * Retrieves bank account and routing fields
      */
-    fun getAchFields(activity: Activity): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = activity.findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = activity.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
+    fun getAchFields(view: View): Pair<PayTheoryEditText, PayTheoryEditText> {
+        val achAccount = view.findViewById<PayTheoryEditText>(R.id.ach_account_number)
+        val achRouting = view.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
         return Pair(achAccount, achRouting)
     }
 
@@ -78,25 +76,25 @@ class Utility {
      */
     fun enablePaymentFields(
         view: View,
-        transactionType: TransactionType,
+        paymentMethodType: PaymentMethodType,
         requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
-        if (transactionType == TransactionType.BANK) {
+        if (paymentMethodType == PaymentMethodType.BANK) {
             enableAccountName(view)
             enableACH(view)
         }
-        if (transactionType == TransactionType.CARD) {
+        if (paymentMethodType == PaymentMethodType.CARD) {
             if (requireAccountName) {
                 enableAccountName(view)
             }
             enableCC(view)
         }
-        if (transactionType == TransactionType.CASH) {
+        if (paymentMethodType == PaymentMethodType.CASH) {
             enableCash(view)
         }
 
-        if (requireBillingAddress && transactionType != TransactionType.CASH) {
+        if (requireBillingAddress && paymentMethodType != PaymentMethodType.CASH) {
             enableBillingAddress(view)
         }
     }
@@ -106,15 +104,15 @@ class Utility {
      */
     fun enableTokenizationFields(
         view: View,
-        tokenizationType: TokenizationType,
+        paymentMethodType: PaymentMethodType,
         requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
-        if (tokenizationType == TokenizationType.BANK) {
+        if (paymentMethodType == PaymentMethodType.BANK) {
             enableAccountName(view)
             enableACH(view)
         }
-        if (tokenizationType == TokenizationType.CARD) {
+        if (paymentMethodType == PaymentMethodType.CARD) {
             if (requireAccountName) {
                 enableAccountName(view)
             }
@@ -128,8 +126,17 @@ class Utility {
 
     /**
      * Creates payTheoryData object for transfer requests
+     * @param sendReceipt boolean to send receipt
+     * @param receiptDescription description for receipt
+     * @param paymentParameters string of payment parameters
+     * @param payorId payor id for transaction
+     * @param invoiceId invoice id for transaction
+     * @param accountCode account code for transaction
+     * @param reference reference for transaction
+     * @param serviceFee service fee for transaction
+     * @return HashMap<Any, Any> of pay theory data
      */
-    fun createPayTheoryData(data: PayTheoryData): HashMap<Any, Any> {
+    fun createPayTheoryData(sendReceipt: Boolean?, receiptDescription: String?, paymentParameters: String?, payorId: String?, invoiceId: String?, accountCode: String?, reference: String?, serviceFee: Int = 0): HashMap<Any, Any> {
         //create pay_theory_data object for host:transfer_part1 action request
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data

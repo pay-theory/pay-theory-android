@@ -3,23 +3,34 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+File secretPropsFile = project.rootProject.file('local.properties')
+
+Properties p = new Properties()
+new FileInputStream(secretPropsFile).withCloseable { is -> p.load(is) }
+p.each { name, value -> ext[name] = value }
+
 android {
-    namespace 'com.paytheory.android.testsdk'
-    compileSdk 35
+    namespace = 'com.paytheory.android.testsdk'
+    compileSdk = 35
 
     defaultConfig {
         applicationId "com.paytheory.android.testsdk"
-        minSdk 26
-        targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 2
+        versionName = "1.0.1"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
+        debug {
+            resValue("string", "api_key", "${API_KEY}")
+        }
         release {
-            minifyEnabled false
+            resValue("string", "api_key", "${API_KEY}")
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -31,14 +42,17 @@ android {
         jvmTarget = '21'
     }
     buildFeatures {
-        viewBinding true
+        viewBinding = true
     }
 }
 
 dependencies {
     //use PayTheorySDK as library
+    //implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: '3.0.1'
     implementation project(path: ':AndroidSDK')
     implementation 'net.java.dev.jna:jna:5.15.0@aar'
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
 
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'

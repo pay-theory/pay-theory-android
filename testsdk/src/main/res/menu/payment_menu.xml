@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <item
+            android:id="@+id/page_card"
+            android:enabled="true"
+            android:icon="@drawable/pt_credit_card_24"
+            android:title="@string/card"/>
+        <item
+            android:id="@+id/page_bank"
+            android:enabled="true"
+            android:icon="@drawable/pt_bank_24"
+            android:title="@string/bank"/>
+        <item
+            android:id="@+id/page_token"
+            android:enabled="true"
+            android:icon="@drawable/pt_token_24"
+            android:title="@string/token"/>
+        <item
+            android:id="@+id/page_cash"
+            android:enabled="true"
+            android:icon="@drawable/pt_cash_24"
+            android:title="@string/cash"/>
+</menu>

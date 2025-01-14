@@ -1,23 +1,43 @@
 package com.paytheory.android.sdk.state
 
-/*
-* Modernization
-* StateElement implements ValidAndEmpty interface
-* */
-
+/**
+ * Class that represents the state of an element
+ */
 class StateElement: ValidAndEmpty {
     private var valid: Boolean = false
     private var empty: Boolean = true
-    /** Sets the validity state of the StateElement. */ fun setValid(_valid:Boolean) {
-        valid = _valid
+
+    /**
+     * Function that sets the validity state of the StateElement
+     * @param validIn validity of the element
+     */
+    fun setValid(validIn:Boolean) {
+        valid = validIn
     }
-    fun setEmpty(_empty:Boolean) {
-        empty = _empty
+
+    /**
+     * Function that sets the empty state of the StateElement
+     * @param emptyIn empty state of the element
+     */
+    fun setEmpty(emptyIn: Boolean) {
+        empty = emptyIn
     }
+
+    /**
+     * Function that returns the validity state of the StateElement
+     * @return validity state of the element
+     */
     override fun isValid(): Boolean {
         return valid
     }
-    override fun isEmpty(): Boolean {
+
+    /**
+     * Function that returns the empty state of the StateElement
+     * @return empty state of the element
+     */
+    override fun isEmpty():Boolean {
         return empty
     }
+
+
 }

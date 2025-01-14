@@ -8,8 +8,18 @@ import androidx.lifecycle.MutableLiveData
  * @param initialConfiguration initial configuration data
  */
 class ConfigurationRepository(initialConfiguration: ConfigurationDetail) {
+    /**
+     * Mutable live data for configuration details
+     */
     private val configurationDetail = MutableLiveData<ConfigurationDetail>()
+    /**
+     * Live data for configuration details
+     */
     val configuration: LiveData<ConfigurationDetail> get() = configurationDetail
+
+    /**
+     * Initializer for ConfigurationRepository
+     */
     init {
         configurationDetail.value = initialConfiguration
     }
