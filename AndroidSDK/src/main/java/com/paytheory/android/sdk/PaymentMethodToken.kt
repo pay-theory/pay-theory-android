@@ -30,7 +30,9 @@ import java.util.Base64
  * @param context The application context.
  * @param partner The partner identifier.
  * @param stage The environment stage (e.g., "sandbox", "production").
- * @param apiKey The API key for authentication.
+ * @param constants The constants object for configuration.
+ * @param payTheoryData The PayTheory data object for additional information.
+ * @param configuration The PayTheory configuration object for metadata and customization.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodToken(
@@ -45,7 +47,7 @@ class PaymentMethodToken(
     var queuedRequest: PaymentMethodTokenData? = null
     /**
      * Final api call to complete transaction
-     * @param paymentMethodTokenData payment method token object
+     * @param paymentMethodTokenData Data object of payment method
      */
     fun tokenize(
         paymentMethodTokenData: PaymentMethodTokenData
@@ -66,6 +68,7 @@ class PaymentMethodToken(
 
     /**
      * Generates the initial action request for tokenization.
+     * @return ActionRequest Object to send through websocket
      * @param paymentMethodTokenData The payment method token data.
      */
     private fun generateInitialActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
@@ -108,6 +111,7 @@ class PaymentMethodToken(
 
     /**
      * Discovers the message type based on the incoming message content.
+     * @return String of message type
      * @param message The incoming message from the socket.
      */
     private fun discoverMessageType(message: String): String {

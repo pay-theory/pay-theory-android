@@ -25,16 +25,16 @@ import java.util.Base64
 
 /**
  * The `Payment` class orchestrates the payment process using Pay Theory's SDK.
+ * It handles communication with the Pay Theory backend, including establishing a secure websocket connection,
+ * sending payment requests, and receiving responses. It integrates with Google Play Integrity API
+ * for enhanced security.
  *
- * It handles communication with the Pay Theory backend, including establishing a secure websocket
- * connection, sending payment requests, and receiving responses. It also integrates with Google Play
- * Integrity API for enhanced security.
- *
- * @param context The application context.
+ * @param context The application context that implements the `Payable` interface.
  * @param partner Your Pay Theory partner identifier.
- * @param stage The environment to use (e.g., "paytheory", "paytheorystudy", "paytheorylab").
- * @param apiKey Your Pay Theory API key.
- * @param feeMode The fee mode to apply ("surcharge" or "service_fee").
+ * @param stage The environment to use (e.g., "paytheory", "paytheorystudy", "paytheorylab"). Defaults to "paytheory".
+ * @param constants The constants object containing API endpoints and other configuration values.
+ * @param payTheoryData Additional data to be sent with the payment request.
+ * @param configuration PayTheoryConfiguration data class with api key, confirmation, and metadata
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class Payment(
@@ -49,7 +49,7 @@ class Payment(
     var queuedRequest: PaymentDetail? = null
     /**
      * Initiates the payment transaction by sending the payment details to the Pay Theory backend.
-     * @param payment The payment details object.
+     * @param payment The `PaymentDetail` object containing the payment information.
      */
     fun transact(
         payment: PaymentDetail
@@ -71,8 +71,8 @@ class Payment(
 
     /**
      * Generates the initial action request to be sent to the Pay Theory backend.
-     * @param payment The payment details object.
-     * @return The generated `ActionRequest` object.
+     * @param payment The `PaymentDetail` object containing the payment information.
+     * @return The generated `ActionRequest` object representing the initial request.
      */
     private fun generateInitialActionRequest(payment: PaymentDetail): ActionRequest {
         //generate public key
@@ -138,7 +138,7 @@ class Payment(
     /**
      * Sets the confirmation message to be used for sending the `host:transfer_part2` action request
      * after user confirmation.
-     * @param confirmationMessage The confirmation message object.
+     * @param confirmationMessage The `ConfirmationMessage` object containing the confirmation details.
      */
     fun setConfirmation(confirmationMessage: ConfirmationMessage) {
         this.originalConfirmation = confirmationMessage.copy()
@@ -177,8 +177,8 @@ class Payment(
 
     /**
      * Determines the type of message received from the websocket.
-     * @param message The received message.
-     * @return The type of message.
+     * @param message The message received from the websocket.
+     * @return The type of message received, represented as a string.
      */
     private fun discoverMessageType(message: String): String {
         return when {
@@ -192,7 +192,7 @@ class Payment(
 
     /**
      * Handles incoming messages from the websocket, triggering appropriate actions based on the message type.
-     * @param message The received message.
+     * @param message The message received from the websocket.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun receiveMessage(message: String) {
@@ -233,6 +233,11 @@ class Payment(
         }
     }
 
+    /**
+     * Establishes the ViewModel and other necessary components for communication with the Pay Theory backend.
+     * @param ptTokenResponse The `PTTokenResponse` object containing the Pay Theory token.
+     * @param attestationResult The result of the Google Play Integrity check.
+     */
     override fun establishViewModel(
         ptTokenResponse: PTTokenResponse,
         attestationResult: String?

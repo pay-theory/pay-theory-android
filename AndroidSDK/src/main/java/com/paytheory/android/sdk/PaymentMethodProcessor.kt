@@ -28,6 +28,14 @@ import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
 
+/**
+ * Abstract class that serves as the base for processing different payment methods.
+ * It handles communication with the Pay Theory platform, including websocket connections
+ * and integrity checks.
+ *
+ * @param context The context of the activity or fragment.
+ * @param configuration The configuration for Pay Theory.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class PaymentMethodProcessor (
     open val context: Payable,
@@ -49,8 +57,15 @@ abstract class PaymentMethodProcessor (
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
+
+    /**
+     * Companion object to hold shared properties and constants.
+     */
     companion object {
 
+        /**
+         * Flag indicating if the session is dirty and needs a new session key.
+         */
         var sessionIsDirty = true
         var messageReactors: MessageReactors? = null
         var connectionReactors: ConnectionReactors? = null
@@ -58,19 +73,61 @@ abstract class PaymentMethodProcessor (
         var webSocketRepository: WebsocketRepository? = null
         var webSocketInteractor: WebsocketInteractor? = null
 
+        /**
+         * Constant representing a successful connection to the socket.
+         */
         const val CONNECTED = "connected to socket"
+        /**
+         * Constant representing a disconnection from the socket.
+         */
         const val DISCONNECTED = "disconnected from socket"
+        /**
+         * Constant representing an internal server error.
+         */
         const val INTERNAL_SERVER_ERROR = "Internal server error"
+        /**
+         * Constant representing the result of a host token request.
+         */
         const val HOST_TOKEN_RESULT = "host_token"
+        /**
+         * Constant representing the action for the first part of a transfer.
+         */
         const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
+        /**
+         * Constant representing the action for the second part of a transfer.
+         */
         const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
+        /**
+         * Constant representing the action to tokenize a payment method.
+         */
         const val TOKENIZE = "host:tokenize"
+        /**
+         * Constant representing the result of a tokenization.
+         */
         const val TOKENIZE_RESULT = "tokenize_complete"
+        /**
+         * Constant representing the action for a barcode scan.
+         */
         const val BARCODE_ACTION = "host:barcode"
+        /**
+         * Constant representing the result of a barcode scan.
+         */
         const val BARCODE_RESULT = "barcode_complete"
+        /**
+         * Constant representing the result of the first part of a transfer.
+         */
         const val TRANSFER_PART_ONE_RESULT = "transfer_confirmation"
+        /**
+         * Constant representing the completion of a transfer.
+         */
         const val COMPLETED_TRANSFER = "transfer_complete"
+        /**
+         * Constant representing an unknown state or action.
+         */
         const val UNKNOWN = "unknown"
+        /**
+         * Constant representing a cash payment.
+         */
         const val CASH = "cash"
     }
     /**
@@ -89,6 +146,7 @@ abstract class PaymentMethodProcessor (
 
     /**
      * Resets the Pay Theory token, attempting to reconnect to the server.
+     * This method is called when there is an issue with the existing token and a new one needs to be obtained. It uses a counter to limit the number of reconnect attempts.
      */
     private fun resetPtToken() {
         if (ptResetCounter < 2000) {
@@ -102,6 +160,7 @@ abstract class PaymentMethodProcessor (
 
     /**
      * Resets the socket connection in case of network failures.
+     * This method attempts to reconnect to the websocket server if the connection is lost. It uses a counter to limit the number of reconnect attempts before reporting a network error to the user. It's called when the socket experiences a disconnection.
      */
     fun resetSocket() {
         if (resetCounter < 50) {
@@ -114,7 +173,8 @@ abstract class PaymentMethodProcessor (
     }
 
     /**
-     * Initiates the Pay Theory token API call to obtain a token.
+     * Initiates the Pay Theory token API call to obtain a PT-Token.
+     * This method makes a network request to the Pay Theory API to retrieve a PT-Token, which is necessary for establishing a secure websocket connection.
      * @param context The application context.
      */
     @SuppressLint("CheckResult")
@@ -156,6 +216,8 @@ abstract class PaymentMethodProcessor (
 
     /**
      * Prepares the Google Play Integrity API by initializing and potentially pre-fetching an integrity token.
+     * This is done to reduce latency when requesting an integrity token later during the payment process.
+     * It initializes the IntegrityManager and prepares an integrity token.
      */
     private fun prepareAndPrefetchIntegrityToken() {
         val googleProjectNumber: Long = (context as Context).resources.getString(R.string.google_project_number).toLong()
@@ -216,6 +278,8 @@ abstract class PaymentMethodProcessor (
 
     /**
      * Signals whether the payment process is ready to begin.
+     * This method updates the Payable interface to indicate if the payment
+     * process is ready to start accepting user input.
      * @param isReady True if ready, false otherwise.
      */
     fun updatePayableReadyState(isReady: Boolean) {
