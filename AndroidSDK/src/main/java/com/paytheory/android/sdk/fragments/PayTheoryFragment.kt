@@ -377,7 +377,7 @@ class PayTheoryFragment : Fragment() {
                 address = this.billingAddress,
                 payorInfo = this.payorInfo
             )
-            processPaymentTransaction(payment)
+            executePaymentTransaction(payment)
             ccExpiration.text!!.clear()
             ccNumber.text!!.clear()
             ccCVV.text!!.clear()
@@ -406,7 +406,7 @@ class PayTheoryFragment : Fragment() {
                 fee_mode = this.feeMode,
                 payorInfo = this.payorInfo
             )
-            processPaymentTransaction(payment)
+            executePaymentTransaction(payment)
             achChooser.text!!.clear()
             achAccount.text!!.clear()
             achRouting.text!!.clear()
@@ -432,7 +432,7 @@ class PayTheoryFragment : Fragment() {
                 buyerContact = contact,
                 payorInfo = this.payorInfo
             )
-            processPaymentTransaction(payment)
+            executePaymentTransaction(payment)
             cashContact.text!!.clear()
             cashName.text!!.clear()
             cashContactFieldValid = false
@@ -663,7 +663,7 @@ class PayTheoryFragment : Fragment() {
      *
      * @param payment The payment details object containing information about the payment.
      */
-    private fun processPaymentTransaction(payment: PaymentDetail) {
+    private fun executePaymentTransaction(payment: PaymentDetail) {
         payTheoryPayment!!.transact(payment)
     }
 

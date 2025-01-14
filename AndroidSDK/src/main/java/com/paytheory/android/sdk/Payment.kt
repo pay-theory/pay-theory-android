@@ -38,13 +38,13 @@ import java.util.Base64
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class Payment(
-    override val context: Payable,
-    override val partner: String,
-    override val stage: String,
-    override val constants: Constants,
-    override val payTheoryData: HashMap<Any, Any>? = hashMapOf(),
-    override val configuration : PayTheoryConfiguration
-) : PaymentMethodProcessor(context,partner,stage,constants,payTheoryData, configuration), WebsocketMessageHandler {
+      contextIn: Payable,
+      partnerIn: String,
+      stageIn: String,
+      constantsIn: Constants,
+      payTheoryDataIn: HashMap<Any, Any>? = hashMapOf(),
+      configurationIn : PayTheoryConfiguration
+) : PaymentMethodProcessor(contextIn,partnerIn,stageIn,constantsIn,payTheoryDataIn, configurationIn), WebsocketMessageHandler {
 
     var queuedRequest: PaymentDetail? = null
     /**
@@ -55,7 +55,7 @@ class Payment(
         payment: PaymentDetail
     ) {
         messageReactors!!.activePaymentDetail = payment
-        val actionRequest = generateInitialActionRequest(payment)
+        val actionRequest = createInitialActionRequestForPayment(payment)
         if (viewModel.connected) {
 
             context.handlePaymentStart(payment.type)
@@ -74,7 +74,7 @@ class Payment(
      * @param payment The `PaymentDetail` object containing the payment information.
      * @return The generated `ActionRequest` object representing the initial request.
      */
-    private fun generateInitialActionRequest(payment: PaymentDetail): ActionRequest {
+    private fun createInitialActionRequestForPayment(payment: PaymentDetail): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -180,7 +180,7 @@ class Payment(
      * @param message The message received from the websocket.
      * @return The type of message received, represented as a string.
      */
-    private fun determineWebSocketMessageType(message: String): String {
+    private fun getWebSocketMessageType(message: String): String {
         return when {
             message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
@@ -208,7 +208,7 @@ class Payment(
                 messageReactors!!.onError(message, this)
             }
             else -> {
-                when (determineWebSocketMessageType(message)) {
+                when (getWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
                     TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message, this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message, viewModel, this)

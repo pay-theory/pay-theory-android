@@ -135,7 +135,7 @@ abstract class PaymentMethodProcessor (
      */
     init {
         if (!isWarm) {
-            prepareAndPrefetchIntegrityToken()
+            initializeAndPrefetchIntegrityToken()
             isWarm = true
         }
         updatePayableReadyState(false)
@@ -148,7 +148,7 @@ abstract class PaymentMethodProcessor (
      * Resets the Pay Theory token, attempting to reconnect to the server.
      * This method is called when there is an issue with the existing token and a new one needs to be obtained. It uses a counter to limit the number of reconnect attempts.
      */
-    private fun resetPtToken() {
+    private fun attemptReconnectToPtToken() {
         if (ptResetCounter < 2000) {
 //            println("PT Token Reconnect Counter: $ptResetCounter")
             ptResetCounter++
@@ -198,7 +198,7 @@ abstract class PaymentMethodProcessor (
                     if (error.message.toString().contains("Unable to resolve host")) {
 //                        println(error.message.toString())
                         disconnect()
-                        resetPtToken()
+                        attemptReconnectToPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
 //                        println(error.message.toString())
                         disconnect()
@@ -219,7 +219,7 @@ abstract class PaymentMethodProcessor (
      * This is done to reduce latency when requesting an integrity token later during the payment process.
      * It initializes the IntegrityManager and prepares an integrity token.
      */
-    private fun prepareAndPrefetchIntegrityToken() {
+    private fun initializeAndPrefetchIntegrityToken() {
         val googleProjectNumber: Long = (context as Context).resources.getString(R.string.google_project_number).toLong()
         val standardIntegrityManager = IntegrityManagerFactory.createStandard(context as Context?)
 
