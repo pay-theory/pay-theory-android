@@ -13,7 +13,7 @@ import com.paytheory.android.testsdk.R
 /**
  * Fragment that handles cash payments
  */
-class CashPaymentFragment() : BaseFragment() {
+class CashPaymentFragment: BaseFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,18 +45,12 @@ class CashPaymentFragment() : BaseFragment() {
         configuration.sendReceipt = true
         configuration.receiptDescription = "Android Payment Receipt Test"
 
-        //Keep in try catch for any additional errors
-        try {
-            payTheoryFragment.configurePayment(
-                configuration
-            )
+        payTheoryFragment.configurePayment(
+            configuration
+        )
 
-            submitButton.setOnClickListener{
-                payTheoryFragment.transact()
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
+        submitButton.setOnClickListener{
+            payTheoryFragment.transact()
         }
     }
 }

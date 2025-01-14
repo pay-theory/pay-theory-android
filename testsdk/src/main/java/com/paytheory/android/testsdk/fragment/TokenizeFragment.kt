@@ -9,7 +9,7 @@ import com.paytheory.android.testsdk.R
 /**
  * Fragment that handles tokenization
  */
-class TokenizeFragment() : BaseFragment() {
+class TokenizeFragment: BaseFragment() {
 
 
     /**
@@ -29,18 +29,14 @@ class TokenizeFragment() : BaseFragment() {
         configuration.requireBillingAddress = true
         configuration.metadata = metadata
         configuration.payorInfo = payorInfo
-        //Keep in try catch for any additional errors
-        try {
-            payTheoryFragment.configureTokenize(
-                configuration
-            )
+
+        payTheoryFragment.configureTokenize(
+            configuration
+        )
 
 
-            submitButton.setOnClickListener{
-                payTheoryFragment.tokenize()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        submitButton.setOnClickListener{
+            payTheoryFragment.tokenize()
         }
     }
 }

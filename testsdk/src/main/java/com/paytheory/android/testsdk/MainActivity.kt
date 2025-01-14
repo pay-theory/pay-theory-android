@@ -43,10 +43,10 @@ class MainActivity : AppCompatActivity(), Payable {
 
         bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
-                R.id.page_card->setCurrentFragment(cardPaymentFragment,"card")
-                R.id.page_bank->setCurrentFragment(bankPaymentFragment,"bank")
-                R.id.page_token->setCurrentFragment(tokenizeFragment,"token")
-                R.id.page_cash->setCurrentFragment(cashPaymentFragment,"cash")
+                R.id.page_card->displayFragment(cardPaymentFragment,"card")
+                R.id.page_bank->displayFragment(bankPaymentFragment,"bank")
+                R.id.page_token->displayFragment(tokenizeFragment,"token")
+                R.id.page_cash->displayFragment(cashPaymentFragment,"cash")
             }
             true
         }
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(), Payable {
      * @param fragment fragment to display
      * @param fragmentType type of fragment
      */
-    private fun setCurrentFragment(fragment:Fragment, fragmentType: String) {
+    private fun displayFragment(fragment:Fragment, fragmentType: String) {
         val responseTextTextView = findViewById<TextView>(R.id.responseMessage)
         runOnUiThread { responseTextTextView.text = ""}
         currentFragment = fragment

@@ -9,6 +9,7 @@ import com.paytheory.android.sdk.FailedTransactionResult
 import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.Payment
+import com.paytheory.android.sdk.PaymentMethodProcessor
 import com.paytheory.android.sdk.PaymentMethodToken
 import com.paytheory.android.sdk.PaymentMethodTokenResults
 import com.paytheory.android.sdk.SuccessfulTransactionResult
@@ -100,7 +101,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
-    fun onError(message: String, payment: Payment? = null) {
+    fun onError(message: String, payment: PaymentMethodProcessor? = null) {
         /* fail if unknown websocket message */
         if (payment != null) {
             if (payment.context is Payable){

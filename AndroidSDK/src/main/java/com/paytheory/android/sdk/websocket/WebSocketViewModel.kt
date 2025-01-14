@@ -7,6 +7,7 @@ import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.PaymentMethodToken
 import com.paytheory.android.sdk.Payment
+import com.paytheory.android.sdk.PaymentMethodProcessor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -29,7 +30,7 @@ class WebSocketViewModel(
     private var payTheoryToken: String,
     private val partner: String,
     private val stage: String,
-    private val payment: Payment?,
+    private val payment: PaymentMethodProcessor?,
     private val paymentMethodToken: PaymentMethodToken?
 ):
     ViewModel() {

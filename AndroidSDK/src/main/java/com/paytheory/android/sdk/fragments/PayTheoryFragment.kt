@@ -91,7 +91,7 @@ class PayTheoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Payment
+
         return inflater.inflate(R.layout.pay_theory_fragment, container, false)
     }
 
@@ -191,7 +191,7 @@ class PayTheoryFragment : Fragment() {
      * @param configuration PayTheoryConfiguration containing an apiKey and amount
      * @return Pair<partnerName:String, stageName:String>
      */
-    private fun parseAndValidatePaymentConfiguration(configuration: PayTheoryConfiguration): Pair<String, String> {
+    private fun validatePaymentConfigAndExtractDetails(configuration: PayTheoryConfiguration): Pair<String, String> {
         // Validation checks for input parameters
         if (configuration.apiKey.isBlank()) {
             throw IllegalArgumentException(INVALID_APIKEY)
@@ -225,34 +225,17 @@ class PayTheoryFragment : Fragment() {
         if (!isNetworkAvailable(this.requireContext())) {
             throw NetworkErrorException(NO_NETWORK_CONNECTION)
         }
-        val (partnerName, stageName) = parseAndValidatePaymentConfiguration(configuration)
+        val (partnerName, stageName) = validatePaymentConfigAndExtractDetails(configuration)
 
         // Set private variables
+        applyConfiguration(configuration)
+
         //ensure button is disabled before validation
-        this.submitButton = configuration.payTheoryButton
         this.submitButton.disable()
 
-        this.apiKey = configuration.apiKey
-        this.amount = configuration.amount
-        this.paymentMethodType = configuration.paymentMethodType
-        this.requireAccountName = configuration.requireAccountName
-        this.requireBillingAddress = configuration.requireBillingAddress
-        this.confirmation = configuration.confirmation
-        this.feeMode = configuration.feeMode
-        this.metadata = configuration.metadata
-        this.payorInfo = configuration.payorInfo
         this.partner = partnerName
         this.stage = stageName
         this.constants = Constants(partner!!, stage!!)
-
-        // Set private variables for payTheoryData
-        this.sendReceipt = configuration.sendReceipt
-        this.receiptDescription = configuration.receiptDescription
-        this.paymentParameters = configuration.paymentParameters
-        this.payorId = configuration.payorId
-        this.invoiceId = configuration.invoiceId
-        this.accountCode = configuration.accountCode
-        this.reference = configuration.reference
 
         // Create pay_theory_data object for transaction message
         payTheoryData = Utility.createPayTheoryData(sendReceipt, receiptDescription, paymentParameters, payorId, invoiceId, accountCode, reference)
@@ -287,15 +270,12 @@ class PayTheoryFragment : Fragment() {
 
         payTheoryPayment =
             Payment(
-                this.requireActivity(),
+                this.requireActivity() as Payable,
                 this.partner!!,
                 this.stage!!,
-                this.apiKey!!,
-                this.feeMode!!,
                 this.constants!!,
-                this.confirmation,
-                this.metadata,
-                this.payTheoryData
+                this.payTheoryData,
+                configuration
             )
 
 
@@ -303,6 +283,27 @@ class PayTheoryFragment : Fragment() {
         Utility.enablePaymentFields(this.requireView(),this.paymentMethodType!!, this.requireAccountName!!, this.requireBillingAddress!!)
 
         configureFieldValidation()
+    }
+
+    private fun applyConfiguration(configuration: PayTheoryConfiguration) {
+        this.apiKey = configuration.apiKey
+        this.amount = configuration.amount
+        this.submitButton = configuration.payTheoryButton
+        this.paymentMethodType = configuration.paymentMethodType
+        this.requireAccountName = configuration.requireAccountName
+        this.requireBillingAddress = configuration.requireBillingAddress
+        this.confirmation = configuration.confirmation
+        this.feeMode = configuration.feeMode
+        this.metadata = configuration.metadata
+        this.payorInfo = configuration.payorInfo
+        // Set private variables for payTheoryData
+        this.sendReceipt = configuration.sendReceipt
+        this.receiptDescription = configuration.receiptDescription
+        this.paymentParameters = configuration.paymentParameters
+        this.payorId = configuration.payorId
+        this.invoiceId = configuration.invoiceId
+        this.accountCode = configuration.accountCode
+        this.reference = configuration.reference
     }
 
     /**
@@ -376,7 +377,7 @@ class PayTheoryFragment : Fragment() {
                 address = this.billingAddress,
                 payorInfo = this.payorInfo
             )
-            makePayment(payment)
+            processPaymentTransaction(payment)
             ccExpiration.text!!.clear()
             ccNumber.text!!.clear()
             ccCVV.text!!.clear()
@@ -405,7 +406,7 @@ class PayTheoryFragment : Fragment() {
                 fee_mode = this.feeMode,
                 payorInfo = this.payorInfo
             )
-            makePayment(payment)
+            processPaymentTransaction(payment)
             achChooser.text!!.clear()
             achAccount.text!!.clear()
             achRouting.text!!.clear()
@@ -431,7 +432,7 @@ class PayTheoryFragment : Fragment() {
                 buyerContact = contact,
                 payorInfo = this.payorInfo
             )
-            makePayment(payment)
+            processPaymentTransaction(payment)
             cashContact.text!!.clear()
             cashName.text!!.clear()
             cashContactFieldValid = false
@@ -456,7 +457,7 @@ class PayTheoryFragment : Fragment() {
         if (!isNetworkAvailable(this.requireContext())) {
             throw NetworkErrorException(NO_NETWORK_CONNECTION)
         }
-        val (partnerName, stageName) = validateAndParseTokenConfiguration(configuration)
+        val (partnerName, stageName) = validateAndExtractTokenDetails(configuration)
 
         // Set private variables
         //ensure button is disabled before validation
@@ -499,13 +500,12 @@ class PayTheoryFragment : Fragment() {
 
         payTheoryTokenizeTransaction =
             PaymentMethodToken(
-                this.requireActivity(),
+                this.requireActivity() as Payable,
                 this.partner!!,
                 this.stage!!,
-                this.apiKey!!,
                 this.constants!!,
-                this.metadata,
-                this.payTheoryData
+                this.payTheoryData,
+                configuration
             )
 
         Utility.enableTokenizationFields(this.requireView(), this.paymentMethodType!!, this.requireAccountName!!,
@@ -521,7 +521,7 @@ class PayTheoryFragment : Fragment() {
      * @param configuration PayTheoryConfiguration containing an apiKey with amount of 0
      * @return Pair<partnerName:String, stageName:String>
      */
-    private fun validateAndParseTokenConfiguration(configuration: PayTheoryConfiguration): Pair<String, String> {
+    private fun validateAndExtractTokenDetails(configuration: PayTheoryConfiguration): Pair<String, String> {
         // Validation checks for input parameters
         if (configuration.apiKey.isBlank()) {
             throw IllegalArgumentException(INVALID_APIKEY)
@@ -663,7 +663,7 @@ class PayTheoryFragment : Fragment() {
      *
      * @param payment The payment details object containing information about the payment.
      */
-    private fun makePayment(payment: PaymentDetail) {
+    private fun processPaymentTransaction(payment: PaymentDetail) {
         payTheoryPayment!!.transact(payment)
     }
 

@@ -9,7 +9,7 @@ import com.paytheory.android.testsdk.R
 /**
  * Fragment that handles bank payments
  */
-class BankPaymentFragment() : BaseFragment() {
+class BankPaymentFragment : BaseFragment() {
 
     /**
      * Function that handles fragment setup and configuration of PayTheoryFragment
@@ -32,20 +32,14 @@ class BankPaymentFragment() : BaseFragment() {
         configuration.sendReceipt = true
         configuration.receiptDescription = "Android Payment Receipt Test"
 
-        //Keep in try catch for any additional errors
-        try {
-            payTheoryFragment.configurePayment(
-                configuration
-            )
+        payTheoryFragment.configurePayment(
+            configuration
+        )
 
-            submitButton.setOnClickListener{
-                payTheoryFragment.transact()
-            }
-
-            payTheoryFragment.card.cardNumber.isValid()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
+        submitButton.setOnClickListener{
+            payTheoryFragment.transact()
         }
+
+        payTheoryFragment.card.cardNumber.isValid()
     }
 }
