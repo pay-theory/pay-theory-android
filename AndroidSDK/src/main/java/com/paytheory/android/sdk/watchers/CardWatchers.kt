@@ -148,15 +148,14 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
 class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: PayTheoryEditText? = pt
-    private var isDelete = false
     private var ptFragment: PayTheoryFragment? = fragment
 
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-        // no-op comment in an unused listener function
+        // no-op
     }
 
     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-        isDelete = before != 0
+        // no-op
     }
 
     override fun afterTextChanged(s: Editable) {
@@ -166,62 +165,102 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
             return
         }
 
-        val maxLength = 5
-
         lock = true
 
-        if (s.length > maxLength) {
-            s.delete(maxLength,s.length)
+        // Format the date and update the field
+        val formatted = formatExpirationDate(s.toString())
+        if (formatted != s.toString()) {
+            s.replace(0, s.length, formatted)
+            ptText!!.setSelection(formatted.length)
         }
 
         lock = false
 
-        val isValidNumber = validExp(s.toString())
+        // Validate the formatted date
+        val isValidNumber = validExp(formatted)
         ptFragment!!.card.expirationDate.setEmpty(false)
         ptFragment!!.card.expirationDate.setValid(isValidNumber)
         handleButton(isValidNumber)
     }
 
-    /**
-     * Function to check if expiration date is valid
-     * @param number expiration date string
-     */
-    @SuppressLint("SimpleDateFormat")
-    private fun validExp(number: String): Boolean {
-        val length = number.length
-        val stringBuilder = StringBuilder()
-        stringBuilder.append(number)
-        if (length > 0 && length == 3) {
-            if (isDelete) stringBuilder.deleteCharAt(length - 1) else stringBuilder.insert(
-                length - 1,
-                "/"
-            )
-            ptText!!.setText(stringBuilder)
-            ptText!!.setSelection(ptText!!.text!!.length)
+    private fun formatExpirationDate(input: String): String {
+        // Remove all non-numeric characters
+        val cleaned = input.filter { it.isDigit() }
+        var formatted = ""
+
+        if (cleaned.isNotEmpty()) {
+            when {
+                // If first digit is > 1, prepend 0 and treat first digit as start of year
+                cleaned.first().toString().toInt() > 1 -> {
+                    formatted = "0${cleaned.first()}/"
+                    if (cleaned.length > 1) {
+                        formatted += cleaned.substring(1, minOf(cleaned.length, 3))
+                    }
+                }
+                // If first digit is 1, look at second digit
+                cleaned.first().toString().toInt() == 1 -> {
+                    if (cleaned.length > 1) {
+                        // If second digit makes month > 12, format as 01/rest
+                        if (cleaned[1].toString().toInt() > 2) {
+                            formatted = "01/${cleaned.substring(1, minOf(cleaned.length, 3))}"
+                        } else {
+                            // Valid month starting with 1, format normally
+                            formatted = cleaned.take(2)
+                            if (cleaned.length > 2) {
+                                formatted += "/${cleaned.substring(2, minOf(cleaned.length, 4))}"
+                            }
+                        }
+                    } else {
+                        // Just first digit entered
+                        formatted = cleaned
+                    }
+                }
+                // If first digit is 0, format normally
+                else -> {
+                    formatted = cleaned.take(2)
+                    if (cleaned.length > 2) {
+                        formatted += "/${cleaned.substring(2, minOf(cleaned.length, 4))}"
+                    }
+                }
+            }
         }
 
-        //get current two digit year
-        val currentTwoDigitYear: Int = SimpleDateFormat("yy").format(Calendar.getInstance().time).toInt()
-        //get month value and check
-        val currentText = ptText!!.text.toString()
-        return (currentText.length == 5) && (currentText.substringBefore("/").toInt() < 13) && (currentText.substringBefore("/").toInt() != 0) && (currentText.substringAfter("/").toInt() >= currentTwoDigitYear)
+        return formatted
     }
 
-    /**
-     * Function to handle button state based on expiration date validation
-     * @param valid boolean for validity of expiration date
-     */
-    private fun handleButton(valid: Boolean){
+    @SuppressLint("SimpleDateFormat")
+    private fun validExp(formattedDate: String): Boolean {
+        // Don't validate incomplete dates
+        if (!formattedDate.contains("/")) return true
+        if (formattedDate.endsWith("/")) return true
+
+        val month = formattedDate.substringBefore("/").toIntOrNull() ?: return false
+        val year = formattedDate.substringAfter("/").toIntOrNull() ?: return false
+
+        // Get current date components
+        val calendar = Calendar.getInstance()
+        val currentYear = SimpleDateFormat("yy").format(calendar.time).toInt()
+        val currentMonth = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+
+        return when {
+            month < 1 || month > 12 -> false
+            year < currentYear -> false
+            year == currentYear && month < currentMonth -> false
+            else -> true
+        }
+    }
+
+    private fun handleButton(valid: Boolean) {
         if (!valid) {
             expFieldValid = false
             ptText!!.error = "Invalid Expiration"
         } else {
             expFieldValid = true
+            ptText!!.error = null
         }
         areFieldsValid(submitButton)
     }
 }
-
 
 /**
  * Class that will add text watchers to an AppCompatEditText
