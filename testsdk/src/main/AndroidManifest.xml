@@ -5,18 +5,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true"-->
-<!--            android:theme="@style/Theme.SunnyDay">-->
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true"-->
-<!--            android:theme="@style/Theme.LofiChill">-->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SunnyDay">
+            android:theme="@style/Theme.AllBusiness">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

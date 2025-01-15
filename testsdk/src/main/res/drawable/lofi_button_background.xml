@@ -12,6 +12,12 @@
             <corners android:radius="8dp" />
         </shape>
     </item>
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="#66A6A3" /> <!-- Slightly darker teal for focused state -->
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#80CBC4" /> <!-- Teal color for normal state -->

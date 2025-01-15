@@ -3,11 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:theme="@style/Theme.LofiChill">
+    android:layout_height="match_parent">
 
     <androidx.fragment.app.FragmentContainerView
-        android:theme="@style/Theme.LofiChill"
         android:id="@+id/payTheoryBankFragment"
         android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment"
         android:layout_width="match_parent"
@@ -20,16 +18,17 @@
 
     <com.paytheory.android.sdk.view.PayTheoryButton
         android:id="@+id/submit"
+        android:enabled="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/submit_payment"
+        android:text="@string/generate_payment_token"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/payTheoryBankFragment"
-        style="@style/LofiButtonStyle"
-        />
+        style="@style/AllBusinessButtonStyle" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
