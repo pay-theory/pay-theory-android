@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.paytheory.android.sdk.PayTheoryConfiguration
+import com.paytheory.android.sdk.PayTheoryMerchantActivity
 import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
@@ -46,7 +47,8 @@ class CashPaymentFragment: BaseFragment() {
         configuration.receiptDescription = "Android Payment Receipt Test"
 
         payTheoryFragment.configurePayment(
-            configuration
+            configuration,
+            requireActivity() as PayTheoryMerchantActivity
         )
 
         submitButton.setOnClickListener{

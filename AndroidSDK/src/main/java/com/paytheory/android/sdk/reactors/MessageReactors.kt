@@ -7,6 +7,7 @@ import com.paytheory.android.sdk.EncryptedPaymentToken
 import com.paytheory.android.sdk.ErrorCode
 import com.paytheory.android.sdk.FailedTransactionResult
 import com.paytheory.android.sdk.PTError
+import com.paytheory.android.sdk.PayTheoryMerchantActivity
 import com.paytheory.android.sdk.Payment
 import com.paytheory.android.sdk.PaymentMethodProcessor
 import com.paytheory.android.sdk.PaymentMethodToken
@@ -136,12 +137,14 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         when (transactionResult.state) {
             "SUCCEEDED" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                (payment.context as PayTheoryMerchantActivity).clearFields()
                 payment.context.handleSuccess(successfulTransactionResult)
                 PaymentMethodProcessor.sessionIsDirty = true
                 payment.resetSocket()
             }
             "PENDING" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                (payment.context as PayTheoryMerchantActivity).clearFields()
                 payment.context.handleSuccess(successfulTransactionResult)
                 PaymentMethodProcessor.sessionIsDirty = true
                 payment.resetSocket()
@@ -196,7 +199,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val encryptedPaymentToken = Gson().fromJson(message, EncryptedPaymentToken::class.java)
         val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
         val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
-
+        (paymentMethodToken.context as PayTheoryMerchantActivity).clearFields()
         paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
         PaymentMethodProcessor.sessionIsDirty = true
 

@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -14,6 +13,7 @@ import com.paytheory.android.sdk.BarcodeResult
 import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.FailedTransactionResult
 import com.paytheory.android.sdk.PTError
+import com.paytheory.android.sdk.PayTheoryMerchantActivity
 import com.paytheory.android.sdk.Payable
 import com.paytheory.android.sdk.Payment
 import com.paytheory.android.sdk.PaymentMethodTokenResults
@@ -27,7 +27,7 @@ import com.paytheory.android.testsdk.fragment.TokenizeFragment
 /**
  * Demo Activity class using Pay Theory Android SDK
  */
-class MainActivity : AppCompatActivity(), Payable {
+class MainActivity : PayTheoryMerchantActivity(), Payable {
     private var currentFragment : Fragment? = null
     private var activeFragmentType : String? = null
     override fun onCreate(savedInstanceState: Bundle?) {

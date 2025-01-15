@@ -15,142 +15,261 @@
                     android:orientation="vertical"
                     tools:ignore="UselessParent">
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/account_name"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/account_name_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/name_on_account"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
                             android:visibility="gone"
-                            android:inputType="text"
-                            android:autofillHints="personName"/>
+                            android:layout_marginBottom="4dp"
+                            android:hint="@string/name_on_account">
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/account_name"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:autofillHints="personName" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/billing_address_1"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/billing_address_1_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/billing_address"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:inputType="text"
-                            android:autofillHints="postalAddress" />
+                            android:hint="@string/billing_address">
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/billing_address_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:autofillHints="postalAddress" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/billing_address_2"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/billing_address_2_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/billing_address_cont"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:inputType="text"
-                            android:autofillHints="extendedAddress" />
+                            android:hint="@string/billing_address_cont">
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/billing_address_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:autofillHints="extendedAddress" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/billing_city_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/city">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/billing_city"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/city"
-                            android:visibility="gone"
                             android:inputType="text"
                             android:autofillHints="addressLocality" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/billing_state_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/state">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/billing_state"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:maxLength="2"
                             android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            android:hint="@string/state"
-                            android:visibility="gone"
                             android:inputType="text"
                             android:autofillHints="addressRegion" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cc_number"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/cc_number_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:digits="1234567890 "
-                            android:hint="@string/card_number"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:inputType="number"
-                            android:autofillHints="creditCardNumber" />
+                            android:hint="@string/card_number">
+                                <com.paytheory.android.sdk.view.PayTheoryEditText
+                                    android:id="@+id/cc_number"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:digits="1234567890 "
+                                    android:inputType="number"
+                                    android:autofillHints="creditCardNumber" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
                             android:id="@+id/cvv_and_expiration"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:visibility="gone"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:orientation="horizontal">
+                                <com.google.android.material.textfield.TextInputLayout
+                                    android:id="@+id/cc_expiration_layout"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="8dp"
+                                    android:hint="@string/expiration"
+                                    android:layout_weight="1">
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
                                     android:id="@+id/cc_expiration"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:autofillHints="creditCardExpirationDate"
                                     android:digits="1234567890/"
-                                    android:hint="@string/expiration"
-                                    android:inputType="number"
-                                    android:visibility="gone"
-                                    android:layout_weight="1" />
+                                    android:inputType="number"/>
+                                </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.TextInputLayout
+                                    android:id="@+id/cc_cvv_layout"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:hint="@string/cvv"
+                                    android:layout_weight="1">
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
                                     android:id="@+id/cc_cvv"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:autofillHints="creditCardSecurityCode"
                                     android:digits="1234567890"
-                                    android:hint="@string/cvv"
-                                    android:inputType="number"
-                                    android:visibility="gone"
-                                    android:layout_weight="1" />
+                                    android:inputType="number"/>
+                                </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
 
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/ach_account_number_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/bank_account_number">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/ach_account_number"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:digits="1234567890"
-                            android:hint="@string/bank_account_number"
-                            android:visibility="gone"
                             android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/ach_routing_number_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/bank_routing_number">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/ach_routing_number"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/bank_routing_number"
                             android:digits="1234567890"
                             android:maxLength="9"
-                            android:visibility="gone"
                             android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cashName"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/cash_name_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/cashName"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:inputType="text" />
-
+                            android:hint="@string/cashName">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
-                            android:id="@+id/cashContact"
+                            android:id="@+id/cash_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/cashContact"
-                            android:visibility="gone"
                             android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/cash_contact_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/cashContact">
+                        <com.paytheory.android.sdk.view.PayTheoryEditText
+                            android:id="@+id/cash_contact"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/billing_zip_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            android:hint="@string/billing_zipcode">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/billing_zip"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/billing_zipcode"
                             android:digits="1234567890"
                             android:maxLength="5"
-                            android:visibility="gone"
                             android:inputType="number"
                             android:autofillHints="postalCode" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/ach_type_choice_layout"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:hint="@string/account_type"
                             android:visibility="gone">
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView

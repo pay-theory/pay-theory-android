@@ -25,49 +25,49 @@ class Utility {
     }
 
     private fun enableCC(view: View) {
-        val ccNumber: PayTheoryEditText? = view.findViewById(R.id.cc_number)
-        ccNumber!!.visibility = View.VISIBLE
-        val ccCVV: PayTheoryEditText? = view.findViewById(R.id.cc_cvv)
+        val ccNumberLayout: TextInputLayout? = view.findViewById(R.id.cc_number_layout)
+        ccNumberLayout!!.visibility = View.VISIBLE
+        val ccCVV: TextInputLayout? = view.findViewById(R.id.cc_cvv_layout)
         ccCVV!!.visibility = View.VISIBLE
-        val ccExpiration: PayTheoryEditText? = view.findViewById(R.id.cc_expiration)
+        val ccExpiration: TextInputLayout? = view.findViewById(R.id.cc_expiration_layout)
         ccExpiration!!.visibility = View.VISIBLE
-        val billingZip: PayTheoryEditText? = view.findViewById(R.id.billing_zip)
+        val billingZip: TextInputLayout? = view.findViewById(R.id.billing_zip_layout)
         billingZip!!.visibility = View.VISIBLE
         val cvvAndExpiration: LinearLayout? = view.findViewById(R.id.cvv_and_expiration)
         cvvAndExpiration!!.visibility = View.VISIBLE
     }
 
     private fun enableBillingAddress(view: View) {
-        val line1: PayTheoryEditText? = view.findViewById(R.id.billing_address_1)
+        val line1: TextInputLayout? = view.findViewById(R.id.billing_address_1_layout)
         line1!!.visibility = View.VISIBLE
-        val line2: PayTheoryEditText? = view.findViewById(R.id.billing_address_2)
+        val line2: TextInputLayout? = view.findViewById(R.id.billing_address_2_layout)
         line2!!.visibility = View.VISIBLE
-        val city: PayTheoryEditText? = view.findViewById(R.id.billing_city)
+        val city: TextInputLayout? = view.findViewById(R.id.billing_city_layout)
         city!!.visibility = View.VISIBLE
-        val state: PayTheoryEditText? = view.findViewById(R.id.billing_state)
+        val state: TextInputLayout? = view.findViewById(R.id.billing_state_layout)
         state!!.visibility = View.VISIBLE
-        val billingZip: PayTheoryEditText? = view.findViewById(R.id.billing_zip)
+        val billingZip: TextInputLayout? = view.findViewById(R.id.billing_zip_layout)
         billingZip!!.visibility = View.VISIBLE
     }
 
     private fun enableAccountName(view: View) {
-        val accountName: PayTheoryEditText? = view.findViewById(R.id.account_name)
+        val accountName: TextInputLayout? = view.findViewById(R.id.account_name_layout)
         accountName!!.visibility = View.VISIBLE
     }
 
     private fun enableACH(view: View) {
-        val achAccount: PayTheoryEditText? = view.findViewById(R.id.ach_account_number)
+        val achAccount: TextInputLayout? = view.findViewById(R.id.ach_account_number_layout)
         achAccount!!.visibility = View.VISIBLE
-        val achRouting: PayTheoryEditText? = view.findViewById(R.id.ach_routing_number)
+        val achRouting: TextInputLayout? = view.findViewById(R.id.ach_routing_number_layout)
         achRouting!!.visibility = View.VISIBLE
         val achChoice: TextInputLayout? = view.findViewById(R.id.ach_type_choice_layout)
         achChoice!!.visibility = View.VISIBLE
     }
 
     private fun enableCash(view: View) {
-        val cashContact: PayTheoryEditText? = view.findViewById(R.id.cashContact)
+        val cashContact: TextInputLayout? = view.findViewById(R.id.cash_contact_layout)
         cashContact!!.visibility = View.VISIBLE
-        val cashName: PayTheoryEditText? = view.findViewById(R.id.cashName)
+        val cashName: TextInputLayout? = view.findViewById(R.id.cash_name_layout)
         cashName!!.visibility = View.VISIBLE
     }
 
@@ -134,7 +134,9 @@ class Utility {
         val payTheoryData = hashMapOf<Any, Any>()
         //if send receipt is enabled add send_receipt and receipt_description to pay_theory_data
         populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
-
+        if (configuration.skipTokenizeValidation == true) {
+            populateKey("skip_validation", payTheoryData, configuration.skipTokenizeValidation!!)
+        }
         if (configuration.sendReceipt == true) {
             populateKey("send_receipt", payTheoryData, configuration.sendReceipt)
             if (configuration.receiptDescription.isNotBlank()){
