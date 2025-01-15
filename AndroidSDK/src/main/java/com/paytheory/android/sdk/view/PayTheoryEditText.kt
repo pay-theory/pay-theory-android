@@ -12,7 +12,7 @@ import android.util.AttributeSet
  * PayTheory Edit Text
  */
 @Suppress("EmptyMethod")
-open class PayTheoryEditText : androidx.appcompat.widget.AppCompatEditText{
+open class PayTheoryEditText : com.google.android.material.textfield.TextInputEditText{
 
     companion object {
         /**

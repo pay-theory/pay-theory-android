@@ -60,6 +60,8 @@ class PayTheoryConfiguration(
      * Payor ID
      */
     var payorId: String? = null
+
+    var skipTokenizeValidation: Boolean? = false
     var accountCode: String? = null
     var reference: String? = null
     var paymentParameters: String? = null

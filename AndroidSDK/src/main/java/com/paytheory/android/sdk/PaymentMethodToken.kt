@@ -84,7 +84,7 @@ class PaymentMethodToken(
             paymentMethodTokenData.expiration_year,
             paymentMethodTokenData.expiration_month,
             paymentMethodTokenData.address,
-            paymentMethodTokenData.account_number,
+            paymentMethodTokenData.accountNumber,
             paymentMethodTokenData.account_type,
             paymentMethodTokenData.bank_code
         )

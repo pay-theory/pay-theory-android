@@ -228,7 +228,7 @@ data class PaymentDetail (
  * @param type type of payment
  * @param timing calculated timing
  * @param name account holder name
- * @param account_number account number
+ * @param accountNumber account number
  * @param account_type type of account
  * @param bank_code routing number
  * @param number card number
@@ -241,7 +241,7 @@ data class PaymentMethodTokenData (
     @SerializedName("type") val type: String,
     @SerializedName("timing") val timing: Long,
     @SerializedName("name") val name: String? = "",
-    @SerializedName("account_number") val account_number: String? = null,
+    @SerializedName("account_number") val accountNumber: String? = null,
     @SerializedName("account_type") val account_type: String? = null,
     @SerializedName("bank_code") val bank_code: String? = null,
     @SerializedName("number") val number: String? = null,

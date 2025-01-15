@@ -5,15 +5,7 @@ pluginManagement {
         mavenCentral()
     }
 }
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
-    id "com.gradle.develocity" version "3.19"
-}
 
-//develocity {
-//    server = "https://develocity.mycompany.com"
-//    allowUntrustedServer = true
-//}
 
 include ':AndroidSDK'
 rootProject.name = "PayTheoryLibrary"

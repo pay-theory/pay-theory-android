@@ -2,12 +2,13 @@ package com.paytheory.android.sdk.view
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatButton
 
 /**
  * PayTheoryButton Class is used to create a submit button to handle the transact or tokenize function
  */
-class PayTheoryButton: AppCompatButton {
+class PayTheoryButton: com.google.android.material.button.MaterialButton {
+
+
 
     /**
      * constructor function
@@ -42,6 +43,7 @@ class PayTheoryButton: AppCompatButton {
         attrs: AttributeSet?,
     defStyleAttr: Int
     ) : super(context, attrs, defStyleAttr) {
+
         init()
     }
 
