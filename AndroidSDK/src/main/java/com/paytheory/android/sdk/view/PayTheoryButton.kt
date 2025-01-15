@@ -59,6 +59,8 @@ class PayTheoryButton: com.google.android.material.button.MaterialButton {
      */
     fun disable(){
         this.isEnabled = false
+        this.background.alpha = 100
+        this.setEnabled(isEnabled)
     }
 
     /**
@@ -66,6 +68,8 @@ class PayTheoryButton: com.google.android.material.button.MaterialButton {
      */
     fun enable(){
         this.isEnabled = true
+        this.background.alpha = 255
+        this.setEnabled(isEnabled)
     }
 
 }

@@ -28,7 +28,7 @@ class TokenizeFragment: BaseFragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_payment, container, false)
+        return inflater.inflate(R.layout.fragment_token, container, false)
     }
     /**
      * Function that handles tokenization configuration
@@ -36,17 +36,17 @@ class TokenizeFragment: BaseFragment() {
     override fun onStart() {
         super.onStart()
         //Create submit button
-        val submitButton: PayTheoryButton = requireActivity().findViewById(R.id.submit)
+        val submitButton: PayTheoryButton = requireView().findViewById(R.id.submit)
 
         //Create PayTheoryFragment
         val payTheoryFragment = getChildFragmentManager().findFragmentById(R.id.payTheoryBankFragment) as PayTheoryFragment
 
         val configuration = PayTheoryConfiguration(submitButton, apiKey)
         configuration.paymentMethodType = PaymentMethodType.CARD
-        configuration.requireAccountName = true
-        configuration.requireBillingAddress = true
         configuration.metadata = metadata
         configuration.payorInfo = payorInfo
+        configuration.requireAccountName = true
+        configuration.requireBillingAddress = true
 
         payTheoryFragment.configureTokenize(
             configuration,

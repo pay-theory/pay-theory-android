@@ -21,6 +21,8 @@
         <item name="android:fontFamily">cursive</item>
         <item name="fontFamily">cursive</item>
 
+
+
         <item name="android:windowBackground">@color/sunny_light_yellow</item>
 
         <item name="android:buttonStyle">@style/SunnyButtonStyle</item>
@@ -67,7 +69,6 @@
 
         <item name="android:buttonStyle">@style/LofiButtonStyle</item>
         <item name="textInputStyle">@style/LofiTextInputLayout</item>
-
     </style>
 
     <style name="LofiTextInputLayout" parent="Widget.Material3.TextInputLayout.FilledBox">
@@ -134,6 +135,8 @@
         parent="Widget.Material3.BottomNavigationView">
         <item name="android:textAlignment">center</item>
     </style>
+
+
 
     <color name="sunny_yellow">#FFEB3B</color>
     <color name="sunny_orange">#FF9800</color>
