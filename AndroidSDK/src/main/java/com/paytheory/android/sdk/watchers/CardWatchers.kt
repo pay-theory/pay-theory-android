@@ -9,7 +9,6 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 /**
  * Boolean that tracks the validity of the account name
@@ -28,10 +27,6 @@ var expFieldValid: Boolean = false
  */
 var cvvFieldValid: Boolean = false
 /**
- * Boolean to track zip code field validation
- */
-var zipCodeFieldValid: Boolean = false
-/**
  * Boolean to track all card field validation
  */
 var cardFieldsValid: Boolean = false
@@ -40,7 +35,7 @@ var cardFieldsValid: Boolean = false
  * Function to enable or disable submit button based on all card field validation
  */
 private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
-    cardFieldsValid = cardNameValid && cardFieldValid && expFieldValid && cvvFieldValid && zipCodeFieldValid
+    cardFieldsValid = cardNameValid && cardFieldValid && expFieldValid && cvvFieldValid
     if (cardFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
     } else {
@@ -439,87 +434,3 @@ class CVVTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var subm
     }
 }
 
-/**
- * Class that will add text watchers to an AppCompatEditText
- * @param pt custom AppCompatEditText that will be watched
- */
-class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
-    private var lock = false
-    private var ptText: EditText? = pt
-    private var ptFragment: PayTheoryFragment? = fragment
-
-    /**
-     * Function that handles text changes
-     * @param s editable text
-     * @param start start index
-     * @param before char count before change
-     * @param count char count after change
-     */
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        // no-op comment in an unused listener function
-    }
-
-    /**
-     * Function that handles text changes before they happen
-     * @param s editable text
-     * @param start start index
-     * @param count char count before change
-     * @param after char count after change
-     */
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        // no-op comment in an unused listener function
-    }
-    /**
-     * Function that handles text changes after they happen
-     * @param s editable text
-     */
-    override fun afterTextChanged(s: Editable) {
-        if (lock || s.isEmpty()) {
-            ptFragment!!.card.postalCode.setEmpty(true)
-            ptFragment!!.card.postalCode.setValid(false)
-            handleButton(false)
-            return
-        }
-
-        val maxLength = 6
-
-        lock = true
-
-        if (s.length > maxLength) {
-            s.delete(maxLength,s.length)
-        }
-
-        ptText!!.setText(s.toString().replace(Regex("[^a-zA-Z0-9]"), "").uppercase(Locale.getDefault()))
-        ptText!!.setSelection(ptText!!.text!!.length) // Move cursor to the end
-
-        lock = false
-        val isValid = validZip(s.toString())
-        ptFragment!!.card.postalCode.setEmpty(false)
-        ptFragment!!.card.postalCode.setValid(isValid)
-        handleButton(isValid)
-    }
-
-    /**
-     * Function to check if zip code is valid
-     * @param number zip code string
-     */
-    private fun validZip(code: String): Boolean {
-        if (code.length < 5 || code.length > 6) return false
-        return true
-    }
-
-    /**
-     * Function to handle button state based on zip code validation
-     * @param valid boolean for validity of zip code
-     */
-    private fun handleButton(valid: Boolean){
-        if (!valid) {
-            zipCodeFieldValid = false
-            ptText!!.error = "Invalid ZIP Code"
-        } else {
-            ptText!!.error = null
-            zipCodeFieldValid = true
-        }
-        areFieldsValid(submitButton,ptFragment)
-    }
-}
