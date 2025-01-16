@@ -53,6 +53,8 @@ class MainActivity : PayTheoryMerchantActivity(), Payable {
         bottomNavigationView.selectedItemId = R.id.page_card
     }
 
+
+
     /**
      * Function to set current fragment in view
      * @param fragment fragment to display

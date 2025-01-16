@@ -20,6 +20,7 @@ import com.paytheory.android.sdk.data.PaymentDetail
 import com.paytheory.android.sdk.data.PaymentMethodTokenData
 import com.paytheory.android.sdk.data.PayorInfo
 import com.paytheory.android.sdk.state.ACHState
+import com.paytheory.android.sdk.state.AddressState
 import com.paytheory.android.sdk.state.CardState
 import com.paytheory.android.sdk.state.CashState
 import com.paytheory.android.sdk.view.PayTheoryButton
@@ -53,7 +54,6 @@ class PayTheoryFragment : Fragment() {
     private var apiKey: String? = null
     private var amount: Int? = null
     private var paymentMethodType: PaymentMethodType? = null
-    private var requireAccountName: Boolean? = null
     private var requireBillingAddress: Boolean? = null
     private var confirmation: Boolean? = null
     private var feeMode: String? = null
@@ -81,6 +81,7 @@ class PayTheoryFragment : Fragment() {
     var card: CardState = CardState()
     var ach: ACHState = ACHState()
     var cash: CashState = CashState()
+    var address: AddressState = AddressState()
 
     /**
      * Display requested card fields
@@ -107,6 +108,15 @@ class PayTheoryFragment : Fragment() {
         if (model !== null) {
             model!!.update(ConfigurationDetail())
         }
+
+    }
+
+    fun requiresAddress(): Boolean? {
+        return requireBillingAddress
+    }
+
+    fun chosenPaymentMethod(): PaymentMethodType {
+        return paymentMethodType!!
     }
 
     /**
@@ -116,6 +126,24 @@ class PayTheoryFragment : Fragment() {
      * This function is called during payment configuration to set up validation for card, ACH, and cash payment fields.
      */
     private fun configureFieldValidation() {
+        if (this.requireBillingAddress == true) {
+            val billingAddress1 =
+                requireView().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+
+            val addressLine1Validation: (EditText) -> AddressLine1TextWatcher =
+                { pt -> AddressLine1TextWatcher(pt, this, submitButton)  }
+            billingAddress1.addTextChangedListener(addressLine1Validation(billingAddress1))
+
+            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
+            val cityValidation: (EditText) -> CityTextWatcher =
+                { pt -> CityTextWatcher(pt, this, submitButton)  }
+            billingCity.addTextChangedListener(cityValidation(billingCity))
+
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
+            val regionValidation: (EditText) -> RegionTextWatcher =
+                { pt -> RegionTextWatcher(pt, this, submitButton)  }
+            billingState.addTextChangedListener(regionValidation(billingState))
+        }
         if (this.paymentMethodType==PaymentMethodType.CARD || this.paymentMethodType==PaymentMethodType.BANK) {
             val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
             //if card payment fields are active add text watcher validation
@@ -145,9 +173,6 @@ class PayTheoryFragment : Fragment() {
                 val zipCodeValidation: (EditText) -> ZipCodeTextWatcher =
                     { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
                 billingZip.addTextChangedListener(zipCodeValidation(billingZip))
-
-
-
             }
 
             //if bank payment fields are active add text watcher validation
@@ -252,6 +277,8 @@ class PayTheoryFragment : Fragment() {
         }
         val (partnerName, stageName) = validatePaymentConfigAndExtractDetails(configuration)
 
+        // clear any previous session data
+        clearFields()
         // Set private variables
         applyConfiguration(configuration)
 
@@ -277,7 +304,6 @@ class PayTheoryFragment : Fragment() {
                 apiKey = this.apiKey,
                 amount = this.amount,
                 paymentMethodType = this.paymentMethodType,
-                requireAccountName = this.requireAccountName,
                 requireBillingAddress = this.requireBillingAddress,
                 confirmation = this.confirmation,
                 feeMode = this.feeMode,
@@ -317,7 +343,6 @@ class PayTheoryFragment : Fragment() {
         this.amount = configuration.amount
         this.submitButton = configuration.payTheoryButton
         this.paymentMethodType = configuration.paymentMethodType
-        this.requireAccountName = configuration.requireAccountName
         this.requireBillingAddress = configuration.requireBillingAddress
         this.confirmation = configuration.confirmation
         this.feeMode = configuration.feeMode
@@ -342,11 +367,10 @@ class PayTheoryFragment : Fragment() {
      */
     fun transact(){
         submitButton.disable()
-        if (this.requireAccountName==true || paymentMethodType==PaymentMethodType.BANK) {
-            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-            this.accountName = accountName.text.toString()
 
-        }
+        val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
+        this.accountName = accountName.text.toString()
+
         // Zipcode required for all payments
         val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
         //If all billing address fields are visible get all field data
@@ -464,6 +488,9 @@ class PayTheoryFragment : Fragment() {
         }
         val (partnerName, stageName) = validateAndExtractTokenDetails(configuration)
 
+        // clear any previous session data
+        clearFields()
+
         // Set private variables
         //ensure button is disabled before validation
         this.submitButton = configuration.payTheoryButton
@@ -472,7 +499,6 @@ class PayTheoryFragment : Fragment() {
         this.paymentMethodType = configuration.paymentMethodType
         this.metadata = configuration.metadata
         this.payorInfo = configuration.payorInfo
-        this.requireAccountName = configuration.requireAccountName
         this.requireBillingAddress = configuration.requireBillingAddress
         this.partner = partnerName
         this.stage = stageName
@@ -498,7 +524,6 @@ class PayTheoryFragment : Fragment() {
                 metadata = this.metadata,
                 payorInfo = this.payorInfo,
                 payorId = this.payorId,
-                requireAccountName = this.requireAccountName,
                 requireBillingAddress = this.requireBillingAddress
             )
         )
@@ -560,10 +585,10 @@ class PayTheoryFragment : Fragment() {
      */
     fun tokenize(){
         submitButton.disable()
-        if (this.requireAccountName==true) {
-            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-            this.accountName = accountName.text.toString()
-        }
+
+        val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
+        this.accountName = accountName.text.toString()
+
         // Zipcode required for all payments
         val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
         //If all billing address fields are visible get all field data
@@ -672,13 +697,17 @@ class PayTheoryFragment : Fragment() {
         val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.ach_type_choice)
         val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
         val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-        accountName.text!!.clear()
+        accountName.text = null
+		accountName.error = null
         accountName.clearFocus()
-        achChooser.text!!.clear()
+        achChooser.text = null
+		achChooser.error = null
         achChooser.clearFocus()
-        achAccount.text!!.clear()
+        achAccount.text = null
+		achAccount.error = null
         achAccount.clearFocus()
-        achRouting.text!!.clear()
+        achRouting.text = null
+		achRouting.error = null
         achRouting.clearFocus()
         accountNumberValid = false
         routingNumberValid = false
@@ -687,11 +716,14 @@ class PayTheoryFragment : Fragment() {
         val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
         val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
         val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-        ccExpiration.text!!.clear()
+        ccExpiration.text = null
+		ccExpiration.error = null
         ccExpiration.clearFocus()
-        ccNumber.text!!.clear()
+        ccNumber.text = null
+		ccNumber.error = null
         ccNumber.clearFocus()
-        ccCVV.text!!.clear()
+        ccCVV.text = null
+		ccCVV.error = null
         ccCVV.clearFocus()
         cardFieldValid = false
         expFieldValid = false
@@ -706,24 +738,36 @@ class PayTheoryFragment : Fragment() {
         val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
         val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
         val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
-        billingAddress1.text!!.clear()
+        billingAddress1.text = null
+        billingAddress1.error = null
         billingAddress1.clearFocus()
-        billingAddress2.text!!.clear()
+        billingAddress2.text = null
+        billingAddress2.error = null
         billingAddress2.clearFocus()
-        billingCity.text!!.clear()
+        billingCity.text = null
+		billingCity.error = null
         billingCity.clearFocus()
-        billingState.text!!.clear()
+        billingState.text = null
+		billingState.error = null
         billingState.clearFocus()
-        billingZip.text!!.clear()
+        billingZip.text = null
+		billingZip.error = null
         billingZip.clearFocus()
+        addressFieldsValid = false
+        addressValid = false
+        cityValid = false
+        regionValid = false
 
         val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
         val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
-        cashName.text!!.clear()
+        cashName.text = null
+		cashName.error = null
         cashName.clearFocus()
-        cashContact.text!!.clear()
+        cashContact.text = null
+		cashContact.error = null
         cashContact.clearFocus()
-        billingZip.text!!.clear()
+        billingZip.text = null
+		billingZip.error = null
         billingZip.clearFocus()
         cashContactFieldValid = false
         cashNameFieldValid = false

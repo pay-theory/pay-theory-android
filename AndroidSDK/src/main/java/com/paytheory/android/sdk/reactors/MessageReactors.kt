@@ -202,6 +202,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         (paymentMethodToken.context as PayTheoryMerchantActivity).clearFields()
         paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
         PaymentMethodProcessor.sessionIsDirty = true
-
+        PaymentMethodProcessor.sessionIsDirty = true
+        paymentMethodToken.resetSocket()
     }
 }
