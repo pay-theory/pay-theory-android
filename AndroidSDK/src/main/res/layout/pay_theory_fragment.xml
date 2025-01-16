@@ -231,9 +231,9 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:hint="@string/state">
+                            android:hint="@string/region">
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
-                                    android:id="@+id/billing_state"
+                                    android:id="@+id/billing_region"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:maxLength="2"
@@ -251,7 +251,7 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:hint="@string/billing_zipcode">
+                            android:hint="@string/billing_postal_code">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/billing_zip"
                             android:layout_width="match_parent"
