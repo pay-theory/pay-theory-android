@@ -139,7 +139,7 @@ class PayTheoryFragment : Fragment() {
                 { pt -> CityTextWatcher(pt, this, submitButton)  }
             billingCity.addTextChangedListener(cityValidation(billingCity))
 
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
             val regionValidation: (EditText) -> RegionTextWatcher =
                 { pt -> RegionTextWatcher(pt, this, submitButton)  }
             billingState.addTextChangedListener(regionValidation(billingState))
@@ -380,7 +380,7 @@ class PayTheoryFragment : Fragment() {
             val billingAddress2 =
                 requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
             val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
 
             this.billingAddress = Address(
                 billingAddress1.text.toString().ifBlank { "" },
@@ -598,7 +598,7 @@ class PayTheoryFragment : Fragment() {
             val billingAddress2 =
                 requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
             val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
 
             this.billingAddress = Address(
                 billingAddress1.text.toString().ifBlank { "" },
@@ -736,7 +736,7 @@ class PayTheoryFragment : Fragment() {
         val billingAddress2 =
             requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
         val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-        val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_state)
+        val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
         val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
         billingAddress1.text = null
         billingAddress1.error = null

@@ -4,8 +4,8 @@
     <string name="billing_address">Address Line 1</string>
     <string name="billing_address_cont">Address Line 2</string>
     <string name="city">City</string>
-    <string name="state">State</string>
-    <string name="billing_zipcode">Zip</string>
+    <string name="region">Region</string>
+    <string name="billing_postal_code">Postal Code</string>
     <string name="card_number">Card number</string>
     <string name="cvv">CVV</string>
     <string name="expiration">Expiration</string>
