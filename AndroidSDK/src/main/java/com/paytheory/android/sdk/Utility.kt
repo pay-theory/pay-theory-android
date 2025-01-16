@@ -77,7 +77,6 @@ class Utility {
     fun enablePaymentFields(
         view: View,
         paymentMethodType: PaymentMethodType,
-        requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
         if (paymentMethodType == PaymentMethodType.BANK) {
@@ -85,9 +84,7 @@ class Utility {
             enableACH(view)
         }
         if (paymentMethodType == PaymentMethodType.CARD) {
-            if (requireAccountName) {
-                enableAccountName(view)
-            }
+            enableAccountName(view)
             enableCC(view)
         }
         if (paymentMethodType == PaymentMethodType.CASH) {
@@ -105,7 +102,6 @@ class Utility {
     fun enableTokenizationFields(
         view: View,
         paymentMethodType: PaymentMethodType,
-        requireAccountName: Boolean,
         requireBillingAddress: Boolean
     ) {
         if (paymentMethodType == PaymentMethodType.BANK) {
@@ -113,9 +109,7 @@ class Utility {
             enableACH(view)
         }
         if (paymentMethodType == PaymentMethodType.CARD) {
-            if (requireAccountName) {
-                enableAccountName(view)
-            }
+            enableAccountName(view)
             enableCC(view)
         }
 
