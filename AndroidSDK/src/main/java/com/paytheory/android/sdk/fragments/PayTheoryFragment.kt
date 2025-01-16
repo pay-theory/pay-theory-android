@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -52,7 +53,6 @@ class PayTheoryFragment : Fragment() {
     private var apiKey: String? = null
     private var amount: Int? = null
     private var paymentMethodType: PaymentMethodType? = null
-    private var tokenizationType: TokenizationType? = null
     private var requireAccountName: Boolean? = null
     private var requireBillingAddress: Boolean? = null
     private var confirmation: Boolean? = null
@@ -116,46 +116,70 @@ class PayTheoryFragment : Fragment() {
      * This function is called during payment configuration to set up validation for card, ACH, and cash payment fields.
      */
     private fun configureFieldValidation() {
-        //if card payment fields are active add text watcher validation
-        if (this.paymentMethodType==PaymentMethodType.CARD) {
-            // get credit card fields
+        if (this.paymentMethodType==PaymentMethodType.CARD || this.paymentMethodType==PaymentMethodType.BANK) {
+            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
+            //if card payment fields are active add text watcher validation
+            if (this.paymentMethodType==PaymentMethodType.CARD) {
+                // get credit card fields
+                val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.cc_number)
+                val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+                val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.cc_expiration)
+                val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
 
-            val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.cc_number)
-            val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-            val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-            val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
+                val cardAccountNameValidation: (EditText) -> CardNameTextWatcher =
+                    { pt -> CardNameTextWatcher(pt, this, submitButton)  }
+                accountName.addTextChangedListener(cardAccountNameValidation(accountName))
 
-            val ccNumberValidation: (PayTheoryEditText, PayTheoryFragment) -> CardNumberTextWatcher =
-                { ptText, ptFragment -> CardNumberTextWatcher(ptText, ptFragment, submitButton)  }
-            val cvvNumberValidation: (PayTheoryEditText) -> CVVTextWatcher =
-                { pt -> CVVTextWatcher(pt, this, submitButton) }
-            val expirationValidation: (PayTheoryEditText) -> ExpirationTextWatcher =
-                { pt -> ExpirationTextWatcher(pt, this, submitButton) }
-            val zipCodeValidation: (PayTheoryEditText) -> ZipCodeTextWatcher =
-                { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
-            ccNumber.addTextChangedListener(ccNumberValidation(ccNumber,this))
-            ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
-            ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
-            billingZip.addTextChangedListener(zipCodeValidation(billingZip))
+                val ccNumberValidation: (EditText) -> CardNumberTextWatcher =
+                    { pt -> CardNumberTextWatcher(pt, this, submitButton)  }
+                ccNumber.addTextChangedListener(ccNumberValidation(ccNumber))
+
+                val cvvNumberValidation: (EditText) -> CVVTextWatcher =
+                    { pt -> CVVTextWatcher(pt, this, submitButton) }
+                ccCVV.addTextChangedListener(cvvNumberValidation(ccCVV))
+
+                val expirationValidation: (EditText) -> ExpirationTextWatcher =
+                    { pt -> ExpirationTextWatcher(pt, this, submitButton) }
+                ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
+
+                val zipCodeValidation: (EditText) -> ZipCodeTextWatcher =
+                    { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
+                billingZip.addTextChangedListener(zipCodeValidation(billingZip))
+
+
+
+            }
+
+            //if bank payment fields are active add text watcher validation
+            if (this.paymentMethodType==PaymentMethodType.BANK) {
+                // get ach fields
+                val achAccountNameValidation: (EditText) -> AccountNameTextWatcher =
+                    { pt -> AccountNameTextWatcher(pt, this, submitButton)  }
+                accountName.addTextChangedListener(achAccountNameValidation(accountName))
+
+                val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
+
+                val achRoutingNumberValidation: (EditText) -> RoutingNumberTextWatcher =
+                    { pt -> RoutingNumberTextWatcher(pt, this, submitButton)  }
+                achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
+
+                val achAccountNumberValidation: (EditText) -> AccountNumberTextWatcher =
+                    { pt -> AccountNumberTextWatcher(pt, this, submitButton)  }
+                achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
+
+                val achChooser: AppCompatAutoCompleteTextView =
+                    requireView().findViewById(R.id.ach_type_choice)
+                val items = listOf(getString(R.string.checking), getString(R.string.savings))
+                val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
+                achChooser.setAdapter(adapter)
+
+                val achAccountTypeValidation: (EditText) -> AccountTypeTextWatcher =
+                    { pt -> AccountTypeTextWatcher(pt, this, submitButton)  }
+                achChooser.addTextChangedListener(achAccountTypeValidation(achChooser))
+
+            }
         }
 
-        //if bank payment fields are active add text watcher validation
-        if (this.paymentMethodType==PaymentMethodType.BANK) {
-            // get ach fields
-            val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
-            val achChooser: AppCompatAutoCompleteTextView =
-                requireView().findViewById(R.id.ach_type_choice)
-            val items = listOf(getString(R.string.checking), getString(R.string.savings))
-            val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
-            achChooser.setAdapter(adapter)
-
-            val achRoutingNumberValidation: (PayTheoryEditText) -> RoutingNumberTextWatcher =
-                { pt -> RoutingNumberTextWatcher(pt, this, submitButton)  }
-            val achAccountNumberValidation: (PayTheoryEditText) -> AccountNumberTextWatcher =
-                { pt -> AccountNumberTextWatcher(pt, this, submitButton)  }
-            achRouting.addTextChangedListener(achRoutingNumberValidation(achRouting))
-            achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
-        }
 
         //if cash payment fields are active add text watcher validation
         if (this.paymentMethodType==PaymentMethodType.CASH) {
@@ -164,10 +188,10 @@ class PayTheoryFragment : Fragment() {
                 requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
             val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
 
-            val cashContactValidation: (PayTheoryEditText) -> CashContactTextWatcher =
+            val cashContactValidation: (EditText) -> CashContactTextWatcher =
                 { pt -> CashContactTextWatcher(pt, this, submitButton) }
 
-            val cashNameValidation: (PayTheoryEditText) -> CashNameTextWatcher =
+            val cashNameValidation: (EditText) -> CashNameTextWatcher =
                 { pt -> CashNameTextWatcher(pt, this, submitButton) }
 
             cashContact.addTextChangedListener(
@@ -281,7 +305,7 @@ class PayTheoryFragment : Fragment() {
 
 
 
-        Utility.enablePaymentFields(this.requireView(),this.paymentMethodType!!, this.requireAccountName!!, this.requireBillingAddress!!)
+        Utility.enablePaymentFields(this.requireView(),this.paymentMethodType!!, this.requireBillingAddress!!)
 
         configureFieldValidation()
 
@@ -489,8 +513,7 @@ class PayTheoryFragment : Fragment() {
                 configuration
             )
 
-        Utility.enableTokenizationFields(this.requireView(), this.paymentMethodType!!, this.requireAccountName!!,
-            this.requireBillingAddress!!)
+        Utility.enableTokenizationFields(this.requireView(), this.paymentMethodType!!, this.requireBillingAddress!!)
 
         configureFieldValidation()
 
@@ -696,6 +719,8 @@ class PayTheoryFragment : Fragment() {
 
         val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
         val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
+        cashName.text!!.clear()
+        cashName.clearFocus()
         cashContact.text!!.clear()
         cashContact.clearFocus()
         billingZip.text!!.clear()

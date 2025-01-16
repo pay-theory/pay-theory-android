@@ -4,9 +4,9 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Patterns
+import android.widget.EditText
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
-import com.paytheory.android.sdk.view.PayTheoryEditText
 
 /**
  * Variable to hold validation for cash contact information
@@ -41,9 +41,9 @@ private fun areFieldsValid(button: PayTheoryButton){
  * @param fragment pay theory fragment
  * @param submitButton pay theory button
  */
-class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+class CashContactTextWatcher(pt: (EditText), fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
-    private var ptText: PayTheoryEditText? = pt
+    private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -103,9 +103,9 @@ class CashContactTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment,
  * @param fragment pay theory fragment
  * @param submitButton pay theory button
  */
-class CashNameTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+class CashNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
-    private var ptText: PayTheoryEditText? = pt
+    private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
