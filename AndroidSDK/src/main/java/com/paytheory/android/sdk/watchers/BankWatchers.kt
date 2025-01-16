@@ -4,12 +4,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
 import com.paytheory.android.sdk.R
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 
 
 /**
- * Boolean that tracks the validity of the account name
+ * Boolean that tracks the validity of the account type
  */
 var accountTypeValid: Boolean = false
 /**
@@ -31,17 +32,23 @@ var bankFieldsValid: Boolean = false
 
 /**
  * Function that checks the validity of all bank fields and enables/disables the pay button
- * @param button pay theory button
  */
-private fun areFieldsValid(button: PayTheoryButton){
+private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
     //check if all card fields are valid
     bankFieldsValid = accountNumberValid && routingNumberValid && accountNameValid && accountTypeValid
     //if all card fields are valid enable
-    if (bankFieldsValid){
+    if (bankFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
     } else {
         button.disable()
     }
+}
+
+fun isBankValid(fragment: PayTheoryFragment?): Boolean{
+    if (fragment?.chosenPaymentMethod() == PaymentMethodType.BANK) {
+        return addressFieldsValid
+    }
+    return true
 }
 
 /**
@@ -79,6 +86,7 @@ class RoutingNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
         if (s.isEmpty()) {
             ptFragment!!.ach.routingNumber.setEmpty(true)
             ptFragment!!.ach.routingNumber.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -99,7 +107,7 @@ class RoutingNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
         } else {
             routingNumberValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -138,6 +146,7 @@ class AccountNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
         if (s.isEmpty()) {
             ptFragment!!.ach.accountNumber.setEmpty(true)
             ptFragment!!.ach.accountNumber.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -158,7 +167,7 @@ class AccountNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
         } else {
             accountNumberValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -197,6 +206,7 @@ class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
         if (s.isEmpty()) {
             ptFragment!!.ach.accountName.setEmpty(true)
             ptFragment!!.ach.accountName.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -217,7 +227,7 @@ class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
         } else {
             accountNameValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -256,6 +266,7 @@ class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
         if (s.isEmpty()) {
             ptFragment!!.ach.accountName.setEmpty(true)
             ptFragment!!.ach.accountName.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -278,6 +289,6 @@ class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
         } else {
             accountTypeValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }

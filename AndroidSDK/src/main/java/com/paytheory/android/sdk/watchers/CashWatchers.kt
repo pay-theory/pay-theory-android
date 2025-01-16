@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Patterns
 import android.widget.EditText
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 
@@ -23,18 +24,26 @@ var cashNameFieldValid: Boolean = false
 
 /**
  * Function to check if all cash fields are valid
- * @param button pay theory button
  */
-private fun areFieldsValid(button: PayTheoryButton){
+private fun areCashFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
     //check if all card fields are valid
     cashFieldsValid = cashContactFieldValid && cashNameFieldValid
     //if all card fields are valid enable
-    if (cashFieldsValid){
+    if (cashFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
     } else {
         button.disable()
     }
 }
+
+fun isCashValid(fragment: PayTheoryFragment?): Boolean {
+    if (fragment?.chosenPaymentMethod() == PaymentMethodType.CASH) {
+        return cashFieldsValid
+    }
+    return true
+}
+
+
 /**
  * Text watcher class to validate buyer contact edit text field
  * @param pt pay theory edit text
@@ -75,6 +84,7 @@ class CashContactTextWatcher(pt: (EditText), fragment: PayTheoryFragment, privat
         if (s.isEmpty()) {
             ptFragment!!.cash.contactInformation.setEmpty(true)
             ptFragment!!.cash.contactInformation.setValid(false)
+            handleButton(false)
             return
         }
         val isValid = isValidEmail(s.toString())
@@ -108,7 +118,7 @@ class CashContactTextWatcher(pt: (EditText), fragment: PayTheoryFragment, privat
         } else {
             cashContactFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areCashFieldsValid(submitButton,ptFragment)
     }
 
 }
@@ -154,6 +164,7 @@ class CashNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
         if (s.isEmpty()) {
             ptFragment!!.cash.payerName.setEmpty(true)
             ptFragment!!.cash.payerName.setValid(false)
+            handleButton(false)
             return
         }
         val isValid = isValid(s.toString())
@@ -182,7 +193,7 @@ class CashNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
         } else {
             cashNameFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areCashFieldsValid(submitButton,ptFragment)
     }
 
 }

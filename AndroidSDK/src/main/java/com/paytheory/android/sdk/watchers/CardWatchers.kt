@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
+
 /**
  * Boolean that tracks the validity of the account name
  */
@@ -35,15 +38,22 @@ var cardFieldsValid: Boolean = false
 
 /**
  * Function to enable or disable submit button based on all card field validation
- * @param button pay theory button
  */
-private fun areFieldsValid(button: PayTheoryButton){
+private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
     cardFieldsValid = cardNameValid && cardFieldValid && expFieldValid && cvvFieldValid && zipCodeFieldValid
-    if (cardFieldsValid){
+    if (cardFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
     } else {
         button.disable()
     }
+
+}
+
+fun isCardValid(fragment: PayTheoryFragment?): Boolean {
+    if (fragment?.chosenPaymentMethod() == PaymentMethodType.CARD) {
+        return cardFieldsValid
+    }
+    return true
 }
 
 /**
@@ -106,7 +116,7 @@ class CardNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
         } else {
             cardNameValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -222,7 +232,7 @@ class CardNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, private v
         } else {
             cardFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -266,6 +276,7 @@ class ExpirationTextWatcher(pt: EditText, fragment: PayTheoryFragment, private v
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
             ptFragment!!.card.expirationDate.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -340,7 +351,7 @@ class ExpirationTextWatcher(pt: EditText, fragment: PayTheoryFragment, private v
         } else {
             expFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -383,6 +394,7 @@ class CVVTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var subm
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
             ptFragment!!.card.expirationDate.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -423,7 +435,7 @@ class CVVTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var subm
         } else {
             cvvFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -465,10 +477,11 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
         if (lock || s.isEmpty()) {
             ptFragment!!.card.postalCode.setEmpty(true)
             ptFragment!!.card.postalCode.setValid(false)
+            handleButton(false)
             return
         }
 
-        val maxLength = 5
+        val maxLength = 6
 
         lock = true
 
@@ -476,22 +489,23 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
             s.delete(maxLength,s.length)
         }
 
+        ptText!!.setText(s.toString().replace(Regex("[^a-zA-Z0-9]"), "").uppercase(Locale.getDefault()))
+        ptText!!.setSelection(ptText!!.text!!.length) // Move cursor to the end
+
         lock = false
-        val isValidNumber = validZip(s.toString())
+        val isValid = validZip(s.toString())
         ptFragment!!.card.postalCode.setEmpty(false)
-        ptFragment!!.card.postalCode.setValid(isValidNumber)
-        handleButton(isValidNumber)
+        ptFragment!!.card.postalCode.setValid(isValid)
+        handleButton(isValid)
     }
 
     /**
      * Function to check if zip code is valid
      * @param number zip code string
      */
-    private fun validZip(number: String): Boolean {
-        val (digits, _) = number
-            .partition(Char::isDigit)
-
-        return digits.length == 5
+    private fun validZip(code: String): Boolean {
+        if (code.length < 5 || code.length > 6) return false
+        return true
     }
 
     /**
@@ -503,8 +517,9 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
             zipCodeFieldValid = false
             ptText!!.error = "Invalid ZIP Code"
         } else {
+            ptText!!.error = null
             zipCodeFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }

@@ -11,6 +11,7 @@ import com.paytheory.android.sdk.fragments.PayTheoryFragment
      fun clearFields() {
          runOnUiThread(Runnable() {
              payTheoryFragment?.clearFields()
+
        })
      }
 }
