@@ -142,7 +142,7 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:hint="@string/cashName">
+                            android:hint="@string/cash_name">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cash_name"
                             android:layout_width="match_parent"
@@ -159,7 +159,7 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="4dp"
                             android:visibility="gone"
-                            android:hint="@string/cashContact">
+                            android:hint="@string/cash_contact">
                         <com.paytheory.android.sdk.view.PayTheoryEditText
                             android:id="@+id/cash_contact"
                             android:layout_width="match_parent"
