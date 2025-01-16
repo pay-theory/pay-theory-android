@@ -46,14 +46,31 @@ class CashContactTextWatcher(pt: (EditText), fragment: PayTheoryFragment, privat
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * onTextChanged function to validate cash contact info
+     * @param s editable
+     * @param start Int
+     * @param before Int
+     * @param count Int
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * beforeTextChanged function to validate cash contact info
+     * @param s CharSequence
+     * @param start Int
+     * @param count Int
+     * @param after Int
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**afterTextChanged function to validate cash contact info
+     * @param s Editable
+     */
     override fun afterTextChanged(s: Editable) {
         if (s.isEmpty()) {
             ptFragment!!.cash.contactInformation.setEmpty(true)
@@ -108,14 +125,31 @@ class CashNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * onTextChanged function to validate cash name
+     * @param s editable
+     * @param start Int
+     * @param before Int
+     * @param count Int
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * beforeTextChanged function to validate cash name
+     * @param s CharSequence
+     * @param start Int
+     * @param count Int
+     * @param after Int
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**afterTextChanged function to validate cash name
+     * @param s Editable
+     */
     override fun afterTextChanged(s: Editable) {
         if (s.isEmpty()) {
             ptFragment!!.cash.payerName.setEmpty(true)

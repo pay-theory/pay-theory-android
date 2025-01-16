@@ -68,6 +68,10 @@ class CardNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
 
     /**
      * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
      */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
@@ -75,6 +79,7 @@ class CardNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var
 
     /**
      * Function that handles text changes after they happen
+     * @param editable editable text
      */
     override fun afterTextChanged(editable: Editable) {
         val s = editable.toString()
@@ -113,14 +118,32 @@ class CardNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, private v
     private var lock = false
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
+
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.cardNumber.setEmpty(true)
@@ -213,14 +236,32 @@ class ExpirationTextWatcher(pt: EditText, fragment: PayTheoryFragment, private v
     private var isDelete = false
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         isDelete = before != 0
     }
 
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
@@ -313,14 +354,31 @@ class CVVTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var subm
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
@@ -378,14 +436,31 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.postalCode.setEmpty(true)
