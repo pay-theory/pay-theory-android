@@ -28,11 +28,10 @@ android {
         debug {
             resValue("string", "api_key", "${API_KEY}")
         }
-        release {
-            resValue("string", "api_key", "${API_KEY}")
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+//        release {
+//            resValue("string", "api_key", "${API_KEY}")
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
