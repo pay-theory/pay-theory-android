@@ -19,55 +19,55 @@ class Utility {
      * Retrieves bank account and routing fields
      */
     fun getAchFields(view: View): Pair<PayTheoryEditText, PayTheoryEditText> {
-        val achAccount = view.findViewById<PayTheoryEditText>(R.id.ach_account_number)
-        val achRouting = view.findViewById<PayTheoryEditText>(R.id.ach_routing_number)
+        val achAccount = view.findViewById<PayTheoryEditText>(R.id.pt_ach_account_number)
+        val achRouting = view.findViewById<PayTheoryEditText>(R.id.pt_ach_routing_number)
         return Pair(achAccount, achRouting)
     }
 
     private fun enableCC(view: View) {
-        val ccNumberLayout: TextInputLayout? = view.findViewById(R.id.cc_number_layout)
+        val ccNumberLayout: TextInputLayout? = view.findViewById(R.id.pt_cc_number_layout)
         ccNumberLayout!!.visibility = View.VISIBLE
-        val ccCVV: TextInputLayout? = view.findViewById(R.id.cc_cvv_layout)
+        val ccCVV: TextInputLayout? = view.findViewById(R.id.pt_cc_cvv_layout)
         ccCVV!!.visibility = View.VISIBLE
-        val ccExpiration: TextInputLayout? = view.findViewById(R.id.cc_expiration_layout)
+        val ccExpiration: TextInputLayout? = view.findViewById(R.id.pt_cc_expiration_layout)
         ccExpiration!!.visibility = View.VISIBLE
-        val billingZip: TextInputLayout? = view.findViewById(R.id.billing_zip_layout)
+        val billingZip: TextInputLayout? = view.findViewById(R.id.pt_billing_zip_layout)
         billingZip!!.visibility = View.VISIBLE
-        val cvvAndExpiration: LinearLayout? = view.findViewById(R.id.cvv_and_expiration)
+        val cvvAndExpiration: LinearLayout? = view.findViewById(R.id.pt_cvv_and_expiration)
         cvvAndExpiration!!.visibility = View.VISIBLE
     }
 
     private fun enableBillingAddress(view: View) {
-        val line1: TextInputLayout? = view.findViewById(R.id.billing_address_1_layout)
+        val line1: TextInputLayout? = view.findViewById(R.id.pt_billing_address_1_layout)
         line1!!.visibility = View.VISIBLE
-        val line2: TextInputLayout? = view.findViewById(R.id.billing_address_2_layout)
+        val line2: TextInputLayout? = view.findViewById(R.id.pt_billing_address_2_layout)
         line2!!.visibility = View.VISIBLE
-        val city: TextInputLayout? = view.findViewById(R.id.billing_city_layout)
+        val city: TextInputLayout? = view.findViewById(R.id.pt_billing_city_layout)
         city!!.visibility = View.VISIBLE
-        val state: TextInputLayout? = view.findViewById(R.id.billing_state_layout)
+        val state: TextInputLayout? = view.findViewById(R.id.pt_billing_state_layout)
         state!!.visibility = View.VISIBLE
-        val billingZip: TextInputLayout? = view.findViewById(R.id.billing_zip_layout)
+        val billingZip: TextInputLayout? = view.findViewById(R.id.pt_billing_zip_layout)
         billingZip!!.visibility = View.VISIBLE
     }
 
     private fun enableAccountName(view: View) {
-        val accountName: TextInputLayout? = view.findViewById(R.id.account_name_layout)
+        val accountName: TextInputLayout? = view.findViewById(R.id.pt_card_account_name_layout)
         accountName!!.visibility = View.VISIBLE
     }
 
     private fun enableACH(view: View) {
-        val achAccount: TextInputLayout? = view.findViewById(R.id.ach_account_number_layout)
+        val achAccount: TextInputLayout? = view.findViewById(R.id.pt_ach_account_number_layout)
         achAccount!!.visibility = View.VISIBLE
-        val achRouting: TextInputLayout? = view.findViewById(R.id.ach_routing_number_layout)
+        val achRouting: TextInputLayout? = view.findViewById(R.id.pt_ach_routing_number_layout)
         achRouting!!.visibility = View.VISIBLE
-        val achChoice: TextInputLayout? = view.findViewById(R.id.ach_type_choice_layout)
+        val achChoice: TextInputLayout? = view.findViewById(R.id.pt_ach_type_choice_layout)
         achChoice!!.visibility = View.VISIBLE
     }
 
     private fun enableCash(view: View) {
-        val cashContact: TextInputLayout? = view.findViewById(R.id.cash_contact_layout)
+        val cashContact: TextInputLayout? = view.findViewById(R.id.pt_cash_contact_layout)
         cashContact!!.visibility = View.VISIBLE
-        val cashName: TextInputLayout? = view.findViewById(R.id.cash_name_layout)
+        val cashName: TextInputLayout? = view.findViewById(R.id.pt_cash_name_layout)
         cashName!!.visibility = View.VISIBLE
     }
 
