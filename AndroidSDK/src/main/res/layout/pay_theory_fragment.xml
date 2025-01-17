@@ -42,7 +42,7 @@
                             android:layout_marginTop="4dp"
                             android:visibility="gone"
                             android:layout_marginBottom="4dp"
-                            android:hint="@string/name_on_bank_account">
+                            android:hint="@string/pt_name_on_bank_account">
                                 <com.paytheory.android.sdk.view.PayTheoryEditText
                                     android:id="@+id/pt_bank_account_name"
                                     android:layout_width="match_parent"
