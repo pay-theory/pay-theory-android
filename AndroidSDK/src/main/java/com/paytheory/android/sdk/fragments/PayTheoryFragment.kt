@@ -128,31 +128,32 @@ class PayTheoryFragment : Fragment() {
     private fun configureFieldValidation() {
         if (this.requireBillingAddress == true) {
             val billingAddress1 =
-                requireView().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+                requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1)
 
             val addressLine1Validation: (EditText) -> AddressLine1TextWatcher =
                 { pt -> AddressLine1TextWatcher(pt, this, submitButton)  }
             billingAddress1.addTextChangedListener(addressLine1Validation(billingAddress1))
 
-            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
+            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city)
             val cityValidation: (EditText) -> CityTextWatcher =
                 { pt -> CityTextWatcher(pt, this, submitButton)  }
             billingCity.addTextChangedListener(cityValidation(billingCity))
 
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region)
             val regionValidation: (EditText) -> RegionTextWatcher =
                 { pt -> RegionTextWatcher(pt, this, submitButton)  }
             billingState.addTextChangedListener(regionValidation(billingState))
         }
         if (this.paymentMethodType==PaymentMethodType.CARD || this.paymentMethodType==PaymentMethodType.BANK) {
-            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
+
             //if card payment fields are active add text watcher validation
             if (this.paymentMethodType==PaymentMethodType.CARD) {
                 // get credit card fields
-                val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.cc_number)
-                val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.cc_cvv)
-                val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-                val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
+                val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
+                val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_number)
+                val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv)
+                val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration)
+                val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip)
 
                 val cardAccountNameValidation: (EditText) -> CardNameTextWatcher =
                     { pt -> CardNameTextWatcher(pt, this, submitButton)  }
@@ -178,6 +179,7 @@ class PayTheoryFragment : Fragment() {
             //if bank payment fields are active add text watcher validation
             if (this.paymentMethodType==PaymentMethodType.BANK) {
                 // get ach fields
+                val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
                 val achAccountNameValidation: (EditText) -> AccountNameTextWatcher =
                     { pt -> AccountNameTextWatcher(pt, this, submitButton)  }
                 accountName.addTextChangedListener(achAccountNameValidation(accountName))
@@ -193,7 +195,7 @@ class PayTheoryFragment : Fragment() {
                 achAccount.addTextChangedListener(achAccountNumberValidation(achAccount))
 
                 val achChooser: AppCompatAutoCompleteTextView =
-                    requireView().findViewById(R.id.ach_type_choice)
+                    requireView().findViewById(R.id.pt_ach_type_choice)
                 val items = listOf(getString(R.string.checking), getString(R.string.savings))
                 val adapter = ArrayAdapter(requireContext(), R.layout.dropdown_list_item, items)
                 achChooser.setAdapter(adapter)
@@ -210,8 +212,8 @@ class PayTheoryFragment : Fragment() {
         if (this.paymentMethodType==PaymentMethodType.CASH) {
             // get cash fields
             val cashContact =
-                requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
-            val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
+                requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_contact)
+            val cashName = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_name)
 
             val cashContactValidation: (EditText) -> CashContactTextWatcher =
                 { pt -> CashContactTextWatcher(pt, this, submitButton) }
@@ -368,19 +370,17 @@ class PayTheoryFragment : Fragment() {
     fun transact(){
         submitButton.disable()
 
-        val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-        this.accountName = accountName.text.toString()
 
         // Zipcode required for all payments
-        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
+        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip)
         //If all billing address fields are visible get all field data
         if (this.requireBillingAddress==true) {
             val billingAddress1 =
-                requireView().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+                requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1)
             val billingAddress2 =
                 requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
+            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region)
 
             this.billingAddress = Address(
                 billingAddress1.text.toString().ifBlank { "" },
@@ -403,9 +403,11 @@ class PayTheoryFragment : Fragment() {
         }
         //Create card payment
         if (paymentMethodType==PaymentMethodType.CARD) {
-            val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-            val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.cc_number)
-            val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
+            this.accountName = accountName.text.toString()
+            val ccExpiration = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration)
+            val ccNumber = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_number)
+            val ccCVV = requireView().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv)
             val expirationMonth = ccExpiration.text.toString().split("/").first()
             val expirationYear = "20" + ccExpiration.text.toString().split("/").last()
 
@@ -427,7 +429,9 @@ class PayTheoryFragment : Fragment() {
         }
         //Create bank paymentToken
         if (paymentMethodType==PaymentMethodType.BANK) {
-            val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.ach_type_choice)
+            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_bank_account_name)
+            this.accountName = accountName.text.toString()
+            val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.pt_ach_type_choice)
             val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
             val accountType = achChooser.text.toString()
 
@@ -447,8 +451,8 @@ class PayTheoryFragment : Fragment() {
         }
         //Create cash payment
         if (paymentMethodType==PaymentMethodType.CASH) {
-            val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
-            val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
+            val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_contact)
+            val cashName = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_name)
 
             val contact = cashContact.text.toString()
             val buyer = cashName.text.toString()
@@ -586,19 +590,17 @@ class PayTheoryFragment : Fragment() {
     fun tokenize(){
         submitButton.disable()
 
-        val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-        this.accountName = accountName.text.toString()
 
         // Zipcode required for all payments
-        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
+        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip)
         //If all billing address fields are visible get all field data
         if (this.requireBillingAddress==true) {
             val billingAddress1 =
-                requireView().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+                requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1)
             val billingAddress2 =
                 requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
+            val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city)
+            val billingState = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region)
 
             this.billingAddress = Address(
                 billingAddress1.text.toString().ifBlank { "" },
@@ -622,9 +624,11 @@ class PayTheoryFragment : Fragment() {
 
         //Create card paymentToken
         if (this.paymentMethodType==PaymentMethodType.CARD) {
-            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
+            this.accountName = accountName.text.toString()
+            val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration)
+            val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_number)
+            val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv)
             val expirationMonth = ccExpiration.text.toString().split("/").first()
             val expirationYear = "20" + ccExpiration.text.toString().split("/").last()
 
@@ -647,10 +651,11 @@ class PayTheoryFragment : Fragment() {
 
         //Create bank paymentToken
         if (this.paymentMethodType == PaymentMethodType.BANK) {
-            val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.ach_type_choice)
-            val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
-            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
+            val accountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_bank_account_name)
             this.accountName = accountName.text.toString()
+            val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.pt_ach_type_choice)
+            val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
+
             val accountType = achChooser.text.toString()
 
             val paymentToken = PaymentMethodTokenData(
@@ -694,12 +699,16 @@ class PayTheoryFragment : Fragment() {
      */
     fun clearFields() {
 
-        val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.ach_type_choice)
+        val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.pt_ach_type_choice)
         val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
-        val accountName = requireView().findViewById<PayTheoryEditText>(R.id.account_name)
-        accountName.text = null
-		accountName.error = null
-        accountName.clearFocus()
+        val cardAccountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
+        val bankAccountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_bank_account_name)
+        cardAccountName.text = null
+        cardAccountName.error = null
+        cardAccountName.clearFocus()
+        bankAccountName.text = null
+        bankAccountName.error = null
+        bankAccountName.clearFocus()
         achChooser.text = null
 		achChooser.error = null
         achChooser.clearFocus()
@@ -713,9 +722,9 @@ class PayTheoryFragment : Fragment() {
         routingNumberValid = false
         bankFieldsValid = false
 
-        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_expiration)
-        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_number)
-        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.cc_cvv)
+        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration)
+        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_number)
+        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv)
         ccExpiration.text = null
 		ccExpiration.error = null
         ccExpiration.clearFocus()
@@ -732,12 +741,12 @@ class PayTheoryFragment : Fragment() {
         cardFieldsValid = false
 
         val billingAddress1 =
-            requireView().findViewById<PayTheoryEditText>(R.id.billing_address_1)
+            requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1)
         val billingAddress2 =
             requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-        val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.billing_city)
-        val billingState = requireView().findViewById<PayTheoryEditText>(R.id.billing_region)
-        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.billing_zip)
+        val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city)
+        val billingState = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region)
+        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip)
         billingAddress1.text = null
         billingAddress1.error = null
         billingAddress1.clearFocus()
@@ -758,8 +767,8 @@ class PayTheoryFragment : Fragment() {
         cityValid = false
         regionValid = false
 
-        val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.cash_contact)
-        val cashName = requireView().findViewById<PayTheoryEditText>(R.id.cash_name)
+        val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_contact)
+        val cashName = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_name)
         cashName.text = null
 		cashName.error = null
         cashName.clearFocus()
