@@ -17,5 +17,5 @@
     <string name="pt_account_type">Account Type</string>
     <string name="pt_cash_contact">Phone or Email</string>
     <string name="pt_cash_name">Full Name</string>
-    <string name="name_on_bank_account">Name on Account</string>
+    <string name="pt_name_on_bank_account">Name on Account</string>
 </resources>
