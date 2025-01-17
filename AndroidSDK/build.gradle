@@ -28,7 +28,7 @@ android {
         prefab = true
     }
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 29
         targetSdk = 35
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -106,7 +106,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = 'com.paytheory.android.sdk'
                 artifactId = 'AndroidSDK'
-                version = '3.0.1'
+                version = '3.0.2'
 
                 pom {
                     packaging = "aar"
