@@ -14,17 +14,6 @@ import android.util.AttributeSet
 @Suppress("EmptyMethod")
 open class PayTheoryEditText : com.google.android.material.textfield.TextInputEditText{
 
-    companion object {
-        /**
-         * Custom validation function
-         * @param incoming String to validate
-         * @param validator Lambda accepting the incoming String value and returning a Boolean result
-         */
-        fun validate(incoming: String, validator: (String) -> Boolean): Boolean {
-            return validator(incoming)
-        }
-    }
-
     /**
      * Constructor for PayTheoryEditText
      * @param context Context of application

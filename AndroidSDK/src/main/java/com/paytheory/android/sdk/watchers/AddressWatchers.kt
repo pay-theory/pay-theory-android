@@ -232,7 +232,7 @@ class RegionTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var s
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
+class PostalCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
@@ -282,7 +282,7 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
         ptText!!.setSelection(ptText!!.text!!.length) // Move cursor to the end
 
         lock = false
-        val isValid = validZip(s.toString())
+        val isValid = validPostalCode(s.toString())
         ptFragment!!.card.postalCode.setEmpty(false)
         ptFragment!!.card.postalCode.setValid(isValid)
         handleButton(isValid)
@@ -290,9 +290,9 @@ class ZipCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var 
 
     /**
      * Function to check if zip code is valid
-     * @param number zip code string
+     * @param code postal code string
      */
-    private fun validZip(code: String): Boolean {
+    private fun validPostalCode(code: String): Boolean {
         if (code.length < 3 || code.length > 10) return false
         return true
     }
