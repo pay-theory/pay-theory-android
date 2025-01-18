@@ -9,12 +9,6 @@ enum class PaymentMethodType {
     CARD, BANK, CASH
 }
 
-/**
- * Enum class that contains the types of payment method tokenization
- */
-enum class TokenizationType {
-    CARD, BANK
-}
 
 /**
  * Object that holds the fee mode values
@@ -34,9 +28,7 @@ data class ConfigurationDetail(
     var apiKey: String? = null,
     var amount: Int? = null,
     var paymentMethodType: PaymentMethodType? = null,
-    var tokenizationType: TokenizationType? = null,
     var requireBillingAddress: Boolean? = null,
-    var confirmation: Boolean? = null,
     var feeMode: String? = null,
     var metadata: HashMap<Any, Any>? = null,
     var payorInfo: PayorInfo? = null,

@@ -5,7 +5,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Patterns
 import android.widget.EditText
-import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
 
@@ -34,13 +33,6 @@ private fun areCashFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragm
     } else {
         button.disable()
     }
-}
-
-fun isCashValid(fragment: PayTheoryFragment?): Boolean {
-    if (fragment?.chosenPaymentMethod() == PaymentMethodType.CASH) {
-        return cashFieldsValid
-    }
-    return true
 }
 
 

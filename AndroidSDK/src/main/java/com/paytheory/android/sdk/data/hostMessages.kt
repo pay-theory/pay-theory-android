@@ -3,7 +3,6 @@
 package com.paytheory.android.sdk.data
 
 import com.google.gson.annotations.SerializedName
-import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.configuration.FeeMode
 
 /**
@@ -135,7 +134,6 @@ data class TransferPartOneRequest(
     @SerializedName("hostToken") val hostToken: String?,
     @SerializedName("payment_method_data") val paymentMethodData: PaymentMethodData,
     @SerializedName("payment_data") val paymentData: PaymentData,
-    @SerializedName("confirmation_needed") val confirmationNeeded: Boolean,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
     @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
@@ -144,15 +142,6 @@ data class TransferPartOneRequest(
 
 )
 
-/**
- * Data class for the transfer part two
- */
-data class TransferPartTwoRequest(
-    @SerializedName("payment_prep") val paymentPrep: ConfirmationMessage,
-    @SerializedName("tags") val tags: HashMap<Any, Any>?,
-    @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("timing") val timing: Long
-)
 
 /**
  * Data class for tokenize request
@@ -188,7 +177,7 @@ data class Address (
  * Data class to store payment details
  * @param type type of payment
  * @param timing calculated timing
- * @param amount amound of payment
+ * @param amount amount of payment
  * @param currency currency type of payment
  * @param name account holder name
  * @param account_number account number

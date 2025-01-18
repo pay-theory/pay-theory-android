@@ -55,7 +55,6 @@ class PayTheoryFragment : Fragment() {
     private var amount: Int? = null
     private var paymentMethodType: PaymentMethodType? = null
     private var requireBillingAddress: Boolean? = null
-    private var confirmation: Boolean? = null
     private var feeMode: String? = null
     private var metadata: HashMap<Any, Any>? = null
     private var payTheoryData: HashMap<Any, Any>? = null
@@ -171,8 +170,8 @@ class PayTheoryFragment : Fragment() {
                     { pt -> ExpirationTextWatcher(pt, this, submitButton) }
                 ccExpiration.addTextChangedListener(expirationValidation(ccExpiration))
 
-                val zipCodeValidation: (EditText) -> ZipCodeTextWatcher =
-                    { pt -> ZipCodeTextWatcher(pt, this, submitButton) }
+                val zipCodeValidation: (EditText) -> PostalCodeTextWatcher =
+                    { pt -> PostalCodeTextWatcher(pt, this, submitButton) }
                 billingZip.addTextChangedListener(zipCodeValidation(billingZip))
             }
 
@@ -307,7 +306,6 @@ class PayTheoryFragment : Fragment() {
                 amount = this.amount,
                 paymentMethodType = this.paymentMethodType,
                 requireBillingAddress = this.requireBillingAddress,
-                confirmation = this.confirmation,
                 feeMode = this.feeMode,
                 metadata = this.metadata,
                 payorInfo = this.payorInfo,
@@ -346,7 +344,6 @@ class PayTheoryFragment : Fragment() {
         this.submitButton = configuration.payTheoryButton
         this.paymentMethodType = configuration.paymentMethodType
         this.requireBillingAddress = configuration.requireBillingAddress
-        this.confirmation = configuration.confirmation
         this.feeMode = configuration.feeMode
         this.metadata = configuration.metadata
         this.payorInfo = configuration.payorInfo
@@ -690,6 +687,34 @@ class PayTheoryFragment : Fragment() {
         payTheoryTokenizeTransaction!!.tokenize(paymentMethodTokenData)
     }
 
+    private fun clearControl(control: EditText) {
+        control.text = null
+        control.error = null
+        control.clearFocus()
+    }
+
+    private fun invalidateFields() {
+        accountTypeValid = false
+        accountNumberValid = false
+        routingNumberValid = false
+
+        bankFieldsValid = false
+
+        cardFieldValid = false
+        expFieldValid = false
+        cvvFieldValid = false
+        cardFieldsValid = false
+
+        addressValid = false
+        cityValid = false
+        regionValid = false
+        zipCodeFieldValid = false
+        addressFieldsValid = false
+
+        cashContactFieldValid = false
+        cashNameFieldValid= false
+        cashFieldsValid = false
+    }
 
     /**
      * Clears all input fields in the payment form.
@@ -699,89 +724,34 @@ class PayTheoryFragment : Fragment() {
      */
     fun clearFields() {
 
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_bank_account_name))
         val achChooser: AppCompatAutoCompleteTextView = requireView().findViewById(R.id.pt_ach_type_choice)
-        val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
-        val cardAccountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name)
-        val bankAccountName = requireView().findViewById<PayTheoryEditText>(R.id.pt_bank_account_name)
-        cardAccountName.text = null
-        cardAccountName.error = null
-        cardAccountName.clearFocus()
-        bankAccountName.text = null
-        bankAccountName.error = null
-        bankAccountName.clearFocus()
         achChooser.text = null
-		achChooser.error = null
+        achChooser.error = null
         achChooser.clearFocus()
-        achAccount.text = null
-		achAccount.error = null
-        achAccount.clearFocus()
-        achRouting.text = null
-		achRouting.error = null
-        achRouting.clearFocus()
-        accountNumberValid = false
-        routingNumberValid = false
-        bankFieldsValid = false
 
-        val ccExpiration = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration)
-        val ccNumber = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_number)
-        val ccCVV = requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv)
-        ccExpiration.text = null
-		ccExpiration.error = null
-        ccExpiration.clearFocus()
-        ccNumber.text = null
-		ccNumber.error = null
-        ccNumber.clearFocus()
-        ccCVV.text = null
-		ccCVV.error = null
-        ccCVV.clearFocus()
-        cardFieldValid = false
-        expFieldValid = false
-        cvvFieldValid = false
-        zipCodeFieldValid = false
-        cardFieldsValid = false
+        val (achAccount, achRouting) = Utility.getAchFields(this.requireView())
+        clearControl(achAccount)
+        clearControl(achRouting)
 
-        val billingAddress1 =
-            requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1)
-        val billingAddress2 =
-            requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2)
-        val billingCity = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city)
-        val billingState = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region)
-        val billingZip = requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip)
-        billingAddress1.text = null
-        billingAddress1.error = null
-        billingAddress1.clearFocus()
-        billingAddress2.text = null
-        billingAddress2.error = null
-        billingAddress2.clearFocus()
-        billingCity.text = null
-		billingCity.error = null
-        billingCity.clearFocus()
-        billingState.text = null
-		billingState.error = null
-        billingState.clearFocus()
-        billingZip.text = null
-		billingZip.error = null
-        billingZip.clearFocus()
-        addressFieldsValid = false
-        addressValid = false
-        cityValid = false
-        regionValid = false
 
-        val cashContact = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_contact)
-        val cashName = requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_name)
-        cashName.text = null
-		cashName.error = null
-        cashName.clearFocus()
-        cashContact.text = null
-		cashContact.error = null
-        cashContact.clearFocus()
-        billingZip.text = null
-		billingZip.error = null
-        billingZip.clearFocus()
-        cashContactFieldValid = false
-        cashNameFieldValid = false
-        cashFieldsValid = false
 
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_card_account_name))
+        clearControl(requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_expiration))
+        clearControl(requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_number))
+        clearControl(requireActivity().findViewById<PayTheoryEditText>(R.id.pt_cc_cvv))
+
+
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_address_1))
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.billing_address_2))
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_city))
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_region))
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_billing_zip))
+
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_contact))
+        clearControl(requireView().findViewById<PayTheoryEditText>(R.id.pt_cash_name))
+
+        invalidateFields()
     }
 }
 

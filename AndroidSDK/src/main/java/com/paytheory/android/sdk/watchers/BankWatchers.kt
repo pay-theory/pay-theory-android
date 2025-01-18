@@ -16,7 +16,7 @@ var accountTypeValid: Boolean = false
 /**
  * Boolean that tracks the validity of the account name
  */
-var accountNameValid: Boolean = false
+var bankAccountNameValid: Boolean = false
 /**
  * Boolean that tracks the validity of the account number
  */
@@ -35,7 +35,7 @@ var bankFieldsValid: Boolean = false
  */
 private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
     //check if all card fields are valid
-    bankFieldsValid = accountNumberValid && routingNumberValid && accountNameValid && accountTypeValid
+    bankFieldsValid = accountNumberValid && routingNumberValid && bankAccountNameValid && accountTypeValid
     //if all card fields are valid enable
     if (bankFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
@@ -222,10 +222,10 @@ class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
      */
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            accountNameValid = false
+            bankAccountNameValid = false
             ptText!!.error = "Invalid Account Name"
         } else {
-            accountNameValid = true
+            bankAccountNameValid = true
         }
         areFieldsValid(submitButton,ptFragment)
     }
@@ -264,8 +264,8 @@ class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
     override fun afterTextChanged(editable: Editable) {
         val s = editable.toString()
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountName.setEmpty(true)
-            ptFragment!!.ach.accountName.setValid(false)
+            ptFragment!!.ach.accountType.setEmpty(true)
+            ptFragment!!.ach.accountType.setValid(false)
             handleButton(false)
             return
         }
@@ -273,8 +273,8 @@ class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
         val isValid = listOf(
             ptFragment?.context?.getString(R.string.checking),
             ptFragment?.context?.getString(R.string.savings)).contains(s.toString())
-        ptFragment!!.ach.accountName.setEmpty(false)
-        ptFragment!!.ach.accountName.setValid(isValid)
+        ptFragment!!.ach.accountType.setEmpty(false)
+        ptFragment!!.ach.accountType.setValid(isValid)
         handleButton(isValid)
     }
 

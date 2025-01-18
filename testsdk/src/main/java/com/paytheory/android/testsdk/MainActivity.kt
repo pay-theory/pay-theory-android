@@ -10,12 +10,10 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.paytheory.android.sdk.BarcodeResult
-import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.FailedTransactionResult
 import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.PayTheoryMerchantActivity
 import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.Payment
 import com.paytheory.android.sdk.PaymentMethodTokenResults
 import com.paytheory.android.sdk.SuccessfulTransactionResult
 import com.paytheory.android.sdk.view.PayTheoryBarcode
@@ -142,14 +140,6 @@ class MainActivity : PayTheoryMerchantActivity(), Payable {
         println(failedTransactionResult)
         val responseTextTextView = findViewById<TextView>(R.id.responseMessage)
         runOnUiThread { responseTextTextView.text = failedTransactionResult.toString()}
-    }
-
-
-    /**
-     * Inherited from Payable interface, handles payment confirmation
-     */
-    override fun confirmation(confirmationMessage: ConfirmationMessage, payment: Payment) {
-        //Handle payment confirmation
     }
 
     override fun handleError(error: PTError) {

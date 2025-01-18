@@ -50,7 +50,7 @@ abstract class PaymentMethodProcessor (
     var resetCounter = 0
     var ptResetCounter = 0
     lateinit var viewModel: WebSocketViewModel
-    var originalConfirmation: ConfirmationMessage? = null
+
     var headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to configuration.apiKey)
 
@@ -93,10 +93,7 @@ abstract class PaymentMethodProcessor (
          * Constant representing the action for the first part of a transfer.
          */
         const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
-        /**
-         * Constant representing the action for the second part of a transfer.
-         */
-        const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
+
         /**
          * Constant representing the action to tokenize a payment method.
          */
@@ -204,10 +201,10 @@ abstract class PaymentMethodProcessor (
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(PTError(ErrorCode.SocketError,"Access Denied"))
+                        context.handleError(PTError(ErrorCode.InvalidAPIKey,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(PTError(ErrorCode.SocketError,error.message.toString()))
+                        context.handleError(PTError(ErrorCode.InvalidAPIKey,error.message.toString()))
                     }
                 }
             }
@@ -270,7 +267,7 @@ abstract class PaymentMethodProcessor (
                         disconnect()
                         resetSocket()
                     } else {
-                        context.handleError(PTError(ErrorCode.SocketError,exception.message!!))
+                        context.handleError(PTError(ErrorCode.AttestationFailed,exception.message!!))
                     }
                 }
             })

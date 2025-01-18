@@ -1,8 +1,7 @@
 package com.paytheory.android.sdk
 
 import com.google.gson.annotations.SerializedName
-import com.paytheory.android.sdk.data.Address
-import com.paytheory.android.sdk.data.PayorInfo
+
 /*
 * Modernization
 * Our legacy SDK did not include an error code
@@ -35,7 +34,7 @@ data class PTError (
 
 /**
  * Data class to store resulting barcode data
- * @param barcodeUid Pay Theory unique barcode identifier
+ * @param barcodeId Pay Theory unique barcode identifier
  * @param barcodeUrl url to view barcode
  * @param barcode barcode number
  * @param barcodeFee barcode fee
@@ -49,40 +48,6 @@ data class BarcodeResult (
     @SerializedName("barcodeFee") val barcodeFee: String,
     @SerializedName("Merchant") val merchant: String,
     @SerializedName("mapUrl") val mapUrl : String
-)
-
-/**
- * Data class to store payment confirmation details
- */
-@Suppress("PropertyName", "PropertyName", "PropertyName", "PropertyName", "PropertyName",
-    "PropertyName", "PropertyName"
-)
-data class ConfirmationMessage (
-    @SerializedName("payment_token") val paymentToken: String,
-    @SerializedName("payer_id") val payerId: String?,
-    @SerializedName("processor_payment_method_id") val processorPaymentMethodId: String?,
-    @SerializedName("merchant_uid") val merchantUid: String?,
-    @SerializedName("last_four") val lastFour: String?,
-    @SerializedName("first_six") val firstSix: String?,
-    @SerializedName("brand") val brand: String?,
-    @SerializedName("session_key") val sessionKey: String,
-    @SerializedName("processor") val processor: String,
-    @SerializedName("expiration") var expiration: String?,
-    @SerializedName("idempotency") val idempotency: String,
-    @SerializedName("billing_name") val billingName: String?,
-    @SerializedName("billing_address") val billingAddress: Address?,
-    @SerializedName("amount") val amount: String,
-    @SerializedName("currency") val currency: String,
-    @SerializedName("fee_mode") val fee_mode: String,
-    @SerializedName("fee") var fee: String,
-    @SerializedName("processor_merchant_id") val processor_merchant_id: String?,
-    @SerializedName("payment_method") val payment_method: String,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
-    @SerializedName("pay_theory_data") val pay_theory_data: HashMap<Any, Any>?,
-    @SerializedName("payor_info") val payorInfo: PayorInfo?,
-    @SerializedName("payor_id") var payor_id: String?,
-    @SerializedName("invoice_id") val invoice_id: String?,
-    @SerializedName("payment_intent_id") val paymentIntentId: String?,
 )
 
 /**
@@ -205,11 +170,7 @@ interface Payable {
      * @param paymentMethodToken result for a payment method token request
      */
     fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
-    /**
-     * function to handle a confirmation when requested in transaction configuration
-     * @param confirmationMessage payment confirmation step, enabled using PayTheoryFragment's transact function confirmation set to true
-     */
-    fun confirmation(confirmationMessage: ConfirmationMessage, payment: Payment)
+
     /**
      * function to handle any system errors from a user's device or Pay Theory
      * @param error reason for the failure
