@@ -329,3 +329,5 @@ Feel free to get in touch:
 The Pay Theory Android SDK is open source and available under the MIT license. See [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
 
 MIT © [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
+
+
