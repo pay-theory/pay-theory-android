@@ -1,13 +1,12 @@
 package com.paytheory.android.sdk.reactors
 import com.google.gson.Gson
 import com.paytheory.android.sdk.BarcodeResult
-import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.EncryptedMessage
 import com.paytheory.android.sdk.EncryptedPaymentToken
 import com.paytheory.android.sdk.ErrorCode
 import com.paytheory.android.sdk.FailedTransactionResult
 import com.paytheory.android.sdk.PTError
-import com.paytheory.android.sdk.Payable
+import com.paytheory.android.sdk.PayTheoryMerchantActivity
 import com.paytheory.android.sdk.Payment
 import com.paytheory.android.sdk.PaymentMethodProcessor
 import com.paytheory.android.sdk.PaymentMethodToken
@@ -77,36 +76,13 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
     }
 
     /**
-     * Sends payment confirmation to paymentConfirmation override method
-     * @param
-     */
-    fun confirmPayment(message: String, payment: Payment? = null){
-        //decrypt message
-        val encryptedPaymentConfirmation = Gson().fromJson(message, EncryptedMessage::class.java)
-        val decryptedMessage = decryptBox(encryptedPaymentConfirmation.body, encryptedPaymentConfirmation.publicKey)
-        val confirmationMessage = Gson().fromJson(decryptedMessage, ConfirmationMessage::class.java)
-        //set original confirmation/transaction with correct fee from Pay Theory
-        payment!!.setConfirmation(confirmationMessage)
-        //Remove service_fee for any merchant_fee transaction
-        if (payment.feeMode == FeeMode.MERCHANT_FEE) {
-            confirmationMessage.fee = "0"
-        }
-        //send user confirmation of payment
-        if (payment.context is Payable){
-            payment.context.confirmation(confirmationMessage, payment)
-        }
-    }
-
-    /**
      * Function that handles incoming message for a unknown action
      * @param message message to be sent
      */
     fun onError(message: String, payment: PaymentMethodProcessor? = null) {
         /* fail if unknown websocket message */
         if (payment != null) {
-            if (payment.context is Payable){
-                payment.context.handleError(PTError(ErrorCode.SocketError,message))
-            }
+            payment.context.handleError(PTError(ErrorCode.SocketError,message))
         }
     }
 
@@ -116,11 +92,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
      */
     fun onTokenError(message: String, paymentMethodToken: PaymentMethodToken? = null) {
         /* fail if unknown websocket message */
-        if (paymentMethodToken != null) {
-            if (paymentMethodToken.context is Payable){
-                paymentMethodToken.context.handleError(PTError(ErrorCode.SocketError,message))
-            }
-        }
+        paymentMethodToken?.context?.handleError(PTError(ErrorCode.TokenFailed,message))
     }
 
     /**
@@ -137,21 +109,23 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val transactionResult = Gson().fromJson(decryptedMessage, TransactionResult::class.java)
 
         //Remove service_fee for any merchant_fee transaction
-        if (payment.feeMode == FeeMode.MERCHANT_FEE) {
+        if (payment.configuration.feeMode == FeeMode.MERCHANT_FEE) {
             transactionResult.serviceFee = "0"
         }
 
-        if (payment.context is Payable) when (transactionResult.state) {
+        when (transactionResult.state) {
             "SUCCEEDED" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                (payment.context as PayTheoryMerchantActivity).clearFields()
                 payment.context.handleSuccess(successfulTransactionResult)
-                Payment.sessionIsDirty = true
+                PaymentMethodProcessor.sessionIsDirty = true
                 payment.resetSocket()
             }
             "PENDING" -> {
                 val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                (payment.context as PayTheoryMerchantActivity).clearFields()
                 payment.context.handleSuccess(successfulTransactionResult)
-                Payment.sessionIsDirty = true
+                PaymentMethodProcessor.sessionIsDirty = true
                 payment.resetSocket()
             }
             "FAILURE" -> {
@@ -159,11 +133,6 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                 payment.context.handleFailure(failedTransactionResult)
                 payment.resetSocket()
             }
-
-        else -> {
-            payment.context.handleError(PTError(ErrorCode.SocketError,"Error retrieving payment confirmation"))
-            payment.resetSocket()
-        }
         }
     }
 
@@ -180,7 +149,7 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val decryptedMessage = decryptBox(encryptedBarcodeMessage.body, encryptedBarcodeMessage.publicKey)
         val barcodeMessageResult = Gson().fromJson(decryptedMessage, BarcodeMessage::class.java)
 
-        if (payment.context is Payable && barcodeMessageResult.barcode.isNotBlank() && barcodeMessageResult.barcodeUrl.isNotBlank()) {
+        if (barcodeMessageResult.barcode.isNotBlank() && barcodeMessageResult.barcodeUrl.isNotBlank()) {
             val barcodeResult = BarcodeResult(
                 barcodeId = barcodeMessageResult.barcodeId,
                 barcodeUrl = barcodeMessageResult.barcodeUrl,
@@ -190,18 +159,18 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
                 mapUrl = mapUrl
             )
 
-
-
+            (payment.context as PayTheoryMerchantActivity).clearFields()
             payment.context.handleBarcodeSuccess(barcodeResult)
-            Payment.sessionIsDirty = true
+            PaymentMethodProcessor.sessionIsDirty = true
+            payment.resetSocket()
 
-        } else if (payment.context is Payable) {
+        } else {
             payment.context.handleError(PTError(ErrorCode.SocketError,"Failed to Create Barcode"))
         }
     }
 
     /**
-     * Sends payment confirmation to paymentConfirmation override method
+     * Handle tokenize success
      * @param
      */
     fun onCompleteToken(message: String, paymentMethodToken: PaymentMethodToken){
@@ -209,9 +178,9 @@ class MessageReactors(private val viewModel: WebSocketViewModel, private val web
         val encryptedPaymentToken = Gson().fromJson(message, EncryptedPaymentToken::class.java)
         val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
         val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
-        if (paymentMethodToken.context is Payable) {
-            paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
-            Payment.sessionIsDirty = true
-        }
+        (paymentMethodToken.context as PayTheoryMerchantActivity).clearFields()
+        paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
+        PaymentMethodProcessor.sessionIsDirty = true
+        paymentMethodToken.resetSocket()
     }
 }

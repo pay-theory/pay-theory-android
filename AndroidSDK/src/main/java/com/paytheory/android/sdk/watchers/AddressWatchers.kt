@@ -3,59 +3,69 @@ package com.paytheory.android.sdk.watchers
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.paytheory.android.sdk.R
 import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
+import java.util.Locale
 
 
 /**
- * Boolean that tracks the validity of the account type
+ * Boolean that tracks the validity of the address field
  */
-var accountTypeValid: Boolean = false
+var addressValid: Boolean = false
 /**
- * Boolean that tracks the validity of the account name
+ * Boolean that tracks the validity of the city field
  */
-var bankAccountNameValid: Boolean = false
+var cityValid: Boolean = false
 /**
- * Boolean that tracks the validity of the account number
+ * Boolean that tracks the validity of the region code field (state)
  */
-var accountNumberValid: Boolean = false
-/**
- * Boolean that tracks the validity of the routing number
- */
-var routingNumberValid: Boolean = false
+var regionValid: Boolean = false
 /**
  * Boolean that tracks the validity of all bank fields
  */
-var bankFieldsValid: Boolean = false
+var addressFieldsValid: Boolean = false
+/**
+ * Boolean to track zip code field validation
+ */
+var zipCodeFieldValid: Boolean = false
 
 /**
- * Function that checks the validity of all bank fields and enables/disables the pay button
+ * * Function that checks the validity of all bank fields and enables/disables the pay button
  */
 private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
-    //check if all card fields are valid
-    bankFieldsValid = accountNumberValid && routingNumberValid && bankAccountNameValid && accountTypeValid
-    //if all card fields are valid enable
-    if (bankFieldsValid && isAddressValid(button,fragment) == true){
+    if (isAddressValid(button,fragment) == true && checkPaymentFieldValidity(fragment) == true){
         button.enable()
     } else {
         button.disable()
     }
 }
 
-fun isBankValid(fragment: PayTheoryFragment?): Boolean{
-    if (fragment?.chosenPaymentMethod() == PaymentMethodType.BANK) {
-        return addressFieldsValid
+fun checkPaymentFieldValidity(fragment: PayTheoryFragment?): Boolean {
+    return isCardValid(fragment) && isBankValid(fragment) && isBankValid(fragment)
+}
+
+/**
+ * Function that checks the validity of all bank fields and enables/disables the pay button
+ * @param button pay theory button
+ */
+fun isAddressValid(button: PayTheoryButton, fragment: PayTheoryFragment?): Boolean{
+    if (fragment?.requiresAddress() == false) {
+        if (fragment?.chosenPaymentMethod() == PaymentMethodType.CARD) {
+            return zipCodeFieldValid
+        }
+        return true
     }
-    return true
+    //check if all card fields are valid
+    addressFieldsValid = addressValid && cityValid && regionValid && zipCodeFieldValid
+    return addressFieldsValid
 }
 
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class RoutingNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+class AddressLine1TextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
@@ -84,38 +94,34 @@ class RoutingNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
     override fun afterTextChanged(editable: Editable) {
         val s = editable.toString()
         if (s.isEmpty()) {
-            ptFragment!!.ach.routingNumber.setEmpty(true)
-            ptFragment!!.ach.routingNumber.setValid(false)
+            ptFragment!!.address.addressLine1.setEmpty(true)
+            ptFragment!!.address.addressLine1.setValid(false)
             handleButton(false)
             return
         }
 
-        val isValidNumber = s.toString().length == 9
-        ptFragment!!.ach.routingNumber.setEmpty(false)
-        ptFragment!!.ach.routingNumber.setValid(isValidNumber)
-        handleButton(isValidNumber)
+        ptFragment!!.address.addressLine1.setEmpty(false)
+        ptFragment!!.address.addressLine1.setValid(true)
+        handleButton(true)
     }
 
-    /**
-     * Function that that handles the pay button and field errors
-     * @param valid boolean that determines if the routing number is valid
-     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            routingNumberValid = false
-            ptText!!.error = "Invalid Routing Number"
+            addressValid = false
+            ptText!!.error = "Invalid Address"
         } else {
-            routingNumberValid = true
+            addressValid = true
         }
         areFieldsValid(submitButton,ptFragment)
     }
+
 }
 
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class AccountNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+class CityTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
@@ -144,38 +150,34 @@ class AccountNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, privat
     override fun afterTextChanged(editable: Editable) {
         val s = editable.toString()
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountNumber.setEmpty(true)
-            ptFragment!!.ach.accountNumber.setValid(false)
+            ptFragment!!.address.city.setEmpty(true)
+            ptFragment!!.address.city.setValid(false)
             handleButton(false)
-            return
         }
 
-        val isValidNumber = s.toString().length >= 5
-        ptFragment!!.ach.accountNumber.setEmpty(false)
-        ptFragment!!.ach.accountNumber.setValid(isValidNumber)
-        handleButton(isValidNumber)
+        cityValid = true
+        ptFragment!!.address.city.setEmpty(false)
+        ptFragment!!.address.city.setValid(true)
+        handleButton(true)
     }
 
-    /**
-     * Function that that handles the pay button and field errors
-     * @param valid boolean that determines if the account number is valid
-     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            accountNumberValid = false
-            ptText!!.error = "Invalid Account Number"
+            addressValid = false
+            ptText!!.error = "Invalid City"
         } else {
-            accountNumberValid = true
+            addressValid = true
         }
         areFieldsValid(submitButton,ptFragment)
     }
+
 }
 
 /**
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+class RegionTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
     TextWatcher {
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
@@ -204,28 +206,23 @@ class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
     override fun afterTextChanged(editable: Editable) {
         val s = editable.toString()
         if (s.isEmpty()) {
-            ptFragment!!.ach.accountName.setEmpty(true)
-            ptFragment!!.ach.accountName.setValid(false)
+            ptFragment!!.address.region.setEmpty(true)
+            ptFragment!!.address.region.setValid(false)
             handleButton(false)
-            return
         }
 
-        val isValidLength = s.toString().isNotEmpty()
-        ptFragment!!.ach.accountName.setEmpty(false)
-        ptFragment!!.ach.accountName.setValid(isValidLength)
+        regionValid = true
+        val isValidLength = s.toString().length == 2
+        ptFragment!!.address.region.setEmpty(false)
+        ptFragment!!.address.region.setValid(isValidLength)
         handleButton(isValidLength)
     }
-
-    /**
-     * Function that that handles the pay button and field errors
-     * @param valid boolean that determines if the account number is valid
-     */
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            bankAccountNameValid = false
-            ptText!!.error = "Invalid Account Name"
+            addressValid = false
+            ptText!!.error = "Invalid Region"
         } else {
-            bankAccountNameValid = true
+            addressValid = true
         }
         areFieldsValid(submitButton,ptFragment)
     }
@@ -235,8 +232,8 @@ class AccountNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
-    TextWatcher {
+class PostalCodeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
+    private var lock = false
     private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
@@ -253,41 +250,64 @@ class AccountTypeTextWatcher(pt: EditText, fragment: PayTheoryFragment, private 
 
     /**
      * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
      */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
     /**
      * Function that handles text changes after they happen
+     * @param s editable text
      */
-    override fun afterTextChanged(editable: Editable) {
-        val s = editable.toString()
-        if (s.isEmpty()) {
-            ptFragment!!.ach.accountType.setEmpty(true)
-            ptFragment!!.ach.accountType.setValid(false)
+    override fun afterTextChanged(s: Editable) {
+        if (lock || s.isEmpty()) {
+            ptFragment!!.card.postalCode.setEmpty(true)
+            ptFragment!!.card.postalCode.setValid(false)
             handleButton(false)
             return
         }
 
-        val isValid = listOf(
-            ptFragment?.context?.getString(R.string.checking),
-            ptFragment?.context?.getString(R.string.savings)).contains(s.toString())
-        ptFragment!!.ach.accountType.setEmpty(false)
-        ptFragment!!.ach.accountType.setValid(isValid)
+        val maxLength = 10
+
+        lock = true
+
+        if (s.length > maxLength) {
+            s.delete(maxLength,s.length)
+        }
+
+        ptText!!.setText(s.toString().replace(Regex("[^a-zA-Z0-9\\s\\-]"), "").uppercase(Locale.getDefault()))
+        ptText!!.setSelection(ptText!!.text!!.length) // Move cursor to the end
+
+        lock = false
+        val isValid = validPostalCode(s.toString())
+        ptFragment!!.card.postalCode.setEmpty(false)
+        ptFragment!!.card.postalCode.setValid(isValid)
         handleButton(isValid)
     }
 
     /**
-     * Function that that handles the pay button and field errors
-     * @param valid boolean that determines if the account number is valid
+     * Function to check if zip code is valid
+     * @param code postal code string
+     */
+    private fun validPostalCode(code: String): Boolean {
+        if (code.length < 3 || code.length > 10) return false
+        return true
+    }
+
+    /**
+     * Function to handle button state based on zip code validation
+     * @param valid boolean for validity of zip code
      */
     private fun handleButton(valid: Boolean){
         if (!valid) {
-            accountTypeValid = false
-            ptText!!.error = "Invalid Account Type"
+            zipCodeFieldValid = false
+            ptText!!.error = "Invalid ZIP Code"
         } else {
-            accountTypeValid = true
+            ptText!!.error = null
+            zipCodeFieldValid = true
         }
         areFieldsValid(submitButton,ptFragment)
     }

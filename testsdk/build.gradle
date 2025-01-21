@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "com.paytheory.android.testsdk"
-        minSdk = 26
+        minSdk = 29
         targetSdk = 35
         versionCode = 2
         versionName = "1.0.1"
@@ -28,11 +28,10 @@ android {
         debug {
             resValue("string", "api_key", "${API_KEY}")
         }
-        release {
-            resValue("string", "api_key", "${API_KEY}")
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+//        release {
+//            resValue("string", "api_key", "${API_KEY}")
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
@@ -48,8 +47,8 @@ android {
 
 dependencies {
     //use PayTheorySDK as library
-    //implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: '3.0.1'
-    implementation project(path: ':AndroidSDK')
+    implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: '3.0.4'
+//    implementation project(path: ':AndroidSDK')
     implementation 'net.java.dev.jna:jna:5.15.0@aar'
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
@@ -58,6 +57,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

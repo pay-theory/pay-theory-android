@@ -1,9 +1,8 @@
 
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'maven-publish'
-}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
 
 File secretPropsFile = project.rootProject.file('local.properties')
 
@@ -28,7 +27,7 @@ android {
         prefab = true
     }
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 29
         targetSdk = 35
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -44,16 +43,16 @@ android {
         }
         release {
             resValue("string", "google_project_number", "${GOOGLE_PROJECT_NUMBER}")
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_18
-        targetCompatibility JavaVersion.VERSION_18
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '18'
+        jvmTarget = '1.8'
     }
 }
 
@@ -103,10 +102,10 @@ afterEvaluate {
     publishing {
         publications {
             maven(MavenPublication) {
-                from(components["release"])
+                from components.release
                 groupId = 'com.paytheory.android.sdk'
                 artifactId = 'AndroidSDK'
-                version = '3.0.1'
+                version = '3.0.4'
 
                 pom {
                     packaging = "aar"

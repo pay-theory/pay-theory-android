@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name_on_account">Name on Account</string>
-    <string name="billing_address">Address Line 1</string>
-    <string name="billing_address_cont">Address Line 2</string>
-    <string name="city">City</string>
-    <string name="state">State</string>
-    <string name="billing_zipcode">Zip</string>
-    <string name="card_number">Card number</string>
-    <string name="cvv">CVV</string>
-    <string name="expiration">Expiration</string>
-    <string name="bank_account_number">Bank Account Number</string>
-    <string name="bank_routing_number">Bank Routing Number</string>
+    <string name="pt_name_on_card_account">Name on Account</string>
+    <string name="pt_billing_address">Address Line 1</string>
+    <string name="pt_billing_address_cont">Address Line 2</string>
+    <string name="pt_city">City</string>
+    <string name="pt_region">Region</string>
+    <string name="pt_billing_postal_code">Postal Code</string>
+    <string name="pt_card_number">Card number</string>
+    <string name="pt_cvv">CVV</string>
+    <string name="pt_expiration">Expiration</string>
+    <string name="pt_bank_account_number">Bank Account Number</string>
+    <string name="pt_bank_routing_number">Bank Routing Number</string>
     <string name="submit_payment">Submit Payment</string>
     <string name="savings">Savings</string>
     <string name="checking">Checking</string>
-    <string name="account_type">Account Type</string>
-    <string name="cashContact">Phone or Email</string>
-    <string name="cashName">Full Name</string>
+    <string name="pt_account_type">Account Type</string>
+    <string name="pt_cash_contact">Phone or Email</string>
+    <string name="pt_cash_name">Full Name</string>
+    <string name="pt_name_on_bank_account">Name on Account</string>
 </resources>

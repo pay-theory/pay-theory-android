@@ -3,7 +3,6 @@ package com.paytheory.android.sdk.view
 import android.content.Context
 import android.graphics.drawable.PictureDrawable
 import android.util.AttributeSet
-import android.view.View
 import androidx.appcompat.widget.AppCompatImageView
 import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGParseException
@@ -32,7 +31,7 @@ class PayTheoryBarcode @JvmOverloads constructor(
      * @param barcodeResult The BarcodeResult containing the barcode URL.
      */
     fun displayBarcode(barcodeResult: BarcodeResult) {
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
         retrieveSvgFromUrl(barcodeResult.barcodeUrl) { svgData ->
             if (svgData != null) {
                 try {

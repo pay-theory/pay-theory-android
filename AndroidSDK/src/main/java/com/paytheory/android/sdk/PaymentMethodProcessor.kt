@@ -50,7 +50,7 @@ abstract class PaymentMethodProcessor (
     var resetCounter = 0
     var ptResetCounter = 0
     lateinit var viewModel: WebSocketViewModel
-    var originalConfirmation: ConfirmationMessage? = null
+
     var headerMap =
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to configuration.apiKey)
 
@@ -93,10 +93,7 @@ abstract class PaymentMethodProcessor (
          * Constant representing the action for the first part of a transfer.
          */
         const val TRANSFER_PART_ONE_ACTION = "host:transfer_part1"
-        /**
-         * Constant representing the action for the second part of a transfer.
-         */
-        const val TRANSFER_PART_TWO_ACTION = "host:transfer_part2"
+
         /**
          * Constant representing the action to tokenize a payment method.
          */
@@ -135,7 +132,7 @@ abstract class PaymentMethodProcessor (
      */
     init {
         if (!isWarm) {
-            prepareAndPrefetchIntegrityToken()
+            initializeAndPrefetchIntegrityToken()
             isWarm = true
         }
         updatePayableReadyState(false)
@@ -148,7 +145,7 @@ abstract class PaymentMethodProcessor (
      * Resets the Pay Theory token, attempting to reconnect to the server.
      * This method is called when there is an issue with the existing token and a new one needs to be obtained. It uses a counter to limit the number of reconnect attempts.
      */
-    private fun resetPtToken() {
+    private fun attemptReconnectToPtToken() {
         if (ptResetCounter < 2000) {
 //            println("PT Token Reconnect Counter: $ptResetCounter")
             ptResetCounter++
@@ -198,16 +195,16 @@ abstract class PaymentMethodProcessor (
                     if (error.message.toString().contains("Unable to resolve host")) {
 //                        println(error.message.toString())
                         disconnect()
-                        resetPtToken()
+                        attemptReconnectToPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
 //                        println(error.message.toString())
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(PTError(ErrorCode.SocketError,"Access Denied"))
+                        context.handleError(PTError(ErrorCode.InvalidAPIKey,"Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(PTError(ErrorCode.SocketError,error.message.toString()))
+                        context.handleError(PTError(ErrorCode.InvalidAPIKey,error.message.toString()))
                     }
                 }
             }
@@ -219,7 +216,7 @@ abstract class PaymentMethodProcessor (
      * This is done to reduce latency when requesting an integrity token later during the payment process.
      * It initializes the IntegrityManager and prepares an integrity token.
      */
-    private fun prepareAndPrefetchIntegrityToken() {
+    private fun initializeAndPrefetchIntegrityToken() {
         val googleProjectNumber: Long = (context as Context).resources.getString(R.string.google_project_number).toLong()
         val standardIntegrityManager = IntegrityManagerFactory.createStandard(context as Context?)
 
@@ -270,7 +267,7 @@ abstract class PaymentMethodProcessor (
                         disconnect()
                         resetSocket()
                     } else {
-                        context.handleError(PTError(ErrorCode.SocketError,exception.message!!))
+                        context.handleError(PTError(ErrorCode.AttestationFailed,exception.message!!))
                     }
                 }
             })

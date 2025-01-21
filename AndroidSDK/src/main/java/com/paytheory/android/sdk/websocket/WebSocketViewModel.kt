@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.paytheory.android.sdk.ErrorCode
 import com.paytheory.android.sdk.PTError
 import com.paytheory.android.sdk.Payable
-import com.paytheory.android.sdk.PaymentMethodToken
-import com.paytheory.android.sdk.Payment
 import com.paytheory.android.sdk.PaymentMethodProcessor
+import com.paytheory.android.sdk.PaymentMethodToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -112,16 +111,13 @@ class WebSocketViewModel(
         } else { //if error is not ssl error
             // error for transaction request
             if (payment != null) {
-                if (payment.context is Payable){
                     println("Error: $error")
                     payment.context.handleError(PTError(ErrorCode.SocketError,error))
-                }
+
             // error for tokenization request
             } else if (paymentMethodToken != null){
-                if (paymentMethodToken.context is Payable){
-                    println("Error: $error")
-                    paymentMethodToken.context.handleError(PTError(ErrorCode.SocketError,error))
-                }
+                println("Error: $error")
+                paymentMethodToken.context.handleError(PTError(ErrorCode.TokenFailed,error))
             }
         }
     }

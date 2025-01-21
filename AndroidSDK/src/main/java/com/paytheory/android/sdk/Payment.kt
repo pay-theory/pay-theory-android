@@ -10,7 +10,6 @@ import com.paytheory.android.sdk.data.PaymentData
 import com.paytheory.android.sdk.data.PaymentDetail
 import com.paytheory.android.sdk.data.PaymentMethodData
 import com.paytheory.android.sdk.data.TransferPartOneRequest
-import com.paytheory.android.sdk.data.TransferPartTwoRequest
 import com.paytheory.android.sdk.nacl.encryptBox
 import com.paytheory.android.sdk.nacl.generateLocalKeyPair
 import com.paytheory.android.sdk.reactors.ConnectionReactors
@@ -34,17 +33,17 @@ import java.util.Base64
  * @param stage The environment to use (e.g., "paytheory", "paytheorystudy", "paytheorylab"). Defaults to "paytheory".
  * @param constants The constants object containing API endpoints and other configuration values.
  * @param payTheoryData Additional data to be sent with the payment request.
- * @param configuration PayTheoryConfiguration data class with api key, confirmation, and metadata
+ * @param configuration PayTheoryConfiguration data class with api key, and metadata
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class Payment(
-    override val context: Payable,
-    override val partner: String,
-    override val stage: String,
-    override val constants: Constants,
-    override val payTheoryData: HashMap<Any, Any>? = hashMapOf(),
-    override val configuration : PayTheoryConfiguration
-) : PaymentMethodProcessor(context,partner,stage,constants,payTheoryData, configuration), WebsocketMessageHandler {
+      contextIn: Payable,
+      partnerIn: String,
+      stageIn: String,
+      constantsIn: Constants,
+      payTheoryDataIn: HashMap<Any, Any>? = hashMapOf(),
+      configurationIn : PayTheoryConfiguration
+) : PaymentMethodProcessor(contextIn,partnerIn,stageIn,constantsIn,payTheoryDataIn, configurationIn), WebsocketMessageHandler {
 
     var queuedRequest: PaymentDetail? = null
     /**
@@ -55,7 +54,7 @@ class Payment(
         payment: PaymentDetail
     ) {
         messageReactors!!.activePaymentDetail = payment
-        val actionRequest = generateInitialActionRequest(payment)
+        val actionRequest = createInitialActionRequestForPayment(payment)
         if (viewModel.connected) {
 
             context.handlePaymentStart(payment.type)
@@ -74,7 +73,7 @@ class Payment(
      * @param payment The `PaymentDetail` object containing the payment information.
      * @return The generated `ActionRequest` object representing the initial request.
      */
-    private fun generateInitialActionRequest(payment: PaymentDetail): ActionRequest {
+    private fun createInitialActionRequestForPayment(payment: PaymentDetail): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -118,8 +117,7 @@ class Payment(
                 payment.bank_code
             )
             val paymentRequest = TransferPartOneRequest(
-                this.hostToken, paymentMethodData, paymentData,
-                configuration.confirmation!!, payment.payorInfo, this.payTheoryData,
+                this.hostToken, paymentMethodData, paymentData, payment.payorInfo, this.payTheoryData,
                 configuration.metadata, sessionKey, System.currentTimeMillis()
             )
             val encryptedBody = encryptBox(
@@ -135,52 +133,13 @@ class Payment(
         }
     }
 
-    /**
-     * Sets the confirmation message to be used for sending the `host:transfer_part2` action request
-     * after user confirmation.
-     * @param confirmationMessage The `ConfirmationMessage` object containing the confirmation details.
-     */
-    fun setConfirmation(confirmationMessage: ConfirmationMessage) {
-        this.originalConfirmation = confirmationMessage.copy()
-    }
-
-    /**
-     * Completes the transfer process by sending the `host:transfer_part2` action request.
-     */
-    fun completeTransfer() {
-        // only for ach payments, need to set expiration to null back to tags-secure-socket
-        if (originalConfirmation!!.expiration.isNullOrBlank() && originalConfirmation!!.brand == "ACH") {
-            originalConfirmation!!.expiration = ""
-        }
-        val requestBody = TransferPartTwoRequest(
-            originalConfirmation!!,
-            configuration.metadata,
-            sessionKey,
-            System.currentTimeMillis()
-        )
-        val encryptedBody = encryptBox(
-            Gson().toJson(requestBody),
-            Key.fromBase64String(messageReactors!!.socketPublicKey)
-        )
-        val actionRequest =
-            ActionRequest(TRANSFER_PART_TWO_ACTION, encryptedBody, publicKey, sessionKey)
-        if (viewModel.connected) {
-            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-        } else {
-            if (context is Payable) {
-                context.handleError(PTError(ErrorCode.SocketError,"System Connection Failed"))
-            } else {
-                return
-            }
-        }
-    }
 
     /**
      * Determines the type of message received from the websocket.
      * @param message The message received from the websocket.
      * @return The type of message received, represented as a string.
      */
-    private fun determineWebSocketMessageType(message: String): String {
+    private fun getWebSocketMessageType(message: String): String {
         return when {
             message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
@@ -208,9 +167,8 @@ class Payment(
                 messageReactors!!.onError(message, this)
             }
             else -> {
-                when (determineWebSocketMessageType(message)) {
+                when (getWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onHostToken(message, this)
-                    TRANSFER_PART_ONE_RESULT -> messageReactors!!.confirmPayment(message, this)
                     BARCODE_RESULT -> messageReactors!!.onBarcode(message, viewModel, this)
                     COMPLETED_TRANSFER -> messageReactors!!.completeTransaction(
                         message,

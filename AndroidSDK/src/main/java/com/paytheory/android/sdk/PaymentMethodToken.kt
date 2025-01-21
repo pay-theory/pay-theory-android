@@ -36,13 +36,13 @@ import java.util.Base64
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodToken(
-    override val context: Payable,
-    override val partner: String,
-    override val stage: String,
-    override val constants: Constants,
-    override val payTheoryData: HashMap<Any, Any>? = hashMapOf(),
-    override val configuration : PayTheoryConfiguration
-) : PaymentMethodProcessor(context,partner,stage,constants,payTheoryData, configuration), WebsocketMessageHandler {
+    contextIn: Payable,
+    partnerIn: String,
+    stageIn: String,
+    constantsIn: Constants,
+    payTheoryDataIn: HashMap<Any, Any>? = hashMapOf(),
+    configurationIn : PayTheoryConfiguration
+) : PaymentMethodProcessor(contextIn,partnerIn,stageIn,constantsIn,payTheoryDataIn, configurationIn), WebsocketMessageHandler {
 
     var queuedRequest: PaymentMethodTokenData? = null
     /**
@@ -53,7 +53,7 @@ class PaymentMethodToken(
         paymentMethodTokenData: PaymentMethodTokenData
     ) {
         messageReactors!!.activePaymentToken = paymentMethodTokenData
-        val actionRequest = generateInitialActionRequest(paymentMethodTokenData)
+        val actionRequest = createInitialActionRequestForToken(paymentMethodTokenData)
         if (viewModel.connected) {
             context.handleTokenStart(paymentMethodTokenData.type)
 
@@ -71,7 +71,7 @@ class PaymentMethodToken(
      * @return ActionRequest Object to send through websocket
      * @param paymentMethodTokenData The payment method token data.
      */
-    private fun generateInitialActionRequest(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
+    private fun createInitialActionRequestForToken(paymentMethodTokenData: PaymentMethodTokenData): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -84,7 +84,7 @@ class PaymentMethodToken(
             paymentMethodTokenData.expiration_year,
             paymentMethodTokenData.expiration_month,
             paymentMethodTokenData.address,
-            paymentMethodTokenData.account_number,
+            paymentMethodTokenData.accountNumber,
             paymentMethodTokenData.account_type,
             paymentMethodTokenData.bank_code
         )
@@ -114,7 +114,7 @@ class PaymentMethodToken(
      * @return String of message type
      * @param message The incoming message from the socket.
      */
-    private fun determineWebSocketMessageType(message: String): String {
+    private fun getWebSocketMessageType(message: String): String {
         return when {
             message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
             message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
@@ -138,7 +138,7 @@ class PaymentMethodToken(
                 messageReactors!!.onTokenError(message, this)
             }
             else -> {
-                when (determineWebSocketMessageType(message)) {
+                when (getWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onTokenizeHostToken(message, this)
                     TOKENIZE_RESULT -> messageReactors!!.onCompleteToken(message, this)
                     else -> messageReactors!!.onTokenError(message, this)

@@ -3,7 +3,6 @@
 package com.paytheory.android.sdk.data
 
 import com.google.gson.annotations.SerializedName
-import com.paytheory.android.sdk.ConfirmationMessage
 import com.paytheory.android.sdk.configuration.FeeMode
 
 /**
@@ -135,7 +134,6 @@ data class TransferPartOneRequest(
     @SerializedName("hostToken") val hostToken: String?,
     @SerializedName("payment_method_data") val paymentMethodData: PaymentMethodData,
     @SerializedName("payment_data") val paymentData: PaymentData,
-    @SerializedName("confirmation_needed") val confirmationNeeded: Boolean,
     @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
     @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
@@ -144,15 +142,6 @@ data class TransferPartOneRequest(
 
 )
 
-/**
- * Data class for the transfer part two
- */
-data class TransferPartTwoRequest(
-    @SerializedName("payment_prep") val paymentPrep: ConfirmationMessage,
-    @SerializedName("tags") val tags: HashMap<Any, Any>?,
-    @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("timing") val timing: Long
-)
 
 /**
  * Data class for tokenize request
@@ -188,7 +177,7 @@ data class Address (
  * Data class to store payment details
  * @param type type of payment
  * @param timing calculated timing
- * @param amount amound of payment
+ * @param amount amount of payment
  * @param currency currency type of payment
  * @param name account holder name
  * @param account_number account number
@@ -228,7 +217,7 @@ data class PaymentDetail (
  * @param type type of payment
  * @param timing calculated timing
  * @param name account holder name
- * @param account_number account number
+ * @param accountNumber account number
  * @param account_type type of account
  * @param bank_code routing number
  * @param number card number
@@ -241,7 +230,7 @@ data class PaymentMethodTokenData (
     @SerializedName("type") val type: String,
     @SerializedName("timing") val timing: Long,
     @SerializedName("name") val name: String? = "",
-    @SerializedName("account_number") val account_number: String? = null,
+    @SerializedName("account_number") val accountNumber: String? = null,
     @SerializedName("account_type") val account_type: String? = null,
     @SerializedName("bank_code") val bank_code: String? = null,
     @SerializedName("number") val number: String? = null,

@@ -5,6 +5,11 @@ package com.paytheory.android.sdk.state
  */
 class CardState {
     /**
+     * State of card name field
+     */
+    var cardName: StateElement = StateElement()
+
+    /**
      * State of card number field
      */
     var cardNumber: StateElement = StateElement()

@@ -112,12 +112,52 @@ Add PayTheoryFragment as a fragment in your activity's xml layout file
         android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment" />
 ```
 
+### Styling
+
+Text inputs are derived from TextInputEditText and can be styled as follows:
+
+```xml
+    <style name="Theme.MyCustomTheme" parent="Base.Theme.MyApplication">
+        ...
+        <item name="textInputStyle">@style/MyInputStyle</item>
+        ...
+    </style>
+
+    <style name="MyInputStyle" parent="Widget.Material3.TextInputLayout.FilledBox">
+        ...
+    </style>
+```
+
+> **_NOTE:_**  any built in style from Widget.Material3.TextInputLayout.* will work
+
+The inputs support all of the material design text input styles described [here](https://developer.android.com/design/ui/mobile/guides/components/material-overview#text-input)
+
+The PayTheoryButton is styled by applying a style from your theme in your layout.
+
+in themes.xml:
+```xml
+    <style name="MyButtonStyle" parent="Widget.Material3.Button.ElevatedButton">
+    ...
+    </style>
+```
+> **_NOTE:_**  any built in style from Widget.Material3.Button.* will work
+
+in your layout file:
+```xml
+    <com.paytheory.android.sdk.view.PayTheoryButton
+        ...
+        style="@style/MyButtonStyle"
+        ...
+    />
+```
+
 ### Code
 
-- Implement the Payable interface from your activity activity
+- Extend the PayTheoryMerchantActivity
+- Implement the Payable interface
 
 ```Kotlin
-class MainActivity : AppCompatActivity() , Payable {
+class MainActivity : PayTheoryMerchantActivity(), Payable {
     ...
 }
 ```

@@ -12,18 +12,7 @@ import android.util.AttributeSet
  * PayTheory Edit Text
  */
 @Suppress("EmptyMethod")
-open class PayTheoryEditText : androidx.appcompat.widget.AppCompatEditText{
-
-    companion object {
-        /**
-         * Custom validation function
-         * @param incoming String to validate
-         * @param validator Lambda accepting the incoming String value and returning a Boolean result
-         */
-        fun validate(incoming: String, validator: (String) -> Boolean): Boolean {
-            return validator(incoming)
-        }
-    }
+open class PayTheoryEditText : com.google.android.material.textfield.TextInputEditText{
 
     /**
      * Constructor for PayTheoryEditText

@@ -39,11 +39,6 @@ class PayTheoryConfiguration(
      */
     var requireBillingAddress: Boolean? = false
     /**
-     * Sets whether or not to show confirmation dialog
-     * Default: false
-     */
-    var confirmation: Boolean? = false
-    /**
      * Fee mode (MERCHANT_FEE or BUYER_FEE)
      * Default: MERCHANT_FEE
      */
@@ -60,6 +55,8 @@ class PayTheoryConfiguration(
      * Payor ID
      */
     var payorId: String? = null
+
+    var skipTokenizeValidation: Boolean? = false
     var accountCode: String? = null
     var reference: String? = null
     var paymentParameters: String? = null

@@ -3,12 +3,17 @@ package com.paytheory.android.sdk.watchers
 import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.EditText
+import com.paytheory.android.sdk.configuration.PaymentMethodType
 import com.paytheory.android.sdk.fragments.PayTheoryFragment
 import com.paytheory.android.sdk.view.PayTheoryButton
-import com.paytheory.android.sdk.view.PayTheoryEditText
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
+/**
+ * Boolean that tracks the validity of the account name
+ */
+var cardNameValid: Boolean = false
 /**
  * Boolean to track card number field validation
  */
@@ -22,24 +27,91 @@ var expFieldValid: Boolean = false
  */
 var cvvFieldValid: Boolean = false
 /**
- * Boolean to track zip code field validation
- */
-var zipCodeFieldValid: Boolean = false
-/**
  * Boolean to track all card field validation
  */
 var cardFieldsValid: Boolean = false
 
 /**
  * Function to enable or disable submit button based on all card field validation
- * @param button pay theory button
  */
-private fun areFieldsValid(button: PayTheoryButton){
-    cardFieldsValid = cardFieldValid && expFieldValid && cvvFieldValid && zipCodeFieldValid
-    if (cardFieldsValid){
+private fun areFieldsValid(button: PayTheoryButton, fragment: PayTheoryFragment?) {
+    cardFieldsValid = cardNameValid && cardFieldValid && expFieldValid && cvvFieldValid
+    if (cardFieldsValid && isAddressValid(button,fragment) == true){
         button.enable()
     } else {
         button.disable()
+    }
+
+}
+
+fun isCardValid(fragment: PayTheoryFragment?): Boolean {
+    if (fragment?.chosenPaymentMethod() == PaymentMethodType.CARD) {
+        return cardFieldsValid
+    }
+    return true
+}
+
+/**
+ * Class that will add text watchers to an AppCompatEditText
+ * @param pt custom AppCompatEditText that will be watched
+ */
+class CardNameTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) :
+    TextWatcher {
+    private var ptText: EditText? = pt
+    private var ptFragment: PayTheoryFragment? = fragment
+
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        // no-op comment in an unused listener function
+    }
+
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        // no-op comment in an unused listener function
+    }
+
+    /**
+     * Function that handles text changes after they happen
+     * @param editable editable text
+     */
+    override fun afterTextChanged(editable: Editable) {
+        val s = editable.toString()
+        if (s.isEmpty()) {
+            ptFragment!!.card.cardName.setEmpty(true)
+            ptFragment!!.card.cardName.setValid(false)
+            return
+        }
+
+        val isValidLength = s.toString().isNotEmpty()
+        ptFragment!!.card.cardName.setEmpty(false)
+        ptFragment!!.card.cardName.setValid(isValidLength)
+        handleButton(isValidLength)
+    }
+
+    /**
+     * Function that that handles the pay button and field errors
+     * @param valid boolean that determines if the account number is valid
+     */
+    private fun handleButton(valid: Boolean){
+        if (!valid) {
+            cardNameValid = false
+            ptText!!.error = "Invalid Account Name"
+        } else {
+            cardNameValid = true
+        }
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -47,18 +119,36 @@ private fun areFieldsValid(button: PayTheoryButton){
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
+class CardNumberTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
-    private var ptText: PayTheoryEditText? = pt
+    private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
+
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.cardNumber.setEmpty(true)
@@ -137,7 +227,7 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
         } else {
             cardFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -145,24 +235,43 @@ class CardNumberTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
+class ExpirationTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
-    private var ptText: PayTheoryEditText? = pt
+    private var ptText: EditText? = pt
     private var isDelete = false
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         isDelete = before != 0
     }
 
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
             ptFragment!!.card.expirationDate.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -188,16 +297,35 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
      */
     @SuppressLint("SimpleDateFormat")
     private fun validExp(number: String): Boolean {
-        val length = number.length
+        var length = number.length
         val stringBuilder = StringBuilder()
+
+        // Check first digit or first two digits for validity
+        var checkBit = number.toString().first().toString()
+        if (number.toString().length > 1) {
+            checkBit = number.toString().subSequence(0,2).toString()
+        }
+
+        // If the check bit doesn't start with '0' and is greater than 1 or 12, prepend '0'
+        if (checkBit.first() != '0') {
+            if ((Integer.parseInt(checkBit) > 1 && Integer.parseInt(checkBit) < 10) ||
+                Integer.parseInt(checkBit) > 12) {
+                stringBuilder.append("0")
+                length = length + 1
+            }
+        }
+
+        // Append the original number to the StringBuilder
         stringBuilder.append(number)
+
+        // If the length is 3, either delete the last char (if deleting) or insert '/'
         if (length > 0 && length == 3) {
             if (isDelete) stringBuilder.deleteCharAt(length - 1) else stringBuilder.insert(
                 length - 1,
                 "/"
             )
-            ptText!!.setText(stringBuilder)
-            ptText!!.setSelection(ptText!!.text!!.length)
+            ptText!!.setText(stringBuilder) // Update the EditText with the modified string
+            ptText!!.setSelection(ptText!!.text!!.length) // Move cursor to the end
         }
 
         //get current two digit year
@@ -218,7 +346,7 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
         } else {
             expFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
@@ -227,23 +355,41 @@ class ExpirationTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, 
  * Class that will add text watchers to an AppCompatEditText
  * @param pt custom AppCompatEditText that will be watched
  */
-class CVVTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
+class CVVTextWatcher(pt: EditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
     private var lock = false
-    private var ptText: PayTheoryEditText? = pt
+    private var ptText: EditText? = pt
     private var ptFragment: PayTheoryFragment? = fragment
 
+    /**
+     * Function that handles text changes
+     * @param s editable text
+     * @param start start index
+     * @param before char count before change
+     * @param count char count after change
+     */
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         // no-op comment in an unused listener function
     }
 
+    /**
+     * Function that handles text changes before they happen
+     * @param s editable text
+     * @param start start index
+     * @param count char count before change
+     * @param after char count after change
+     */
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         // no-op comment in an unused listener function
     }
-
+    /**
+     * Function that handles text changes after they happen
+     * @param s editable text
+     */
     override fun afterTextChanged(s: Editable) {
         if (lock || s.isEmpty()) {
             ptFragment!!.card.expirationDate.setEmpty(true)
             ptFragment!!.card.expirationDate.setValid(false)
+            handleButton(false)
             return
         }
 
@@ -284,71 +430,7 @@ class CVVTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private
         } else {
             cvvFieldValid = true
         }
-        areFieldsValid(submitButton)
+        areFieldsValid(submitButton,ptFragment)
     }
 }
 
-/**
- * Class that will add text watchers to an AppCompatEditText
- * @param pt custom AppCompatEditText that will be watched
- */
-class ZipCodeTextWatcher(pt: PayTheoryEditText, fragment: PayTheoryFragment, private var submitButton: PayTheoryButton) : TextWatcher {
-    private var lock = false
-    private var ptText: PayTheoryEditText? = pt
-    private var ptFragment: PayTheoryFragment? = fragment
-
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        // no-op comment in an unused listener function
-    }
-
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        // no-op comment in an unused listener function
-    }
-
-    override fun afterTextChanged(s: Editable) {
-        if (lock || s.isEmpty()) {
-            ptFragment!!.card.postalCode.setEmpty(true)
-            ptFragment!!.card.postalCode.setValid(false)
-            return
-        }
-
-        val maxLength = 5
-
-        lock = true
-
-        if (s.length > maxLength) {
-            s.delete(maxLength,s.length)
-        }
-
-        lock = false
-        val isValidNumber = validZip(s.toString())
-        ptFragment!!.card.postalCode.setEmpty(false)
-        ptFragment!!.card.postalCode.setValid(isValidNumber)
-        handleButton(isValidNumber)
-    }
-
-    /**
-     * Function to check if zip code is valid
-     * @param number zip code string
-     */
-    private fun validZip(number: String): Boolean {
-        val (digits, _) = number
-            .partition(Char::isDigit)
-
-        return digits.length == 5
-    }
-
-    /**
-     * Function to handle button state based on zip code validation
-     * @param valid boolean for validity of zip code
-     */
-    private fun handleButton(valid: Boolean){
-        if (!valid) {
-            zipCodeFieldValid = false
-            ptText!!.error = "Invalid ZIP Code"
-        } else {
-            zipCodeFieldValid = true
-        }
-        areFieldsValid(submitButton)
-    }
-}
