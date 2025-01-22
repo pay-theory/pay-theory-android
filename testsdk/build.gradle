@@ -47,8 +47,8 @@ android {
 
 dependencies {
     //use PayTheorySDK as library
-    implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: PT_RELEASE_VERSION
-//    implementation project(path: ':AndroidSDK')
+//    implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: PT_RELEASE_VERSION
+    implementation project(path: ':AndroidSDK')
     implementation 'net.java.dev.jna:jna:5.15.0@aar'
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
