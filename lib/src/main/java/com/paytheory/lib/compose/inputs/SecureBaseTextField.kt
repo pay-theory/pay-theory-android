@@ -19,7 +19,7 @@ internal fun SecureBaseTextField(
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
     visualTransformation: VisualTransformation = NoFilterTransformation(),
-    maxChar: Int = 20,
+    maxChar: Int = 128,
     preWrap: (String) -> String = { it },
     onValueChange: (SecureString) -> Unit,
     isValid: (SecureString) -> Boolean,

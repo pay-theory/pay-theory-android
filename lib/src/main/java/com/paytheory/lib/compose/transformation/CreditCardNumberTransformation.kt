@@ -7,8 +7,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 class CreditCardNumberTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = text.text.takeIf { it.length <= 16 } ?: text.text.take(16)
-        val formatted = trimmed.chunked(4).joinToString(" ")
+
+        val trimmed = text.text.take(16)
+        val formatted = trimmed.chunked(4).joinToString(" ").trim().take(19)
 
         return TransformedText(
             AnnotatedString(formatted),

@@ -142,6 +142,16 @@ dependencies {
     implementation("androidx.compose.material:material:1.7.8")
 
     testImplementation("junit:junit:4.13.2")
+
+    testImplementation("io.mockk:mockk:1.13.17")
+    testImplementation ("org.mockito:mockito-core:4.8.1")
+    testImplementation( "org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("androidx.compose.ui:ui-test-junit4:1.7.8") // Or the latest version
+    testImplementation("org.mockito:mockito-core:4.8.1") // Or the latest version
+    testImplementation("org.mockito:mockito-inline:4.8.1") // Or the latest version
+    testImplementation("androidx.compose.ui:ui-test-manifest:1.7.8")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:core:1.6.1")
     androidTestImplementation("androidx.test:runner:1.6.2")

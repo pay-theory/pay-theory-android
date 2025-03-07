@@ -1,7 +1,6 @@
 package com.paytheory.simplecompose
 
 
-import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -16,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paytheory.lib.BarcodeResult
 import com.paytheory.lib.FailedTransactionResult
@@ -36,7 +34,7 @@ class MainActivity : ComponentActivity(), Payable {
         setContent {
             JetsnacksampleTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
+                    SimplePayment(
                         payable = this@MainActivity,
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -79,12 +77,12 @@ class MainActivity : ComponentActivity(), Payable {
 }
 
 @Composable
-fun Greeting(payable: Payable, modifier: Modifier = Modifier) {
+fun SimplePayment(payable: Payable, modifier: Modifier = Modifier) {
     val apiKey = LocalContext.current.getString(R.string.api_key)
     val ptConfig = PayTheoryConfiguration(
         apiKey = apiKey,
         amount = 1000000,
-        paymentMethodType = PaymentMethodType.ACH,
+        paymentMethodType = PaymentMethodType.CARD,
         requireBillingAddress = false,
         requireAccountName = false,
         outlined = false

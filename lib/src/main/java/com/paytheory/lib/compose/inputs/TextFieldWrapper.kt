@@ -5,6 +5,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import com.paytheory.lib.compose.string.SecureString
@@ -23,6 +24,7 @@ fun TextFieldWrapper(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isOutlined: Boolean = true
 ) {
+    val testModifier = modifier.testTag("testField")
     if (isOutlined) {
         OutlinedTextField(
             value = value.revealForUi(),
@@ -46,6 +48,7 @@ fun TextFieldWrapper(
             visualTransformation = visualTransformation,
             label = label,
             maxLines = maxLines,
+
             singleLine = singleLine,
             enabled = enabled
         )
@@ -66,6 +69,7 @@ fun TextFieldWrapper(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isOutlined: Boolean = true
 ) {
+    val testModifier = modifier.testTag("testField")
     if (isOutlined) {
         OutlinedTextField(
             value = value,

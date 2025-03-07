@@ -9,7 +9,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 class SecureStringWrapper(initialValue: SecureString, selection: TextRange?) {
 
     private var _secureValue: SecureString = initialValue
-    private var _selection: TextRange? = selection
+    var _selection: TextRange? = selection
 
     // Use a MutableState to hold the visible value
     var visibleValue: String by mutableStateOf(_secureValue.revealForUi())

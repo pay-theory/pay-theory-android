@@ -30,11 +30,11 @@ fun SecureCardNumberField(
     SecureBaseTextField(
         value = secureString,
         onValueChange = { newSecureString ->
-            secureString = newSecureString // Update the internal state
-            onValueChange(newSecureString) // Notify the caller
+            secureString = SecureString(newSecureString.revealForUi().take(20)) // Update the internal state
+            onValueChange(secureString) // Notify the caller
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        maxChar = 20,
+        maxChar = 16,
         modifier = modifier,
         visualTransformation = CreditCardNumberTransformation(),
         label = { Text(stringResource(id = R.string.card_number)) },

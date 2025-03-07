@@ -53,7 +53,7 @@ class PaymentViewModel @Inject constructor(
         this
     )
 
-    val validator = Validator()
+    var validator = Validator()
 
     // region State Management
     sealed class PaymentState {

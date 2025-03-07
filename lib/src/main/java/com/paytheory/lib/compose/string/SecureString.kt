@@ -7,15 +7,17 @@ class SecureString(dataIn: ByteArray) {
     constructor(value: String) : this(value.toSecureBytes())
 
     private var data = dataIn
-    private var _isModified = mutableStateOf(false)
+    var _isModified = mutableStateOf(false)
 
     fun revealForUi(): String = data.toSecureString()
     fun revealForProcessing(): ByteArray = data
-    fun clear() = Arrays.fill(data, 0.toByte())
+    fun zeroFill() {
+        data.fill(0)
+    }
 
     // Function to update the SecureString securely
     fun setValue(newValue: String) {
-        clear()
+        zeroFill()
         data = newValue.toSecureBytes()
         _isModified.value = !_isModified.value // Toggle the flag
     }
@@ -34,7 +36,7 @@ class SecureString(dataIn: ByteArray) {
 
     override fun hashCode(): Int = data.contentHashCode()
     companion object {
-        private fun String.toSecureBytes(): ByteArray {
+        fun String.toSecureBytes(): ByteArray {
             val chars = toCharArray()
             val bytes = ByteArray(chars.size * 2)
             chars.forEachIndexed { i, c ->
@@ -45,7 +47,7 @@ class SecureString(dataIn: ByteArray) {
             return bytes
         }
 
-        private fun ByteArray.toSecureString(): String {
+        fun ByteArray.toSecureString(): String {
             val chars = CharArray(size / 2)
             for (i in chars.indices) {
                 val high = (this[i * 2].toInt() and 0xFF) shl 8

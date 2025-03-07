@@ -10,9 +10,9 @@ import com.goterl.lazysodium.utils.KeyPair
 /**
  * Object that handles lazy sodium functions
  */
-private val lazySodium = LazySodiumAndroid(SodiumAndroid())
-private val boxLazy = lazySodium as Box.Lazy
-private lateinit var keyPair: KeyPair
+val lazySodium = LazySodiumAndroid(SodiumAndroid())
+val boxLazy = lazySodium as Box.Lazy
+lateinit var keyPair: KeyPair
 
 /**
  * Function to generate KeyPair
