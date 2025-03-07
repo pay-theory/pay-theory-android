@@ -1,6 +1,7 @@
 package com.paytheory.lib
 
 import com.google.gson.annotations.SerializedName
+import com.paytheory.lib.model.PaymentViewModel.PaymentField
 
 /*
 * Modernization
@@ -164,6 +165,9 @@ interface Payable {
      * @param paymentMethodToken result for a payment method token request
      */
     fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
+
+
+    fun handleStateChange(fieldState: Pair<PaymentField,Boolean>)
 
     /**
      * function to handle any system errors from a user's device or Pay Theory

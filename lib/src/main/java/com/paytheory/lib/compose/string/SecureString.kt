@@ -22,10 +22,6 @@ class SecureString(dataIn: ByteArray) {
         _isModified.value = !_isModified.value // Toggle the flag
     }
 
-    // Provide the String representation
-    val value: String
-        get() = revealForUi()
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

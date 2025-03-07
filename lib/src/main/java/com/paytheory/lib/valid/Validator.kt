@@ -77,5 +77,5 @@ class Validator {
     fun isValidPostalCode(secureString: SecureString): Boolean = secureString.revealForUi().toString().length >= 5
             && secureString.revealForUi().toString().length <= 6
 
-    fun isNotEmpty(secureString: SecureString): Boolean = secureString.toString().isNotEmpty()
+    fun isNotEmpty(secureString: SecureString): Boolean = secureString.revealForUi().isNotEmpty()
 }

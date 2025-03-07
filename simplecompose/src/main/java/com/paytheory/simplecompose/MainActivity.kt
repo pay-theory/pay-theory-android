@@ -25,6 +25,7 @@ import com.paytheory.lib.PaymentMethodTokenResults
 import com.paytheory.lib.SuccessfulTransactionResult
 import com.paytheory.lib.compose.PaymentForm
 import com.paytheory.lib.configuration.PaymentMethodType
+import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.simplecompose.ui.theme.JetsnacksampleTheme
 
 class MainActivity : ComponentActivity(), Payable {
@@ -71,6 +72,10 @@ class MainActivity : ComponentActivity(), Payable {
         Log.d("MainActivity", "handleTokenizeSuccess: $paymentMethodToken")
     }
 
+    override fun handleStateChange(fieldState: Pair<PaymentViewModel.PaymentField, Boolean>) {
+        Log.d("MainActivity", "handleStateChange: $fieldState")
+    }
+
     override fun handleError(error: PTError) {
         Log.d("MainActivity", "handleError: $error")
     }
@@ -82,10 +87,10 @@ fun SimplePayment(payable: Payable, modifier: Modifier = Modifier) {
     val ptConfig = PayTheoryConfiguration(
         apiKey = apiKey,
         amount = 1000000,
-        paymentMethodType = PaymentMethodType.CARD,
+        paymentMethodType = PaymentMethodType.ACH,
         requireBillingAddress = false,
         requireAccountName = false,
-        outlined = false
+        outlined = true
     )
 
     Column(

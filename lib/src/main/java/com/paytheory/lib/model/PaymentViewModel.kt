@@ -33,11 +33,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class PaymentViewModel @Inject constructor(
-    packageName:String,
-    configurationIn: PayTheoryConfiguration,
-    payable: Payable
-) : ViewModel() {
+class PaymentViewModel @Inject constructor(packageName:String, configurationIn: PayTheoryConfiguration, payable: Payable) :ViewModel() {
     val webServicesProvider = WebServicesProvider()
     val webSocketRepository = WebsocketRepository(webServicesProvider)
     val interactor = WebsocketInteractor(webSocketRepository)
@@ -90,6 +86,37 @@ class PaymentViewModel @Inject constructor(
     // endregion
 
     var connected: Boolean = false
+
+    enum class PaymentField {
+        NAME_ON_ACCOUNT,
+        BANK_ACCOUNT_NUMBER,
+        BANK_ROUTING_NUMBER,
+        BANK_ACCOUNT_TYPE,
+        CARD_NUMBER,
+        CARD_EXPIRATION,
+        CARD_CVC,
+        ADDRESS_LINE1,
+        ADDRESS_LINE2,
+        CITY,
+        REGION,
+        POSTAL_CODE
+    }
+
+    val PaymentFieldState: HashMap<PaymentField, Boolean> = hashMapOf(
+        Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, false),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, false),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, false),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_TYPE, false),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_NUMBER, false),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_EXPIRATION, false),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_CVC, false),
+        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE1, false),
+        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE2, false),
+        Pair<PaymentField, Boolean>(PaymentField.CITY, false),
+        Pair<PaymentField, Boolean>(PaymentField.REGION, false),
+        Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, false)
+    )
+
 
 
     /**
@@ -361,46 +388,56 @@ class PaymentViewModel @Inject constructor(
 
     }
 
+    private fun propagateState(field: PaymentField, isValid: Boolean): Boolean {
+        if (PaymentFieldState.contains(field) && PaymentFieldState[field] != isValid) {
+            PaymentFieldState[field] = isValid
+            payTheoryPayment.context.handleStateChange(Pair(field, PaymentFieldState.get(field)!!))
+            return PaymentFieldState[field]!!
+        }
+        else
+            return isValid
+
+    }
 
     private fun isValidCardNumber(): Boolean {
-        return validator.isValidCardNumber(cardNumber.value)
+        return propagateState(PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value))
     }
 
     private fun isValidExpiration(): Boolean {
-        return validator.isValidExpiration(expiration.value)
+        return propagateState(PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value))
     }
     private fun isValidCvc(): Boolean {
-        return validator.isValidCvc(cvc.value)
+        return propagateState(PaymentField.CARD_CVC, validator.isValidCvc(cvc.value))
     }
 
     private fun isValidStreetAddress(): Boolean {
-        return validator.isNotEmpty(addressLine1.value)
+        return propagateState(PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value))
     }
 
     private fun isValidCity(): Boolean {
-        return validator.isNotEmpty(city.value)
+        return propagateState(PaymentField.CITY, validator.isNotEmpty(city.value))
     }
     private fun isValidState(): Boolean {
-        return validator.isNotEmpty(region.value)
+        return propagateState(PaymentField.REGION, validator.isNotEmpty(region.value))
     }
     private fun isValidPostalCode(): Boolean {
-        return validator.isValidPostalCode(postalCode.value)
+        return propagateState(PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value))
     }
 
     private fun isValidNameOnAccount(): Boolean {
-        return validator.isNotEmpty(nameOnAccount.value)
+        return propagateState(PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value))
     }
 
     private fun isValidBankAccountNumber(): Boolean {
-        return validator.isValidBankAccountNumber(bankAccountNumber.value)
+        return propagateState(PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value))
     }
 
     private fun isValidBankRoutingNumber(): Boolean {
-        return validator.isValidBankRoutingNumber(bankRoutingNumber.value)
+        return propagateState(PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value))
     }
 
     private fun isValidAccountType(): Boolean {
-        return bankAccountType.value.isNotBlank()
+        return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank())
     }
     private fun isValidAccountAddress(): Boolean {
         var relevant = mutableListOf(
@@ -420,6 +457,7 @@ class PaymentViewModel @Inject constructor(
     fun paymentSuccess(result: SuccessfulTransactionResult) {
         _paymentState.value = PaymentState.Success(result.receiptNumber)
     }
+
 
     internal fun clearSensitiveData() {
         listOf(
