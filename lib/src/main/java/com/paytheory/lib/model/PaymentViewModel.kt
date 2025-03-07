@@ -87,6 +87,12 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
 
     var connected: Boolean = false
 
+    enum class FieldState {
+        EMPTY,
+        READY,
+        INVALID,
+        INIT
+    }
     enum class PaymentField {
         NAME_ON_ACCOUNT,
         BANK_ACCOUNT_NUMBER,
@@ -102,7 +108,21 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         POSTAL_CODE
     }
 
-    val PaymentFieldState: HashMap<PaymentField, Boolean> = hashMapOf(
+    val paymentFieldValid: HashMap<PaymentField, Boolean> = hashMapOf(
+        Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, true),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, true),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, true),
+        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_TYPE, true),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_NUMBER, true),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_EXPIRATION, true),
+        Pair<PaymentField, Boolean>(PaymentField.CARD_CVC, true),
+        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE1, true),
+        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE2, true),
+        Pair<PaymentField, Boolean>(PaymentField.CITY, true),
+        Pair<PaymentField, Boolean>(PaymentField.REGION, true),
+        Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, true)
+    )
+    val paymentFieldEmpty: HashMap<PaymentField, Boolean> = hashMapOf(
         Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, false),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, false),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, false),
@@ -115,6 +135,21 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         Pair<PaymentField, Boolean>(PaymentField.CITY, false),
         Pair<PaymentField, Boolean>(PaymentField.REGION, false),
         Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, false)
+    )
+
+    val paymentFieldState: HashMap<PaymentField, FieldState> = hashMapOf(
+        Pair<PaymentField, FieldState>(PaymentField.NAME_ON_ACCOUNT, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.BANK_ACCOUNT_NUMBER, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.BANK_ROUTING_NUMBER, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.BANK_ACCOUNT_TYPE, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.CARD_NUMBER, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.CARD_EXPIRATION, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.CARD_CVC, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.ADDRESS_LINE1, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.ADDRESS_LINE2, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.CITY, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.REGION, FieldState.INIT),
+        Pair<PaymentField, FieldState>(PaymentField.POSTAL_CODE, FieldState.INIT)
     )
 
 
@@ -388,56 +423,67 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
 
     }
 
-    private fun propagateState(field: PaymentField, isValid: Boolean): Boolean {
-        if (PaymentFieldState.contains(field) && PaymentFieldState[field] != isValid) {
-            PaymentFieldState[field] = isValid
-            payTheoryPayment.context.handleStateChange(Pair(field, PaymentFieldState.get(field)!!))
-            return PaymentFieldState[field]!!
+    private fun propagateState(field: PaymentField, isValid: Boolean, isEmpty: Boolean): Boolean {
+        var fieldState: FieldState? = paymentFieldState[field]
+
+        if (isEmpty && fieldState != FieldState.EMPTY) {
+            paymentFieldState[field] = FieldState.EMPTY
+            paymentFieldEmpty[field] = true
+            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
+        } else if (fieldState != FieldState.READY && isValid) {
+            paymentFieldState[field] = FieldState.READY
+            paymentFieldValid[field] = true
+            paymentFieldEmpty[field] = isEmpty
+            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
+        } else if (isEmpty == false && fieldState != FieldState.INVALID && isValid == false) {
+            paymentFieldState[field] = FieldState.INVALID
+            paymentFieldValid[field] = false
+            paymentFieldEmpty[field] = false
+            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
         }
-        else
-            return isValid
+        return isValid
 
     }
 
     private fun isValidCardNumber(): Boolean {
-        return propagateState(PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value))
+        return propagateState(PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value,), cardNumber.value.stringLength() == 0)
     }
 
     private fun isValidExpiration(): Boolean {
-        return propagateState(PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value))
+        return propagateState(PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value), expiration.value.secureValue.stringLength() == 0)
     }
     private fun isValidCvc(): Boolean {
-        return propagateState(PaymentField.CARD_CVC, validator.isValidCvc(cvc.value))
+        return propagateState(PaymentField.CARD_CVC, validator.isValidCvc(cvc.value), cvc.value.stringLength() == 0)
     }
 
     private fun isValidStreetAddress(): Boolean {
-        return propagateState(PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value))
+        return propagateState(PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value), addressLine1.value.stringLength() == 0)
     }
 
     private fun isValidCity(): Boolean {
-        return propagateState(PaymentField.CITY, validator.isNotEmpty(city.value))
+        return propagateState(PaymentField.CITY, validator.isNotEmpty(city.value), city.value.stringLength() == 0)
     }
     private fun isValidState(): Boolean {
-        return propagateState(PaymentField.REGION, validator.isNotEmpty(region.value))
+        return propagateState(PaymentField.REGION, validator.isNotEmpty(region.value), region.value.stringLength() == 0)
     }
     private fun isValidPostalCode(): Boolean {
-        return propagateState(PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value))
+        return propagateState(PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value), postalCode.value.stringLength() == 0)
     }
 
     private fun isValidNameOnAccount(): Boolean {
-        return propagateState(PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value))
+        return propagateState(PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value), nameOnAccount.value.stringLength() == 0)
     }
 
     private fun isValidBankAccountNumber(): Boolean {
-        return propagateState(PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value))
+        return propagateState(PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value), bankAccountNumber.value.stringLength() == 0)
     }
 
     private fun isValidBankRoutingNumber(): Boolean {
-        return propagateState(PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value))
+        return propagateState(PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value), bankRoutingNumber.value.stringLength() == 0)
     }
 
     private fun isValidAccountType(): Boolean {
-        return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank())
+        return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank(), bankAccountType.value.isBlank())
     }
     private fun isValidAccountAddress(): Boolean {
         var relevant = mutableListOf(

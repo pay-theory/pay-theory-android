@@ -1,6 +1,11 @@
 package com.paytheory.lib.compose.string
 
 import androidx.compose.runtime.mutableStateOf
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.nio.charset.Charset
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.CodingErrorAction
 import java.util.Arrays
 
 /**
@@ -44,6 +49,49 @@ class SecureString(dataIn: ByteArray) {
 
     private var data = dataIn
     var _isModified = mutableStateOf(false)
+
+    fun stringLength(charset: Charset = Charsets.UTF_8): Int {
+
+        var totalChars: Int = 0
+
+        val decoder: CharsetDecoder = charset.newDecoder()
+            .onMalformedInput(CodingErrorAction.IGNORE) // Handle errors silently
+            .onUnmappableCharacter(CodingErrorAction.IGNORE)
+
+        val byteBuffer = ByteBuffer.wrap(data)
+        val charBuffer = CharBuffer.allocate(1024) // Temporary buffer (adjust size as needed)
+
+
+        decoder.reset()
+
+        // Decode in chunks to avoid storing the full string
+        while (byteBuffer.hasRemaining()) {
+            val result = decoder.decode(byteBuffer, charBuffer, false)
+            if (result.isOverflow) {
+                totalChars += charBuffer.position()
+                charBuffer.clear() // Reset buffer (discard contents)
+            } else if (result.isUnderflow) {
+                totalChars += charBuffer.position()
+            } else {
+                result.throwException()
+            }
+        }
+
+        // Finalize decoding (end-of-input)
+        val finalResult = decoder.decode(byteBuffer, charBuffer, true)
+        if (finalResult.isOverflow) {
+            totalChars += charBuffer.position()
+            charBuffer.clear()
+        } else {
+            totalChars += charBuffer.position()
+        }
+
+        // Flush remaining state
+        decoder.flush(charBuffer)
+        totalChars += charBuffer.position()
+        return totalChars
+
+    }
 
     fun revealForUi(): String = data.toSecureString()
     fun revealForProcessing(): ByteArray = data

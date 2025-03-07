@@ -72,9 +72,11 @@ class MainActivity : ComponentActivity(), Payable {
         Log.d("MainActivity", "handleTokenizeSuccess: $paymentMethodToken")
     }
 
-    override fun handleStateChange(fieldState: Pair<PaymentViewModel.PaymentField, Boolean>) {
+    override fun handleStateChange(fieldState: Pair<PaymentViewModel.PaymentField, PaymentViewModel.FieldState>) {
         Log.d("MainActivity", "handleStateChange: $fieldState")
     }
+
+
 
     override fun handleError(error: PTError) {
         Log.d("MainActivity", "handleError: $error")
