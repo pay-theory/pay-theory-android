@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cvc" translatable="false">CVC</string>
+    <string name="mm_dd" translatable="false">MM/DD</string>
+    <string name="name_on_account">Name on Account</string>
+    <string name="account_type">Account Type</string>
+    <string name="account_number">Account Number</string>
+    <string name="routing_number">Routing Number</string>
+    <string name="card_number">Card Number</string>
+    <string name="checking_account">Checking</string>
+    <string name="savings_account">Savings</string>
+    <string name="address_1">Address Line 1</string>
+    <string name="address_2">Address Line 2</string>
+    <string name="city">City</string>
+    <string name="state">State</string>
+    <string name="zip">Zip</string>
+</resources>

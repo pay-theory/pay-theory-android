@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="name_on_account">Nom sur le compte</string>
+    <string name="account_type">Type de compte</string>
+    <string name="account_number">Numéro de compte</string>
+    <string name="routing_number">Numéro de routage</string>
+    <string name="card_number">Numéro de carte</string>
+    <string name="checking_account">Compte chèque</string>
+    <string name="savings_account">Compte épargne</string>
+    <string name="address_1">Adresse Ligne 1</string>
+    <string name="address_2">Adresse Ligne 2</string>
+    <string name="city">Ville</string>
+    <string name="state">État</string>
+    <string name="zip">Code</string>
+</resources>
