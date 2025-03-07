@@ -1,10 +1,6 @@
 package com.paytheory.lib.compose
 
 import android.accounts.NetworkErrorException
-import android.content.Context
-import android.icu.util.TimeZone
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,7 +31,7 @@ import com.paytheory.lib.valid.Validator
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 /**
- * Composable function to display the Payment Form.
+ * Composable function to display a Payment Form.
  *
  * @param payable An instance of [Payable] interface to handle payment actions.
  * @param configuration Configuration parameters for the payment form, defined in [PayTheoryConfiguration].
