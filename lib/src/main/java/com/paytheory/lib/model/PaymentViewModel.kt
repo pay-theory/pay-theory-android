@@ -18,13 +18,13 @@ import com.paytheory.lib.configuration.PaymentMethodType
 import com.paytheory.lib.data.Address
 import com.paytheory.lib.data.PaymentDetail
 import com.paytheory.lib.valid.Validator
-import com.paytheory.lib.websocket.SocketUpdate
 import com.paytheory.lib.websocket.WebServicesProvider
+import com.paytheory.lib.websocket.WebsocketInteractor
 import com.paytheory.lib.websocket.WebsocketMessageHandler
+import com.paytheory.lib.websocket.WebsocketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,24 +34,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentViewModel @Inject constructor(packageName:String, configurationIn: PayTheoryConfiguration, payable: Payable) :ViewModel() {
-    val webServicesProvider = WebServicesProvider()
-    val webSocketRepository = WebsocketRepository(webServicesProvider)
-    val interactor = WebsocketInteractor(webSocketRepository)
-
-    val configuration = configurationIn
-    val payTheoryData = createPayTheoryData(configuration)
-
-    val payTheoryPayment = Payment(
-        packageName,
-        payable,
-        payTheoryData,
-        configurationIn,
-        this
-    )
-
-    var validator = Validator()
-
-    // region State Management
     sealed class PaymentState {
         object Idle : PaymentState()
         object ValidAndReady : PaymentState()
@@ -60,33 +42,6 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         data class Success(val paymentToken: String) : PaymentState()
         data class Error(val errorMessage: String) : PaymentState()
     }
-    var clearCount = mutableIntStateOf(0)  // Add this line
-
-
-    private val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Idle)
-    val paymentState: StateFlow<PaymentState> = _paymentState
-    // endregion
-
-    var isValidAndReady = false
-    var errorMessage: String = ""
-
-    // region Secure Data Holders
-    var bankAccountNumber = mutableStateOf(SecureString(""))
-    var bankRoutingNumber = mutableStateOf(SecureString(""))
-    var bankAccountType = mutableStateOf("")
-    var cardNumber = mutableStateOf(SecureString(""))
-    var expiration = mutableStateOf(SecureStringWrapper(SecureString(""),null))
-    var cvc = mutableStateOf(SecureString(""))
-    var nameOnAccount = mutableStateOf(SecureString(""))
-    var addressLine1 = mutableStateOf(SecureString(""))
-    var addressLine2 = mutableStateOf(SecureString(""))
-    var city = mutableStateOf(SecureString(""))
-    var region = mutableStateOf(SecureString(""))
-    var postalCode = mutableStateOf(SecureString(""))
-    // endregion
-
-    var connected: Boolean = false
-
     enum class FieldState {
         EMPTY,
         READY,
@@ -108,7 +63,8 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         POSTAL_CODE
     }
 
-    val paymentFieldValid: HashMap<PaymentField, Boolean> = hashMapOf(
+    private val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Idle)
+    private val paymentFieldValid: HashMap<PaymentField, Boolean> = hashMapOf(
         Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, true),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, true),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, true),
@@ -122,7 +78,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         Pair<PaymentField, Boolean>(PaymentField.REGION, true),
         Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, true)
     )
-    val paymentFieldEmpty: HashMap<PaymentField, Boolean> = hashMapOf(
+    private val paymentFieldEmpty: HashMap<PaymentField, Boolean> = hashMapOf(
         Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, false),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, false),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, false),
@@ -136,8 +92,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         Pair<PaymentField, Boolean>(PaymentField.REGION, false),
         Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, false)
     )
-
-    val paymentFieldState: HashMap<PaymentField, FieldState> = hashMapOf(
+    private val paymentFieldState: HashMap<PaymentField, FieldState> = hashMapOf(
         Pair<PaymentField, FieldState>(PaymentField.NAME_ON_ACCOUNT, FieldState.INIT),
         Pair<PaymentField, FieldState>(PaymentField.BANK_ACCOUNT_NUMBER, FieldState.INIT),
         Pair<PaymentField, FieldState>(PaymentField.BANK_ROUTING_NUMBER, FieldState.INIT),
@@ -151,8 +106,40 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         Pair<PaymentField, FieldState>(PaymentField.REGION, FieldState.INIT),
         Pair<PaymentField, FieldState>(PaymentField.POSTAL_CODE, FieldState.INIT)
     )
+    private val webServicesProvider = WebServicesProvider()
+    private val webSocketRepository = WebsocketRepository(webServicesProvider)
+    internal val interactor = WebsocketInteractor(webSocketRepository)
+    val configuration = configurationIn
+    val payTheoryData = createPayTheoryData(configuration)
+    val payTheoryPayment = Payment(
+        packageName,
+        payable,
+        payTheoryData,
+        configurationIn,
+        this
+    )
+    val paymentState: StateFlow<PaymentState> = _paymentState
 
 
+    var validator = Validator()
+    var clearCount = mutableIntStateOf(0)  // Add this line
+    var isValidAndReady = false
+    var errorMessage: String = ""
+    var connected: Boolean = false
+
+
+    var bankAccountNumber = mutableStateOf(SecureString(""))
+    var bankRoutingNumber = mutableStateOf(SecureString(""))
+    var bankAccountType = mutableStateOf("")
+    var cardNumber = mutableStateOf(SecureString(""))
+    var expiration = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var cvc = mutableStateOf(SecureString(""))
+    var nameOnAccount = mutableStateOf(SecureString(""))
+    var addressLine1 = mutableStateOf(SecureString(""))
+    var addressLine2 = mutableStateOf(SecureString(""))
+    var city = mutableStateOf(SecureString(""))
+    var region = mutableStateOf(SecureString(""))
+    var postalCode = mutableStateOf(SecureString(""))
 
     /**
      * Function to disconnect WebSocket
@@ -216,28 +203,12 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         interactor.stopSocket()
         // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call", "Software caused connection abort", "null", "Unable to resolve host"
         if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)){
-//            if (payTheoryPayment != null){ // error for transaction request
-//                if (payTheoryPayment is Payable){
-                    println("Network Connection Error - Reconnecting...")
-                    payTheoryPayment.resetSocket()
-//                }
-//            } else if (paymentMethodToken != null){
-//                if (paymentMethodToken.context is Payable){
-//                    println("Network Connection Error - Reconnecting...")
-//                    paymentMethodToken.resetSocket()
-//                }
-//            }
-        } else { //if error is not ssl error
-            // error for transaction request
-//            if (payment != null) {
-                println("Error: $error")
-                payTheoryPayment.context.handleError(PTError(ErrorCode.SocketError,error))
 
-                // error for tokenization request
-//            } else if (paymentMethodToken != null){
-//                println("Error: $error")
-//                paymentMethodToken.context.handleError(PTError(ErrorCode.TokenFailed,error))
-//            }
+            println("Network Connection Error - Reconnecting...")
+            payTheoryPayment.resetSocket()
+
+        } else { //if error is not ssl error
+            payTheoryPayment.context.handleError(PTError(ErrorCode.SocketError,error))
         }
     }
 
@@ -247,7 +218,6 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         super.onCleared()
     }
 
-    // region Public Setters
     fun updateNameOnAccount(value: SecureString) {
         nameOnAccount.value = value
         validateInputs()
@@ -296,10 +266,6 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         postalCode.value = value
         validateInputs()
     }
-    // endregion
-
-    // region Core Logic
-
 
     fun submitPayment() {
         var payment: PaymentDetail? = null
@@ -349,28 +315,8 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         }
             payTheoryPayment.transact(payment!!)
             _paymentState.value = PaymentState.Processing
-//        }
-//        if (!isValidInput()) return
 
-//        viewModelScope.launch {
-//            try {
-//                _paymentState.value = PaymentState.Loading
-//
-////                val encryptedBundle = createEncryptedBundle()
-////                val response = apiService.tokenize(encryptedBundle)
-////
-////                handleResponse(response)
-//            } catch (e: Exception) {
-//                handleError(e)
-//            } finally {
-//                clearSensitiveData()
-//            }
-//        }
     }
-    // endregion
-
-    // region Security & Validation
-
 
     private fun validateInputs() {
         var isValid = false
@@ -444,22 +390,18 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         return isValid
 
     }
-
     private fun isValidCardNumber(): Boolean {
         return propagateState(PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value,), cardNumber.value.stringLength() == 0)
     }
-
     private fun isValidExpiration(): Boolean {
         return propagateState(PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value), expiration.value.secureValue.stringLength() == 0)
     }
     private fun isValidCvc(): Boolean {
         return propagateState(PaymentField.CARD_CVC, validator.isValidCvc(cvc.value), cvc.value.stringLength() == 0)
     }
-
     private fun isValidStreetAddress(): Boolean {
         return propagateState(PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value), addressLine1.value.stringLength() == 0)
     }
-
     private fun isValidCity(): Boolean {
         return propagateState(PaymentField.CITY, validator.isNotEmpty(city.value), city.value.stringLength() == 0)
     }
@@ -469,19 +411,15 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     private fun isValidPostalCode(): Boolean {
         return propagateState(PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value), postalCode.value.stringLength() == 0)
     }
-
     private fun isValidNameOnAccount(): Boolean {
         return propagateState(PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value), nameOnAccount.value.stringLength() == 0)
     }
-
     private fun isValidBankAccountNumber(): Boolean {
         return propagateState(PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value), bankAccountNumber.value.stringLength() == 0)
     }
-
     private fun isValidBankRoutingNumber(): Boolean {
         return propagateState(PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value), bankRoutingNumber.value.stringLength() == 0)
     }
-
     private fun isValidAccountType(): Boolean {
         return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank(), bankAccountType.value.isBlank())
     }
@@ -494,10 +432,6 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         )
         return relevant.all { it }
     }
-
-
-    // endregion
-
 
 
     fun paymentSuccess(result: SuccessfulTransactionResult) {
@@ -516,76 +450,14 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         }
         bankAccountType.value = ""
         expiration.value = SecureStringWrapper(SecureString(""),null)
-//        expiration.value = TextFieldValue("")
+        for (field in PaymentField.entries) {
+            paymentFieldState[field] = FieldState.INIT
+            paymentFieldEmpty[field] = false
+            paymentFieldValid[field] = true
+        }
+
         clearCount.intValue++
         _paymentState.value = PaymentState.Idle
     }
-    // endregion
 
-
-    // endregion
-
-    // endregion
-}
-
-/**
- * Creates WebSocket interactor to start, stop and send messages
- * @param repository WebSocket repository
- */
-class WebsocketInteractor(private val repository: WebsocketRepository) {
-
-    /**
-     * Function to close WebSocket
-     */
-    @ExperimentalCoroutinesApi
-    fun stopSocket() {
-        repository.closeSocket()
-    }
-
-    /**
-     * Function to send messages though a WebSocket
-     */
-    @ExperimentalCoroutinesApi
-    fun sendMessage(message:String) {
-        repository.sendMessage(message)
-    }
-
-    /**
-     * Function to start WebSocket
-     * @param ptToken token used for security
-     */
-    @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String, partner: String, stage: String): Channel<SocketUpdate> = repository.startSocket(ptToken, partner, stage)
-
-}
-
-/**
- * Creates WebSocket repository to start, stop and send messages
- * @param webServicesProvider WebSocket web services provider
- */
-class WebsocketRepository(private val webServicesProvider: WebServicesProvider) {
-
-    /**
-     * Function to start WebSocket
-     * @param ptToken token used for security
-     */
-    @ExperimentalCoroutinesApi
-    fun startSocket(ptToken:String, partner: String, stage: String): Channel<SocketUpdate> =
-        webServicesProvider.startSocket(ptToken, partner, stage)
-
-    /**
-     * Function to send messages though a WebSocket
-     */
-    @ExperimentalCoroutinesApi
-    fun sendMessage(message:String) {
-        webServicesProvider.sendMessage(message)
-    }
-
-    /**
-     * Function to close WebSocket
-     */
-    @ExperimentalCoroutinesApi
-    fun closeSocket() {
-        webServicesProvider.stopSocket()
-    }
 }

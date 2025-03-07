@@ -18,8 +18,8 @@ import com.paytheory.lib.data.HostTokenMessage
 import com.paytheory.lib.data.PaymentDetail
 import com.paytheory.lib.data.PaymentMethodTokenData
 import com.paytheory.lib.model.PaymentViewModel
-import com.paytheory.lib.model.WebsocketInteractor
 import com.paytheory.lib.nacl.decryptBox
+import com.paytheory.lib.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /*
