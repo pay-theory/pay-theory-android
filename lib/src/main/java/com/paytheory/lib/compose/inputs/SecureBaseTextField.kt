@@ -13,6 +13,33 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.transformation.NoFilterTransformation
 
+/**
+ * A composable function that provides a secure text field for sensitive data.
+ * It wraps the standard TextField and handles the secure storage and manipulation
+ * of text via [SecureString].
+ *
+ * @param value The current [SecureString] value of the text field.
+ * @param modifier Modifier for styling and layout.
+ * @param keyboardOptions Keyboard options for configuring the on-screen keyboard.
+ * @param visualTransformation Transformation applied to the text for display,
+ *        defaults to [NoFilterTransformation] which means no transformation
+ * @param maxChar The maximum number of characters allowed in the text field.
+ *        Defaults to 128.
+ * @param preWrap A function to preprocess the input string before it's stored
+ *        in the [SecureString]. Useful for formatting. Defaults to identity.
+ * @param onValueChange Callback triggered when the text field's value changes.
+ *        It receives the new [SecureString] value.
+ * @param isValid A function to validate the current [SecureString] value.
+ *        It returns true if the value is valid, false otherwise.
+ * @param label Optional label to display above the text field.
+ * @param isOutlined Whether to render the text field with an outlined style.
+ *        Defaults to true.
+ * @param isNumeric Whether to allow only numeric input. Defaults to false. If true the preWrap will be applied after the filtering.
+ *
+ * @see SecureString
+ * @see TextFieldWrapper
+ * @see NoFilterTransformation
+ */
 @Composable
 internal fun SecureBaseTextField(
     value: SecureString,
@@ -27,8 +54,7 @@ internal fun SecureBaseTextField(
     isOutlined: Boolean = true,
     isNumeric: Boolean = false
 ) {
-    // Use a custom remember that handles secure data
-    //    val secureWrapper = remember { SecureStringWrapper(value,null) }
+
 
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()

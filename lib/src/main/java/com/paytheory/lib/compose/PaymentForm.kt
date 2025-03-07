@@ -112,6 +112,13 @@ fun createPayTheoryData(configuration: PayTheoryConfiguration): HashMap<Any, Any
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+/**
+ * Composable function to display the Payment Form.
+ *
+ * @param payable An instance of [Payable] interface to handle payment actions.
+ * @param configuration Configuration parameters for the payment form, defined in [PayTheoryConfiguration].
+ * @param modifier Modifier to apply to the payment form composable.
+ */
 fun PaymentForm(
     payable: Payable,
     configuration: PayTheoryConfiguration,

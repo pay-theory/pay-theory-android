@@ -16,6 +16,39 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.paytheory.lib.R
 import com.paytheory.lib.compose.string.SecureStringWrapper
 
+/**
+ * Formats a card expiry date string from a raw input string.
+ *
+ * This function takes a string as input and attempts to extract and format a card expiry date
+ * in the MM/YY format. It handles various input scenarios, including:
+ *   - Empty input strings.
+ *   - Input strings containing non-digit characters.
+ *   - Input strings with less than 4 digits.
+ *   - Month values exceeding 12.
+ *   - Month values less than 1.
+ *
+ * The function extracts digits from the input, treats the first one or two as the month,
+ * and the next two as the year. It ensures that the month value is within the valid range (1-12)
+ * and formats the month with a leading zero if it's a single digit (e.g., 01, 09 instead of 1, 9).
+ *
+ * @param input The raw input string, potentially containing digits and non-digit characters.
+ * @return A formatted expiry date string in the MM/YY format, or an empty string if no digits are found in the input.
+ *  If only month digits are found, it returns only the month formatted.
+ *
+ * Examples:
+ *   - formatCardExpiryDate("1225") returns "12/25"
+ *   - formatCardExpiryDate("1225abc") returns "12/25"
+ *   - formatCardExpiryDate("12") returns "12"
+ *   - formatCardExpiryDate("0123") returns "01/23"
+ *   - formatCardExpiryDate("0999") returns "09/99"
+ *   - formatCardExpiryDate("1399") returns "12/99" // Month coerced to 12
+ *   - formatCardExpiryDate("9") returns "09"
+ *   - formatCardExpiryDate("abc") returns ""
+ *   - formatCardExpiryDate("") returns ""
+ *   - formatCardExpiryDate("0") returns "0"
+ *   - formatCardExpiryDate("01") returns "01"
+ *   - formatCardExpiryDate("1") returns "01"
+ */
 fun formatCardExpiryDate(input: String): String {
 
     val digits = input.filter { it.isDigit() }
@@ -35,6 +68,24 @@ fun formatCardExpiryDate(input: String): String {
     return if (year.isNotEmpty()) "$formattedMonth/$year" else formattedMonth
 }
 
+/**
+ * A composable function that provides a secure text field for entering and displaying
+ * credit/debit card expiration dates (MM/YY format).
+ *
+ * This field uses [SecureStringWrapper] to handle the sensitive data securely,
+ * ensuring it's encrypted in memory and only revealed for UI display when needed.
+ *
+ * @param modifier The modifier to be applied to the text field.
+ * @param value The current value of the expiration date, wrapped in a [SecureStringWrapper].
+ * @param onValueChange A callback that is invoked when the value of the text field changes.
+ *                      It receives the new value as a [SecureStringWrapper].
+ * @param isValid A function that checks if the current value is a valid expiration date.
+ *                 It receives the current value as a [SecureStringWrapper] and returns a Boolean.
+ * @param isOutlined Determines whether the text field should have an outlined style. Defaults to `true`.
+ * @param clearKey A key that, when changed, will reset the internal state of the field.
+ *                 This can be used to clear the field programmatically. Defaults to `0`.
+ *
+ */
 @Composable
 fun SecureExpirationField(
     modifier: Modifier,

@@ -13,6 +13,28 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.transformation.NoFilterTransformation
 
+/**
+ * A secure text field that handles sensitive string input.
+ *
+ * This composable provides a text field that works with [SecureString] to manage
+ * sensitive data securely. It masks the input and provides validation.
+ * It also internally uses [rememberSaveable] to maintain state across configuration changes.
+ *
+ * @param label The label to display above the text field.
+ * @param modifier Modifier to apply to the text field.
+ * @param value The initial [SecureString] value of the text field.
+ * @param onValueChange Callback invoked when the text field's value changes. It provides the new [SecureString] value.
+ * @param isValid Lambda function to validate the current [SecureString] input. Returns `true` if valid, `false` otherwise.
+ * @param isOutlined Determines whether to render an outlined or filled text field. Defaults to `true` (outlined).
+ * @param clearKey A key used to clear and reset the saved state of the text field. Changing this value will reset the
+ *                 internal state of the [SecureString]. Defaults to 0. This is useful for scenarios where you need to
+ *                 completely clear the field and its history.
+ * @param maxLength The maximum number of characters allowed in the text field. Defaults to 128.
+ *
+ * @see SecureString
+ * @see SecureBaseTextField
+ * @see NoFilterTransformation
+ */
 @Composable
 fun SecureStandardTextField(
     label: String,

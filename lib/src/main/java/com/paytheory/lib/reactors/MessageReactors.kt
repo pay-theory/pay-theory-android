@@ -6,7 +6,6 @@ import com.paytheory.lib.EncryptedPaymentToken
 import com.paytheory.lib.ErrorCode
 import com.paytheory.lib.FailedTransactionResult
 import com.paytheory.lib.PTError
-import com.paytheory.lib.PayTheoryMerchantActivity
 import com.paytheory.lib.Payment
 import com.paytheory.lib.PaymentMethodProcessor
 import com.paytheory.lib.PaymentMethodToken
@@ -19,8 +18,8 @@ import com.paytheory.lib.data.HostTokenMessage
 import com.paytheory.lib.data.PaymentDetail
 import com.paytheory.lib.data.PaymentMethodTokenData
 import com.paytheory.lib.model.PaymentViewModel
-import com.paytheory.lib.nacl.decryptBox
 import com.paytheory.lib.model.WebsocketInteractor
+import com.paytheory.lib.nacl.decryptBox
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /*
@@ -156,7 +155,6 @@ class MessageReactors(private val viewModel: PaymentViewModel, private val webSo
                 mapUrl = mapUrl
             )
 
-            (payment.context as PayTheoryMerchantActivity).clearFields()
             payment.context.handleBarcodeSuccess(barcodeResult)
             PaymentMethodProcessor.sessionIsDirty = true
             payment.resetSocket()
@@ -175,7 +173,7 @@ class MessageReactors(private val viewModel: PaymentViewModel, private val webSo
         val encryptedPaymentToken = Gson().fromJson(message, EncryptedPaymentToken::class.java)
         val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
         val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
-        (paymentMethodToken.context as PayTheoryMerchantActivity).clearFields()
+
         paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
         PaymentMethodProcessor.sessionIsDirty = true
         paymentMethodToken.resetSocket()

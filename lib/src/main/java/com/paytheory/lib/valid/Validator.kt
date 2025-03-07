@@ -50,17 +50,17 @@ class Validator {
 
 
     fun isValidBankAccountNumber(secureString: SecureString): Boolean {
-        return secureString.revealForUi().toString().length in 7..17
+        return secureString.revealForUi().filter { it.isDigit() }.length in 7..17
     }
 
     fun isValidBankRoutingNumber(secureString: SecureString): Boolean {
-        return secureString.revealForUi().let { raw ->
+        return secureString.revealForUi().filter { it.isDigit() }.let { raw ->
             raw.toString().length == 9 && routingCheck(secureString)
         }
     }
     fun isValidCardNumber(secureString: SecureString): Boolean {
-        return secureString.revealForUi().let { raw ->
-            raw.toString().length in 16..19 && luhnCheck(secureString)
+        return secureString.revealForUi().filter { it.isDigit() }.let { raw ->
+            raw.toString().length in 15..16 && luhnCheck(secureString)
         }
     }
 
@@ -71,7 +71,7 @@ class Validator {
     }
 
     fun isValidCvc(secureString: SecureString): Boolean {
-        return secureString.revealForProcessing().toString().length >= 3
+        return secureString.revealForUi().length >= 3
     }
 
     fun isValidPostalCode(secureString: SecureString): Boolean = secureString.revealForUi().toString().length >= 5
