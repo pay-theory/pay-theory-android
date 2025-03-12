@@ -27,6 +27,7 @@ import com.paytheory.lib.PTError
 import com.paytheory.lib.Payable
 import com.paytheory.lib.PaymentMethodTokenResults
 import com.paytheory.lib.SuccessfulTransactionResult
+import com.paytheory.lib.model.PaymentViewModel
 
 class MainActivity : ComponentActivity(), Payable {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +64,10 @@ class MainActivity : ComponentActivity(), Payable {
 
     override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
         Log.d("MainActivity", "handleTokenizeSuccess: $paymentMethodToken")
+    }
+
+    override fun handleStateChange(fieldState: Pair<PaymentViewModel.PaymentField, PaymentViewModel.FieldState>) {
+        Log.d("MainActivity", "handleStateChange: $fieldState")
     }
 
     override fun handleError(error: PTError) {

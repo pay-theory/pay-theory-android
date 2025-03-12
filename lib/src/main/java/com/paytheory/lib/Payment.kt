@@ -47,19 +47,22 @@ class Payment(
     fun transact(
         payment: PaymentDetail
     ) {
-        messageReactors!!.activePaymentDetail = payment
-        val actionRequest = createInitialActionRequestForPayment(payment)
-        if (viewModel.connected) {
 
-            context.handlePaymentStart(payment.type)
-            viewModel.sendSocketMessage(Gson().toJson(actionRequest))
-            println("Pay Theory Payment Requested")
+            messageReactors!!.activePaymentDetail = payment
+            val actionRequest = createInitialActionRequestForPayment(payment)
+            if (viewModel.connected) {
 
-        } else {
-            queuedRequest = payment
-            ptTokenApiCall(context as Context)
-            println("Pay Theory Resetting Connection")
-        }
+                context.handlePaymentStart(payment.type)
+                viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+                println("Pay Theory Payment Requested")
+
+            } else {
+                queuedRequest = payment
+                ptTokenApiCall(context as Context)
+                println("Pay Theory Resetting Connection")
+            }
+
+
     }
 
     /**
@@ -180,9 +183,7 @@ class Payment(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun disconnect() {
-
-        viewModel.interactor.stopSocket()
-
+        viewModel.disconnect()
     }
 
     /**
@@ -199,10 +200,9 @@ class Payment(
             ptTokenResponse.ptToken,
             attestationResult!!,
             viewModel,
-            viewModel.interactor,
             packageName
         )
-        messageReactors = MessageReactors(viewModel, viewModel.interactor)
+        messageReactors = MessageReactors(viewModel)
         viewModel.subscribeToSocketEvents(this, ptTokenResponse, attestationResult)
         if (queuedRequest != null)
             messageReactors!!.activePaymentDetail = queuedRequest

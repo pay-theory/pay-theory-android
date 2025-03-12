@@ -19,7 +19,6 @@ import com.paytheory.lib.data.PaymentDetail
 import com.paytheory.lib.data.PaymentMethodTokenData
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.nacl.decryptBox
-import com.paytheory.lib.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /*
@@ -34,7 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  * @param webSocketInteractor interactor for WebSocket
  */
 @ExperimentalCoroutinesApi
-class MessageReactors(private val viewModel: PaymentViewModel, private val webSocketInteractor: WebsocketInteractor) {
+class MessageReactors(private val viewModel: PaymentViewModel) {
     var activePaymentDetail: PaymentDetail? = null
     var activePaymentToken: PaymentMethodTokenData? = null
     private var hostToken = ""
@@ -99,37 +98,43 @@ class MessageReactors(private val viewModel: PaymentViewModel, private val webSo
     @ExperimentalCoroutinesApi
     fun completeTransaction(message: String, viewModel: PaymentViewModel, payment: Payment) {
         viewModel.disconnect()
-        val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
-        //decrypt message
-        val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
 
-        val transactionResult = Gson().fromJson(decryptedMessage, TransactionResult::class.java)
+        try {
+            val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+            //decrypt message
+            val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
 
-        //Remove service_fee for any merchant_fee transaction
-        if (payment.configuration.feeMode == FeeMode.MERCHANT_FEE) {
-            transactionResult.serviceFee = "0"
+            val transactionResult = Gson().fromJson(decryptedMessage, TransactionResult::class.java)
+
+            //Remove service_fee for any merchant_fee transaction
+            if (payment.configuration.feeMode == FeeMode.MERCHANT_FEE) {
+                transactionResult.serviceFee = "0"
+            }
+
+            when (transactionResult.state) {
+                "SUCCEEDED" -> {
+                    val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                    payment.context.handleSuccess(successfulTransactionResult)
+                    PaymentMethodProcessor.sessionIsDirty = true
+                    payment.resetSocket()
+                }
+                "PENDING" -> {
+                    val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                    payment.viewModel.paymentSuccess(successfulTransactionResult)
+                    payment.context.handleSuccess(successfulTransactionResult)
+                    PaymentMethodProcessor.sessionIsDirty = true
+                    payment.resetSocket()
+                }
+                "FAILURE" -> {
+                    val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
+                    payment.context.handleFailure(failedTransactionResult)
+                    payment.resetSocket()
+                }
+            }
+        } catch (e: Exception) {
+            payment.context.handleError(PTError(ErrorCode.SocketError,e.message ?: "Unknown error"))
         }
 
-        when (transactionResult.state) {
-            "SUCCEEDED" -> {
-                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
-                payment.context.handleSuccess(successfulTransactionResult)
-                PaymentMethodProcessor.sessionIsDirty = true
-                payment.resetSocket()
-            }
-            "PENDING" -> {
-                val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
-                payment.viewModel.paymentSuccess(successfulTransactionResult)
-                payment.context.handleSuccess(successfulTransactionResult)
-                PaymentMethodProcessor.sessionIsDirty = true
-                payment.resetSocket()
-            }
-            "FAILURE" -> {
-                val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
-                payment.context.handleFailure(failedTransactionResult)
-                payment.resetSocket()
-            }
-        }
     }
 
     /**

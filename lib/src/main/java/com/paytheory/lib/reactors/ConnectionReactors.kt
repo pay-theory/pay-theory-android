@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.paytheory.lib.data.ActionRequest
 import com.paytheory.lib.data.HostTokenRequest
 import com.paytheory.lib.model.PaymentViewModel
-import com.paytheory.lib.websocket.WebsocketInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64
 
@@ -22,7 +21,6 @@ class ConnectionReactors(
     private val ptToken: String,
     private val attestation: String,
     private val viewModel: PaymentViewModel,
-    private val websocketInteractor: WebsocketInteractor,
     private val applicationPackageName: String) {
 
     companion object {
@@ -49,6 +47,6 @@ class ConnectionReactors(
      */
     @ExperimentalCoroutinesApi
     fun onDisconnected() {
-        websocketInteractor.stopSocket()
+        viewModel.disconnect()
     }
 }

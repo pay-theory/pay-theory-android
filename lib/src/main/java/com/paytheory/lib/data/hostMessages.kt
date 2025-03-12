@@ -53,7 +53,7 @@ data class HostTokenRequest(
     @SerializedName("timing") val timing: Long,
     @SerializedName("origin") val origin: String = "android",
     @SerializedName("application_package_name") val applicationPackageName: String,
-    @SerializedName("require_attestation") val requireAttestation: Boolean = false,
+    @SerializedName("require_attestation") val requireAttestation: Boolean = true,
 )
 
 /**

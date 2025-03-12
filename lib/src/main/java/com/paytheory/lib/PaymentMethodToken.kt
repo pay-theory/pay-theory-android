@@ -85,10 +85,9 @@ class PaymentMethodToken(
             ptTokenResponse.ptToken,
             attestationResult!!,
             viewModel,
-            viewModel.interactor,
             (this.context as Context).applicationContext.packageName
         )
-        messageReactors = MessageReactors(viewModel,viewModel.interactor)
+        messageReactors = MessageReactors(viewModel)
         viewModel.subscribeToSocketEvents(this,ptTokenResponse,attestationResult)
         if (queuedRequest != null)
             messageReactors!!.activePaymentToken = queuedRequest

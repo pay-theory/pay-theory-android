@@ -4,15 +4,13 @@ import com.google.gson.annotations.SerializedName
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.model.PaymentViewModel.PaymentField
 
-/*
-* Modernization
-* Our legacy SDK did not include an error code
-* This is our error code enum
-* we are including this in errors, need to work through various scenarios and find where to use each
-* */
 enum class ErrorCode {
+    ActionComplete, //The payment action has already been completed.
+    ActionInProgress, //A payment action is already in progress.
     AttestationFailed, //The device attestation process failed.
+    InProgress, //Initialization is still in progress.
     InvalidAPIKey, //The provided API key is invalid or not recognized.
+    NotValid, //The provided data is not valid.
     SocketError, //An error occurred with the WebSocket connection.
     TokenFailed	//Token generation or validation failed.
 }
@@ -125,8 +123,15 @@ data class EncryptedPaymentToken (
     @SerializedName("public_key") val publicKey: String
 )
 /**
- * Interface that responds for any transaction request or tokenization request
- */
+* Interface that responds for any transaction request or tokenization request
+* Intended to be implemented by the consuming application activity or fragment providing
+* access to the application context for the SDK
+*
+* This interface provides a set of callback functions that are invoked by the SDK to communicate
+* the status and results of payment transactions, tokenization processes, barcode requests,
+* SDK readiness, field state changes, and any encountered errors. Implementing this interface allows
+* your application to react to these events and manage the payment flow accordingly.
+*/
 interface Payable {
     /**
      * function to handle changes to SDK readiness

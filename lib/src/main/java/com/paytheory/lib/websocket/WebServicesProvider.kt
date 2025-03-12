@@ -35,8 +35,12 @@ class WebServicesProvider {
     @ExperimentalCoroutinesApi
     fun startSocket(ptToken: String, partner: String, stage: String): Channel<SocketUpdate> =
         with(PTWebSocketListener()) {
-            startSocket(this, ptToken, partner, stage)
-            this@with.socketEventChannel
+            try {
+                startSocket(this, ptToken, partner, stage)
+                this@with.socketEventChannel
+            } catch (ex: Exception) {
+                throw SocketStartException(ex.message)
+            }
         }
 
     /**
@@ -47,14 +51,19 @@ class WebServicesProvider {
     @OptIn(DelicateCoroutinesApi::class)
     @ExperimentalCoroutinesApi
     fun startSocket(webSocketListener: PTWebSocketListener, ptToken: String, partner: String, stage: String) {
-        this.webSocketListener = webSocketListener
-        webSocket = socketOkHttpClient.newWebSocket(
-            Request.Builder().url("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptToken}")
-                .build(),
-            webSocketListener
-        )
+        try {
+            this.webSocketListener = webSocketListener
+            webSocket = socketOkHttpClient.newWebSocket(
+                Request.Builder().url("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptToken}")
+                    .build(),
+                webSocketListener
+            )
 
-        socketOkHttpClient.dispatcher.executorService.shutdown()
+            socketOkHttpClient.dispatcher.executorService.shutdown()
+        } catch (ex: Exception) {
+            throw SocketStartException(ex.message)
+        }
+
     }
 
     /**
@@ -63,7 +72,12 @@ class WebServicesProvider {
      */
     @ExperimentalCoroutinesApi
     fun sendMessage(message: String) {
-        webSocket?.send(message)
+        try {
+            webSocket?.send(message)
+        } catch (ex: Exception) {
+            throw SocketMessageException(ex.message)
+        }
+
     }
 
     /**
@@ -83,7 +97,11 @@ class WebServicesProvider {
             println("error closing socket ${ex.message}")
             webSocket = null
             webSocketListener = null
+            throw SocketClosureException()
         }
     }
 
+    class SocketMessageException(message: String?) : Exception(message)
+    class SocketStartException(message: String?) : Exception(message)
+    class SocketClosureException : Exception()
 }
