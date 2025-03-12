@@ -407,9 +407,12 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         }
 
         if (errorMessage.isNotEmpty()) {
-            payTheoryPayment.context.handleError(PTError(ErrorCode.NotValid, errorMessage))
-            if (derivedPaymentState is PaymentState.Error && _paymentState.value is PaymentState.Error) {}
-            else _paymentState.value = derivedPaymentState
+
+            if (!(derivedPaymentState is PaymentState.Error && _paymentState.value is PaymentState.Error)) {
+                payTheoryPayment.context.handleError(PTError(ErrorCode.NotValid, errorMessage))
+                _paymentState.value = derivedPaymentState
+            }
+
         } else {
             _paymentState.value = derivedPaymentState
         }
