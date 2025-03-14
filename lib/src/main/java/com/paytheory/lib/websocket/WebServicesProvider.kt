@@ -17,12 +17,6 @@ class WebServicesProvider {
 
 
 
-    private val socketOkHttpClient = OkHttpClient.Builder()
-        .readTimeout(30, TimeUnit.SECONDS)
-        .connectTimeout(39, TimeUnit.SECONDS)
-        .hostnameVerifier ( hostnameVerifier = { _, _ -> true })
-        .build()
-
     @OptIn(DelicateCoroutinesApi::class)
     @ExperimentalCoroutinesApi
     private var webSocketListener: PTWebSocketListener? = null
@@ -53,6 +47,11 @@ class WebServicesProvider {
     fun startSocket(webSocketListener: PTWebSocketListener, ptToken: String, partner: String, stage: String) {
         try {
             this.webSocketListener = webSocketListener
+            val socketOkHttpClient = OkHttpClient.Builder()
+                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(39, TimeUnit.SECONDS)
+                .hostnameVerifier ( hostnameVerifier = { _, _ -> true })
+                .build()
             webSocket = socketOkHttpClient.newWebSocket(
                 Request.Builder().url("wss://${partner}.secure.socket.${stage}.com/${partner}?pt_token=${ptToken}")
                     .build(),
@@ -77,7 +76,6 @@ class WebServicesProvider {
         } catch (ex: Exception) {
             throw SocketMessageException(ex.message)
         }
-
     }
 
     /**
@@ -86,13 +84,12 @@ class WebServicesProvider {
     @OptIn(DelicateCoroutinesApi::class)
     @ExperimentalCoroutinesApi
     fun stopSocket() {
-//        println("Pay Theory Requested Disconnect")
         try {
             webSocket?.close(normalClosureStatus, null)
             webSocket = null
             webSocketListener?.socketEventChannel?.close()
             webSocketListener = null
-//            println("Pay Theory Disconnected stopSocket")
+
         } catch (ex: IllegalArgumentException) {
             println("error closing socket ${ex.message}")
             webSocket = null

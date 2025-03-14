@@ -42,6 +42,28 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         data class Success(val paymentToken: String) : PaymentState()
         data class Error(val errorMessage: String) : PaymentState()
     }
+
+    class ValidField(validator: Validator, field: PaymentField) {
+
+    }
+
+    enum class BankFields {
+        NAME_ON_ACCOUNT,
+        BANK_ACCOUNT_NUMBER,
+        BANK_ROUTING_NUMBER,
+        BANK_ACCOUNT_TYPE
+    }
+    enum class CreditCardFields {
+        CARD_NUMBER,
+        CARD_EXPIRATION,
+        CARD_CVC
+    }
+    enum class AddressFields {
+        ADDRESS_LINE1,
+        CITY,
+        REGION,
+        POSTAL_CODE
+    }
     enum class FieldState {
         EMPTY,
         READY,
@@ -63,7 +85,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         POSTAL_CODE
     }
 
-    private val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Loading)
+    val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Loading)
     val paymentFieldValid: HashMap<PaymentField, Boolean> = hashMapOf(
         Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, true),
         Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, true),
@@ -162,14 +184,17 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
      * @param handler WebSocket message handler
      */
     @ExperimentalCoroutinesApi
-    fun subscribeToSocketEvents(handler: WebsocketMessageHandler, ptTokenResponse:PTTokenResponse, attestationResult:String?) {
+    fun subscribeToSocketEvents(handler: WebsocketMessageHandler, ptTokenResponse:PTTokenResponse) {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 interactor.startSocket(ptTokenResponse.ptToken, configuration.partnerName, configuration.stageName).consumeEach {
                     if (it.exception == null) {
                         handler.receiveMessage(it.text!!)
-
+                        connected = true
+                    } else if (it.exception.message == "executor rejected") {
+                        connected = false
+                        _paymentState.value = PaymentState.Loading
                     } else {
                         onSocketError(it.exception,"Failed to receive message")
                         connected = false
@@ -182,8 +207,8 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
                 _paymentState.value = PaymentState.Loading
             }
         }
-        connected = true
-        _paymentState.value = PaymentState.Idle
+//        connected = true
+//        _paymentState.value = PaymentState.Idle
     }
 
     /**
@@ -203,17 +228,25 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun onSocketError(ex: Throwable, reason: String) {
-        val error = ex.message.toString()
+        if (ex.message!!.contains("executor rejected")) {
+                return
+        }
+        val error = "$reason ${ex.message}"
         interactor.stopSocket()
         // catch errors "Read error: ssl=0x7340b644c8: I/O error during system call", "Software caused connection abort", "null", "Unable to resolve host"
-        if (error.contains("Read error: ssl", ignoreCase = true) || error.contains("Software caused connection abort", ignoreCase = true) || error.contains("null", ignoreCase = true) || error.contains("Unable to resolve host", ignoreCase = true)) {
-
+        if (error.contains("Read error: ssl", ignoreCase = true)
+            || error.contains("Software caused connection abort", ignoreCase = true)
+            || error.contains("null", ignoreCase = true)
+            || error.contains("Unable to resolve host", ignoreCase = true)) {
             println("Network Connection Error - Reconnecting...")
             payTheoryPayment.resetSocket()
         } else if (error == "executor rejected") {
+            println("Socket connection removed.")
         } else { //if error is not ssl error
-            payTheoryPayment.context.handleError(PTError(ErrorCode.SocketError,error))
+            payTheoryPayment.payable.handleError(PTError(ErrorCode.SocketError,error))
         }
+        connected = false
+        _paymentState.value = PaymentState.Loading
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -274,13 +307,13 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     fun submitPayment() {
         var payment: PaymentDetail? = null
         if (_paymentState.value == PaymentState.Processing) {
-            payTheoryPayment.context.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
+            payTheoryPayment.payable.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
             return
         } else if (_paymentState.value is PaymentState.Success) {
-            payTheoryPayment.context.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
+            payTheoryPayment.payable.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
             return
         } else if (_paymentState.value is PaymentState.Loading) {
-            payTheoryPayment.context.handleError(PTError(ErrorCode.InProgress,"No connection available"))
+            payTheoryPayment.payable.handleError(PTError(ErrorCode.InProgress,"No connection available"))
             return
         }
         if (configuration.paymentMethodType == PaymentMethodType.ACH) {
@@ -358,66 +391,59 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
      * @throws PTError if the inputs are not valid and it attempts to call `payTheoryPayment.context.handleError()`.
      */
     private fun validateInputs() {
-        var isValid = false
+        var isReady = false
         if (configuration.paymentMethodType == PaymentMethodType.ACH) {
-            var relevant = mutableListOf(
-                isValidNameOnAccount(),
-                isValidBankAccountNumber(),
-                isValidBankRoutingNumber(),
-                isValidAccountType()
-            )
-
-            if (configuration.requireBillingAddress) {
-                relevant.add(addressLine1.value.revealForUi().isNotBlank())
-                relevant.add(city.value.revealForUi().isNotBlank())
-                relevant.add(region.value.revealForUi().isNotBlank())
-                relevant.add(postalCode.value.revealForUi().isNotBlank())
+            val relevant = mutableListOf<Boolean>()
+            for (field in BankFields.entries) {
+                when (field) {
+                    BankFields.NAME_ON_ACCOUNT -> relevant.add(isValidNameOnAccount())
+                    BankFields.BANK_ACCOUNT_NUMBER -> relevant.add(isValidBankAccountNumber())
+                    BankFields.BANK_ROUTING_NUMBER -> relevant.add(isValidBankRoutingNumber())
+                    BankFields.BANK_ACCOUNT_TYPE -> relevant.add(isValidAccountType())
+                }
             }
 
-            isValid = relevant.all { it }
+            if (configuration.requireBillingAddress) {
+                relevant.add(isValidAccountAddress())
+            }
 
-        } else{
+            isReady = relevant.all { it }
 
-            var relevant = mutableListOf(
-                isValidCardNumber(),
-                isValidExpiration(),
-                isValidCvc()
-            )
+        } else {
+
+            val relevant = mutableListOf<Boolean>()
+            for (field in CreditCardFields.entries) {
+                when (field) {
+                    CreditCardFields.CARD_NUMBER -> relevant.add(isValidCardNumber())
+                    CreditCardFields.CARD_EXPIRATION -> relevant.add(isValidExpiration())
+                    CreditCardFields.CARD_CVC -> relevant.add(isValidCvc())
+                }
+            }
 
             if (configuration.requireBillingAddress) {
                 relevant.add(isValidAccountAddress())
             } else {
                 relevant.add(isValidPostalCode())
             }
-            isValid = relevant.all { it }
-
+            isReady = relevant.all { it }
 
         }
 
 
-        val derivedPaymentState = when {
-            isValid -> PaymentState.ValidAndReady
-            else  -> PaymentState.Error("Invalid input")
+
+
+        if (!connected) {
+            isValidAndReady = false
         }
-
-        errorMessage = if (isValid) {
-            ""
-        } else {
-            "Invalid input"
-        }
-
-        if (errorMessage.isNotEmpty()) {
-
-            if (!(derivedPaymentState is PaymentState.Error && _paymentState.value is PaymentState.Error)) {
-                payTheoryPayment.context.handleError(PTError(ErrorCode.NotValid, errorMessage))
-                _paymentState.value = derivedPaymentState
+        else {
+            val derivedPaymentState =  when {
+                isReady -> PaymentState.ValidAndReady
+                else -> _paymentState.value
             }
-
-        } else {
             _paymentState.value = derivedPaymentState
+            isValidAndReady = isReady
         }
 
-        isValidAndReady = isValid
 
     }
 
@@ -457,17 +483,17 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         if (isEmpty && fieldState != FieldState.EMPTY) {
             paymentFieldState[field] = FieldState.EMPTY
             paymentFieldEmpty[field] = true
-            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
+            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
         } else if (fieldState != FieldState.READY && isValid) {
             paymentFieldState[field] = FieldState.READY
             paymentFieldValid[field] = true
             paymentFieldEmpty[field] = isEmpty
-            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
+            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
         } else if (isEmpty == false && fieldState != FieldState.INVALID && isValid == false) {
             paymentFieldState[field] = FieldState.INVALID
             paymentFieldValid[field] = false
             paymentFieldEmpty[field] = false
-            payTheoryPayment.context.handleStateChange(Pair(field, paymentFieldState[field]!!))
+            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
         }
         return isValid
 
@@ -505,19 +531,23 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     private fun isValidAccountType(): Boolean {
         return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank(), bankAccountType.value.isBlank())
     }
-    private fun isValidAccountAddress(): Boolean {
-        var relevant = mutableListOf(
-            isValidStreetAddress(),
-            isValidCity(),
-            isValidState(),
-            isValidPostalCode()
-        )
+    fun isValidAccountAddress(): Boolean {
+        val relevant = mutableListOf<Boolean>()
+        for (field in AddressFields.entries) {
+            when (field) {
+                AddressFields.ADDRESS_LINE1 -> relevant.add(isValidStreetAddress())
+                AddressFields.CITY -> isValidCity()
+                AddressFields.REGION -> isValidState()
+                AddressFields.POSTAL_CODE -> isValidPostalCode()
+            }
+        }
         return relevant.all { it }
     }
 
 
     fun paymentSuccess(result: SuccessfulTransactionResult) {
         _paymentState.value = PaymentState.Success(result.receiptNumber)
+        clearSensitiveData()
     }
 
 
@@ -536,10 +566,11 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
             paymentFieldState[field] = FieldState.INIT
             paymentFieldEmpty[field] = false
             paymentFieldValid[field] = true
+            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
         }
 
         clearCount.intValue++
-        _paymentState.value = PaymentState.Idle
+        isValidAndReady = false
     }
 
 }

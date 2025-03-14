@@ -30,12 +30,12 @@ import java.util.logging.Logger
  * It handles communication with the Pay Theory platform, including websocket connections
  * and integrity checks.
  *
- * @param context The context of the activity or fragment.
+ * @param payable The payable client interface.
  * @param configuration The configuration for Pay Theory.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class PaymentMethodProcessor (
-    open val context: Payable,
+    open val payable: Payable,
     open val payTheoryData: HashMap<Any, Any>? = hashMapOf(),
     open val configuration : PayTheoryConfiguration,
     open val viewModel: PaymentViewModel
@@ -137,9 +137,10 @@ abstract class PaymentMethodProcessor (
      */
     private fun attemptReconnectToPtToken() {
         if (ptResetCounter < 2000) {
+            disconnect()
 //            println("PT Token Reconnect Counter: $ptResetCounter")
             ptResetCounter++
-            ptTokenApiCall(this.context as Context)
+            ptTokenApiCall(this.payable)
         } else {
             messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
         }
@@ -153,7 +154,7 @@ abstract class PaymentMethodProcessor (
         if (resetCounter < 50) {
 //            println("Reconnect Counter: $resetCounter")
             resetCounter++
-            ptTokenApiCall(this.context as Context)
+            ptTokenApiCall(this.payable)
         } else {
             messageReactors?.onError("NETWORK_ERROR: Please check device connection", this)
         }
@@ -165,40 +166,47 @@ abstract class PaymentMethodProcessor (
      * @param context The application context.
      */
     @SuppressLint("CheckResult")
-    fun ptTokenApiCall(context: Context) {
+    fun ptTokenApiCall(context: Payable) {
         if (sessionIsDirty) {
             headerMap.put("x-session-key",UUID.randomUUID().toString())
             sessionIsDirty = false
         }
 
+        if (configuration.apiKey != "test-paytheory-apikey") {
+            val observable =
+                ApiService(configuration.apiBasePath).ptTokenApiCall().doToken(headerMap)
+            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                // handle success pt-token request
+                .subscribe({ ptTokenResponse: PTTokenResponse ->
+                    ptResetCounter = 0
+                    initiateGooglePlayIntegrityCheck(ptTokenResponse)
+                    // handle failed pt-token request
+                }, { error ->
 
-        val observable = ApiService(configuration.apiBasePath).ptTokenApiCall().doToken(headerMap)
-        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            // handle success pt-token request
-            .subscribe({ ptTokenResponse: PTTokenResponse ->
-                ptResetCounter = 0
-                initiateGooglePlayIntegrityCheck(ptTokenResponse)
-                // handle failed pt-token request
-            }, { error ->
-                if (context is Payable) {
-                    // error "Unable to resolve host "evolve.paytheorystudy.com": No address associated with hostname"
+
                     if (error.message.toString().contains("Unable to resolve host")) {
-//                        println(error.message.toString())
+
                         disconnect()
                         attemptReconnectToPtToken()
                     } else if (error.message.toString().contains("HTTP 500")) {
-//                        println(error.message.toString())
+
                         disconnect()
                         resetSocket()
                     } else if (error.message == "HTTP 404 ") {
-                        context.handleError(PTError(ErrorCode.InvalidAPIKey,"Access Denied"))
+                        context.handleError(PTError(ErrorCode.InvalidAPIKey, "Access Denied"))
                     } else {
                         println("ptTokenApiCall " + error.message)
-                        context.handleError(PTError(ErrorCode.InvalidAPIKey,error.message.toString()))
+                        context.handleError(
+                            PTError(
+                                ErrorCode.InvalidAPIKey,
+                                error.message.toString()
+                            )
+                        )
                     }
+
                 }
-            }
-            )
+                )
+        }
     }
 
     /**
@@ -207,24 +215,31 @@ abstract class PaymentMethodProcessor (
      * It initializes the IntegrityManager and prepares an integrity token.
      */
     private fun initializeAndPrefetchIntegrityToken() {
-        val googleProjectNumber: Long = (context as Context).resources.getString(R.string.google_project_number).toLong()
-        val standardIntegrityManager = IntegrityManagerFactory.createStandard(context as Context?)
+
+        val googleProjectNumber: Long = getGoogleProjectNumber()
+
+        if (configuration.apiKey == "test-paytheory-apikey") {
+            ptTokenApiCall(payable)
+        } else {
+            val standardIntegrityManager = IntegrityManagerFactory.createStandard(payable as Context?)
 
 
-        // Prepare integrity token. Can be called once in a while to keep internal
-        // state fresh.
-        standardIntegrityManager.prepareIntegrityToken(
-            PrepareIntegrityTokenRequest.builder()
-                .setCloudProjectNumber(googleProjectNumber)
-                .build()
-        )
-            .addOnSuccessListener { tokenProvider ->
-                integrityTokenProvider = tokenProvider
-                ptTokenApiCall(context as Context)
-            }
-            .addOnFailureListener { exception ->
-                Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
-            }
+            // Prepare integrity token. Can be called once in a while to keep internal
+            // state fresh.
+            standardIntegrityManager.prepareIntegrityToken(
+                PrepareIntegrityTokenRequest.builder()
+                    .setCloudProjectNumber(googleProjectNumber)
+                    .build()
+            )
+                .addOnSuccessListener { tokenProvider ->
+                    integrityTokenProvider = tokenProvider
+                    ptTokenApiCall(payable)
+                }
+                .addOnFailureListener { exception ->
+                    Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
+                }
+        }
+
     }
 
     /**
@@ -233,35 +248,45 @@ abstract class PaymentMethodProcessor (
      * @param ptTokenResponse The response containing the Pay Theory token.
      */
     private fun initiateGooglePlayIntegrityCheck(ptTokenResponse: PTTokenResponse) {
+        if (configuration.apiKey == "test-paytheory-apikey") {
+            establishViewModel(ptTokenResponse)
+        } else {
+            // See above how to prepare integrityTokenProvider.
 
-        // See above how to prepare integrityTokenProvider.
+            // Request integrity token by providing a user action request hash. Can be called
+            // several times for different user actions.
+            val digest = MessageDigest.getInstance("SHA-256")
+            val requestHash =
+                digest.digest(ptTokenResponse.challengeOptions.challenge.toByteArray(Charsets.UTF_8))
 
-        // Request integrity token by providing a user action request hash. Can be called
-        // several times for different user actions.
-        val digest = MessageDigest.getInstance("SHA-256")
-        val requestHash = digest.digest(ptTokenResponse.challengeOptions.challenge.toByteArray(Charsets.UTF_8))
+            val integrityTokenResponse: Task<StandardIntegrityToken> =
+                integrityTokenProvider!!.request(
+                    StandardIntegrityTokenRequest.builder()
+                        .setRequestHash(Base64.getEncoder().encodeToString(requestHash))
+                        .build()
+                )
+            integrityTokenResponse
+                .addOnSuccessListener(OnSuccessListener { response ->
+                    establishViewModel(ptTokenResponse, response.token())
+                }
+                )
+                .addOnFailureListener(OnFailureListener { exception ->
 
-        val integrityTokenResponse: Task<StandardIntegrityToken> =
-            integrityTokenProvider!!.request(
-                StandardIntegrityTokenRequest.builder()
-                    .setRequestHash(Base64.getEncoder().encodeToString(requestHash))
-                    .build()
-            )
-        integrityTokenResponse
-            .addOnSuccessListener(OnSuccessListener { response ->
-                establishViewModel(ptTokenResponse, response.token()) }
-            )
-            .addOnFailureListener(OnFailureListener { exception ->
-//                if (context is Payable) {
                     if (exception.message?.contains("Network error") == true) {
                         println("Google Play Integrity API Network Error. Retrying...")
                         disconnect()
                         resetSocket()
                     } else {
-                        context.handleError(PTError(ErrorCode.AttestationFailed,exception.message!!))
+                        payable.handleError(
+                            PTError(
+                                ErrorCode.AttestationFailed,
+                                exception.message!!
+                            )
+                        )
                     }
-//                }
-            })
+
+                })
+        }
     }
 
     /**
@@ -271,7 +296,7 @@ abstract class PaymentMethodProcessor (
      * @param isReady True if ready, false otherwise.
      */
     fun updatePayableReadyState(isReady: Boolean) {
-        context.handleReady(isReady)
+        payable.handleReady(isReady)
     }
 
 
@@ -286,3 +311,15 @@ abstract class PaymentMethodProcessor (
         attestationResult: String? = ""
     )
 }
+
+private fun PaymentMethodProcessor.getGoogleProjectNumber(): Long
+    {
+        var googleProjectNumber: Long = 0L
+        if (configuration.apiKey == "test-paytheory-apikey") {
+            googleProjectNumber = 12345678L
+        } else {
+            googleProjectNumber = (payable as Context).resources.getString(R.string.google_project_number).toLong()
+        }
+
+        return googleProjectNumber
+    }

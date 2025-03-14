@@ -46,10 +46,10 @@ fun createSecureStringWrapperSaver(): Saver<SecureStringWrapper, *> = listSaver(
     },
     restore = { list ->
         SecureStringWrapper(
-            initialValue = SecureString(list[0] as String),
+            initialValue = SecureString(list[0] as String), //.filter { it.isDigit() }
             selection = TextRange(
-                start = list[1] as Int,
-                end = list[2] as Int
+                start = 0,
+                end = list[0].toString().length
             )
         )
     }

@@ -1,4 +1,4 @@
-package com.paytheory.simplecompose
+package com.paytheory.lib.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class PaymentResultState {
+    object Loading : PaymentResultState()
     object Idle : PaymentResultState()
     data class Success(val result: SuccessfulTransactionResult) : PaymentResultState()
     data class Failure(val result: FailedTransactionResult) : PaymentResultState()
@@ -20,7 +21,7 @@ sealed class PaymentResultState {
     data class Error(val error: PTError) : PaymentResultState()
 }
 
-class PaymentResultViewModel : ViewModel() {
+class PaymentProcessViewModel : ViewModel() {
     private val _paymentState = MutableStateFlow<PaymentResultState>(PaymentResultState.Idle)
     val paymentState = _paymentState.asStateFlow()
 
@@ -29,8 +30,5 @@ class PaymentResultViewModel : ViewModel() {
             _paymentState.emit(newState)
         }
     }
-
-    fun resetState() {
-        _paymentState.value = PaymentResultState.Idle
-    }
 }
+

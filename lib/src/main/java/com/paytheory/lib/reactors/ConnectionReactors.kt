@@ -1,52 +1,43 @@
 package com.paytheory.lib.reactors
 
 import com.google.gson.Gson
+import com.paytheory.lib.ErrorCode
+import com.paytheory.lib.PTError
 import com.paytheory.lib.data.ActionRequest
 import com.paytheory.lib.data.HostTokenRequest
 import com.paytheory.lib.model.PaymentViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64
 
-/**
- * Class that handles connection reactors for the WebSocket.
- *
- * @param ptToken The PayTheory token.
- * @param attestation The attestation string.
- * @param viewModel The PaymentViewModel instance.
- * @param websocketInteractor The WebsocketInteractor instance.
- * @param applicationPackageName The application's package name.
- */
-@ExperimentalCoroutinesApi
 class ConnectionReactors(
     private val ptToken: String,
     private val attestation: String,
-    private val viewModel: PaymentViewModel,
-    private val applicationPackageName: String) {
+    private val paymentViewModel: PaymentViewModel,
+    private val applicationPackageName: String,
+    private val origin: String,
+) {
 
-    companion object {
-        private const val HOST_ACTION = "host:hostToken"
-    }
-
-    /**
-     * Called when the WebSocket is connected. Sends a host token action request.
-     */
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun onConnected() {
-
-        val requestData = HostTokenRequest(ptToken, attestation, System.currentTimeMillis(), "android", applicationPackageName)
-
-        val encodedBody =
-            Base64.getEncoder().encodeToString(Gson().toJson(requestData).toByteArray())
-
-        val actionRequest = ActionRequest(HOST_ACTION, encodedBody)
-        viewModel.sendSocketMessage(Gson().toJson(actionRequest))
+        try {
+            val requestData = HostTokenRequest(
+                ptToken,
+                attestation,
+                System.currentTimeMillis(),
+                origin,
+                applicationPackageName
+            )
+            val encodedBody = Base64.getEncoder()
+                .encodeToString(Gson().toJson(requestData).toByteArray())
+            val actionRequest = ActionRequest("host:hostToken", encodedBody)
+            paymentViewModel.sendSocketMessage(Gson().toJson(actionRequest))
+        } catch (e: Exception) {
+            paymentViewModel.payTheoryPayment.payable.handleError(PTError(ErrorCode.SocketError, "Error sending socket message: ${e.message}"))
+        }
     }
 
-    /**
-     * Called when the WebSocket is disconnected. Stops the socket interactions.
-     */
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun onDisconnected() {
-        viewModel.disconnect()
+        paymentViewModel.disconnect()
     }
 }

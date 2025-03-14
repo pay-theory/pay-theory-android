@@ -21,23 +21,16 @@ import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.nacl.decryptBox
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-/*
-* Modernization
-* Errors have been updated to PTError
-* supporting error code enum
-* */
-
 /**
  * Creates reactions based on WebSocket messages
  * @param viewModel view model of WebSocket
- * @param webSocketInteractor interactor for WebSocket
  */
 @ExperimentalCoroutinesApi
 class MessageReactors(private val viewModel: PaymentViewModel) {
     var activePaymentDetail: PaymentDetail? = null
     var activePaymentToken: PaymentMethodTokenData? = null
     private var hostToken = ""
-    private var sessionKey = ""
+    var sessionKey = ""
     var socketPublicKey = ""
     private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
@@ -79,7 +72,8 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
      */
     fun onError(message: String, payment: PaymentMethodProcessor? = null) {
         /* fail if unknown websocket message */
-        payment?.context?.handleError(PTError(ErrorCode.SocketError,message))
+        payment?.viewModel?.disconnect()
+        payment?.payable?.handleError(PTError(ErrorCode.SocketError,message))
     }
 
     /**
@@ -88,7 +82,7 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
      */
     fun onTokenError(message: String, paymentMethodToken: PaymentMethodToken? = null) {
         /* fail if unknown websocket message */
-        paymentMethodToken?.context?.handleError(PTError(ErrorCode.TokenFailed,message))
+        paymentMethodToken?.payable?.handleError(PTError(ErrorCode.TokenFailed,message))
     }
 
     /**
@@ -97,7 +91,7 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
      */
     @ExperimentalCoroutinesApi
     fun completeTransaction(message: String, viewModel: PaymentViewModel, payment: Payment) {
-        viewModel.disconnect()
+//        viewModel.disconnect()
 
         try {
             val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
@@ -114,25 +108,26 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
             when (transactionResult.state) {
                 "SUCCEEDED" -> {
                     val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
-                    payment.context.handleSuccess(successfulTransactionResult)
+                    payment.viewModel.paymentSuccess(successfulTransactionResult)
+                    payment.payable.handleSuccess(successfulTransactionResult)
                     PaymentMethodProcessor.sessionIsDirty = true
                     payment.resetSocket()
                 }
                 "PENDING" -> {
                     val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
                     payment.viewModel.paymentSuccess(successfulTransactionResult)
-                    payment.context.handleSuccess(successfulTransactionResult)
+                    payment.payable.handleSuccess(successfulTransactionResult)
                     PaymentMethodProcessor.sessionIsDirty = true
                     payment.resetSocket()
                 }
                 "FAILURE" -> {
                     val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
-                    payment.context.handleFailure(failedTransactionResult)
+                    payment.payable.handleFailure(failedTransactionResult)
                     payment.resetSocket()
                 }
             }
         } catch (e: Exception) {
-            payment.context.handleError(PTError(ErrorCode.SocketError,e.message ?: "Unknown error"))
+            payment.payable.handleError(PTError(ErrorCode.SocketError,e.message ?: "Unknown error"))
         }
 
     }
@@ -160,12 +155,12 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
                 mapUrl = mapUrl
             )
 
-            payment.context.handleBarcodeSuccess(barcodeResult)
+            payment.payable.handleBarcodeSuccess(barcodeResult)
             PaymentMethodProcessor.sessionIsDirty = true
             payment.resetSocket()
 
         } else {
-            payment.context.handleError(PTError(ErrorCode.SocketError,"Failed to Create Barcode"))
+            payment.payable.handleError(PTError(ErrorCode.SocketError,"Failed to Create Barcode"))
         }
     }
 
@@ -179,7 +174,7 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
         val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
         val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
 
-        paymentMethodToken.context.handleTokenizeSuccess(paymentMethodTokenResult)
+        paymentMethodToken.payable.handleTokenizeSuccess(paymentMethodTokenResult)
         PaymentMethodProcessor.sessionIsDirty = true
         paymentMethodToken.resetSocket()
     }

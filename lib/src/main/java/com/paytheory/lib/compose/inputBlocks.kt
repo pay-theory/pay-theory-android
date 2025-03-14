@@ -32,9 +32,9 @@ import com.paytheory.lib.valid.Validator
 
 @Composable
 internal fun RowScope.RegionInput(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    validator: Validator,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureStandardTextField(
         label = stringResource(id = R.string.state),
@@ -49,9 +49,9 @@ internal fun RowScope.RegionInput(
 
 @Composable
 internal fun RowScope.CityInput(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    validator: Validator,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureStandardTextField(
         label = stringResource(id = R.string.city),
@@ -66,8 +66,8 @@ internal fun RowScope.CityInput(
 
 @Composable
 internal fun AddressLine2Input(
-    viewModel: PaymentViewModel,
-    modifier: Modifier
+    modifier: Modifier,
+    viewModel: PaymentViewModel
 ) {
     SecureStandardTextField(
         label = stringResource(id = R.string.address_2),
@@ -82,9 +82,9 @@ internal fun AddressLine2Input(
 
 @Composable
 internal fun AddressLine1Input(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    validator: Validator,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureStandardTextField(
         label = stringResource(id = R.string.address_1),//"Address Line 1"
@@ -99,9 +99,9 @@ internal fun AddressLine1Input(
 
 @Composable
 internal fun BankRoutingNumber(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    validator: Validator,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureBankNumberField(
         value = viewModel.bankRoutingNumber.value,
@@ -116,9 +116,9 @@ internal fun BankRoutingNumber(
 
 @Composable
 internal fun BankAccountNumber(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
     validator: Validator,
-    modifier: Modifier
 ) {
     SecureBankNumberField(
         value = viewModel.bankAccountNumber.value,
@@ -132,9 +132,9 @@ internal fun BankAccountNumber(
 
 @Composable
 internal fun RowScope.PostalCodeInput(
-    validator: Validator,
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureStandardTextField(
         label = "Zip",
@@ -198,9 +198,9 @@ internal fun RowScope.CardNumberInput(
 
 @Composable
 internal fun NameOnAccountInput(
+    modifier: Modifier,
     viewModel: PaymentViewModel,
-    validator: Validator,
-    modifier: Modifier
+    validator: Validator
 ) {
     SecureStandardTextField(
         label = stringResource(id = R.string.name_on_account),

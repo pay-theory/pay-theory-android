@@ -1,6 +1,5 @@
 package com.paytheory.lib
 
-import android.content.Context
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.lib.api.PTTokenResponse
@@ -25,7 +24,7 @@ import java.util.Base64
  * sending payment requests, and receiving responses. It integrates with Google Play Integrity API
  * for enhanced security.
  *
- * @param context The application context that implements the `Payable` interface.
+ * @param payable The application context that implements the `Payable` interface.
  * @param payTheoryData Additional data to be sent with the payment request.
  * @param configuration PayTheoryConfiguration data class with api key, and metadata
  */
@@ -52,13 +51,13 @@ class Payment(
             val actionRequest = createInitialActionRequestForPayment(payment)
             if (viewModel.connected) {
 
-                context.handlePaymentStart(payment.type)
+                payable.handlePaymentStart(payment.type)
                 viewModel.sendSocketMessage(Gson().toJson(actionRequest))
                 println("Pay Theory Payment Requested")
 
             } else {
                 queuedRequest = payment
-                ptTokenApiCall(context as Context)
+                ptTokenApiCall(payable)
                 println("Pay Theory Resetting Connection")
             }
 
@@ -70,7 +69,7 @@ class Payment(
      * @param payment The `PaymentDetail` object containing the payment information.
      * @return The generated `ActionRequest` object representing the initial request.
      */
-    private fun createInitialActionRequestForPayment(payment: PaymentDetail): ActionRequest {
+    fun createInitialActionRequestForPayment(payment: PaymentDetail): ActionRequest {
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
@@ -200,13 +199,13 @@ class Payment(
             ptTokenResponse.ptToken,
             attestationResult!!,
             viewModel,
-            packageName
+            packageName,
+            origin = "android"
         )
         messageReactors = MessageReactors(viewModel)
-        viewModel.subscribeToSocketEvents(this, ptTokenResponse, attestationResult)
+        viewModel.subscribeToSocketEvents(this, ptTokenResponse)
         if (queuedRequest != null)
             messageReactors!!.activePaymentDetail = queuedRequest
 
-        updatePayableReadyState(true)
     }
 }

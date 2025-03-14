@@ -17,6 +17,8 @@ import androidx.compose.ui.text.input.TextFieldValue
  *
  * The `visibleValue` is a Compose `MutableState`, ensuring UI updates whenever it changes.
  *
+ * This class is designed specifically to enable the text transformations needed in expiration field
+ *
  * @property initialValue The initial `SecureString` to be wrapped.
  * @property selection The initial text selection range within the visible value. If null, no selection is applied.
  */

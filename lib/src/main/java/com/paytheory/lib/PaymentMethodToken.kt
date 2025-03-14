@@ -16,18 +16,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  * It includes functionalities for establishing a connection, sending tokenization requests, and
  * receiving responses.
  *
- * @param context The application context.
+ * @param payable The application context.
  * @param payTheoryData The PayTheory data object for additional information.
  * @param configuration The PayTheory configuration object for metadata and customization.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodToken(
     packageNamed: String,
-    contextIn: Payable,
+    payable: Payable,
     payTheoryDataIn: HashMap<Any, Any>? = hashMapOf(),
     configurationIn : PayTheoryConfiguration,
     viewModel: PaymentViewModel
-) : PaymentMethodProcessor(contextIn,payTheoryDataIn, configurationIn,viewModel), WebsocketMessageHandler {
+) : PaymentMethodProcessor(payable,payTheoryDataIn, configurationIn,viewModel), WebsocketMessageHandler {
 
     var queuedRequest: PaymentMethodTokenData? = null
 
@@ -80,15 +80,17 @@ class PaymentMethodToken(
         ptTokenResponse: PTTokenResponse,
         attestationResult: String?
     ) {
-
+        var packaged = "com.unit.test"
+        if (this.payable is Context) packaged = (this.payable as Context).applicationContext.packageName
         connectionReactors = ConnectionReactors(
             ptTokenResponse.ptToken,
             attestationResult!!,
             viewModel,
-            (this.context as Context).applicationContext.packageName
+            packaged,
+            origin = "android"
         )
         messageReactors = MessageReactors(viewModel)
-        viewModel.subscribeToSocketEvents(this,ptTokenResponse,attestationResult)
+        viewModel.subscribeToSocketEvents(this,ptTokenResponse)
         if (queuedRequest != null)
             messageReactors!!.activePaymentToken = queuedRequest
 

@@ -21,8 +21,9 @@ android {
         applicationId = "com.paytheory.simplecompose"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.02"
+        versionCode = 7
+        versionName = "1.07"
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,20 +32,20 @@ android {
         debug {
             isDebuggable = true
             resValue("string", "api_key", "${localProperties.getProperty("API_KEY")}")
-            isMinifyEnabled = true
-
-            // Enables resource shrinking, which is performed by the
-            // Android Gradle plugin.
-            isShrinkResources = true
-            proguardFiles(
-                // Includes the default ProGuard rules files that are packaged with
-                // the Android Gradle plugin. To learn more, go to the section about
-                // R8 configuration files.
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-
-                // Includes a local, custom Proguard rules file
-                "proguard-rules.pro"
-            )
+//            isMinifyEnabled = true
+//
+//            // Enables resource shrinking, which is performed by the
+//            // Android Gradle plugin.
+//            isShrinkResources = true
+//            proguardFiles(
+//                // Includes the default ProGuard rules files that are packaged with
+//                // the Android Gradle plugin. To learn more, go to the section about
+//                // R8 configuration files.
+//                getDefaultProguardFile("proguard-android-optimize.txt"),
+//
+//                // Includes a local, custom Proguard rules file
+//                "proguard-rules.pro"
+//            )
         }
         release {
             isDebuggable = false

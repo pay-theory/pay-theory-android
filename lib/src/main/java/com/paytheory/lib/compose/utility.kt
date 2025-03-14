@@ -62,7 +62,12 @@ internal fun createPayTheoryData(configuration: PayTheoryConfiguration): HashMap
 
     payTheoryData["fee"] = configuration.serviceFee as Any
 
-    payTheoryData["timezone"] = TimeZone.getDefault().id
+    if (configuration.apiKey == "test-paytheory-apikey") {
+        payTheoryData["timezone"] = "test"
+    } else {
+        payTheoryData["timezone"] = TimeZone.getDefault().id
+    }
+
 
     return payTheoryData
 }
