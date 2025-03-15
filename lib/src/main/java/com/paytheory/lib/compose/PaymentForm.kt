@@ -56,6 +56,7 @@ fun PaymentForm(
     configuration: PayTheoryConfiguration,
     @SuppressLint("ModifierParameter") fieldModifier: Modifier = Modifier,
     buttonModifier: Modifier = Modifier,
+
 ) {
     val validator = Validator()
 

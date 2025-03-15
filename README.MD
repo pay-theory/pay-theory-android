@@ -25,82 +25,7 @@ Add the Pay Theory Android SDK to your app's `build.gradle` file:
 
 ```gradle
 dependencies {
-    implementation 'com.paytheory.android.sdk:AndroidSDK:2.8.4'
-}
-```
-
-## Securing Your API Key
-
-To keep your Pay Theory API key secure and out of version control, store it in your `local.properties` file:
-
-1. Add your API key to `local.properties`:
-```properties
-pay.theory.api.key=your_api_key_here
-```
-
-2. In your app's `build.gradle` file, add code to read the API key:
-```gradle
-android {
-    defaultConfig {
-        // Other config...
-        
-        def localProperties = new Properties()
-        localProperties.load(new FileInputStream(rootProject.file("local.properties")))
-        
-        buildConfigField "String", "PAY_THEORY_API_KEY", "\"${localProperties['pay.theory.api.key']}\""
-    }
-}
-```
-
-3. Access your API key in code:
-```kotlin
-val ptConfig = PayTheoryConfiguration(
-    apiKey = BuildConfig.PAY_THEORY_API_KEY,
-    // other configuration...
-)
-```
-
-Make sure to add `local.properties` to your `.gitignore` file to prevent it from being committed to version control:
-```gitignore
-local.properties
-```
-
-## ProGuard Configuration
-
-If you're using ProGuard for code obfuscation, add the following rules to your `proguard-rules.pro` file:
-
-```proguard
-# Keep source file names and line numbers for better debugging
--keepattributes SourceFile,LineNumberTable
-
-# Repackage classes into the top-level
--repackageclasses
-
-# Keep Compose-related classes
--keep class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt { *; }
-
-# Keep SSL-related classes
--dontwarn org.bouncycastle.jsse.BCSSLParameters
--dontwarn org.bouncycastle.jsse.BCSSLSocket
--dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
--dontwarn org.conscrypt.Conscrypt$Version
--dontwarn org.conscrypt.Conscrypt
--dontwarn org.conscrypt.ConscryptHostnameVerifier
--dontwarn org.openjsse.javax.net.ssl.SSLParameters
--dontwarn org.openjsse.javax.net.ssl.SSLSocket
--dontwarn org.openjsse.net.ssl.OpenJSSE
-```
-
-Enable ProGuard in your app's `build.gradle` file:
-
-```gradle
-android {
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
+    implementation 'com.paytheory.lib:ComposePayments:VERSION'
 }
 ```
 
@@ -114,12 +39,72 @@ class MainActivity : ComponentActivity(), Payable {
     private val paymentFieldModel: PaymentFieldViewModel by viewModels()
 
     // Implement Payable interface methods
-    override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
-        paymentProcessModel.updateState(PaymentResultState.Success(successfulTransactionResult))
+    override fun handleSuccess(
+        successfulTransactionResult: SuccessfulTransactionResult) {
+        paymentProcessModel.updateState(
+            PaymentResultState.Success(successfulTransactionResult)
+        )
     }
 
-    override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
-        paymentProcessModel.updateState(PaymentResultState.Failure(failedTransactionResult))
+    override fun handleFailure(
+        failedTransactionResult: FailedTransactionResult) {
+        paymentProcessModel.updateState(
+            PaymentResultState.Failure(failedTransactionResult)
+        )
+    }
+
+    override fun handleStateChange(field: PaymentField, fieldState: FieldState) {
+        // Update the field state in the ViewModel
+        paymentFieldModel.updateState(field, fieldState)
+        
+        // Example of responding to specific field states
+        when (field) {
+            PaymentField.CARD_NUMBER -> {
+                when (fieldState) {
+                    is FieldState.Valid -> {
+                        // Handle valid card number
+                        val cardType = fieldState.cardType
+                        Log.d("PaymentForm", "Valid card: $cardType")
+                    }
+                    is FieldState.Invalid -> {
+                        // Handle invalid card number
+                        val error = fieldState.error
+                        Log.d("PaymentForm", "Invalid card: $error")
+                    }
+                    is FieldState.Empty -> {
+                        // Handle empty card number field
+                        Log.d("PaymentForm", "Card number empty")
+                    }
+                }
+            }
+            PaymentField.BANK_ACCOUNT_NUMBER -> {
+                when (fieldState) {
+                    is FieldState.Valid -> {
+                        // Handle valid bank account number
+                        Log.d("PaymentForm", "Valid bank account")
+                    }
+                    is FieldState.Invalid -> {
+                        // Handle invalid bank account number
+                        val error = fieldState.error
+                        Log.d("PaymentForm", "Invalid bank account: $error")
+                    }
+                }
+            }
+            PaymentField.POSTAL_CODE -> {
+                when (fieldState) {
+                    is FieldState.Valid -> {
+                        // Handle valid postal code
+                        Log.d("PaymentForm", "Valid postal code")
+                    }
+                    is FieldState.Invalid -> {
+                        // Handle invalid postal code
+                        val error = fieldState.error
+                        Log.d("PaymentForm", "Invalid postal code: $error")
+                    }
+                }
+            }
+            // Handle other fields as needed
+        }
     }
 
     // ... implement other Payable interface methods
@@ -131,11 +116,14 @@ class MainActivity : ComponentActivity(), Payable {
 ```kotlin
 val ptConfig = PayTheoryConfiguration(
     apiKey = BuildConfig.PAY_THEORY_API_KEY,
-    amount = 1000, // Amount in cents
-    paymentMethodType = PaymentMethodType.CARD, // or PaymentMethodType.ACH
+    amount = 1000, 
+    // Amount in cents - not required for token
+    paymentMethodType = PaymentMethodType.CARD, 
+    // or PaymentMethodType.ACH
     requireBillingAddress = false,
     requireAccountName = false,
-    paymentMethodAction = PaymentMethodAction.PAYMENT // or PaymentMethodAction.TOKEN
+    paymentMethodAction = PaymentMethodAction.PAYMENT 
+    // or PaymentMethodAction.TOKEN
 )
 ```
 
@@ -260,19 +248,6 @@ fun CustomPaymentForm(fieldModel: PaymentFieldViewModel) {
 }
 ```
 
-### Pre-submission Validation
-
-```kotlin
-fun validateBeforeSubmit(fieldModel: PaymentFieldViewModel): Boolean {
-    return fieldModel.run {
-        cardNumberState.value is FieldState.Valid &&
-        expirationState.value is FieldState.Valid &&
-        cvvState.value is FieldState.Valid &&
-        (if (requiresPostalCode) postalCodeState.value is FieldState.Valid else true)
-    }
-}
-```
-
 ## Payment States
 
 The SDK provides various payment states through `PaymentResultState`:
@@ -308,9 +283,168 @@ The `PayTheoryConfiguration` class supports various options:
 - `paymentMethodAction`: PAYMENT or TOKEN
 - `outlined`: Use outlined text fields
 
+## Styling
+
+The Pay Theory SDK uses Material 3 theming with Jetpack Compose, allowing you to customize the appearance of the payment form to match your app's design.
+
+### Material Theme Customization
+
+```kotlin
+@Composable
+fun PayTheoryTheme(content: @Composable () -> Unit) {
+    val colorScheme = lightColorScheme(
+        primary = Color(0xFF2196F3),
+        secondary = Color(0xFF03DAC6),
+        surface = Color(0xFFFFFFFF),
+        error = Color(0xFFB00020)
+    )
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography(
+            // Custom typography settings
+            bodyLarge = TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp
+            )
+        ),
+        shapes = Shapes(
+            // Custom shape settings
+            small = RoundedCornerShape(4.dp),
+            medium = RoundedCornerShape(8.dp),
+            large = RoundedCornerShape(12.dp)
+        )
+    ) {
+        content()
+    }
+}
+```
+
+### Modifiers and Spacing
+
+The PaymentForm accepts modifiers for both fields and buttons:
+
+```kotlin
+@Composable
+fun StyledPaymentForm(
+    payable: Payable,
+    configuration: PayTheoryConfiguration
+) {
+    PaymentForm(
+        payable = payable,
+        configuration = configuration,
+        fieldModifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 8.dp),
+        buttonModifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(56.dp)
+    )
+}
+```
+
+### Resources and Documentation
+
+For more detailed information about styling with Jetpack Compose:
+
+- [Material 3 Design](https://m3.material.io/develop/android/jetpack-compose) - Official Material 3 guidelines for Compose
+- [Compose Theming](https://developer.android.com/jetpack/compose/themes) - Learn about theming in Jetpack Compose
+- [Material Components](https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary) - Material 3 component documentation
+- [Compose Modifiers](https://developer.android.com/jetpack/compose/modifiers) - Guide to using modifiers in Compose
+- [Typography](https://developer.android.com/jetpack/compose/text) - Text styling in Compose
+- [Color](https://developer.android.com/jetpack/compose/themes/material#color) - Color system in Material 3
+
+### Best Practices
+
+1. **Theme Consistency**: Use your app's existing Material Theme to ensure the payment form matches your app's design language.
+2. **Accessibility**: Maintain sufficient color contrast and touch target sizes for better accessibility.
+3. **Responsive Design**: Use flexible modifiers like `fillMaxWidth()` and relative padding for different screen sizes.
+4. **Dark Theme Support**: Consider both light and dark theme variants when customizing colors.
+5. **Error States**: Maintain clear visual feedback for error states while keeping brand consistency.
+
 ## Security
 
 The SDK handles sensitive payment data securely and is PCI compliant. All communication with Pay Theory servers is encrypted.
+
+## Securing Your API Key
+
+To keep your Pay Theory API key secure and out of version control, store it in your `local.properties` file:
+
+1. Add your API key to `local.properties`:
+```properties
+pay.theory.api.key=your_api_key_here
+```
+
+2. In your app's `build.gradle` file, add code to read the API key:
+```gradle
+android {
+    defaultConfig {
+        // Other config...
+        
+        def localProperties = new Properties()
+        localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+        
+        buildConfigField "String", "PAY_THEORY_API_KEY", "\"${localProperties['pay.theory.api.key']}\""
+    }
+}
+```
+
+3. Access your API key in code:
+```kotlin
+val ptConfig = PayTheoryConfiguration(
+    apiKey = BuildConfig.PAY_THEORY_API_KEY,
+    // other configuration...
+)
+```
+
+Make sure to add `local.properties` to your `.gitignore` file to prevent it from being committed to version control:
+```gitignore
+local.properties
+```
+
+## ProGuard Configuration
+
+If you're using ProGuard for code obfuscation, add the following rules to your `proguard-rules.pro` file:
+
+```proguard
+# Keep source file names and line numbers for better debugging
+-keepattributes SourceFile,LineNumberTable
+
+# Repackage classes into the top-level
+-repackageclasses
+
+# Keep Compose-related classes
+-keep class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt { *; }
+
+# Keep SSL-related classes
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
+```
+
+Enable ProGuard in your app's `build.gradle` file:
+
+```gradle
+android {
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+```
 
 ## License
 
