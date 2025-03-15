@@ -260,6 +260,21 @@ The SDK provides various payment states through `PaymentResultState`:
 - `TokenSuccess`: Payment method tokenized successfully
 - `Error`: Error occurred during processing
 
+## Error Codes
+
+The SDK uses the following error codes when throwing `PTError`:
+
+- `AttestationFailed`: Device attestation failed, indicating an unsupported environment (e.g., missing Play Services)
+- `InvalidAmount`: Payment amount is invalid or missing
+- `InvalidApiKey`: API key is invalid or missing
+- `InvalidConfiguration`: Payment configuration is invalid or incomplete
+- `InvalidPaymentMethod`: Payment method details are invalid or incomplete
+- `NetworkError`: Network connection error occurred
+- `PaymentFailed`: Payment processing failed on the server
+- `TokenFailed`: Payment method tokenization failed
+- `UnknownError`: An unexpected error occurred
+
+
 ## Example Usage
 
 Check the `qualitydemo` module in this repository for a complete implementation example, including:
