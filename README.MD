@@ -421,16 +421,6 @@ If you're using ProGuard for code obfuscation, add the following rules to your `
 # Keep Compose-related classes
 -keep class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt { *; }
 
-# Keep SSL-related classes
--dontwarn org.bouncycastle.jsse.BCSSLParameters
--dontwarn org.bouncycastle.jsse.BCSSLSocket
--dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
--dontwarn org.conscrypt.Conscrypt$Version
--dontwarn org.conscrypt.Conscrypt
--dontwarn org.conscrypt.ConscryptHostnameVerifier
--dontwarn org.openjsse.javax.net.ssl.SSLParameters
--dontwarn org.openjsse.javax.net.ssl.SSLSocket
--dontwarn org.openjsse.net.ssl.OpenJSSE
 ```
 
 Enable ProGuard in your app's `build.gradle` file:
@@ -445,6 +435,39 @@ android {
     }
 }
 ```
+
+## Google Play Integrity API
+
+The Pay Theory Android SDK utilizes Google Play Integrity API for enhanced security. This has important implications for development and testing:
+
+### Production Environment
+- Production API keys will **not** work on emulators
+- Production API keys require devices with:
+  - Google Play Services installed and up-to-date
+  - A valid Google account signed in
+  - Play Store installed and functional
+
+### Development/Testing Environment
+- Development/sandbox API keys will only work on emulators and physical devices with:
+  - Google Play Services installed and up-to-date
+
+### Unsupported Environments
+The SDK will not function in environments without Google Play Services, including:
+- Android emulators without Play Services
+- Devices without Play Services installed
+- Devices with outdated Play Services
+- Devices without Play Store
+- Devices without a Google account
+
+### Error Handling
+When running in an unsupported environment, the SDK will throw a `PTError` with `ErrorCode.AttestationFailed`. Your app should handle this gracefully and inform users they need a supported device with Play Services.
+
+### Best Practices
+- Always test on physical devices with Play Services during development
+- Include appropriate error handling for unsupported environments
+- Consider providing alternative payment flows for users on unsupported devices
+
+
 
 ## License
 
