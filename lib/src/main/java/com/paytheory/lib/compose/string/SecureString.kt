@@ -100,9 +100,8 @@ class SecureString(dataIn: ByteArray) {
     }
 
     // Function to update the SecureString securely
-    fun setValue(newValue: String) {
-        zeroFill()
-        data = newValue.toSecureBytes()
+    fun resetValue() {
+        data = SecureString("").revealForProcessing()
         _isModified.value = !_isModified.value // Toggle the flag
     }
 

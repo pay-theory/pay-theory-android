@@ -38,5 +38,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "PayTheory"
 include(":lib")
-include(":simplecompose")
+include(":qualitydemo")
 include(":app")

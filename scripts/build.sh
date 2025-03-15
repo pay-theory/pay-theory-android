@@ -1,5 +1,5 @@
 #!/bin/bash
-PT_VERSION=3.0.5
+PT_VERSION=4.0.0-alpha1
 # from project root
 ./gradlew publishToMavenLocal
 cp scripts/maven_bundle.sh ~/.m2/repository/com/paytheory/android/sdk/AndroidSDK/"$PT_VERSION"/.

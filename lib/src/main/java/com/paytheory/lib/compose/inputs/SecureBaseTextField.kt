@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
 import com.paytheory.lib.compose.string.SecureString
+import com.paytheory.lib.compose.string.SecureStringWrapper
 import com.paytheory.lib.compose.transformation.NoFilterTransformation
 
 /**
@@ -42,14 +43,14 @@ import com.paytheory.lib.compose.transformation.NoFilterTransformation
  */
 @Composable
 internal fun SecureBaseTextField(
-    value: SecureString,
+    value: SecureStringWrapper,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
     visualTransformation: VisualTransformation = NoFilterTransformation(),
     maxChar: Int = 128,
     preWrap: (String) -> String = { it },
-    onValueChange: (SecureString) -> Unit,
-    isValid: (SecureString) -> Boolean,
+    onValueChange: (SecureStringWrapper) -> Unit,
+    isValid: (SecureStringWrapper) -> Boolean,
     label: @Composable (() -> Unit)?,
     isOutlined: Boolean = true,
     isNumeric: Boolean = false
@@ -64,14 +65,19 @@ internal fun SecureBaseTextField(
         isDirty = true
     }
 
-    val isValid = if (isDirty || value.revealForUi().isNotEmpty()) isValid(value) else true
+    val isValid = if (isDirty || value.secureValue.revealForUi().isNotEmpty()) isValid(value) else true
+
+
 
     TextFieldWrapper(
         value = value,
         onValueChange = { newValue ->
             if (newValue.length <= maxChar) {
                 val filtered = if (isNumeric) newValue.filter { it.isDigit() } else newValue
-                onValueChange(SecureString(preWrap(filtered)))
+                onValueChange(SecureStringWrapper(
+                    SecureString(preWrap(filtered)),
+                    selection = null
+                ))
             }
         },
         isError = !isValid,

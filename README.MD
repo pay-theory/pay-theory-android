@@ -1,372 +1,321 @@
 # Pay Theory Android SDK
 
+The Pay Theory Android SDK provides a simple way to integrate payment processing into your Android application using Jetpack Compose. The SDK supports both card and ACH (bank transfer) payments, as well as payment method tokenization.
+
+## Features
+
+- Credit/Debit card payments
+- ACH (bank transfer) payments
+- Payment method tokenization
+- Customizable UI components
+- Real-time field validation
+- Secure payment processing
+- Compose-based implementation
+
 ## Requirements
 
-Pay Theory's Android SDK is available for Android SDK >= 26
-
-## Register your application
-
-Register your app in Pay Theory's merchant portal to use Pay Theory Android SDK
-
-For each mobile app, you want to register
-
-- enter your application package name
-
-- enter your application description
+- Android API level 28 or higher
+- Jetpack Compose
+- Kotlin 2.10.0 or higher
+- Pay Theory API key
 
 ## Installation
 
-The Pay Theory Android SDK is now available at [Maven Repository](https://repo1.maven.org/maven2/com/paytheory/)
+Add the Pay Theory Android SDK to your app's `build.gradle` file:
 
-The latest version is available via `mavenCentral()`:
-
-- Add mavenCentral() to your project level `build.gradle` file
-
-```kotlin
-buildscript {
-    repositories {
-        ...
-        mavenCentral()
-    }
-}
-```
-
-- Add Pay Theory AndroidSDK to your app level `build.gradle` file
-
-```kotlin
+```gradle
 dependencies {
-    ...
-    implementation group: 'com.paytheory.android.sdk', name: 'AndroidSDK', version: 'LATEST_VERSION'
-    ...
+    implementation 'com.paytheory.android.sdk:AndroidSDK:2.8.4'
 }
 ```
 
-### Secure your API key
+## Securing Your API Key
 
-> **_NOTE:_**  While Pay Theory's API key is not considered a *secret key*
-> it is still a good practice to avoid exposing it in your source code repository
-> below is one approach you can take to adding your API key as a build resource
+To keep your Pay Theory API key secure and out of version control, store it in your `local.properties` file:
 
-- Add API key to your project level `local.properties` file
-
-```dotenv
-API_KEY=YOUR-API-KEY
+1. Add your API key to `local.properties`:
+```properties
+pay.theory.api.key=your_api_key_here
 ```
 
-- Update app level build.gradle file
-  - Read in and parse local properties
-  - set your API key as a build resource
-
-
-```kotlin
-File secretPropsFile = project.rootProject.file('local.properties')
-Properties p = new Properties()
-new FileInputStream(secretPropsFile).withCloseable { is -> p.load(is) }
-p.each { name, value -> ext[name] = value }
-
+2. In your app's `build.gradle` file, add code to read the API key:
+```gradle
 android {
-    ...
-    buildTypes {
-        debug {
-            ...
-            resValue("string", "api_key", "${API_KEY}")
-            ...
-        }
-        release {
-            ...
-            resValue("string", "api_key", "${API_KEY}")
-            ...
-        }
-    }
-    ...
-```
-
-### Update your app level `build.gradle`
-
-- change minSdk version to 26 or higher
-
-- change targetSdk and compileSdk to 33 or higher
-
-```Kotlin
-android {
-    ...
-    compileSdk 33
-    ...
     defaultConfig {
-        ...
-        minSdk 26
-        targetSdk 33
-        ...
+        // Other config...
+        
+        def localProperties = new Properties()
+        localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+        
+        buildConfigField "String", "PAY_THEORY_API_KEY", "\"${localProperties['pay.theory.api.key']}\""
     }
-```
-
-## Usage
-
-### Layout
-
-Add PayTheoryFragment as a fragment in your activity's xml layout file
-
-```xml
-    <fragment
-        android:id="@+id/payTheoryFragment"
-        android:name="com.paytheory.android.sdk.fragments.PayTheoryFragment" />
-```
-
-### Styling
-
-Text inputs are derived from TextInputEditText and can be styled as follows:
-
-```xml
-    <style name="Theme.MyCustomTheme" parent="Base.Theme.MyApplication">
-        ...
-        <item name="textInputStyle">@style/MyInputStyle</item>
-        ...
-    </style>
-
-    <style name="MyInputStyle" parent="Widget.Material3.TextInputLayout.FilledBox">
-        ...
-    </style>
-```
-
-> **_NOTE:_**  any built in style from Widget.Material3.TextInputLayout.* will work
-
-The inputs support all of the material design text input styles described [here](https://developer.android.com/design/ui/mobile/guides/components/material-overview#text-input)
-
-The PayTheoryButton is styled by applying a style from your theme in your layout.
-
-in themes.xml:
-```xml
-    <style name="MyButtonStyle" parent="Widget.Material3.Button.ElevatedButton">
-    ...
-    </style>
-```
-> **_NOTE:_**  any built in style from Widget.Material3.Button.* will work
-
-in your layout file:
-```xml
-    <com.paytheory.android.sdk.view.PayTheoryButton
-        ...
-        style="@style/MyButtonStyle"
-        ...
-    />
-```
-
-### Code
-
-- Extend the PayTheoryMerchantActivity
-- Implement the Payable interface
-
-```Kotlin
-class MainActivity : PayTheoryMerchantActivity(), Payable {
-    ...
 }
 ```
 
-- Set your api key.
-
-```Kotlin
-val apiKey = resources.getString(R.string.api_key)
-```
-
-- Set PayTheoryFragment inside your `onCreate` method.
-
-```Kotlin
-val payTheoryFragment = this.supportFragmentManager.findFragmentById(R.id.payTheoryFragment) as PayTheoryFragment
-```
-
-- Configure PayTheoryFragment with a PayTheoryConfiguration.
-
-> **_NOTE:_**  PayTheoryConfiguration allows you to set a number of optional values
-> the button used to trigger a payment / tokenization process and your apiKey are 
-> required to construct a PayTheoryConfiguration.
-
-```Kotlin
-val configuration = PayTheoryConfiguration(submitButton, apiKey)
-```
-
-#### PayTheoryButton
-
-> **_NOTE:_**  An instance of PayTheoryButton is required so it can be enabled or disabled 
-> depending on the validity of the payment details being entered.
-> PayTheoryButton can be extended and a custom version can be provided to handle responses
-> to data entry in controlled fields.
-
+3. Access your API key in code:
 ```kotlin
-    /**
-     * Override disable function to react when Pay Theory disables payment
-     */
-    fun disable(){
-        this.isEnabled = false
+val ptConfig = PayTheoryConfiguration(
+    apiKey = BuildConfig.PAY_THEORY_API_KEY,
+    // other configuration...
+)
+```
+
+Make sure to add `local.properties` to your `.gitignore` file to prevent it from being committed to version control:
+```gitignore
+local.properties
+```
+
+## ProGuard Configuration
+
+If you're using ProGuard for code obfuscation, add the following rules to your `proguard-rules.pro` file:
+
+```proguard
+# Keep source file names and line numbers for better debugging
+-keepattributes SourceFile,LineNumberTable
+
+# Repackage classes into the top-level
+-repackageclasses
+
+# Keep Compose-related classes
+-keep class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt { *; }
+
+# Keep SSL-related classes
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
+```
+
+Enable ProGuard in your app's `build.gradle` file:
+
+```gradle
+android {
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
-
-    /**
-     * Override enable function to react when Pay Theory enables payment
-     */
-    fun enable(){
-        this.isEnabled = true
-    }
-```
-
-#### Valid and Empty protocol
-
-- PayTheoryFragment exposes the state of critical payment fields such as card number, security code, and expiration date
-- These values can be accessed using the following syntax:
-
-```kotlin
-    payTheoryFragment.card.cardNumber.isValid()
-    payTheoryFragment.card.cardNumber.isEmpty()
-```
-
-- exposed fields for card include card number, CVV, expiration date and postal code
-- exposed fields for bank include account number and routing number
-- exposed fields for cash include full name and contact
-
-#### Additional Configurations
-
-Before accepting a payment some additional configuration settings are required
-
-- an amount and payment method type must be set for payments
-- a payment method type must be set for tokenization, but amount must not be set
-- if not set payment method type defaults to CARD
-- CASH payment method type is not allowed for tokenization
-
-```kotlin
-        configuration.paymentMethodType = PaymentMethodType.BANK
-        configuration.amount = 15000
-```
-
-- optionally additional data can be attached to your request
-
-```kotlin
-        configuration.metadata = metadata /** HashMap<Any,Any> **/
-        configuration.payorInfo = payorInfo /** PayorInfo **/
-        configuration.requireAccountName = true
-        configuration.requireBillingAddress = true
-        configuration.accountCode = "Test Account Code"
-        configuration.reference = "Test Reference"
-        configuration.sendReceipt = true
-        configuration.receiptDescription = "Android Payment Receipt Test"
-```
-
-#### Payment Requests
-
-Here is an example on how to use PayTheoryFragment class method transact():
-
-```kotlin
-try {
-    payTheoryFragment.configurePayment(
-        configuration
-    )
-
-    submitButton.setOnClickListener{
-        payTheoryFragment.transact()
-    }
-
-} catch (e: Exception) {
-    e.printStackTrace()
 }
 ```
 
-#### Tokenization Requests
+## Basic Implementation
 
-Here is an example on how to use PayTheoryFragment class method tokenize():
+1. Implement the `Payable` interface in your Activity or ViewModel:
 
 ```kotlin
-try {
-    payTheoryFragment.configureTokenize(
-        configuration
+class MainActivity : ComponentActivity(), Payable {
+    private val paymentProcessModel: PaymentProcessViewModel by viewModels()
+    private val paymentFieldModel: PaymentFieldViewModel by viewModels()
+
+    // Implement Payable interface methods
+    override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
+        paymentProcessModel.updateState(PaymentResultState.Success(successfulTransactionResult))
+    }
+
+    override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
+        paymentProcessModel.updateState(PaymentResultState.Failure(failedTransactionResult))
+    }
+
+    // ... implement other Payable interface methods
+}
+```
+
+2. Configure the payment form:
+
+```kotlin
+val ptConfig = PayTheoryConfiguration(
+    apiKey = BuildConfig.PAY_THEORY_API_KEY,
+    amount = 1000, // Amount in cents
+    paymentMethodType = PaymentMethodType.CARD, // or PaymentMethodType.ACH
+    requireBillingAddress = false,
+    requireAccountName = false,
+    paymentMethodAction = PaymentMethodAction.PAYMENT // or PaymentMethodAction.TOKEN
+)
+```
+
+3. Add the PaymentForm composable to your UI:
+
+```kotlin
+@Composable
+fun PaymentScreen(
+    payable: Payable,
+    processModel: PaymentProcessViewModel,
+    fieldModel: PaymentFieldViewModel
+) {
+    PaymentForm(
+        payable = payable,
+        configuration = ptConfig,
+        fieldModifier = Modifier.padding(8.dp),
+        buttonModifier = Modifier.fillMaxWidth()
     )
+}
+```
+
+## Form Field State Management
+
+The SDK provides granular control over form field states through the `PaymentFieldViewModel`. This allows you to track user interactions, validate input in real-time, and respond to field state changes.
+
+### Observing Field States
+
+```kotlin
+@Composable
+fun PaymentScreen(
+    payable: Payable,
+    processModel: PaymentProcessViewModel,
+    fieldModel: PaymentFieldViewModel
+) {
+    // Collect field states
+    val cardNumberState = fieldModel.cardNumberState.collectAsState()
+    val expirationState = fieldModel.expirationState.collectAsState()
+    val cvvState = fieldModel.cvvState.collectAsState()
+    val postalCodeState = fieldModel.postalCodeState.collectAsState()
+
+    // Example of responding to field state changes
+    LaunchedEffect(cardNumberState.value) {
+        when (cardNumberState.value) {
+            is FieldState.Valid -> {
+                // Handle valid card number
+                val cardType = (cardNumberState.value as FieldState.Valid).cardType
+                // Update UI based on card type
+            }
+            is FieldState.Invalid -> {
+                // Handle invalid input
+                val error = (cardNumberState.value as FieldState.Invalid).error
+                // Show error message
+            }
+            is FieldState.Empty -> {
+                // Handle empty field
+            }
+        }
+    }
+}
+```
+
+### Available Field States
+
+Each form field provides the following states:
+
+```kotlin
+sealed class FieldState {
+    object Empty : FieldState()
+    data class Valid(
+        val value: String,
+        val cardType: String? = null // Only for card number field
+    ) : FieldState()
+    data class Invalid(
+        val value: String,
+        val error: String
+    ) : FieldState()
+}
+```
+
+### Accessible Field States
+
+The `PaymentFieldViewModel` provides access to these states:
+
+- `cardNumberState`: Card number validation and card type detection
+- `expirationState`: Card expiration date validation
+- `cvvState`: CVV code validation
+- `postalCodeState`: Postal/ZIP code validation
+- `accountNumberState`: Bank account number validation (ACH)
+- `routingNumberState`: Bank routing number validation (ACH)
+- `accountNameState`: Account holder name validation
+- `addressState`: Billing address validation
+
+### Custom Validation Example
+
+```kotlin
+@Composable
+fun CustomPaymentForm(fieldModel: PaymentFieldViewModel) {
+    val cardState = fieldModel.cardNumberState.collectAsState()
     
-    submitButton.setOnClickListener{
-        payTheoryFragment.tokenize()
+    Column {
+        PaymentForm(/* ... */)
+        
+        // Custom validation feedback
+        cardState.value.let { state ->
+            when (state) {
+                is FieldState.Valid -> {
+                    Text(
+                        text = "Using ${state.cardType} card",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                is FieldState.Invalid -> {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                else -> { /* Handle other states */ }
+            }
+        }
     }
-} catch (e: Exception) {
-    e.printStackTrace()
 }
 ```
 
-#### Results
+### Pre-submission Validation
 
-The transaction results will come back through your Payable interface as these classes:
-
-- successful card/bank payment result
-
-```Kotlin
-data class SuccessfulTransactionResult (
-    @SerializedName("state") val state: String,
-    @SerializedName("amount") val amount: String,
-    @SerializedName("brand") val brand: String,
-    @SerializedName("last_four") val lastFour: String,
-    @SerializedName("service_fee") val serviceFee: String,
-    @SerializedName("currency") val currency: String,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
-    @SerializedName("receipt_number") val receiptNumber: String,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("payment_method_id") val paymentMethodId: String,
-    @SerializedName("payor_id") val payorId: String,
-)
+```kotlin
+fun validateBeforeSubmit(fieldModel: PaymentFieldViewModel): Boolean {
+    return fieldModel.run {
+        cardNumberState.value is FieldState.Valid &&
+        expirationState.value is FieldState.Valid &&
+        cvvState.value is FieldState.Valid &&
+        (if (requiresPostalCode) postalCodeState.value is FieldState.Valid else true)
+    }
+}
 ```
 
-- successful barcode request result
+## Payment States
 
-```Kotlin
-data class BarcodeResult (
-    @SerializedName("BarcodeId") val barcodeId: String,
-    @SerializedName("barcodeUrl") val barcodeUrl: String,
-    @SerializedName("barcode") val barcode: String,
-    @SerializedName("barcodeFee") val barcodeFee: String,
-    @SerializedName("Merchant") val merchant: String,
-    @SerializedName("mapUrl") val mapUrl : String
-)
-```
+The SDK provides various payment states through `PaymentResultState`:
 
-- successful payment method token result
+- `Loading`: Initial loading state
+- `Idle`: Ready for input
+- `Processing`: Payment is being processed
+- `Success`: Payment completed successfully
+- `Failure`: Payment failed
+- `TokenSuccess`: Payment method tokenized successfully
+- `Error`: Error occurred during processing
 
-```Kotlin
-data class PaymentMethodTokenResults (
-    @SerializedName("payment_method_id") val paymentMethodId: String,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
-    @SerializedName("payor_id") var payor_id: String?,
-    @SerializedName("last_four") val lastFour: String?,
-    @SerializedName("first_six") val firstSix: String?,
-    @SerializedName("brand") val brand: String?,
-    @SerializedName("expiration") val expiration: String?,
-    @SerializedName("payment_type") val paymentType: String
-)
-```
+## Example Usage
 
-- failed card, bank, barcode, and token request results
+Check the `qualitydemo` module in this repository for a complete implementation example, including:
 
-```Kotlin
-data class FailedTransactionResult (
-    @SerializedName("state") val state: String,
-    @SerializedName("brand") val brand: String,
-    @SerializedName("last_four") val lastFour: String,
-    @SerializedName("receipt_number") val receiptNumber: String,
-    @SerializedName("payment_method_id") val paymentMethodId: String,
-    @SerializedName("payor_id") val payorId: String,
-)
+- Card payments
+- ACH payments
+- Payment method tokenization
+- Field state management
+- Error handling
+- UI customization
 
-```
+## Configuration Options
 
-- any processing error results
+The `PayTheoryConfiguration` class supports various options:
 
-```Kotlin
-data class Error (
-    @SerializedName("reason") val reason: String
-)
-```
+- `apiKey`: Your Pay Theory API key
+- `amount`: Payment amount in cents
+- `paymentMethodType`: CARD or ACH
+- `requireBillingAddress`: Whether to require billing address
+- `requireAccountName`: Whether to require account name
+- `paymentMethodAction`: PAYMENT or TOKEN
+- `outlined`: Use outlined text fields
 
-## Support/Feedback
+## Security
 
-Feel free to get in touch:
-
-- [GitHub Issues](https://github.com/pay-theory/pay-theory-android/issues) - For any issues or feedback
-- [Support](https://paytheory.com/) / [support@paytheory.com](mailto:support@paytheory.com)
+The SDK handles sensitive payment data securely and is PCI compliant. All communication with Pay Theory servers is encrypted.
 
 ## License
 
-The Pay Theory Android SDK is open source and available under the MIT license. See [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-MIT © [LICENSE](https://github.com/pay-theory/pay-theory-android/blob/main/LICENSE)
+## Support
 
+For support, please contact support@paytheory.com or visit [Pay Theory's documentation](https://docs.paytheory.com). 

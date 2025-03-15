@@ -1,10 +1,8 @@
 package com.paytheory.lib.compose
 
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 
 /**
  * A composable button designed with PayTheory's branding.
@@ -27,11 +25,7 @@ fun PayTheoryButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF6200EE),
-            disabledContainerColor = Color(0xFF6200EE).copy(alpha = 0.4f)
-        )
+        modifier = modifier
     ) {
         content()
     }

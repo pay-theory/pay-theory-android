@@ -1,42 +1,61 @@
 package com.paytheory.lib.reactors
 import com.google.gson.Gson
-import com.paytheory.lib.BarcodeResult
-import com.paytheory.lib.EncryptedMessage
-import com.paytheory.lib.EncryptedPaymentToken
-import com.paytheory.lib.ErrorCode
-import com.paytheory.lib.FailedTransactionResult
-import com.paytheory.lib.PTError
+
 import com.paytheory.lib.Payment
 import com.paytheory.lib.PaymentMethodProcessor
 import com.paytheory.lib.PaymentMethodToken
-import com.paytheory.lib.PaymentMethodTokenResults
-import com.paytheory.lib.SuccessfulTransactionResult
-import com.paytheory.lib.TransactionResult
+
 import com.paytheory.lib.configuration.FeeMode
 import com.paytheory.lib.data.BarcodeMessage
+import com.paytheory.lib.data.BarcodeResult
+import com.paytheory.lib.data.EncryptedMessage
+import com.paytheory.lib.data.ErrorCode
+import com.paytheory.lib.data.FailedTransactionResult
 import com.paytheory.lib.data.HostTokenMessage
+import com.paytheory.lib.data.PTError
 import com.paytheory.lib.data.PaymentDetail
-import com.paytheory.lib.data.PaymentMethodTokenData
+import com.paytheory.lib.data.PaymentMethodTokenResults
+import com.paytheory.lib.data.SuccessfulTransactionResult
+import com.paytheory.lib.data.TransactionResult
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.nacl.decryptBox
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
- * Creates reactions based on WebSocket messages
- * @param viewModel view model of WebSocket
+ * Handles and processes various types of WebSocket messages in the Pay Theory payment system.
+ *
+ * This class is responsible for managing different types of message reactions including:
+ * - Host token processing
+ * - Payment transaction completion
+ * - Barcode generation and handling
+ * - Payment method tokenization
+ * - Error handling
+ *
+ * @property viewModel The PaymentViewModel instance managing the payment state
+ * @property activePaymentDetail Current payment details being processed
+ * @property activePaymentToken Current payment token being processed
+ * @property hostToken The current host token for authentication
+ * @property sessionKey The current session key for secure communication
+ * @property socketPublicKey The public key used for WebSocket encryption
  */
 @ExperimentalCoroutinesApi
 class MessageReactors(private val viewModel: PaymentViewModel) {
     var activePaymentDetail: PaymentDetail? = null
-    var activePaymentToken: PaymentMethodTokenData? = null
+    var activePaymentToken: PaymentDetail? = null
     private var hostToken = ""
     var sessionKey = ""
     var socketPublicKey = ""
     private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
     /**
-     * Called when host token message received from websocket
-     * @param
+     * Processes a host token message for payment processing.
+     *
+     * Extracts and stores necessary security credentials from the host token message
+     * and updates the payment instance with these credentials.
+     *
+     * @param message The raw message containing the host token information
+     * @param payment The Payment instance to be updated with the credentials
+     * @return The parsed [HostTokenMessage]
      */
     @ExperimentalCoroutinesApi
     fun onHostToken(message: String, payment: Payment): HostTokenMessage {
@@ -51,8 +70,13 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Called when host token message received from websocket
-     * @param
+     * Processes a host token message for payment method tokenization.
+     *
+     * Similar to [onHostToken], but specifically for tokenization operations.
+     *
+     * @param message The raw message containing the host token information
+     * @param paymentMethodToken The PaymentMethodToken instance to be updated
+     * @return The parsed [HostTokenMessage]
      */
     @ExperimentalCoroutinesApi
     fun onTokenizeHostToken(message: String, paymentMethodToken: PaymentMethodToken): HostTokenMessage {
@@ -67,8 +91,10 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Function that handles incoming message for a unknown action
-     * @param message message to be sent
+     * Handles error messages for payment processing.
+     *
+     * @param message The error message
+     * @param payment Optional payment processor instance
      */
     fun onError(message: String, payment: PaymentMethodProcessor? = null) {
         /* fail if unknown websocket message */
@@ -77,8 +103,10 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Function that handles incoming message for a unknown action
-     * @param message message to be sent
+     * Handles error messages for tokenization.
+     *
+     * @param message The error message
+     * @param paymentMethodToken Optional payment method token instance
      */
     fun onTokenError(message: String, paymentMethodToken: PaymentMethodToken? = null) {
         /* fail if unknown websocket message */
@@ -86,8 +114,16 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Function that handles incoming transfer response
-     * @param message message to be sent
+     * Completes a payment transaction by processing the encrypted response.
+     *
+     * This method:
+     * 1. Decrypts the transaction message
+     * 2. Processes the transaction result based on its state (SUCCEEDED, PENDING, FAILURE)
+     * 3. Updates the payment state and notifies appropriate handlers
+     *
+     * @param message The encrypted transaction message
+     * @param viewModel The payment view model instance
+     * @param payment The payment instance being processed
      */
     @ExperimentalCoroutinesApi
     fun completeTransaction(message: String, viewModel: PaymentViewModel, payment: Payment) {
@@ -133,8 +169,16 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Function that handles incoming barcode response
-     * @param message message to be sent
+     * Processes a barcode generation response.
+     *
+     * This method:
+     * 1. Decrypts the barcode message
+     * 2. Creates a barcode result with necessary information
+     * 3. Handles success or failure of barcode generation
+     *
+     * @param message The encrypted barcode message
+     * @param viewModel The payment view model instance
+     * @param payment The payment instance being processed
      */
     @ExperimentalCoroutinesApi
     fun onBarcode(message: String, viewModel: PaymentViewModel, payment: Payment) {
@@ -165,17 +209,43 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     }
 
     /**
-     * Handle tokenize success
-     * @param
+     * Completes the payment method tokenization process.
+     *
+     * This method:
+     * 1. Decrypts the tokenization message
+     * 2. Processes the token results
+     * 3. Handles success or failure of tokenization
+     *
+     * @param message The encrypted tokenization message
+     * @param paymentMethodToken The payment method token instance
      */
     fun onCompleteToken(message: String, paymentMethodToken: PaymentMethodToken){
-        //decrypt message
-        val encryptedPaymentToken = Gson().fromJson(message, EncryptedPaymentToken::class.java)
-        val decryptedMessage = decryptBox(encryptedPaymentToken.body, encryptedPaymentToken.publicKey)
-        val paymentMethodTokenResult = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
+        try {
+            val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+            //decrypt message
+            val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
 
-        paymentMethodToken.payable.handleTokenizeSuccess(paymentMethodTokenResult)
-        PaymentMethodProcessor.sessionIsDirty = true
-        paymentMethodToken.resetSocket()
+            val tokenResults = Gson().fromJson(decryptedMessage, PaymentMethodTokenResults::class.java)
+
+            when (tokenResults.paymentMethodId.isEmpty()) {
+                false -> {
+                    val successfulTokenResult = Gson().fromJson(decryptedMessage,
+                        PaymentMethodTokenResults::class.java)
+                    paymentMethodToken.viewModel.tokenSuccess(successfulTokenResult)
+//                        .paymentSuccess(successfulTransactionResult)
+                    paymentMethodToken.payable.handleTokenizeSuccess(successfulTokenResult)
+                        //.handleSuccess(successfulTransactionResult)
+                    PaymentMethodProcessor.sessionIsDirty = true
+                    paymentMethodToken.resetSocket()
+                }
+                true -> {
+                    val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
+                    paymentMethodToken.payable.handleFailure(failedTransactionResult)
+                    paymentMethodToken.resetSocket()
+                }
+            }
+        } catch (e: Exception) {
+            paymentMethodToken.payable.handleError(PTError(ErrorCode.SocketError,e.message ?: "Unknown error"))
+        }
     }
 }

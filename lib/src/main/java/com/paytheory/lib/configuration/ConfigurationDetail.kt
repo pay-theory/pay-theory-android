@@ -4,7 +4,14 @@ package com.paytheory.lib.configuration
  * Enum class that contains the types of payments
  */
 enum class PaymentMethodType {
-    CARD, ACH,
+    CARD, ACH
+}
+
+/**
+ * Enum class that contains the types of payments
+ */
+enum class PaymentMethodAction {
+    TOKEN, PAYMENT
 }
 
 

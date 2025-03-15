@@ -33,6 +33,19 @@ data class CashRequest(
     @SerializedName("metadata") val metadata: HashMap<Any, Any>?
 )
 
+/**
+ * Data class for tokenize request
+ */
+data class TokenizeRequest(
+    @SerializedName("hostToken") val hostToken: String?,
+    @SerializedName("payment_method_data") val paymentMethodData: PaymentMethodData,
+    @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
+    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
+    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
+    @SerializedName("sessionKey") val sessionKey: String?,
+    @SerializedName("timing") val timing: Long
+)
+
 
 /**
  * Data class for transfer part one request

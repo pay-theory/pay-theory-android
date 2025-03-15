@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import com.paytheory.lib.compose.string.SecureString
+import com.paytheory.lib.compose.string.SecureStringWrapper
 
 /**
  * A composable wrapper for either [OutlinedTextField] or [TextField] based on the `isOutlined` parameter.
@@ -33,7 +34,7 @@ import com.paytheory.lib.compose.string.SecureString
  */
 @Composable
 fun TextFieldWrapper(
-    value: SecureString,
+    value: SecureStringWrapper,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -48,7 +49,7 @@ fun TextFieldWrapper(
 
     if (isOutlined) {
         OutlinedTextField(
-            value = value.revealForUi(),
+            value = value.secureValue.revealForUi(),
             isError = isError,
             onValueChange = onValueChange,
             modifier = modifier,
@@ -61,7 +62,7 @@ fun TextFieldWrapper(
         )
     } else {
         TextField(
-            value = value.revealForUi(),
+            value = value.secureValue.revealForUi(),
             isError = isError,
             onValueChange = onValueChange,
             modifier = modifier,

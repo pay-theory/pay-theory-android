@@ -29,7 +29,13 @@ import com.paytheory.lib.compose.inputs.SecureStandardTextField
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.valid.Validator
 
-
+/**
+ * Composable function for rendering a region/state input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.RegionInput(
     modifier: Modifier,
@@ -47,6 +53,13 @@ internal fun RowScope.RegionInput(
     )
 }
 
+/**
+ * Composable function for rendering a city input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.CityInput(
     modifier: Modifier,
@@ -64,6 +77,12 @@ internal fun RowScope.CityInput(
     )
 }
 
+/**
+ * Composable function for rendering an optional address line 2 input field.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ */
 @Composable
 internal fun AddressLine2Input(
     modifier: Modifier,
@@ -80,6 +99,13 @@ internal fun AddressLine2Input(
     )
 }
 
+/**
+ * Composable function for rendering the primary address input field.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun AddressLine1Input(
     modifier: Modifier,
@@ -87,7 +113,7 @@ internal fun AddressLine1Input(
     validator: Validator
 ) {
     SecureStandardTextField(
-        label = stringResource(id = R.string.address_1),//"Address Line 1"
+        label = stringResource(id = R.string.address_1),
         value = viewModel.addressLine1.value,
         onValueChange = viewModel::updateAddressLine1,
         isValid = validator::isNotEmpty,
@@ -97,6 +123,13 @@ internal fun AddressLine1Input(
     )
 }
 
+/**
+ * Composable function for rendering a bank routing number input field.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun BankRoutingNumber(
     modifier: Modifier,
@@ -114,6 +147,13 @@ internal fun BankRoutingNumber(
     )
 }
 
+/**
+ * Composable function for rendering a bank account number input field.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun BankAccountNumber(
     modifier: Modifier,
@@ -130,6 +170,13 @@ internal fun BankAccountNumber(
     )
 }
 
+/**
+ * Composable function for rendering a postal code input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.PostalCodeInput(
     modifier: Modifier,
@@ -148,6 +195,13 @@ internal fun RowScope.PostalCodeInput(
     )
 }
 
+/**
+ * Composable function for rendering a card CVC input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.CvcInput(
     modifier: Modifier,
@@ -164,6 +218,13 @@ internal fun RowScope.CvcInput(
     )
 }
 
+/**
+ * Composable function for rendering a card expiration date input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.ExpirationInput(
     modifier: Modifier,
@@ -180,6 +241,13 @@ internal fun RowScope.ExpirationInput(
     )
 }
 
+/**
+ * Composable function for rendering a card number input field within a row.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun RowScope.CardNumberInput(
     modifier: Modifier,
@@ -196,6 +264,13 @@ internal fun RowScope.CardNumberInput(
     )
 }
 
+/**
+ * Composable function for rendering a name on account input field.
+ *
+ * @param modifier The modifier to be applied to the input field
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ * @param validator The validator instance for input validation
+ */
 @Composable
 internal fun NameOnAccountInput(
     modifier: Modifier,
@@ -213,6 +288,16 @@ internal fun NameOnAccountInput(
     )
 }
 
+/**
+ * Composable function for rendering a bank account type dropdown selector.
+ * 
+ * This component provides a dropdown menu for selecting between checking and savings account types.
+ * The selection is cleared when the clearKey (viewModel.clearCount.intValue) changes.
+ *
+ * @param modifier The modifier to be applied to the dropdown
+ * @param configuration The PayTheory configuration instance
+ * @param viewModel The PaymentViewModel instance managing the payment form state
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun BankAccountTypeChooser(
@@ -226,12 +311,10 @@ internal fun BankAccountTypeChooser(
     )
     var expanded by remember { mutableStateOf(false) }
 
-    // Clear the selected option when clearKey changes (viewModel.clearCount.intValue changes)
     LaunchedEffect(key1 = viewModel.clearCount.intValue) {
-        viewModel.updateBankAccountType("") // Clear the selection in the ViewModel
+        viewModel.updateBankAccountType("")
     }
 
-    // State to track the TextFieldValue, derived from viewModel.bankAccountType
     val textFieldValue = remember(viewModel.bankAccountType.value) {
         mutableStateOf(TextFieldValue(viewModel.bankAccountType.value))
     }
@@ -241,7 +324,6 @@ internal fun BankAccountTypeChooser(
         onExpandedChange = { expanded = !expanded },
         modifier = modifier.fillMaxWidth()
     ) {
-        // Use either OutlinedTextField or TextField based on the configuration
         val textFieldModifier = Modifier
             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
             .fillMaxWidth()
@@ -274,7 +356,7 @@ internal fun BankAccountTypeChooser(
                 DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {
-                        viewModel.updateBankAccountType(option) // Update ViewModel
+                        viewModel.updateBankAccountType(option)
                         expanded = false
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 
 import com.paytheory.lib.compose.string.SecureString
+import com.paytheory.lib.compose.string.SecureStringWrapper
 import com.paytheory.lib.compose.transformation.NoFilterTransformation
 
 /**
@@ -39,15 +40,19 @@ import com.paytheory.lib.compose.transformation.NoFilterTransformation
 fun SecureStandardTextField(
     label: String,
     modifier: Modifier,
-    value: SecureString,
-    onValueChange: (SecureString) -> Unit,
-    isValid: (SecureString) -> Boolean,
+    value: SecureStringWrapper,
+    onValueChange: (SecureStringWrapper) -> Unit,
+    isValid: (SecureStringWrapper) -> Boolean,
     isOutlined: Boolean = true,
     clearKey: Int = 0,
     maxLength: Int = 128,
 ) {
-    var secureString by rememberSaveable(stateSaver = createSecureStringSaver(), key = "clearKey_$clearKey") {
+    var secureString by rememberSaveable(stateSaver = createSecureStringWrapperSaver(), key = "clearKey_$clearKey") {
         mutableStateOf(value)
+    }
+
+    if (secureString.secureValue != value.secureValue) {
+        secureString = value
     }
 
     SecureBaseTextField(

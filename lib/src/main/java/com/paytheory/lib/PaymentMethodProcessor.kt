@@ -12,6 +12,10 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.paytheory.lib.api.ApiService
 import com.paytheory.lib.api.PTTokenResponse
+import com.paytheory.lib.data.ActionRequest
+import com.paytheory.lib.data.ErrorCode
+import com.paytheory.lib.data.PTError
+import com.paytheory.lib.data.PaymentDetail
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
@@ -71,6 +75,7 @@ abstract class PaymentMethodProcessor (
          * Constant representing a successful connection to the socket.
          */
         const val CONNECTED = "connected to socket"
+
         /**
          * Constant representing a disconnection from the socket.
          */
@@ -100,6 +105,9 @@ abstract class PaymentMethodProcessor (
          * Constant representing the result of a barcode scan.
          */
         const val BARCODE_RESULT = "barcode_complete"
+
+
+        const val TOKENIZE = "host:tokenize"
         /**
          * Constant representing the result of the first part of a transfer.
          */
@@ -306,10 +314,11 @@ abstract class PaymentMethodProcessor (
      * @param ptTokenResponse The response containing the Pay Theory token.
      * @param attestationResult The result of the Google Play Integrity check (optional).
      */
-    abstract fun establishViewModel(
-        ptTokenResponse: PTTokenResponse,
-        attestationResult: String? = ""
-    )
+    abstract fun establishViewModel(ptTokenResponse: PTTokenResponse, attestationResult: String? = "")
+
+    abstract fun process(payment: PaymentDetail)
+
+    abstract fun createInitialActionRequest(payment: PaymentDetail): ActionRequest
 }
 
 private fun PaymentMethodProcessor.getGoogleProjectNumber(): Long

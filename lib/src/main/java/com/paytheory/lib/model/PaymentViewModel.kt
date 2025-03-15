@@ -4,19 +4,21 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paytheory.lib.ErrorCode
-import com.paytheory.lib.PTError
 import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
 import com.paytheory.lib.Payment
-import com.paytheory.lib.SuccessfulTransactionResult
+import com.paytheory.lib.PaymentMethodToken
 import com.paytheory.lib.api.PTTokenResponse
 import com.paytheory.lib.compose.createPayTheoryData
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
+import com.paytheory.lib.configuration.PaymentMethodAction
 import com.paytheory.lib.configuration.PaymentMethodType
-import com.paytheory.lib.data.Address
+import com.paytheory.lib.data.ErrorCode
+import com.paytheory.lib.data.PTError
 import com.paytheory.lib.data.PaymentDetail
+import com.paytheory.lib.data.PaymentMethodTokenResults
+import com.paytheory.lib.data.SuccessfulTransactionResult
 import com.paytheory.lib.valid.Validator
 import com.paytheory.lib.websocket.WebServicesProvider
 import com.paytheory.lib.websocket.WebsocketInteractor
@@ -31,7 +33,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
+/**
+ * ViewModel responsible for managing payment form state and processing payments through Pay Theory.
+ *
+ * This class handles:
+ * - Payment form state management
+ * - Input validation
+ * - WebSocket communication
+ * - Payment processing
+ *
+ * @property configuration The Pay Theory configuration for this payment instance
+ * @property payTheoryData Additional data required for payment processing
+ * @property payTheoryProcessor The processor handling payment or tokenization
+ * @property paymentState Current state of the payment process
+ */
 @HiltViewModel
 class PaymentViewModel @Inject constructor(packageName:String, configurationIn: PayTheoryConfiguration, payable: Payable) :ViewModel() {
     sealed class PaymentState {
@@ -43,103 +58,30 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         data class Error(val errorMessage: String) : PaymentState()
     }
 
-    class ValidField(validator: Validator, field: PaymentField) {
 
-    }
-
-    enum class BankFields {
-        NAME_ON_ACCOUNT,
-        BANK_ACCOUNT_NUMBER,
-        BANK_ROUTING_NUMBER,
-        BANK_ACCOUNT_TYPE
-    }
-    enum class CreditCardFields {
-        CARD_NUMBER,
-        CARD_EXPIRATION,
-        CARD_CVC
-    }
-    enum class AddressFields {
-        ADDRESS_LINE1,
-        CITY,
-        REGION,
-        POSTAL_CODE
-    }
-    enum class FieldState {
-        EMPTY,
-        READY,
-        INVALID,
-        INIT
-    }
-    enum class PaymentField {
-        NAME_ON_ACCOUNT,
-        BANK_ACCOUNT_NUMBER,
-        BANK_ROUTING_NUMBER,
-        BANK_ACCOUNT_TYPE,
-        CARD_NUMBER,
-        CARD_EXPIRATION,
-        CARD_CVC,
-        ADDRESS_LINE1,
-        ADDRESS_LINE2,
-        CITY,
-        REGION,
-        POSTAL_CODE
-    }
 
     val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Loading)
-    val paymentFieldValid: HashMap<PaymentField, Boolean> = hashMapOf(
-        Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, true),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, true),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, true),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_TYPE, true),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_NUMBER, true),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_EXPIRATION, true),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_CVC, true),
-        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE1, true),
-        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE2, true),
-        Pair<PaymentField, Boolean>(PaymentField.CITY, true),
-        Pair<PaymentField, Boolean>(PaymentField.REGION, true),
-        Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, true)
-    )
-    val paymentFieldEmpty: HashMap<PaymentField, Boolean> = hashMapOf(
-        Pair<PaymentField, Boolean>(PaymentField.NAME_ON_ACCOUNT, false),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_NUMBER, false),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ROUTING_NUMBER, false),
-        Pair<PaymentField, Boolean>(PaymentField.BANK_ACCOUNT_TYPE, false),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_NUMBER, false),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_EXPIRATION, false),
-        Pair<PaymentField, Boolean>(PaymentField.CARD_CVC, false),
-        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE1, false),
-        Pair<PaymentField, Boolean>(PaymentField.ADDRESS_LINE2, false),
-        Pair<PaymentField, Boolean>(PaymentField.CITY, false),
-        Pair<PaymentField, Boolean>(PaymentField.REGION, false),
-        Pair<PaymentField, Boolean>(PaymentField.POSTAL_CODE, false)
-    )
-    val paymentFieldState: HashMap<PaymentField, FieldState> = hashMapOf(
-        Pair<PaymentField, FieldState>(PaymentField.NAME_ON_ACCOUNT, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.BANK_ACCOUNT_NUMBER, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.BANK_ROUTING_NUMBER, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.BANK_ACCOUNT_TYPE, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.CARD_NUMBER, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.CARD_EXPIRATION, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.CARD_CVC, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.ADDRESS_LINE1, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.ADDRESS_LINE2, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.CITY, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.REGION, FieldState.INIT),
-        Pair<PaymentField, FieldState>(PaymentField.POSTAL_CODE, FieldState.INIT)
-    )
+
     private val webServicesProvider = WebServicesProvider()
     private val webSocketRepository = WebsocketRepository(webServicesProvider)
     internal val interactor = WebsocketInteractor(webSocketRepository)
     val configuration = configurationIn
     val payTheoryData = createPayTheoryData(configuration)
-    val payTheoryPayment = Payment(
-        packageName,
-        payable,
-        payTheoryData,
-        configurationIn,
-        this
-    )
+    val payTheoryProcessor = if (configuration.paymentMethodAction==PaymentMethodAction.TOKEN)
+        PaymentMethodToken(
+            packageName,
+            payable,
+            payTheoryData,
+            configurationIn,
+            this
+        ) else Payment(
+            packageName,
+            payable,
+            payTheoryData,
+            configurationIn,
+            this
+        )
+
     val paymentState: StateFlow<PaymentState> = _paymentState
 
 
@@ -150,21 +92,24 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     var connected: Boolean = false
 
 
-    var bankAccountNumber = mutableStateOf(SecureString(""))
-    var bankRoutingNumber = mutableStateOf(SecureString(""))
+    var bankAccountNumber = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var bankRoutingNumber = mutableStateOf(SecureStringWrapper(SecureString(""),null))
     var bankAccountType = mutableStateOf("")
-    var cardNumber = mutableStateOf(SecureString(""))
+    var cardNumber = mutableStateOf(SecureStringWrapper(SecureString(""),null))
     var expiration = mutableStateOf(SecureStringWrapper(SecureString(""),null))
-    var cvc = mutableStateOf(SecureString(""))
-    var nameOnAccount = mutableStateOf(SecureString(""))
-    var addressLine1 = mutableStateOf(SecureString(""))
-    var addressLine2 = mutableStateOf(SecureString(""))
-    var city = mutableStateOf(SecureString(""))
-    var region = mutableStateOf(SecureString(""))
-    var postalCode = mutableStateOf(SecureString(""))
+    var cvc = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var nameOnAccount = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var addressLine1 = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var addressLine2 = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var city = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var region = mutableStateOf(SecureStringWrapper(SecureString(""),null))
+    var postalCode = mutableStateOf(SecureStringWrapper(SecureString(""),null))
 
     /**
-     * Function to disconnect WebSocket
+     * Disconnects the WebSocket connection and updates state.
+     * 
+     * This function should be called when cleaning up the payment form or when
+     * the connection needs to be explicitly terminated.
      */
     @ExperimentalCoroutinesApi
     fun disconnect() {
@@ -180,8 +125,10 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     }
 
     /**
-     * Function to start socket
-     * @param handler WebSocket message handler
+     * Subscribes to WebSocket events and handles incoming messages.
+     *
+     * @param handler The handler for processing WebSocket messages
+     * @param ptTokenResponse The token response containing authentication information
      */
     @ExperimentalCoroutinesApi
     fun subscribeToSocketEvents(handler: WebsocketMessageHandler, ptTokenResponse:PTTokenResponse) {
@@ -212,8 +159,9 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     }
 
     /**
-     * Function to send messages to server
-     * @param message message to send to server
+     * Sends a message through the WebSocket connection.
+     *
+     * @param message The message to send to the server
      */
     @ExperimentalCoroutinesApi
     fun sendSocketMessage(message:String) {
@@ -226,6 +174,12 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         }
     }
 
+    /**
+     * Handles WebSocket errors and manages reconnection attempts.
+     *
+     * @param ex The exception that occurred
+     * @param reason A description of what operation failed
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun onSocketError(ex: Throwable, reason: String) {
         if (ex.message!!.contains("executor rejected")) {
@@ -239,11 +193,11 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
             || error.contains("null", ignoreCase = true)
             || error.contains("Unable to resolve host", ignoreCase = true)) {
             println("Network Connection Error - Reconnecting...")
-            payTheoryPayment.resetSocket()
+            payTheoryProcessor.resetSocket()
         } else if (error == "executor rejected") {
             println("Socket connection removed.")
         } else { //if error is not ssl error
-            payTheoryPayment.payable.handleError(PTError(ErrorCode.SocketError,error))
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.SocketError,error))
         }
         connected = false
         _paymentState.value = PaymentState.Loading
@@ -255,15 +209,20 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         super.onCleared()
     }
 
-    fun updateNameOnAccount(value: SecureString) {
+    /**
+     * Updates the name on account field and triggers validation.
+     *
+     * @param value The new name value as a SecureString
+     */
+    fun updateNameOnAccount(value: SecureStringWrapper) {
         nameOnAccount.value = value
         validateInputs()
     }
-    fun updateBankAccountNumber(value: SecureString) {
+    fun updateBankAccountNumber(value: SecureStringWrapper) {
         bankAccountNumber.value = value
         validateInputs()
     }
-    fun updateBankRoutingNumber(value: SecureString) {
+    fun updateBankRoutingNumber(value: SecureStringWrapper) {
         bankRoutingNumber.value = value
         validateInputs()
     }
@@ -271,7 +230,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         bankAccountType.value = value
         validateInputs()
     }
-    fun updateCardNumber(value: SecureString) {
+    fun updateCardNumber(value: SecureStringWrapper) {
         cardNumber.value = value
         validateInputs()
     }
@@ -280,115 +239,97 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         expiration.value = value
         validateInputs()
     }
-    fun updateCvc(value: SecureString) {
+    fun updateCvc(value: SecureStringWrapper) {
         cvc.value = value
         validateInputs()
     }
-    fun updateAddressLine1(value: SecureString) {
+    fun updateAddressLine1(value: SecureStringWrapper) {
         addressLine1.value = value
         validateInputs()
     }
-    fun updateAddressLine2(value: SecureString) {
+    fun updateAddressLine2(value: SecureStringWrapper) {
         addressLine2.value = value
     }
-    fun updateCity(value: SecureString) {
+    fun updateCity(value: SecureStringWrapper) {
         city.value = value
         validateInputs()
     }
-    fun updateRegion(value: SecureString) {
+    fun updateRegion(value: SecureStringWrapper) {
         region.value = value
         validateInputs()
     }
-    fun updatePostalCode(value: SecureString) {
+    fun updatePostalCode(value: SecureStringWrapper) {
         postalCode.value = value
         validateInputs()
     }
 
+    /**
+     * Submits the payment for processing.
+     * 
+     * This function performs pre-submission validation and handles various error cases:
+     * - Payment already in progress
+     * - Payment already completed
+     * - No connection available
+     * - Invalid amount with token action
+     *
+     * If validation passes, it constructs the appropriate payment detail object
+     * and submits it for processing.
+     */
     fun submitPayment() {
         var payment: PaymentDetail? = null
         if (_paymentState.value == PaymentState.Processing) {
-            payTheoryPayment.payable.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
             return
         } else if (_paymentState.value is PaymentState.Success) {
-            payTheoryPayment.payable.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
             return
         } else if (_paymentState.value is PaymentState.Loading) {
-            payTheoryPayment.payable.handleError(PTError(ErrorCode.InProgress,"No connection available"))
-            return
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.InProgress,"No connection available"))
         }
-        if (configuration.paymentMethodType == PaymentMethodType.ACH) {
-            payment = PaymentDetail(
-                timing = System.currentTimeMillis(),
-                amount = configuration.amount,
-                type = configuration.paymentMethodType.toString(),
-                account_type = bankAccountType.value,
-                name = nameOnAccount.value.revealForUi(),
-                account_number = bankAccountNumber.value.revealForUi(),
-                bank_code = bankRoutingNumber.value.revealForUi(),
-                fee_mode = configuration.feeMode,
-                address = Address(
-                    line1 = addressLine1.value.revealForUi(),
-                    line2 = addressLine2.value.revealForUi(),
-                    city = city.value.revealForUi(),
-                    region = region.value.revealForUi(),
-                    postal_code = postalCode.value.revealForUi()
-                ),
-                payorInfo = configuration.payorInfo
-            )
-        } else if (configuration.paymentMethodType == PaymentMethodType.CARD) {
-            payment = PaymentDetail(
-                timing = System.currentTimeMillis(),
-                amount = configuration.amount,
-                type = configuration.paymentMethodType.toString(),
-                name = nameOnAccount.value.revealForUi(),
-                number = cardNumber.value.revealForUi(),
-                security_code = cvc.value.revealForUi(),
-                expiration_month = if (expiration.value.secureValue.revealForUi()
-                        .isNotBlank()
-                ) expiration.value.secureValue.revealForUi().split("/")[0] else null,
-                expiration_year = if (expiration.value.secureValue.revealForUi()
-                        .isNotBlank()
-                ) expiration.value.secureValue.revealForUi().split("/")[1] else null,
-                fee_mode = configuration.feeMode,
-                address = Address(
-                    line1 = addressLine1.value.revealForUi(),
-                    line2 = addressLine2.value.revealForUi(),
-                    city = city.value.revealForUi(),
-                    region = region.value.revealForUi(),
-                    postal_code = postalCode.value.revealForUi()
-                ),
-                payorInfo = configuration.payorInfo
-            )
+
+        if (configuration.amount > 0 && configuration.paymentMethodAction == PaymentMethodAction.TOKEN) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Cannot have amount with token action"))
+        }
+        if (configuration.amount < 10 && configuration.paymentMethodAction == PaymentMethodAction.PAYMENT) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Must provide amount greater than 10"))
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            _paymentState.value = PaymentState.Processing
+        }
+        val paymentConfigured: PaymentDetail = if (configuration.paymentMethodType == PaymentMethodType.ACH) {
+            constructBankPayment()
+        } else {
+            constructCardPayment()
         }
         try {
-            payTheoryPayment.transact(payment!!)
+            payTheoryProcessor.process(paymentConfigured)
         } catch (ex: Exception) {
             onSocketError(ex,"Payment submission failed")
             _paymentState.value = PaymentState.Error(ex.message!!)
             return
         }
 
-        _paymentState.value = PaymentState.Processing
+
 
     }
 
     /**
-     * Validates the payment form based on the selected payment method type and configuration.
+     * Validates all input fields based on the payment method type and configuration.
      *
-     * This function checks the validity of various input fields, including:
-     * - For ACH payments: Name on account, bank account number, bank routing number, account type, and optionally billing address details (if required by configuration).
-     * - For non-ACH payments: Card number, expiration date, CVC, and optionally either billing address or postal code (depending on configuration).
+     * For ACH payments, validates:
+     * - Name on account
+     * - Bank account number
+     * - Bank routing number
+     * - Account type
+     * - Billing address (if required)
      *
-     * The validation results are then used to update the `_paymentState` and `errorMessage`.
+     * For card payments, validates:
+     * - Card number
+     * - Expiration date
+     * - CVC
+     * - Billing address or postal code (based on configuration)
      *
-     * - `_paymentState`: Set to `PaymentState.ValidAndReady` if all inputs are valid, otherwise `PaymentState.Error("Invalid input")`.
-     * - `errorMessage`: Set to an empty string if inputs are valid, otherwise "Invalid input".
-     *
-     * If the `errorMessage` is not empty, it also calls `payTheoryPayment.context.handleError()` to report the error.
-     *
-     * Finally, it updates the `isValidAndReady` flag based on the validation result.
-     *
-     * @throws PTError if the inputs are not valid and it attempts to call `payTheoryPayment.context.handleError()`.
+     * Updates the payment state and validity flags based on the validation results.
      */
     private fun validateInputs() {
         var isReady = false
@@ -447,90 +388,51 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
 
     }
 
-    /**
-     * Propagates the state of a payment field based on its validity and emptiness.
-     *
-     * This function updates the internal state of a payment field (`paymentFieldState`) and related
-     * properties (`paymentFieldValid`, `paymentFieldEmpty`) based on whether the field is valid,
-     * empty, or neither. It also notifies the payment context about the state change.
-     *
-     * @param field The payment field whose state is being propagated.
-     * @param isValid `true` if the field's current input is considered valid, `false` otherwise.
-     * @param isEmpty `true` if the field is currently empty, `false` otherwise.
-     * @return `true` if the field is valid, `false` otherwise (same as the `isValid` input).
-     *
-     * The function operates based on the following logic:
-     * 1. **Empty State:** If `isEmpty` is `true` and the field's current state is not `EMPTY`,
-     *    it sets the state to `EMPTY`, marks the field as empty, and notifies the context.
-     * 2. **Ready State:** If `isValid` is `true` and the field's current state is not `READY`,
-     *    it sets the state to `READY`, marks the field as valid, potentially updates the emptiness status,
-     *    and notifies the context.
-     * 3. **Invalid State:** If `isEmpty` is `false`, `isValid` is `false`, and the field's current
-     *    state is not `INVALID`, it sets the state to `INVALID`, marks the field as invalid,
-     *    marks the field as not empty, and notifies the context.
-     *
-     * The context is notified through the `payTheoryPayment.context.handleStateChange` method,
-     * which receives a `Pair` containing the field and its new state.
-     *
-     * Example Scenarios
-     *  - The user clears a field: isEmpty will be true, isValid will be false, state will change to EMPTY.
-     *  - The user enters a valid input: isEmpty will be false, isValid will be true, state will change to READY.
-     *  - The user enters an invalid input: isEmpty will be false, isValid will be false, state will change to INVALID.
-     */
-    internal fun propagateState(field: PaymentField, isValid: Boolean, isEmpty: Boolean): Boolean {
-        var fieldState: FieldState? = paymentFieldState[field]
-
-        if (isEmpty && fieldState != FieldState.EMPTY) {
-            paymentFieldState[field] = FieldState.EMPTY
-            paymentFieldEmpty[field] = true
-            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
-        } else if (fieldState != FieldState.READY && isValid) {
-            paymentFieldState[field] = FieldState.READY
-            paymentFieldValid[field] = true
-            paymentFieldEmpty[field] = isEmpty
-            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
-        } else if (isEmpty == false && fieldState != FieldState.INVALID && isValid == false) {
-            paymentFieldState[field] = FieldState.INVALID
-            paymentFieldValid[field] = false
-            paymentFieldEmpty[field] = false
-            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
-        }
-        return isValid
-
-    }
     private fun isValidCardNumber(): Boolean {
-        return propagateState(PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value,), cardNumber.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.CARD_NUMBER, validator.isValidCardNumber(cardNumber.value), cardNumber.value.secureValue.stringLength() == 0)
     }
     private fun isValidExpiration(): Boolean {
-        return propagateState(PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value), expiration.value.secureValue.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.CARD_EXPIRATION, validator.isValidExpiration(expiration.value), expiration.value.secureValue.stringLength() == 0)
     }
     private fun isValidCvc(): Boolean {
-        return propagateState(PaymentField.CARD_CVC, validator.isValidCvc(cvc.value), cvc.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.CARD_CVC, validator.isValidCvc(cvc.value), cvc.value.secureValue.stringLength() == 0)
     }
     private fun isValidStreetAddress(): Boolean {
-        return propagateState(PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value), addressLine1.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.ADDRESS_LINE1, validator.isNotEmpty(addressLine1.value), addressLine1.value.secureValue.stringLength() == 0)
     }
     private fun isValidCity(): Boolean {
-        return propagateState(PaymentField.CITY, validator.isNotEmpty(city.value), city.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.CITY, validator.isNotEmpty(city.value), city.value.secureValue.stringLength() == 0)
     }
     private fun isValidState(): Boolean {
-        return propagateState(PaymentField.REGION, validator.isNotEmpty(region.value), region.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.REGION, validator.isNotEmpty(region.value), region.value.secureValue.stringLength() == 0)
     }
     private fun isValidPostalCode(): Boolean {
-        return propagateState(PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value), postalCode.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.POSTAL_CODE, validator.isValidPostalCode(postalCode.value), postalCode.value.secureValue.stringLength() == 0)
     }
     private fun isValidNameOnAccount(): Boolean {
-        return propagateState(PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value), nameOnAccount.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.NAME_ON_ACCOUNT, validator.isNotEmpty(nameOnAccount.value), nameOnAccount.value.secureValue.stringLength() == 0)
     }
     private fun isValidBankAccountNumber(): Boolean {
-        return propagateState(PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value), bankAccountNumber.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.BANK_ACCOUNT_NUMBER, validator.isValidBankAccountNumber(bankAccountNumber.value), bankAccountNumber.value.secureValue.stringLength() == 0)
     }
     private fun isValidBankRoutingNumber(): Boolean {
-        return propagateState(PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value), bankRoutingNumber.value.stringLength() == 0)
+        return propagateState(payTheoryProcessor, PaymentField.BANK_ROUTING_NUMBER, validator.isValidBankRoutingNumber(bankRoutingNumber.value), bankRoutingNumber.value.secureValue.stringLength() == 0)
     }
     private fun isValidAccountType(): Boolean {
-        return propagateState(PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank(), bankAccountType.value.isBlank())
+        return propagateState(payTheoryProcessor, PaymentField.BANK_ACCOUNT_TYPE, bankAccountType.value.isNotBlank(), bankAccountType.value.isBlank())
     }
+
+    /**
+     * Validates the complete billing address.
+     *
+     * Checks all required address fields:
+     * - Street address (line 1)
+     * - City
+     * - Region (State)
+     * - Postal code
+     *
+     * @return true if all required address fields are valid, false otherwise
+     */
     fun isValidAccountAddress(): Boolean {
         val relevant = mutableListOf<Boolean>()
         for (field in AddressFields.entries) {
@@ -545,28 +447,49 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     }
 
 
+    /**
+     * Handles successful payment completion.
+     *
+     * Updates the payment state to Success with the receipt number and
+     * clears sensitive data from the form.
+     *
+     * @param result The successful transaction result containing the receipt number
+     */
     fun paymentSuccess(result: SuccessfulTransactionResult) {
         _paymentState.value = PaymentState.Success(result.receiptNumber)
         clearSensitiveData()
     }
+    fun tokenSuccess(result: PaymentMethodTokenResults) {
+        _paymentState.value = PaymentState.Success(result.paymentMethodId)
+        clearSensitiveData()
+    }
 
 
+    /**
+     * Clears all sensitive data from the form and resets field states.
+     *
+     * This includes:
+     * - All form field values
+     * - Field states (valid/invalid/empty)
+     * - Validation flags
+     *
+     * Increments the clear count to notify observers of the clear operation.
+     */
     internal fun clearSensitiveData() {
         listOf(
             nameOnAccount, addressLine1, addressLine2,
             city, region, cardNumber, cvc,
             bankAccountNumber, bankRoutingNumber,
-             postalCode
+             postalCode, expiration
         ).forEach {
-            it.value.setValue("")
+            it.value = SecureStringWrapper(SecureString(""),null)
         }
         bankAccountType.value = ""
-        expiration.value = SecureStringWrapper(SecureString(""),null)
         for (field in PaymentField.entries) {
             paymentFieldState[field] = FieldState.INIT
             paymentFieldEmpty[field] = false
             paymentFieldValid[field] = true
-            payTheoryPayment.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
+            payTheoryProcessor.payable.handleStateChange(Pair(field, paymentFieldState[field]!!))
         }
 
         clearCount.intValue++
@@ -574,3 +497,4 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     }
 
 }
+

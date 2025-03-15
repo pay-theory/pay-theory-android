@@ -43,17 +43,17 @@ class SecureStringTest {
     }
 
     @Test
-    fun testSetValue() {
-        secureString.setValue("new_string")
-        assertEquals("new_string", secureString.revealForUi())
-        val expectedBytes = "new_string".toSecureBytes()
+    fun testResetValue() {
+        secureString.resetValue()
+        assertEquals("", secureString.revealForUi())
+        val expectedBytes = ByteArray(0)
         assertArrayEquals(expectedBytes, secureString.revealForProcessing())
     }
 
     @Test
-    fun testSetValue_modifiedFlag() {
+    fun testResetValue_modifiedFlag() {
         val initialModified = secureString._isModified.value
-        secureString.setValue("new_string")
+        secureString.resetValue()
         assertNotEquals(initialModified, secureString._isModified.value)
     }
 
