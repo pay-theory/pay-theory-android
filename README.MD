@@ -459,8 +459,6 @@ The Pay Theory Android SDK utilizes Google Play Integrity API for enhanced secur
 - Production API keys will **not** work on emulators
 - Production API keys require devices with:
   - Google Play Services installed and up-to-date
-  - A valid Google account signed in
-  - Play Store installed and functional
 
 ### Development/Testing Environment
 - Development/sandbox API keys will only work on emulators and physical devices with:
