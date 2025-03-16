@@ -1,8 +1,6 @@
 package com.paytheory.lib.model
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.paytheory.lib.model.PaymentViewModel.FieldState
-import com.paytheory.lib.model.PaymentViewModel.PaymentField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
