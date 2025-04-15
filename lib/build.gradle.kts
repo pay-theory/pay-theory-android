@@ -1,4 +1,3 @@
-
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -77,6 +76,9 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
 
+    // Google Pay Button for Jetpack Compose
+    implementation("com.google.pay.button:compose-pay-button:1.0.0")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
@@ -123,6 +125,9 @@ dependencies {
 
     //Google Play Integrity Api
     implementation("com.google.android.play:integrity:1.4.0")
+
+    //Google Pay API
+    implementation("com.google.android.gms:play-services-wallet:19.2.1")
 
     //Okhttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

@@ -62,6 +62,7 @@ class Payment(
             message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
             message.indexOf(TRANSFER_PART_ONE_RESULT) > -1 -> TRANSFER_PART_ONE_RESULT
             message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
+            message.indexOf(WALLET_TRANSACTION_RESULT) > -1 -> WALLET_TRANSACTION_RESULT
             else -> UNKNOWN
         }
     }
@@ -96,7 +97,11 @@ class Payment(
                         viewModel,
                         this
                     )
-
+                    WALLET_TRANSACTION_RESULT -> messageReactors!!.onWalletTransaction(
+                        message,
+                        viewModel,
+                        this
+                    )
                     else -> messageReactors!!.onError(message, this)
                 }
             }

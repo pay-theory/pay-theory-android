@@ -180,6 +180,15 @@ fun PaymentForm(
                 }
             }
 
+            // Google Pay Button (if enabled)
+            if (configuration.googlePayEnabled) {
+                GooglePayForm(
+                    payable = payable,
+                    configuration = configuration,
+                    buttonModifier = buttonModifier
+                )
+            }
+
             // Payment Button State Management
             when (paymentViewState) {
                 is PaymentState.Loading -> {

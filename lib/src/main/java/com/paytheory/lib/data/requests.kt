@@ -122,6 +122,8 @@ data class PaymentMethodTokenData (
  * @param expiration_year card expiration year
  * @param expiration_month card expiration month
  * @param address billing address
+ * @param walletType type of digital wallet (e.g., GOOGLE_PAY)
+ * @param digitalWalletPayload encrypted digital wallet token
  */
 data class PaymentDetail (
     @SerializedName("type") val type: String,
@@ -144,4 +146,6 @@ data class PaymentDetail (
     @SerializedName("buyer") val buyer: String? = null,
     @SerializedName("buyer_contact") val buyerContact: String? = null,
     @SerializedName("sessionKey") var sessionKey: String? = null,
+    @SerializedName("wallet_type") val walletType: String? = null,
+    @SerializedName("digital_wallet_payload") val digitalWalletPayload: String? = null
 )

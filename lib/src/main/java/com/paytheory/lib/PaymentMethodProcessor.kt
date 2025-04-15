@@ -106,6 +106,15 @@ abstract class PaymentMethodProcessor (
          */
         const val BARCODE_RESULT = "barcode_complete"
 
+        /**
+         * Constant representing the action for a wallet transaction (e.g., Google Pay).
+         */
+        const val WALLET_TRANSACTION_ACTION = "host:wallet_transaction"
+        
+        /**
+         * Constant representing the result of a wallet transaction.
+         */
+        const val WALLET_TRANSACTION_RESULT = "wallet_transaction_complete"
 
         const val TOKENIZE = "host:tokenize"
         /**

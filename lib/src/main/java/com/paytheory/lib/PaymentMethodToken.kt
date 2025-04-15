@@ -61,6 +61,7 @@ class PaymentMethodToken(
         return when {
             message.indexOf(TOKENIZE_RESULT) > -1 -> TOKENIZE_RESULT
             message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
+            message.indexOf(WALLET_TRANSACTION_RESULT) > -1 -> WALLET_TRANSACTION_RESULT
             else -> UNKNOWN
         }
     }
@@ -90,6 +91,7 @@ class PaymentMethodToken(
                 when (getWebSocketMessageType(message)) {
                     HOST_TOKEN_RESULT -> messageReactors!!.onTokenizeHostToken(message, this)
                     TOKENIZE_RESULT -> messageReactors!!.onCompleteToken(message, this)
+                    WALLET_TRANSACTION_RESULT -> messageReactors!!.onWalletTransaction(message, viewModel, this)
                     else -> messageReactors!!.onTokenError(message, this)
                 }
             }

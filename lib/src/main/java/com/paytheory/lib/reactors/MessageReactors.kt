@@ -48,6 +48,13 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
     private val mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
     /**
+     * Constants for WebSocket message types
+     */
+    companion object {
+        const val WALLET_TRANSACTION_RESULT = "wallet_transaction_complete"
+    }
+
+    /**
      * Processes a host token message for payment processing.
      *
      * Extracts and stores necessary security credentials from the host token message
@@ -67,6 +74,28 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
         payment.sessionKey = hostTokenMessage.body.sessionKey
         payment.hostToken = hostTokenMessage.body.hostToken
         return hostTokenMessage
+    }
+
+    /**
+     * Establishes a connection for a generic PaymentMethodProcessor.
+     * This is used by specialized processors like GooglePayProcessor.
+     *
+     * @param ptTokenResponse The response from the PT token API
+     * @param attestationResult The result of attestation (if applicable)
+     * @param processor The payment method processor instance
+     */
+    @ExperimentalCoroutinesApi
+    fun establishConnection(
+        ptTokenResponse: com.paytheory.lib.api.PTTokenResponse,
+        attestationResult: String?,
+        processor: PaymentMethodProcessor
+    ) {
+        socketPublicKey = ptTokenResponse.publicKey
+        sessionKey = ptTokenResponse.sessionKey
+        hostToken = ptTokenResponse.hostToken
+        processor.publicKey = ptTokenResponse.publicKey
+        processor.sessionKey = ptTokenResponse.sessionKey
+        processor.hostToken = ptTokenResponse.hostToken
     }
 
     /**
@@ -166,6 +195,55 @@ class MessageReactors(private val viewModel: PaymentViewModel) {
             payment.payable.handleError(PTError(ErrorCode.SocketError,e.message ?: "Unknown error"))
         }
 
+    }
+
+    /**
+     * Processes a wallet transaction response (e.g., Google Pay).
+     * 
+     * This method is similar to completeTransaction but specifically handles wallet payments.
+     *
+     * @param message The encrypted wallet transaction message
+     * @param viewModel The payment view model instance
+     * @param processor The payment method processor instance
+     */
+    @ExperimentalCoroutinesApi
+    fun onWalletTransaction(message: String, viewModel: PaymentViewModel, processor: PaymentMethodProcessor) {
+        try {
+            val encryptedTransferMessage = Gson().fromJson(message, EncryptedMessage::class.java)
+            // Decrypt message
+            val decryptedMessage = decryptBox(encryptedTransferMessage.body, encryptedTransferMessage.publicKey)
+
+            val transactionResult = Gson().fromJson(decryptedMessage, TransactionResult::class.java)
+
+            // Remove service_fee for any merchant_fee transaction
+            if (processor.configuration.feeMode == FeeMode.MERCHANT_FEE) {
+                transactionResult.serviceFee = "0"
+            }
+
+            when (transactionResult.state) {
+                "SUCCEEDED" -> {
+                    val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                    processor.viewModel.paymentSuccess(successfulTransactionResult)
+                    processor.payable.handleSuccess(successfulTransactionResult)
+                    PaymentMethodProcessor.sessionIsDirty = true
+                    processor.resetSocket()
+                }
+                "PENDING" -> {
+                    val successfulTransactionResult = Gson().fromJson(decryptedMessage, SuccessfulTransactionResult::class.java)
+                    processor.viewModel.paymentSuccess(successfulTransactionResult)
+                    processor.payable.handleSuccess(successfulTransactionResult)
+                    PaymentMethodProcessor.sessionIsDirty = true
+                    processor.resetSocket()
+                }
+                "FAILURE" -> {
+                    val failedTransactionResult = Gson().fromJson(decryptedMessage, FailedTransactionResult::class.java)
+                    processor.payable.handleFailure(failedTransactionResult)
+                    processor.resetSocket()
+                }
+            }
+        } catch (e: Exception) {
+            processor.payable.handleError(PTError(ErrorCode.SocketError, e.message ?: "Unknown error"))
+        }
     }
 
     /**

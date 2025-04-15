@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- all notes, documentation, plans and scripts are to be written in `.notes` directory in project root
+- comprehensive documentation of this project is in `documentation` folder in project root
