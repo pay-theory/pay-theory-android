@@ -1,7 +1,6 @@
 package com.paytheory.lib
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -12,10 +11,10 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.paytheory.lib.api.ApiService
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.data.ActionRequest
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PaymentDetail
+import com.paytheory.lib.data.payable.ErrorCode
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.requests.ActionRequest
+import com.paytheory.lib.data.requests.PaymentDetail
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
@@ -23,6 +22,7 @@ import com.paytheory.lib.websocket.WebsocketMessageHandler
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.UUID
@@ -44,14 +44,42 @@ abstract class PaymentMethodProcessor (
     open val configuration : PayTheoryConfiguration,
     open val viewModel: PaymentViewModel
 ) : WebsocketMessageHandler {
+    init {
+        Timber.tag("DEBUG_PAYTHEORY").d("PaymentMethodProcessor constructor (init block) started")
+    }
+
+    val integrity by lazy {
+        Timber.tag("DEBUG_PAYTHEORY").d("Integrity lazy initializer started. isWarm: %s", isWarm)
+        // Check configuration here for safety, though triggering is conditional
+        if (!configuration.isTestMode) {
+            if (!isWarm) {
+                // Call the function that needs configuration
+                initializeAndPrefetchIntegrityToken()
+                isWarm = true
+                Timber.tag("DEBUG_PAYTHEORY").d("Integrity check done, isWarm set to true.")
+            }
+        } else {
+            Timber.tag("DEBUG_PAYTHEORY").d("Skipping integrity initialization in test mode (lazy block).")
+            isWarm = false // Define state for test mode
+        }
+        // Decide what ready state means here
+        updatePayableReadyState(false)
+        Timber.tag("DEBUG_PAYTHEORY").d("Integrity lazy initializer finished.")
+        Unit // Return Unit as the value of the lazy property isn't the focus
+    }
+
     var isWarm: Boolean = false
     var integrityTokenProvider: StandardIntegrityTokenProvider? = null
     var resetCounter = 0
     var ptResetCounter = 0
 
-    var headerMap =
+    val headerMap: MutableMap<String, String> by lazy {
+    if (configuration.isTestMode) {
+        mutableMapOf("Content-Type" to "application/json")
+    } else {
         mutableMapOf("Content-Type" to "application/json", "X-API-Key" to configuration.apiKey)
-
+    }
+}
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
@@ -67,9 +95,6 @@ abstract class PaymentMethodProcessor (
         var sessionIsDirty = true
         var messageReactors: MessageReactors? = null
         var connectionReactors: ConnectionReactors? = null
-//        var webServicesProvider: WebServicesProvider? = null
-//        var webSocketRepository: WebsocketRepository? = null
-//        var webSocketInteractor: WebsocketInteractor? = null
 
         /**
          * Constant representing a successful connection to the socket.
@@ -137,13 +162,15 @@ abstract class PaymentMethodProcessor (
     /**
      * Initializes the `Payment` instance, including warming up the Play Integrity API.
      */
-    init {
-        if (!isWarm) {
-            initializeAndPrefetchIntegrityToken()
-            isWarm = true
-        }
-        updatePayableReadyState(false)
-    }
+
+
+//    private val integrity by lazy {
+//        if (!isWarm) {
+//            initializeAndPrefetchIntegrityToken()
+//            isWarm = true
+//        }
+//        updatePayableReadyState(false)
+//    }
 
 
 
@@ -189,7 +216,7 @@ abstract class PaymentMethodProcessor (
             sessionIsDirty = false
         }
 
-        if (configuration.apiKey != "test-paytheory-apikey") {
+        if (configuration.isTestMode != true) {
             val observable =
                 ApiService(configuration.apiBasePath).ptTokenApiCall().doToken(headerMap)
             observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -232,14 +259,15 @@ abstract class PaymentMethodProcessor (
      * It initializes the IntegrityManager and prepares an integrity token.
      */
     private fun initializeAndPrefetchIntegrityToken() {
+        if (configuration.isTestMode != true) {
+            val googleProjectNumber: Long = getGoogleProjectNumber()
 
-        val googleProjectNumber: Long = getGoogleProjectNumber()
-
-        if (configuration.apiKey == "test-paytheory-apikey") {
+        
             ptTokenApiCall(payable)
-        } else {
-            val standardIntegrityManager = IntegrityManagerFactory.createStandard(payable as Context?)
-
+        
+            val context = payable.getContext() 
+                ?: throw IllegalStateException("Context is required for non-test environments")
+            val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
 
             // Prepare integrity token. Can be called once in a while to keep internal
             // state fresh.
@@ -256,7 +284,6 @@ abstract class PaymentMethodProcessor (
                     Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
                 }
         }
-
     }
 
     /**
@@ -265,7 +292,7 @@ abstract class PaymentMethodProcessor (
      * @param ptTokenResponse The response containing the Pay Theory token.
      */
     private fun initiateGooglePlayIntegrityCheck(ptTokenResponse: PTTokenResponse) {
-        if (configuration.apiKey == "test-paytheory-apikey") {
+        if (configuration.isTestMode == true) {
             establishViewModel(ptTokenResponse)
         } else {
             // See above how to prepare integrityTokenProvider.
@@ -327,17 +354,42 @@ abstract class PaymentMethodProcessor (
 
     abstract fun process(payment: PaymentDetail)
 
+    /**
+     * Sets the connection credentials for the payment processor.
+     * This method is called by MessageReactors to safely set the credentials.
+     *
+     * @param pubKey The public key for encryption
+     * @param sessKey The session key for the connection
+     * @param hToken The host token for authentication
+     */
+    fun setConnectionCredentials(pubKey: String, sessKey: String, hToken: String) {
+        this.publicKey = pubKey
+        this.sessionKey = sessKey
+        this.hostToken = hToken
+    }
+
+    /**
+     * Checks if the connection credentials are set.
+     * 
+     * @return true if all credentials are set, false otherwise
+     */
+    fun hasCredentials(): Boolean {
+        return !publicKey.isNullOrEmpty() && !sessionKey.isNullOrEmpty() && !hostToken.isNullOrEmpty()
+    }
+
     abstract fun createInitialActionRequest(payment: PaymentDetail): ActionRequest
 }
 
 private fun PaymentMethodProcessor.getGoogleProjectNumber(): Long
-    {
-        var googleProjectNumber: Long = 0L
-        if (configuration.apiKey == "test-paytheory-apikey") {
-            googleProjectNumber = 12345678L
-        } else {
-            googleProjectNumber = (payable as Context).resources.getString(R.string.google_project_number).toLong()
-        }
-
-        return googleProjectNumber
+{
+    var googleProjectNumber: Long = 0L
+    if (configuration.isTestMode == true) {
+        googleProjectNumber = 12345678L
+    } else {
+        val context = payable.getContext() 
+            ?: throw IllegalStateException("Context is required for non-test environments")
+        googleProjectNumber = context.resources.getString(R.string.google_project_number).toLong()
     }
+
+    return googleProjectNumber
+}

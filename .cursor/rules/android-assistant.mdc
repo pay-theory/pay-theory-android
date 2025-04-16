@@ -8,3 +8,4 @@ alwaysApply: true
 
 - all notes, documentation, plans and scripts are to be written in `.notes` directory in project root
 - comprehensive documentation of this project is in `documentation` folder in project root
+- our work related to Google Pay is linked to https://pay-theory.atlassian.net/browse/PTP-249

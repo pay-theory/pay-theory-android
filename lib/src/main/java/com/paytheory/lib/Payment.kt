@@ -3,12 +3,12 @@ package com.paytheory.lib
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.data.ActionRequest
-import com.paytheory.lib.data.CashRequest
-import com.paytheory.lib.data.PaymentData
-import com.paytheory.lib.data.PaymentDetail
-import com.paytheory.lib.data.PaymentMethodData
-import com.paytheory.lib.data.TransferPartOneRequest
+import com.paytheory.lib.data.requests.ActionRequest
+import com.paytheory.lib.data.requests.CashRequest
+import com.paytheory.lib.data.payloads.PaymentData
+import com.paytheory.lib.data.requests.PaymentDetail
+import com.paytheory.lib.data.payloads.PaymentMethodData
+import com.paytheory.lib.data.requests.TransferPartOneRequest
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.nacl.encryptBox
 import com.paytheory.lib.nacl.generateLocalKeyPair
@@ -180,7 +180,7 @@ class Payment(
         //generate public key
         val keyPair = generateLocalKeyPair()
         publicKey = Base64.getEncoder().encodeToString(keyPair.publicKey.asBytes)
-        //if payment type is "CASH" return cash com.paytheory.lib.data.ActionRequest
+        //if payment type is "CASH" return cash com.paytheory.lib.data.requests.ActionRequest
         if (payment.type == CASH) {
             val requestAction = BARCODE_ACTION
             val paymentRequest = CashRequest(
@@ -203,7 +203,7 @@ class Payment(
                 sessionKey
             )
         }
-        //if payment type is not "CASH" return transfer com.paytheory.lib.data.ActionRequest
+        //if payment type is not "CASH" return transfer com.paytheory.lib.data.requests.ActionRequest
         else {
             val requestAction = TRANSFER_PART_ONE_ACTION
             val paymentData = PaymentData(payment.currency, payment.amount, payment.fee_mode)

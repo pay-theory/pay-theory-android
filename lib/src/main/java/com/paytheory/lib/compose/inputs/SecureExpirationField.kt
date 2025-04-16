@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.paytheory.lib.R
 import com.paytheory.lib.compose.string.SecureStringWrapper
+import com.paytheory.lib.compose.utility.ExpirationFieldUtils
 
 /**
  * Formats a card expiry date string from a raw input string.
@@ -121,7 +122,7 @@ fun SecureExpirationField(
         value = secureWrapper.secureState,
         onValueChange = { newValue ->
             val rawInput = newValue.text
-            val formattedText = formatCardExpiryDate(rawInput)
+            val formattedText = ExpirationFieldUtils.formatCardExpiryDate(rawInput)
 
             // Calculate cursor position
             val newCursorPosition = when {

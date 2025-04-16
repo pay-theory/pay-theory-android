@@ -1,4 +1,3 @@
-
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -38,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId = "com.paytheory.jetsnack"
-        minSdk = 26
+        minSdk = 28
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

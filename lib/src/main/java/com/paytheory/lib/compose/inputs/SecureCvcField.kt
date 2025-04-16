@@ -14,6 +14,8 @@ import com.paytheory.lib.R
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
 import com.paytheory.lib.compose.transformation.PasswordFilterTransformation
+import com.paytheory.lib.compose.utility.CardNetwork
+import com.paytheory.lib.compose.utility.CvcFieldUtils
 
 /**
  * A composable function that creates a secure CVC (Card Verification Code) input field.
@@ -28,6 +30,8 @@ import com.paytheory.lib.compose.transformation.PasswordFilterTransformation
  * @param isValid A lambda function that takes a [SecureString] and returns `true` if the value is
  *                considered valid, `false` otherwise. This is used for visual feedback on the field's
  *                validity.
+ * @param cardNetwork An optional [CardNetwork] that, if provided, will be used to validate the CVC
+ *                     according to the network's specific requirements (e.g., 4 digits for Amex).
  * @param isOutlined Determines if the field should be displayed as an outlined text field or a filled one.
  *                  Defaults to `true` (outlined).
  * @param clearKey An integer key used to reset the field's internal state. Changing this key
@@ -39,7 +43,10 @@ fun SecureCvcField(
     modifier: Modifier,
     value: SecureStringWrapper,
     onValueChange: (SecureStringWrapper) -> Unit,
-    isValid: (SecureStringWrapper) -> Boolean,
+    isValid: (SecureStringWrapper) -> Boolean = { wrapper ->
+        CvcFieldUtils.isValidCvc(wrapper.secureValue.revealForUi())
+    },
+    cardNetwork: CardNetwork? = null,
     isOutlined: Boolean = true,
     clearKey: Int = 0
 ) {
@@ -51,18 +58,33 @@ fun SecureCvcField(
         secureString = value
     }
 
+    // Determine max length based on card network
+    val maxLength = if (cardNetwork == CardNetwork.AMEX) 4 else 4 // Allow up to 4 digits, but validation will check correct length
+
     SecureBaseTextField(
         value = secureString,
         onValueChange = { newSecureString ->
-            secureString = newSecureString // Update the internal state
-            onValueChange(newSecureString) // Notify the caller
+            // Format the input to ensure only digits
+            val formatted = CvcFieldUtils.formatCvc(newSecureString.secureValue.revealForUi())
+            val formattedWrapper = if (formatted != newSecureString.secureValue.revealForUi()) {
+                SecureStringWrapper(SecureString(formatted), selection = null)
+            } else {
+                newSecureString
+            }
+            
+            secureString = formattedWrapper // Update the internal state
+            onValueChange(formattedWrapper) // Notify the caller
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        maxChar = 4,
+        maxChar = maxLength,
         modifier = modifier,
         visualTransformation = PasswordFilterTransformation(),
         label = { Text(stringResource(id = R.string.cvc)) },
-        isValid = isValid,
+        isValid = if (cardNetwork != null) {
+            { wrapper -> CvcFieldUtils.isValidCvc(wrapper.secureValue.revealForUi(), cardNetwork) }
+        } else {
+            isValid
+        },
         isOutlined = isOutlined
     )
 }

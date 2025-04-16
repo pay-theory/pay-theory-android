@@ -1,9 +1,9 @@
 package com.paytheory.lib.compose.transformation
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import com.paytheory.lib.compose.utility.TransformationUtils
 
 /**
  * A [VisualTransformation] that formats a credit card number with spaces.
@@ -25,33 +25,11 @@ import androidx.compose.ui.text.input.VisualTransformation
  */
 class CreditCardNumberTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-
-        val trimmed = text.text.take(16)
-        val formatted = trimmed.chunked(4).joinToString(" ").trim().take(19)
+        val formatted = TransformationUtils.formatCreditCardNumber(text.text)
 
         return TransformedText(
             AnnotatedString(formatted),
-            CreditCardOffsetMapping
+            TransformationUtils.CreditCardOffsetMapping
         )
-    }
-
-    private object CreditCardOffsetMapping : OffsetMapping {
-        override fun originalToTransformed(offset: Int): Int {
-            return when {
-                offset <= 4 -> offset
-                offset <= 8 -> offset + 1
-                offset <= 12 -> offset + 2
-                else -> offset + 3
-            }
-        }
-
-        override fun transformedToOriginal(offset: Int): Int {
-            return when {
-                offset <= 4 -> offset
-                offset <= 9 -> offset - 1
-                offset <= 14 -> offset - 2
-                else -> offset - 3
-            }
-        }
     }
 }

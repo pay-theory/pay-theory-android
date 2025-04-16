@@ -1,22 +1,56 @@
 package com.paytheory.lib.googlepay
 
 import android.app.Activity
-import androidx.lifecycle.LiveData
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.paytheory.lib.configuration.GooglePayBillingAddressFormat
 import com.paytheory.lib.configuration.GooglePayConstants
 import com.paytheory.lib.configuration.GooglePayEnvironment
+import com.paytheory.lib.googlepay.interfaces.GooglePayClientInterface
+import com.paytheory.lib.googlepay.interfaces.GooglePayUtilInterface
 import org.json.JSONArray
 import org.json.JSONObject
-import timber.log.Timber
 import java.math.BigDecimal
+import timber.log.Timber
 
 /**
  * Utility class for Google Pay operations
  */
-object GooglePayUtil {
-    private val googlePayClient = GooglePayClient()
+class GooglePayUtil private constructor(
+    private val googlePayClient: GooglePayClientInterface
+) : GooglePayUtilInterface {
+    
+    companion object {
+        @Volatile
+        private var instance: GooglePayUtil? = null
+        
+        /**
+         * Get instance of GooglePayUtil with default implementation of GooglePayClient
+         */
+        fun getInstance(): GooglePayUtil {
+            return instance ?: synchronized(this) {
+                instance ?: GooglePayUtil(GooglePayClient()).also { instance = it }
+            }
+        }
+        
+        /**
+         * Get instance of GooglePayUtil with custom implementation of GooglePayClient
+         * This is primarily used for testing to inject mock clients
+         */
+        fun getInstance(client: GooglePayClientInterface): GooglePayUtil {
+            return synchronized(this) {
+                GooglePayUtil(client).also { instance = it }
+            }
+        }
+        
+        /**
+         * Reset the singleton instance (useful for testing)
+         */
+        fun resetInstance() {
+            instance = null
+        }
+    }
     
     /**
      * Checks if Google Pay is available on the device
@@ -24,17 +58,19 @@ object GooglePayUtil {
      * @param activity Host activity
      * @param environment Google Pay environment (TEST or PRODUCTION)
      * @param billingAddressRequired Whether billing address is required
-     * @return LiveData<Boolean> with Google Pay availability result
+     * @return Task<Boolean> with Google Pay availability result
      */
-    fun isGooglePayAvailable(
+    override fun isGooglePayAvailable(
         activity: Activity,
-        environment: GooglePayEnvironment = GooglePayEnvironment.TEST,
-        billingAddressRequired: Boolean = false
-    ): LiveData<Boolean> {
+        environment: GooglePayEnvironment,
+        billingAddressRequired: Boolean
+    ): Task<Boolean> {
         return googlePayClient.isReadyToPay(
             activity,
             environment,
-            billingAddressRequired
+            billingAddressRequired,
+            GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
+            GooglePayConstants.DEFAULT_SUPPORTED_METHODS
         )
     }
     
@@ -53,17 +89,17 @@ object GooglePayUtil {
      * @param allowCreditCards Whether credit cards are allowed
      * @return Task<PaymentData> Google Pay payment result
      */
-    fun requestGooglePayment(
+    override fun requestGooglePayment(
         activity: Activity,
         amount: BigDecimal,
         merchantName: String,
-        environment: GooglePayEnvironment = GooglePayEnvironment.TEST,
-        billingAddressRequired: Boolean = false,
-        billingAddressFormat: GooglePayBillingAddressFormat = GooglePayBillingAddressFormat.MINIMAL,
-        shippingAddressRequired: Boolean = false,
-        phoneNumberRequired: Boolean = false,
-        allowPrepaidCards: Boolean = true,
-        allowCreditCards: Boolean = true
+        environment: GooglePayEnvironment,
+        billingAddressRequired: Boolean,
+        billingAddressFormat: GooglePayBillingAddressFormat,
+        shippingAddressRequired: Boolean,
+        phoneNumberRequired: Boolean,
+        allowPrepaidCards: Boolean,
+        allowCreditCards: Boolean
     ): Task<PaymentData> {
         try {
             val priceString = amount.toString()
@@ -77,7 +113,9 @@ object GooglePayUtil {
                 phoneNumberRequired = phoneNumberRequired,
                 environment = environment,
                 allowPrepaidCards = allowPrepaidCards,
-                allowCreditCards = allowCreditCards
+                allowCreditCards = allowCreditCards,
+                allowedCardNetworks = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
+                allowedAuthMethods = GooglePayConstants.DEFAULT_SUPPORTED_METHODS
             )
             
             return googlePayClient.loadPaymentData(activity, paymentDataRequestJson)
@@ -93,7 +131,7 @@ object GooglePayUtil {
      * @param paymentData PaymentData from Google Pay response
      * @return Token string for payment processing
      */
-    fun extractPaymentToken(paymentData: PaymentData): String {
+    override fun extractPaymentToken(paymentData: PaymentData): String {
         return googlePayClient.extractPaymentToken(paymentData)
     }
     
@@ -103,7 +141,7 @@ object GooglePayUtil {
      * 
      * @return JSONArray containing the allowed payment methods
      */
-    fun getAllowedPaymentMethodsJson(): JSONArray {
+    override fun getAllowedPaymentMethodsJson(): JSONArray {
         val cardNetworks = JSONArray()
         GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS.forEach { cardNetworks.put(it) }
         

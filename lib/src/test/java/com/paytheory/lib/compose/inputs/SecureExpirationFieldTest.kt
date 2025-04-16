@@ -3,22 +3,22 @@ package com.paytheory.lib.compose.inputs
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class ExpiryDateFormatterTest {
+class SecureExpirationFieldTest {
 
     @Test
-    fun `empty input returns empty string`() {
+    fun `formatCardExpiryDate_emptyInput_returnsEmptyString`() {
         assertEquals("", formatCardExpiryDate(""))
     }
 
     @Test
-    fun `non-digit characters are ignored`() {
+    fun `formatCardExpiryDate_nonDigitCharacters_ignoresNonDigits`() {
         assertEquals("12/34", formatCardExpiryDate("1a2b-3c4d"))
         assertEquals("02", formatCardExpiryDate("0w2"))
         assertEquals("03", formatCardExpiryDate("3!"))
     }
 
     @Test
-    fun `single digit month formatting`() {
+    fun `formatCardExpiryDate_singleDigitMonth_formatsCorrectly`() {
         assertEquals("1", formatCardExpiryDate("1"))
         assertEquals("0", formatCardExpiryDate("0"))
         assertEquals("02", formatCardExpiryDate("2"))  // 2 → 02
@@ -26,7 +26,7 @@ class ExpiryDateFormatterTest {
     }
 
     @Test
-    fun `two digit month formatting`() {
+    fun `formatCardExpiryDate_twoDigitMonth_formatsCorrectly`() {
         assertEquals("12", formatCardExpiryDate("12"))
         assertEquals("01", formatCardExpiryDate("01"))
         assertEquals("02", formatCardExpiryDate("02"))
@@ -35,7 +35,7 @@ class ExpiryDateFormatterTest {
     }
 
     @Test
-    fun `partial year formatting`() {
+    fun `formatCardExpiryDate_partialYear_formatsCorrectly`() {
         assertEquals("12/3", formatCardExpiryDate("123"))
         assertEquals("12/34", formatCardExpiryDate("1234"))
         assertEquals("02/25", formatCardExpiryDate("0225"))
@@ -43,7 +43,7 @@ class ExpiryDateFormatterTest {
     }
 
     @Test
-    fun `month with leading zero handling`() {
+    fun `formatCardExpiryDate_monthWithLeadingZero_handlesCorrectly`() {
         assertEquals("0", formatCardExpiryDate("0"))
         assertEquals("01", formatCardExpiryDate("01"))
         assertEquals("02/3", formatCardExpiryDate("023"))
@@ -51,14 +51,14 @@ class ExpiryDateFormatterTest {
     }
 
     @Test
-    fun `month coercion behavior`() {
+    fun `formatCardExpiryDate_invalidMonth_coercesToValidMonth`() {
         assertEquals("12", formatCardExpiryDate("13"))  // 13 → 12
         assertEquals("12", formatCardExpiryDate("50"))  // 50 → 12
         assertEquals("12", formatCardExpiryDate("99"))  // 99 → 12
     }
 
     @Test
-    fun `real-world patterns`() {
+    fun `formatCardExpiryDate_realWorldPatterns_formatsCorrectly`() {
         assertEquals("12/34", formatCardExpiryDate("12/34"))
         assertEquals("12/34", formatCardExpiryDate("12 34"))
         assertEquals("12/3", formatCardExpiryDate("12/3"))
@@ -66,7 +66,7 @@ class ExpiryDateFormatterTest {
     }
 
     @Test
-    fun `edge cases`() {
+    fun `formatCardExpiryDate_edgeCases_handlesCorrectly`() {
         assertEquals("1", formatCardExpiryDate("1"))
         assertEquals("12", formatCardExpiryDate("12"))
         assertEquals("12/3", formatCardExpiryDate("123"))

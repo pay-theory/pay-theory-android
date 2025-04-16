@@ -1,10 +1,11 @@
 package com.paytheory.lib
 
-import com.paytheory.lib.data.BarcodeResult
-import com.paytheory.lib.data.FailedTransactionResult
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PaymentMethodTokenResults
-import com.paytheory.lib.data.SuccessfulTransactionResult
+import android.content.Context
+import com.paytheory.lib.data.payable.BarcodeResult
+import com.paytheory.lib.data.payable.FailedTransactionResult
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
 import com.paytheory.lib.model.FieldState
 import com.paytheory.lib.model.PaymentField
 
@@ -28,7 +29,7 @@ import com.paytheory.lib.model.PaymentField
  * Implementing this interface allows your application to react to these events and manage the
  * payment flow accordingly.
  */
-interface Payable {
+interface Payable : ContextProvider {
     /**
      * Handles changes to the SDK readiness status.
      *
@@ -119,4 +120,14 @@ interface Payable {
      * @param error The `PTError` object containing the reason for the failure.
      */
     fun handleError(error: PTError)
+
+    fun clientContext(): Context
+    
+    /**
+     * Returns the Android Context from the implementing class.
+     * Default implementation returns null for test environments.
+     *
+     * @return The Android Context or null
+     */
+    override fun getContext(): Context? = clientContext()
 }

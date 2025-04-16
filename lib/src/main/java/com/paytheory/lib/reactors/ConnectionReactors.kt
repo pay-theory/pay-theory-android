@@ -1,10 +1,10 @@
 package com.paytheory.lib.reactors
 
 import com.google.gson.Gson
-import com.paytheory.lib.data.ActionRequest
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.HostTokenRequest
-import com.paytheory.lib.data.PTError
+import com.paytheory.lib.data.requests.ActionRequest
+import com.paytheory.lib.data.payable.ErrorCode
+import com.paytheory.lib.data.requests.HostTokenRequest
+import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.model.PaymentViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Base64

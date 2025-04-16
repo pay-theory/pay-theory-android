@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.paytheory.lib.R
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
+import com.paytheory.lib.compose.utility.BankFieldUtils
 
 /**
  * A composable function that provides a secure text field for bank account or routing numbers.
@@ -26,6 +27,7 @@ import com.paytheory.lib.compose.string.SecureStringWrapper
  * @param value The current `SecureString` value of the field.
  * @param onValueChange Callback invoked when the value changes. It provides the updated `SecureString`.
  * @param isValid A function to validate the entered `SecureString`. Returns `true` if valid, `false` otherwise.
+ *                If not provided, default validation based on the field type (routing/account) will be used.
  * @param isRouting Boolean flag indicating whether this field is for a routing number (true) or an account number (false).
  *                  Defaults to `false`. It determines the label and the maximum character limit.
  * @param isOutlined Boolean flag indicating if the text field should be outlined. Defaults to `true`.
@@ -51,8 +53,15 @@ fun SecureBankNumberField(
     modifier: Modifier,
     value: SecureStringWrapper,
     onValueChange: (SecureStringWrapper) -> Unit,
-    isValid: (SecureStringWrapper) -> Boolean,
     isRouting: Boolean = false,
+    isValid: (SecureStringWrapper) -> Boolean = { wrapper ->
+        val text = wrapper.secureValue.revealForUi()
+        if (isRouting) {
+            BankFieldUtils.isValidRoutingNumber(text)
+        } else {
+            BankFieldUtils.isValidBankAccountNumber(text)
+        }
+    },
     isOutlined: Boolean = true,
     clearKey: Int = 0
 ) {
@@ -69,11 +78,23 @@ fun SecureBankNumberField(
     SecureBaseTextField(
         value = secureString,
         onValueChange = { newSecureString ->
-            secureString =
-                SecureStringWrapper(newSecureString.secureValue.takeIf { it.stringLength() <= maxChar }
-                    ?: SecureString(newSecureString.secureValue.revealForUi().take(maxChar)),
-                    selection = null)
-            onValueChange(secureString) // Notify the caller
+            // Format input to ensure only digits
+            val rawInput = newSecureString.secureValue.revealForUi()
+            val formatted = if (isRouting) {
+                BankFieldUtils.formatRoutingNumber(rawInput)
+            } else {
+                BankFieldUtils.formatBankAccountNumber(rawInput)
+            }
+            
+            // Create formatted wrapper and enforce max length
+            val formattedWrapper = if (formatted.length <= maxChar) {
+                SecureStringWrapper(initialValue = SecureString(formatted), selection = null)
+            } else {
+                SecureStringWrapper(initialValue = SecureString(formatted.take(maxChar)), selection = null)
+            }
+            
+            secureString = formattedWrapper
+            onValueChange(formattedWrapper) // Notify the caller
         },
         isValid = isValid,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

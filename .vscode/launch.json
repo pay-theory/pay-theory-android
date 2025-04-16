@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "android",
+            "request": "launch",
+            "name": "Launch qualitydemo App",
+            "appId": "com.paytheory.qualitydemo",
+            "adbPort": 5037,
+            "preLaunchTask": "build-android-app"
+        }
+    ]
+} 

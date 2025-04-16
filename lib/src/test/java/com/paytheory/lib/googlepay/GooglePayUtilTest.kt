@@ -1,137 +1,236 @@
 package com.paytheory.lib.googlepay
 
 import android.app.Activity
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.wallet.PaymentData
+import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.configuration.GooglePayBillingAddressFormat
 import com.paytheory.lib.configuration.GooglePayEnvironment
-import io.mockk.MockKAnnotations
+import com.paytheory.lib.googlepay.interfaces.GooglePayClientInterface
+import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.verify
+import org.json.JSONArray
+import org.json.JSONObject
+import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.math.BigDecimal
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-@RunWith(MockitoJUnitRunner::class)
+/**
+ * Tests for GooglePayUtil that execute real implementation code
+ * while only mocking external dependencies.
+ */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [30])
 class GooglePayUtilTest {
+
+    // Mock dependencies (only things that need to be mocked)
+    private lateinit var mockClient: GooglePayClientInterface
+    private lateinit var mockActivity: Activity
+    private lateinit var mockPaymentData: PaymentData
+    private lateinit var mockConfiguration: PayTheoryConfiguration
     
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-    
-    @MockK
-    private lateinit var activity: Activity
-    
-    @MockK
-    private lateinit var googlePayClient: GooglePayClient
-    
-    @MockK
-    private lateinit var paymentDataTask: Task<PaymentData>
-    
-    @MockK
-    private lateinit var paymentData: PaymentData
+    // REAL implementation under test
+    private lateinit var googlePayUtil: GooglePayUtil
     
     @Before
     fun setup() {
-        MockKAnnotations.init(this)
+        // Create mocks for external dependencies
+        mockClient = mockk(relaxed = true)
+        mockActivity = mockk(relaxed = true)
+        mockPaymentData = mockk(relaxed = true)
+        mockConfiguration = mockk(relaxed = true)
         
-        mockkObject(GooglePayUtil)
+        // Configure mocks
+        every { mockConfiguration.googlePayMerchantName } returns "Test Merchant"
+        every { mockConfiguration.googlePayEnabled } returns true
+        every { mockConfiguration.googlePayEnvironment } returns GooglePayEnvironment.TEST
+        every { mockConfiguration.googlePayAllowPrepaidCards } returns true
+        every { mockConfiguration.googlePayBillingAddressRequired } returns false
+        every { mockConfiguration.googlePayBillingAddressFormat } returns GooglePayBillingAddressFormat.MINIMAL
+        every { mockConfiguration.googlePayPhoneNumberRequired } returns false
+        every { mockConfiguration.googlePayShippingAddressRequired } returns false
         
-        // Replace the real GooglePayClient with our mock
-        val clientField = GooglePayUtil::class.java.getDeclaredField("googlePayClient")
-        clientField.isAccessible = true
-        clientField.set(GooglePayUtil, googlePayClient)
+        // Reset singleton to ensure clean state
+        GooglePayUtil.resetInstance()
         
-        // Set up common mocks
-        val isReadyToPayLiveData = MutableLiveData<Boolean>()
-        isReadyToPayLiveData.value = true
+        // Create the REAL util instance with our mock client
+        googlePayUtil = GooglePayUtil.getInstance(mockClient)
+    }
+    
+    @After
+    fun tearDown() {
+        // Reset the singleton after each test
+        GooglePayUtil.resetInstance()
+        clearAllMocks()
+    }
+    
+    @Test
+    fun `isGooglePayAvailable should check availability through client`() {
+        // Set up mock behavior for the client
+        val taskSource = TaskCompletionSource<Boolean>()
+        taskSource.setResult(true)
+        val mockTask: Task<Boolean> = taskSource.task
         
         every { 
-            googlePayClient.isReadyToPay(
-                any(), 
-                any(), 
-                any(), 
-                any(), 
+            mockClient.isReadyToPay(
+                activity = mockActivity,
+                environment = GooglePayEnvironment.TEST,
+                billingAddressRequired = false,
+                allowedCardNetworks = any(),
+                allowedAuthMethods = any()
+            ) 
+        } returns mockTask
+        
+        // Execute the real method
+        val result = googlePayUtil.isGooglePayAvailable(
+            activity = mockActivity,
+            environment = GooglePayEnvironment.TEST,
+            billingAddressRequired = false
+        )
+        
+        // Verify the client was called with correct parameters
+        verify { 
+            mockClient.isReadyToPay(
+                activity = mockActivity,
+                environment = GooglePayEnvironment.TEST,
+                billingAddressRequired = false,
+                allowedCardNetworks = any(),
+                allowedAuthMethods = any()
+            ) 
+        }
+        
+        // Verify the result
+        assertEquals(mockTask, result)
+    }
+    
+    @Test
+    fun `requestGooglePayment should create request and delegate to client`() {
+        // Set up mocks
+        val priceBigDecimal = BigDecimal("10.99")
+        val requestJson = "{\"valid\":\"json\"}"
+        val requestSlot = slot<String>()
+        
+        val taskSource = TaskCompletionSource<PaymentData>()
+        taskSource.setResult(mockPaymentData)
+        val mockTask: Task<PaymentData> = taskSource.task
+        
+        // Mock client behavior
+        every { 
+            mockClient.createPaymentDataRequest(
+                price = any(),
+                merchantName = any(),
+                billingAddressRequired = any(),
+                billingAddressFormat = any(),
+                shippingAddressRequired = any(),
+                phoneNumberRequired = any(),
+                environment = any(),
+                allowPrepaidCards = any(),
+                allowCreditCards = any(),
+                allowedCardNetworks = any(),
+                allowedAuthMethods = any()
+            ) 
+        } returns requestJson
+        
+        every { 
+            mockClient.loadPaymentData(mockActivity, capture(requestSlot))
+        } returns mockTask
+        
+        // Execute the real method
+        val result = googlePayUtil.requestGooglePayment(
+            activity = mockActivity,
+            amount = priceBigDecimal,
+            merchantName = "Test Merchant", 
+            environment = GooglePayEnvironment.TEST,
+            billingAddressRequired = false,
+            billingAddressFormat = GooglePayBillingAddressFormat.MINIMAL,
+            shippingAddressRequired = false,
+            phoneNumberRequired = false,
+            allowPrepaidCards = true,
+            allowCreditCards = true
+        )
+        
+        // Verify client methods were called
+        verify { 
+            mockClient.createPaymentDataRequest(
+                price = priceBigDecimal.toString(),
+                merchantName = "Test Merchant",
+                billingAddressRequired = false,
+                billingAddressFormat = GooglePayBillingAddressFormat.MINIMAL,
+                shippingAddressRequired = false,
+                phoneNumberRequired = false,
+                environment = GooglePayEnvironment.TEST,
+                allowPrepaidCards = true,
+                allowCreditCards = true,
+                any(),
                 any()
             ) 
-        } returns isReadyToPayLiveData
+        }
+        
+        verify { 
+            mockClient.loadPaymentData(mockActivity, requestJson)
+        }
+        
+        // Verify the captured request parameter
+        assertEquals(requestJson, requestSlot.captured)
+        
+        // Verify the result
+        assertEquals(mockTask, result)
+    }
+    
+    @Test
+    fun `extractPaymentToken should delegate to client extractPaymentToken`() {
+        // Set up mock
+        val expectedToken = "test-payment-token"
         
         every { 
-            googlePayClient.createPaymentDataRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
-            ) 
-        } returns "{}"
+            mockClient.extractPaymentToken(mockPaymentData) 
+        } returns expectedToken
         
-        every { googlePayClient.loadPaymentData(any(), any()) } returns paymentDataTask
+        // Execute the real method
+        val result = googlePayUtil.extractPaymentToken(mockPaymentData)
         
-        every { googlePayClient.extractPaymentToken(any()) } returns "test_token"
+        // Verify client method was called
+        verify { mockClient.extractPaymentToken(mockPaymentData) }
+        
+        // Verify the result
+        assertEquals(expectedToken, result)
     }
     
     @Test
-    fun `test isGooglePayAvailable calls client correctly`() {
-        GooglePayUtil.isGooglePayAvailable(
-            activity,
-            GooglePayEnvironment.TEST,
-            true
-        )
+    fun `getAllowedPaymentMethodsJson should generate valid JSON structure`() {
+        // Execute the real method
+        val result = googlePayUtil.getAllowedPaymentMethodsJson()
         
-        verify { 
-            googlePayClient.isReadyToPay(
-                activity,
-                GooglePayEnvironment.TEST,
-                true
-            ) 
-        }
-    }
-    
-    @Test
-    fun `test requestGooglePayment calls client methods correctly`() {
-        val amount = BigDecimal("15.99")
-        val merchantName = "Test Merchant"
+        // Get and verify the result
+        val jsonArray = JSONArray(result.toString())
+        assertTrue(jsonArray.length() > 0)
         
-        GooglePayUtil.requestGooglePayment(
-            activity,
-            amount,
-            merchantName,
-            GooglePayEnvironment.PRODUCTION,
-            true,
-            GooglePayBillingAddressFormat.FULL,
-            true,
-            true,
-            false,
-            true
-        )
+        // Verify the JSON structure
+        val cardMethod = jsonArray.getJSONObject(0)
+        assertEquals("CARD", cardMethod.getString("type"))
         
-        verify { 
-            googlePayClient.createPaymentDataRequest(
-                price = amount.toString(),
-                merchantName = merchantName,
-                billingAddressRequired = true,
-                billingAddressFormat = GooglePayBillingAddressFormat.FULL,
-                shippingAddressRequired = true,
-                phoneNumberRequired = true,
-                environment = GooglePayEnvironment.PRODUCTION,
-                allowPrepaidCards = false,
-                allowCreditCards = true
-            ) 
-        }
+        // Verify parameters
+        val parameters = cardMethod.getJSONObject("parameters")
+        assertTrue(parameters.has("allowedCardNetworks"))
+        assertTrue(parameters.has("allowedAuthMethods"))
         
-        verify { googlePayClient.loadPaymentData(activity, any()) }
-    }
-    
-    @Test
-    fun `test extractPaymentToken delegates to client`() {
-        GooglePayUtil.extractPaymentToken(paymentData)
+        // Verify card networks
+        val networks = parameters.getJSONArray("allowedCardNetworks")
+        assertTrue(networks.length() > 0)
         
-        verify { googlePayClient.extractPaymentToken(paymentData) }
+        // Verify auth methods
+        val authMethods = parameters.getJSONArray("allowedAuthMethods")
+        assertTrue(authMethods.length() > 0)
     }
 } 

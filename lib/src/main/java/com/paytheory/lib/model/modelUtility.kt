@@ -1,8 +1,8 @@
 package com.paytheory.lib.model
 
 import com.paytheory.lib.PaymentMethodProcessor
-import com.paytheory.lib.data.Address
-import com.paytheory.lib.data.PaymentDetail
+import com.paytheory.lib.data.payloads.Address
+import com.paytheory.lib.data.requests.PaymentDetail
 
 /**
  * Propagates the state of a payment field based on its validity and emptiness.

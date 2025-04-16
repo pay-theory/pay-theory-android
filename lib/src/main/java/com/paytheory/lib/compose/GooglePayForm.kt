@@ -7,10 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,9 +19,7 @@ import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
 import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.googlepay.GooglePayProcessor
+import com.paytheory.lib.compose.utility.GooglePayFormUtils
 import com.paytheory.lib.model.PaymentViewModel
 
 /**
@@ -50,9 +47,8 @@ fun GooglePayForm(
     val context = LocalContext.current
     val activity = context as? Activity
     
-    if (activity == null) {
-        // Google Pay requires an Activity context
-        payable.handleError(PTError(ErrorCode.GooglePayUnavailable, "Google Pay requires an Activity context"))
+    // Use utilities to validate context and check Google Pay availability
+    if (!GooglePayFormUtils.validateGooglePayContext(activity, payable)) {
         return
     }
     
@@ -66,17 +62,18 @@ fun GooglePayForm(
         )
     }
     
-    // Create Google Pay processor
+    // Create Google Pay processor using utility
     val googlePayProcessor = remember {
-        GooglePayProcessor(configuration, activity, payable, viewModel)
+        GooglePayFormUtils.createGooglePayProcessor(payable, activity!!, configuration, viewModel)
     }
     
-    // Observe Google Pay availability
-    val isGooglePayAvailable by googlePayProcessor.isGooglePayAvailable().observeAsState(initial = false)
+    // We need to observe Google Pay availability with a state
+    var isGooglePayAvailable by remember { mutableStateOf(false) }
     var isCheckingAvailability by remember { mutableStateOf(true) }
     
-    // Update checking state when availability is determined
-    if (isGooglePayAvailable || !isGooglePayAvailable) {
+    // Update the state when availability check completes
+    GooglePayFormUtils.checkGooglePayAvailability(googlePayProcessor) { available ->
+        isGooglePayAvailable = available
         isCheckingAvailability = false
     }
     
@@ -94,7 +91,7 @@ fun GooglePayForm(
             isGooglePayAvailable -> {
                 // Google Pay is available, show button
                 GooglePayButton(
-                    onClick = { googlePayProcessor.initiateGooglePayPayment() },
+                    onClick = { GooglePayFormUtils.initiateGooglePayPayment(googlePayProcessor) },
                     enabled = true,
                     modifier = buttonModifier,
                     buttonType = buttonType,

@@ -3,10 +3,10 @@ package com.paytheory.lib.compose
 import android.app.Activity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,8 +16,9 @@ import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
 import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.PTError
+import com.paytheory.lib.compose.utility.GooglePayFormUtils
+import com.paytheory.lib.data.payable.ErrorCode
+import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.googlepay.GooglePayProcessor
 import com.paytheory.lib.model.PaymentViewModel
 
@@ -49,18 +50,19 @@ fun StandaloneGooglePayButton(
     buttonType: GooglePayButtonType = configuration.googlePayButtonType,
     buttonColor: GooglePayButtonColor = configuration.googlePayButtonColor
 ) {
-    // Validate configuration
-    if (!configuration.googlePayEnabled) {
-        throw IllegalStateException("Google Pay must be enabled in PayTheoryConfiguration")
+    // Validate configuration using utility
+    try {
+        GooglePayFormUtils.validateGooglePayConfiguration(configuration)
+    } catch (e: IllegalStateException) {
+        throw e
     }
 
     // Get local context and cast to Activity for Google Pay processing
     val context = LocalContext.current
     val activity = context as? Activity
     
-    if (activity == null) {
-        // Google Pay requires an Activity context
-        payable.handleError(PTError(ErrorCode.GooglePayUnavailable, "Google Pay requires an Activity context"))
+    // Validate context using utility
+    if (!GooglePayFormUtils.validateGooglePayContext(activity, payable)) {
         return
     }
     
@@ -74,29 +76,32 @@ fun StandaloneGooglePayButton(
         )
     }
     
-    // Create Google Pay processor
+    // Create Google Pay processor using utility
     val googlePayProcessor = remember {
-        GooglePayProcessor(configuration, activity, payable, viewModel)
+        GooglePayFormUtils.createGooglePayProcessor(payable, activity!!, configuration, viewModel)
     }
     
-    // Observe Google Pay availability
-    val isGooglePayAvailable by googlePayProcessor.isGooglePayAvailable().observeAsState(initial = false)
-    var hasCheckedAvailability by remember { mutableStateOf(false) }
+    // State for Google Pay availability
+    var isGooglePayAvailable by remember { mutableStateOf(false) }
+    var isCheckingAvailability by remember { mutableStateOf(true) }
     
-    // Handle availability state changes
-    if (!hasCheckedAvailability && (isGooglePayAvailable || !isGooglePayAvailable)) {
-        hasCheckedAvailability = true
-        
-        // If Google Pay is unavailable and an onUnavailable callback was provided, invoke it
-        if (!isGooglePayAvailable) {
-            onUnavailable?.invoke()
+    // Check Google Pay availability using utility
+    LaunchedEffect(Unit) {
+        GooglePayFormUtils.checkGooglePayAvailability(googlePayProcessor) { available ->
+            isGooglePayAvailable = available
+            isCheckingAvailability = false
+            
+            // If Google Pay is unavailable and an onUnavailable callback was provided, invoke it
+            if (!available) {
+                onUnavailable?.invoke()
+            }
         }
     }
     
     // Only show the button if Google Pay is available or if we're not hiding when unavailable
-    if (isGooglePayAvailable || !hideWhenUnavailable) {
+    if (!isCheckingAvailability && (isGooglePayAvailable || !hideWhenUnavailable)) {
         GooglePayButton(
-            onClick = { googlePayProcessor.initiateGooglePayPayment() },
+            onClick = { GooglePayFormUtils.initiateGooglePayPayment(googlePayProcessor) },
             enabled = isGooglePayAvailable,
             modifier = modifier.padding(vertical = 4.dp),
             buttonType = buttonType,

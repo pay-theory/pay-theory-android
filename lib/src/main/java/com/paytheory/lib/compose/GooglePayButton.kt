@@ -3,13 +3,11 @@ package com.paytheory.lib.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.pay.button.ButtonTheme
-import com.google.pay.button.ButtonType
 import com.google.pay.button.PayButton
 import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
-import com.paytheory.lib.googlepay.GooglePayUtil
-import org.json.JSONArray
+import com.paytheory.lib.compose.utility.GooglePayButtonUtils
+import com.paytheory.lib.googlepay.GooglePayFactory
 
 /**
  * A composable Google Pay button that uses Google's official compose-pay-button library.
@@ -31,40 +29,17 @@ fun GooglePayButton(
     buttonType: GooglePayButtonType = GooglePayButtonType.PAY,
     buttonColor: GooglePayButtonColor = GooglePayButtonColor.BLACK
 ) {
-    // Get the allowedPaymentMethods from GooglePayUtil
-    val allowedPaymentMethods = GooglePayUtil.getAllowedPaymentMethodsJson().toString()
+    // Get the allowedPaymentMethods from GooglePayUtil via the Factory
+    val googlePayUtil = GooglePayFactory.getGooglePayUtil()
+    val allowedPaymentMethods = googlePayUtil.getAllowedPaymentMethodsJson().toString()
     
     PayButton(
         onClick = onClick,
         allowedPaymentMethods = allowedPaymentMethods,
         modifier = modifier,
-        type = mapButtonType(buttonType),
+        type = GooglePayButtonUtils.mapButtonType(buttonType),
         radius = 4.dp,  // Match corner radius to our design system
         enabled = enabled,
-        theme = mapButtonTheme(buttonColor)
+        theme = GooglePayButtonUtils.mapButtonTheme(buttonColor)
     )
-}
-
-/**
- * Maps our internal GooglePayButtonType to the library's ButtonType
- */
-private fun mapButtonType(buttonType: GooglePayButtonType): ButtonType {
-    return when (buttonType) {
-        GooglePayButtonType.PAY -> ButtonType.PAY
-        GooglePayButtonType.CHECKOUT -> ButtonType.PAY_CHECKOUT
-        GooglePayButtonType.ORDER -> ButtonType.PAY_ORDER
-        GooglePayButtonType.SUBSCRIBE -> ButtonType.PAY_SUBSCRIBE
-        GooglePayButtonType.BOOK -> ButtonType.PAY_BOOK
-        GooglePayButtonType.BUY -> ButtonType.PAY_BUY
-    }
-}
-
-/**
- * Maps our internal GooglePayButtonColor to the library's ButtonTheme
- */
-private fun mapButtonTheme(buttonColor: GooglePayButtonColor): ButtonTheme {
-    return when (buttonColor) {
-        GooglePayButtonColor.BLACK -> ButtonTheme.DARK
-        GooglePayButtonColor.WHITE -> ButtonTheme.LIGHT
-    }
 } 

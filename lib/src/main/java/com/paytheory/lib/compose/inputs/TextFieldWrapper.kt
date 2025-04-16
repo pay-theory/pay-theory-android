@@ -7,15 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
+import com.paytheory.lib.compose.utility.TextFieldUtils
 
 /**
  * A composable wrapper for either [OutlinedTextField] or [TextField] based on the `isOutlined` parameter.
  * This component handles displaying and updating a text field's value, with options for styling, validation, and input configuration.
- * It uses a [SecureString] for internal value handling, ensuring sensitive data is stored securely.
+ * It uses a [SecureStringWrapper] for internal value handling, ensuring sensitive data is stored securely.
  *
- * @param value The current text to be displayed in the text field, wrapped in a [SecureString].
+ * @param value The current text to be displayed in the text field, wrapped in a [SecureStringWrapper].
  * @param onValueChange The callback that is triggered when the text field's text changes.
  *                      It receives the new text as a [String].
  * @param modifier Modifier to be applied to the text field.
@@ -46,10 +46,12 @@ fun TextFieldWrapper(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isOutlined: Boolean = true
 ) {
+    // Use TextFieldUtils to convert SecureStringWrapper to text for display
+    val displayText = TextFieldUtils.secureWrapperToText(value)
 
     if (isOutlined) {
         OutlinedTextField(
-            value = value.secureValue.revealForUi(),
+            value = displayText,
             isError = isError,
             onValueChange = onValueChange,
             modifier = modifier,
@@ -62,7 +64,7 @@ fun TextFieldWrapper(
         )
     } else {
         TextField(
-            value = value.secureValue.revealForUi(),
+            value = displayText,
             isError = isError,
             onValueChange = onValueChange,
             modifier = modifier,
@@ -70,7 +72,6 @@ fun TextFieldWrapper(
             visualTransformation = visualTransformation,
             label = label,
             maxLines = maxLines,
-
             singleLine = singleLine,
             enabled = enabled
         )
@@ -117,6 +118,7 @@ fun TextFieldWrapper(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isOutlined: Boolean = true
 ) {
+    // This overload already uses TextFieldValue directly, no conversion needed
 
     if (isOutlined) {
         OutlinedTextField(

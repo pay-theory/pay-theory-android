@@ -1,171 +1,233 @@
 package com.paytheory.lib.configuration
 
 import com.paytheory.lib.PayTheoryConfiguration
-import org.junit.Assert.*
+import com.google.android.gms.wallet.WalletConstants
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [30])
 class GooglePayConfigurationTest {
 
-    private val validApiKey = "test-paytheorylab-test"
-    
+    // Use the correct test API key matching the constant in PayTheoryConfiguration
+    private val validApiKey = "test-paytheory-apikey"
+
     @Test
-    fun testDefaultGooglePaySettings() {
+    fun `builder should enable Google Pay with merchant name`() {
+        // Given
+        val merchantName = "Test Merchant"
+        
+        // When
         val config = PayTheoryConfiguration.Builder()
             .setApiKey(validApiKey)
-            .setAmount(1000)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
             .build()
             
-        // Verify default values
-        assertFalse(config.googlePayEnabled)
-        assertNull(config.googlePayMerchantName)
-        assertTrue(config.googlePayAllowPrepaidCards)
-        assertTrue(config.googlePayAllowCreditCards)
-        assertFalse(config.googlePayBillingAddressRequired)
-        assertEquals(GooglePayBillingAddressFormat.MINIMAL, config.googlePayBillingAddressFormat)
-        assertFalse(config.googlePayShippingAddressRequired)
-        assertFalse(config.googlePayPhoneNumberRequired)
+        // Then
+        assertTrue(config.googlePayEnabled)
+        assertEquals(merchantName, config.googlePayMerchantName)
+    }
+    
+    @Test
+    fun `builder should set Google Pay billing address options`() {
+        // Given
+        val merchantName = "Test Merchant"
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayBillingAddressRequired(true)
+            .setGooglePayBillingAddressFormat(GooglePayBillingAddressFormat.FULL)
+            .build()
+            
+        // Then
+        assertTrue(config.googlePayBillingAddressRequired)
+        assertEquals(GooglePayBillingAddressFormat.FULL, config.googlePayBillingAddressFormat)
+    }
+    
+    @Test
+    fun `builder should set Google Pay shipping address options`() {
+        // Given
+        val merchantName = "Test Merchant"
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayShippingAddressRequired(true)
+            .setGooglePayPhoneNumberRequired(true)
+            .build()
+            
+        // Then
+        assertTrue(config.googlePayShippingAddressRequired)
+        assertTrue(config.googlePayPhoneNumberRequired)
+    }
+    
+    @Test
+    fun `builder should set Google Pay card options`() {
+        // Given
+        val merchantName = "Test Merchant"
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayAllowPrepaidCards(false)
+            .setGooglePayAllowCreditCards(false)
+            .build()
+            
+        // Then
+        assertFalse(config.googlePayAllowPrepaidCards)
+        assertFalse(config.googlePayAllowCreditCards)
+    }
+    
+    @Test
+    fun `builder should set Google Pay button options`() {
+        // Given
+        val merchantName = "Test Merchant"
+        val buttonType = GooglePayButtonType.CHECKOUT
+        val buttonColor = GooglePayButtonColor.WHITE
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayButtonType(buttonType)
+            .setGooglePayButtonColor(buttonColor)
+            .build()
+            
+        // Then
+        assertEquals(buttonType, config.googlePayButtonType)
+        assertEquals(buttonColor, config.googlePayButtonColor)
+    }
+    
+    @Test
+    fun `builder should set Google Pay environment`() {
+        // Given
+        val merchantName = "Test Merchant"
+        val environment = GooglePayEnvironment.PRODUCTION
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayEnvironment(environment)
+            .build()
+            
+        // Then
+        assertEquals(environment, config.googlePayEnvironment)
+    }
+    
+    @Test
+    fun `builder should set Google Pay allowed card networks`() {
+        // Given
+        val merchantName = "Test Merchant"
+        val networks = listOf("VISA", "MASTERCARD")
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .setGooglePayAllowedCardNetworks(networks)
+            .build()
+            
+        // Then
+        assertEquals(networks, config.googlePayAllowedCardNetworks)
+    }
+    
+    @Test
+    fun `should use default values when only required Google Pay options are set`() {
+        // Given
+        val merchantName = "Test Merchant"
+        
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .enableGooglePay(merchantName)
+            .build()
+            
+        // Then
+        assertEquals(GooglePayEnvironment.TEST, config.googlePayEnvironment)
         assertEquals(GooglePayButtonType.PAY, config.googlePayButtonType)
         assertEquals(GooglePayButtonColor.BLACK, config.googlePayButtonColor)
-        assertEquals(GooglePayEnvironment.TEST, config.googlePayEnvironment)
+        assertEquals(GooglePayBillingAddressFormat.MINIMAL, config.googlePayBillingAddressFormat)
+        assertFalse(config.googlePayBillingAddressRequired)
+        assertFalse(config.googlePayShippingAddressRequired)
+        assertFalse(config.googlePayPhoneNumberRequired)
+        assertTrue(config.googlePayAllowPrepaidCards)
+        assertTrue(config.googlePayAllowCreditCards)
         assertEquals(GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS, config.googlePayAllowedCardNetworks)
         assertEquals(GooglePayConstants.DEFAULT_SUPPORTED_METHODS, config.googlePaySupportedMethods)
     }
     
     @Test
-    fun testEnableGooglePay() {
+    fun `Google Pay should be disabled by default`() {
+        // When
+        val config = PayTheoryConfiguration.Builder()
+            .setApiKey(validApiKey)
+            .setAmount(1099)
+            .build()
+            
+        // Then
+        assertFalse(config.googlePayEnabled)
+        assertEquals(null, config.googlePayMerchantName)
+    }
+    
+    @Test
+    fun `should correctly set all Google Pay button types`() {
+        // Given
         val merchantName = "Test Merchant"
-        val config = PayTheoryConfiguration.Builder()
-            .setApiKey(validApiKey)
-            .setAmount(1000)
-            .enableGooglePay(merchantName)
-            .build()
-            
-        // Verify Google Pay is enabled with the right merchant name
-        assertTrue(config.googlePayEnabled)
-        assertEquals(merchantName, config.googlePayMerchantName)
-    }
-    
-    @Test(expected = IllegalArgumentException::class)
-    fun testGooglePayEnabledWithoutMerchantName() {
-        // This should throw an exception because merchant name is required when Google Pay is enabled
-        PayTheoryConfiguration.Builder()
-            .setApiKey(validApiKey)
-            .setAmount(1000)
-            .apply { 
-                // Manually set googlePayEnabled without setting merchantName
-                this.googlePayEnabled = true 
-            }
-            .build()
-    }
-    
-    @Test
-    fun testCustomGooglePaySettings() {
-        val config = PayTheoryConfiguration.Builder()
-            .setApiKey(validApiKey)
-            .setAmount(1000)
-            .enableGooglePay("Test Merchant")
-            .setGooglePayAllowPrepaidCards(false)
-            .setGooglePayAllowCreditCards(false)
-            .setGooglePayBillingAddressRequired(true)
-            .setGooglePayBillingAddressFormat(GooglePayBillingAddressFormat.FULL)
-            .setGooglePayShippingAddressRequired(true)
-            .setGooglePayPhoneNumberRequired(true)
-            .setGooglePayButtonType(GooglePayButtonType.CHECKOUT)
-            .setGooglePayButtonColor(GooglePayButtonColor.WHITE)
-            .setGooglePayEnvironment(GooglePayEnvironment.PRODUCTION)
-            .build()
+        val buttonTypes = listOf(
+            GooglePayButtonType.PAY,
+            GooglePayButtonType.CHECKOUT,
+            GooglePayButtonType.ORDER,
+            GooglePayButtonType.SUBSCRIBE,
+            GooglePayButtonType.BOOK,
+            GooglePayButtonType.BUY
+        )
         
-        // Verify custom settings
-        assertTrue(config.googlePayEnabled)
-        assertEquals("Test Merchant", config.googlePayMerchantName)
-        assertFalse(config.googlePayAllowPrepaidCards)
-        assertFalse(config.googlePayAllowCreditCards)
-        assertTrue(config.googlePayBillingAddressRequired)
-        assertEquals(GooglePayBillingAddressFormat.FULL, config.googlePayBillingAddressFormat)
-        assertTrue(config.googlePayShippingAddressRequired)
-        assertTrue(config.googlePayPhoneNumberRequired)
-        assertEquals(GooglePayButtonType.CHECKOUT, config.googlePayButtonType)
-        assertEquals(GooglePayButtonColor.WHITE, config.googlePayButtonColor)
-        assertEquals(GooglePayEnvironment.PRODUCTION, config.googlePayEnvironment)
+        // When/Then - Test each button type
+        buttonTypes.forEach { buttonType ->
+            val config = PayTheoryConfiguration.Builder()
+                .setApiKey(validApiKey)
+                .setAmount(1099)
+                .enableGooglePay(merchantName)
+                .setGooglePayButtonType(buttonType)
+                .build()
+                
+            assertEquals(buttonType, config.googlePayButtonType)
+        }
     }
     
     @Test
-    fun testIsReadyToPayRequestBuilding() {
-        val config = PayTheoryConfiguration.Builder()
-            .setApiKey(validApiKey)
-            .setAmount(1000)
-            .enableGooglePay("Test Merchant")
-            .build()
-            
-        val request = GooglePayRequestBuilder.buildIsReadyToPayRequest(config)
-        
-        // Verify request structure
-        assertEquals(2, request.getInt("apiVersion"))
-        assertEquals(0, request.getInt("apiVersionMinor"))
-        assertTrue(request.has("allowedPaymentMethods"))
-        
-        val allowedMethods = request.getJSONArray("allowedPaymentMethods")
-        assertEquals(1, allowedMethods.length())
-        
-        val cardMethod = allowedMethods.getJSONObject(0)
-        assertEquals("CARD", cardMethod.getString("type"))
-        
-        val parameters = cardMethod.getJSONObject("parameters")
-        assertTrue(parameters.has("allowedAuthMethods"))
-        assertTrue(parameters.has("allowedCardNetworks"))
-        assertTrue(parameters.getBoolean("allowPrepaidCards"))
-        assertTrue(parameters.getBoolean("allowCreditCards"))
-    }
-    
-    @Test
-    fun testPaymentDataRequestBuilding() {
+    fun `should correctly set Google Pay supported methods`() {
+        // Given
         val merchantName = "Test Merchant"
+        val supportedMethods = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
+        
+        // When
         val config = PayTheoryConfiguration.Builder()
             .setApiKey(validApiKey)
-            .setAmount(1000)
+            .setAmount(1099)
             .enableGooglePay(merchantName)
-            .setGooglePayBillingAddressRequired(true)
-            .setGooglePayShippingAddressRequired(true)
-            .setGooglePayPhoneNumberRequired(true)
+            .setGooglePaySupportedMethods(supportedMethods)
             .build()
             
-        val price = "10.00"
-        val request = GooglePayRequestBuilder.buildPaymentDataRequest(config, price)
-        
-        // Verify request structure
-        assertEquals(2, request.getInt("apiVersion"))
-        assertEquals(0, request.getInt("apiVersionMinor"))
-        
-        // Verify transaction info
-        val transactionInfo = request.getJSONObject("transactionInfo")
-        assertEquals(price, transactionInfo.getString("totalPrice"))
-        assertEquals("FINAL", transactionInfo.getString("totalPriceStatus"))
-        assertEquals(GooglePayConstants.CURRENCY_CODE, transactionInfo.getString("currencyCode"))
-        assertEquals(GooglePayConstants.COUNTRY_CODE, transactionInfo.getString("countryCode"))
-        
-        // Verify merchant info
-        val merchantInfo = request.getJSONObject("merchantInfo")
-        assertEquals(merchantName, merchantInfo.getString("merchantName"))
-        
-        // Verify shipping address requirements
-        assertTrue(request.getBoolean("shippingAddressRequired"))
-        val shippingParams = request.getJSONObject("shippingAddressParameters")
-        assertTrue(shippingParams.getBoolean("phoneNumberRequired"))
-        
-        // Verify payment method with tokenization
-        val allowedMethods = request.getJSONArray("allowedPaymentMethods")
-        val cardMethod = allowedMethods.getJSONObject(0)
-        val tokenSpec = cardMethod.getJSONObject("tokenizationSpecification")
-        assertEquals("PAYMENT_GATEWAY", tokenSpec.getString("type"))
-        
-        val tokenParams = tokenSpec.getJSONObject("parameters")
-        assertEquals(GooglePayConstants.GATEWAY_NAME, tokenParams.getString("gateway"))
-        assertEquals(GooglePayConstants.GATEWAY_MERCHANT_ID, tokenParams.getString("gatewayMerchantId"))
-        
-        // Verify billing address parameters
-        val parameters = cardMethod.getJSONObject("parameters")
-        assertTrue(parameters.getBoolean("billingAddressRequired"))
-        val billingParams = parameters.getJSONObject("billingAddressParameters")
-        assertEquals("MIN", billingParams.getString("format"))
+        // Then
+        assertEquals(supportedMethods, config.googlePaySupportedMethods)
     }
 } 

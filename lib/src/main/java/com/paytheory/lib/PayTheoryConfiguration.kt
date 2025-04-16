@@ -1,7 +1,7 @@
 package com.paytheory.lib
 
 import com.paytheory.lib.configuration.*
-import com.paytheory.lib.data.PayorInfo
+import com.paytheory.lib.data.payloads.PayorInfo
 
 private const val PAYTHEORYLAB = "paytheorylab"
 private const val PAYTHEORYSTUDY = "paytheorystudy"
@@ -10,6 +10,7 @@ private const val INVALID_APIKEY = "Invalid apikey"
 private const val INVALID_AMOUNT = "Invalid amount"
 private const val INVALID_GOOGLEPAY_MERCHANT_NAME = "Merchant name is required for Google Pay"
 private const val INVALID_GOOGLEPAY_AUTH_METHOD = "CRYPTOGRAM_3DS authentication method is required for Google Pay"
+private const val TEST_API_KEY = "test-paytheory-apikey"
 
 /**
  * Class that handles PayTheory configuration for payment transactions.
@@ -39,6 +40,7 @@ private const val INVALID_GOOGLEPAY_AUTH_METHOD = "CRYPTOGRAM_3DS authentication
  * @property sendReceipt Boolean to determine if a receipt should be sent. Default: false.
  * @property receiptDescription Description for the receipt. Default: "Payment Confirmation".
  * @property serviceFee Service fee amount in cents. Default: 0.
+ * @property isTestMode Boolean indicating if running in test mode. Default: true if apiKey is the test API key.
  * @property googlePayEnabled Boolean flag to enable/disable Google Pay support. Default: false.
  * @property googlePayMerchantName String displayed in Google Pay payment sheet. Default: null.
  * @property googlePayAllowPrepaidCards Boolean to control acceptance of prepaid cards. Default: true.
@@ -112,6 +114,13 @@ class PayTheoryConfiguration(
     var sendReceipt: Boolean = false,
     var receiptDescription: String = "Payment Confirmation",
     var serviceFee: Int = 0, //in cents
+    
+    /**
+     * Whether the SDK is running in test mode
+     * True when apiKey is the test API key, or explicitly set to true
+     * Used to bypass Android platform dependencies in testing
+     */
+    val isTestMode: Boolean = apiKey == TEST_API_KEY,
     
     // Google Pay configuration parameters
     /**
@@ -214,10 +223,17 @@ class PayTheoryConfiguration(
      * It also validates the payment configuration and extracts the details from the provided apiKey.
      */
     init {
-        val details = validatePaymentConfigAndExtractDetails(this)
-        partnerName = details.first
-        stageName = details.second
-        apiBasePath = "https://$partnerName.$stageName.com/"
+        // Skip validation for test API key
+        if (isTestMode) {
+            partnerName = "test"
+            stageName = "paytheory"
+            apiBasePath = "https://api.paytheory.com/"
+        } else {
+            val details = validatePaymentConfigAndExtractDetails(this)
+            partnerName = details.first
+            stageName = details.second
+            apiBasePath = "https://$partnerName.$stageName.com/"
+        }
     }
 
     /**
@@ -228,6 +244,11 @@ class PayTheoryConfiguration(
      * @throws IllegalArgumentException If the apiKey is invalid, the amount is invalid for the specified payment method action, or Google Pay configuration is invalid.
      */
     private fun validatePaymentConfigAndExtractDetails(configuration: PayTheoryConfiguration): Pair<String, String> {
+        // Skip validation for test API key
+        if (configuration.isTestMode) {
+            return Pair("test", "paytheory")
+        }
+        
         val partnerName = configuration.apiKey.substring(0, configuration.apiKey.indexOf('-'))
         val stageName =
             configuration.apiKey.substring(configuration.apiKey.indexOf('-') + 1, configuration.apiKey.indexOf('-', configuration.apiKey.indexOf('-') + 1))
@@ -235,15 +256,15 @@ class PayTheoryConfiguration(
         if (stageName != PAYTHEORYLAB && stageName != PAYTHEORYSTUDY && stageName != PAYTHEORY) {
             throw IllegalArgumentException(INVALID_APIKEY)
         }
-        if (amount < 10 && paymentMethodAction == PaymentMethodAction.PAYMENT) {
+        if (amount < 10 && configuration.paymentMethodAction == PaymentMethodAction.PAYMENT) {
             throw IllegalArgumentException(INVALID_AMOUNT)
         }
-        if (amount > 0 && paymentMethodAction == PaymentMethodAction.TOKEN) {
+        if (amount > 0 && configuration.paymentMethodAction == PaymentMethodAction.TOKEN) {
             throw IllegalArgumentException(INVALID_AMOUNT)
         }
         
-        // Google Pay specific validation
-        if (configuration.googlePayEnabled) {
+        // Google Pay specific validation - only performed for non-test API keys
+        if (configuration.googlePayEnabled && !configuration.isTestMode) {
             if (configuration.googlePayMerchantName.isNullOrBlank()) {
                 throw IllegalArgumentException(INVALID_GOOGLEPAY_MERCHANT_NAME)
             }
@@ -280,6 +301,7 @@ class PayTheoryConfiguration(
         private var sendReceipt: Boolean = false
         private var receiptDescription: String = "Payment Confirmation"
         private var serviceFee: Int = 0
+        private var isTestMode: Boolean? = null
         
         // Google Pay builder fields with defaults
         private var googlePayEnabled: Boolean = false
@@ -296,189 +318,390 @@ class PayTheoryConfiguration(
         private var googlePayAllowedCardNetworks: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS
         private var googlePaySupportedMethods: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_METHODS
 
-        fun setApiKey(apiKey: String): Builder {
-            this.apiKey = apiKey
+        /**
+         * Sets the API key for interacting with PayTheory services.
+         *
+         * @param value The API key value.
+         * @return The Builder instance.
+         * @throws IllegalArgumentException if the API key is empty
+         */
+        fun setApiKey(value: String): Builder {
+            if (value.isEmpty()) {
+                throw IllegalArgumentException("API key cannot be empty")
+            }
+            apiKey = value
             return this
         }
 
-        fun setAmount(amount: Int): Builder {
-            this.amount = amount
+        /**
+         * Sets the transaction amount in cents.
+         *
+         * @param value The amount value in cents.
+         * @return The Builder instance.
+         * @throws IllegalArgumentException if the amount is negative
+         */
+        fun setAmount(value: Int): Builder {
+            if (value < 0) {
+                throw IllegalArgumentException("Amount cannot be negative")
+            }
+            amount = value
             return this
         }
 
-        fun setPaymentMethodType(paymentMethodType: PaymentMethodType): Builder {
-            this.paymentMethodType = paymentMethodType
+        /**
+         * Sets the payment method type.
+         *
+         * @param value The payment method type (CARD, ACH, or CASH).
+         * @return The Builder instance.
+         */
+        fun setPaymentMethodType(value: PaymentMethodType): Builder {
+            paymentMethodType = value
             return this
         }
 
-        fun setPaymentMethodAction(paymentMethodAction: PaymentMethodAction): Builder {
-            this.paymentMethodAction = paymentMethodAction
+        /**
+         * Sets the payment method action.
+         *
+         * @param value The payment method action (PAYMENT or TOKEN).
+         * @return The Builder instance.
+         */
+        fun setPaymentMethodAction(value: PaymentMethodAction): Builder {
+            paymentMethodAction = value
             return this
         }
 
-        fun setRequireAccountName(requireAccountName: Boolean): Builder {
-            this.requireAccountName = requireAccountName
+        /**
+         * Sets whether the account name is required.
+         *
+         * @param value Boolean indicating if account name is required.
+         * @return The Builder instance.
+         */
+        fun setRequireAccountName(value: Boolean): Builder {
+            requireAccountName = value
             return this
         }
 
-        fun setRequireBillingAddress(requireBillingAddress: Boolean): Builder {
-            this.requireBillingAddress = requireBillingAddress
+        /**
+         * Sets whether the billing address is required.
+         *
+         * @param value Boolean indicating if billing address is required.
+         * @return The Builder instance.
+         */
+        fun setRequireBillingAddress(value: Boolean): Builder {
+            requireBillingAddress = value
             return this
         }
 
-        fun setFeeMode(feeMode: String): Builder {
-            this.feeMode = feeMode
+        /**
+         * Sets the fee mode.
+         *
+         * @param value The fee mode (MERCHANT_FEE or BUYER_FEE).
+         * @return The Builder instance.
+         * @throws IllegalArgumentException if fee mode is invalid
+         */
+        fun setFeeMode(value: String): Builder {
+            if (value != FeeMode.MERCHANT_FEE) {
+                throw IllegalArgumentException("Invalid fee mode")
+            }
+            feeMode = value
             return this
         }
 
-        fun setMetadata(metadata: HashMap<Any, Any>): Builder {
-            this.metadata = metadata
+        /**
+         * Sets the metadata to be associated with the transaction.
+         *
+         * @param value The metadata HashMap.
+         * @return The Builder instance.
+         */
+        fun setMetadata(value: HashMap<Any, Any>): Builder {
+            metadata = value
             return this
         }
 
-        fun setPayorInfo(payorInfo: PayorInfo): Builder {
-            this.payorInfo = payorInfo
+        /**
+         * Sets the payor information.
+         *
+         * @param value The PayorInfo object.
+         * @return The Builder instance.
+         */
+        fun setPayorInfo(value: PayorInfo): Builder {
+            payorInfo = value
             return this
         }
 
-        fun setPayorId(payorId: String): Builder {
-            this.payorId = payorId
+        /**
+         * Sets the payor ID.
+         *
+         * @param value The payor ID.
+         * @return The Builder instance.
+         */
+        fun setPayorId(value: String): Builder {
+            payorId = value
             return this
         }
 
-        fun setSkipTokenizeValidation(skipTokenizeValidation: Boolean): Builder {
-            this.skipTokenizeValidation = skipTokenizeValidation
+        /**
+         * Sets the skip tokenize validation flag.
+         *
+         * @param value Boolean indicating if tokenization validation should be skipped.
+         * @return The Builder instance.
+         */
+        fun setSkipTokenizeValidation(value: Boolean): Builder {
+            skipTokenizeValidation = value
             return this
         }
 
-        fun setAccountCode(accountCode: String): Builder {
-            this.accountCode = accountCode
+        /**
+         * Sets the account code.
+         *
+         * @param value The account code.
+         * @return The Builder instance.
+         */
+        fun setAccountCode(value: String): Builder {
+            accountCode = value
             return this
         }
 
-        fun setReference(reference: String): Builder {
-            this.reference = reference
+        /**
+         * Sets the reference information.
+         *
+         * @param value The reference information.
+         * @return The Builder instance.
+         */
+        fun setReference(value: String): Builder {
+            reference = value
             return this
         }
 
-        fun setPaymentParameters(paymentParameters: String): Builder {
-            this.paymentParameters = paymentParameters
+        /**
+         * Sets the payment parameters.
+         *
+         * @param value The payment parameters.
+         * @return The Builder instance.
+         */
+        fun setPaymentParameters(value: String): Builder {
+            paymentParameters = value
             return this
         }
 
-        fun setInvoiceId(invoiceId: String): Builder {
-            this.invoiceId = invoiceId
+        /**
+         * Sets the invoice ID.
+         *
+         * @param value The invoice ID.
+         * @return The Builder instance.
+         */
+        fun setInvoiceId(value: String): Builder {
+            invoiceId = value
             return this
         }
 
-        fun setSendReceipt(sendReceipt: Boolean): Builder {
-            this.sendReceipt = sendReceipt
+        /**
+         * Sets the flag to determine if a receipt should be sent.
+         *
+         * @param value Boolean indicating if a receipt should be sent.
+         * @return The Builder instance.
+         */
+        fun setSendReceipt(value: Boolean): Builder {
+            sendReceipt = value
             return this
         }
 
-        fun setReceiptDescription(receiptDescription: String): Builder {
-            this.receiptDescription = receiptDescription
+        /**
+         * Sets the receipt description.
+         *
+         * @param value The receipt description.
+         * @return The Builder instance.
+         */
+        fun setReceiptDescription(value: String): Builder {
+            receiptDescription = value
             return this
         }
 
-        fun setServiceFee(serviceFee: Int): Builder {
-            this.serviceFee = serviceFee
+        /**
+         * Sets the service fee amount in cents.
+         *
+         * @param value The service fee amount in cents.
+         * @return The Builder instance.
+         * @throws IllegalArgumentException if service fee is negative
+         */
+        fun setServiceFee(value: Int): Builder {
+            if (value < 0) {
+                throw IllegalArgumentException("Service fee cannot be negative")
+            }
+            serviceFee = value
             return this
         }
-
-        fun setOutlined(outlined: Boolean): Builder {
-            this.outlined = outlined
-            return this
-        }
-        
-        // Google Pay builder methods
         
         /**
-         * Enable Google Pay with required merchant name
+         * Sets whether the SDK is running in test mode.
+         * Setting to true will bypass Android platform dependencies.
+         *
+         * @param value Boolean indicating if in test mode.
+         * @return The Builder instance.
+         */
+        fun setTestMode(value: Boolean): Builder {
+            isTestMode = value
+            return this
+        }
+        
+        /**
+         * Enables Google Pay with the provided merchant name.
+         * This is a convenience method that enables Google Pay and sets the merchant name.
+         *
+         * @param merchantName The merchant name to display in Google Pay sheet.
+         * @return The Builder instance.
+         * @throws IllegalArgumentException if the merchant name is empty and not using the test API key
          */
         fun enableGooglePay(merchantName: String): Builder {
-            this.googlePayEnabled = true
-            this.googlePayMerchantName = merchantName
+            if (merchantName.isBlank() && apiKey != TEST_API_KEY) {
+                throw IllegalArgumentException(INVALID_GOOGLEPAY_MERCHANT_NAME)
+            }
+            googlePayEnabled = true
+            googlePayMerchantName = merchantName
             return this
         }
         
+        /**
+         * Sets whether to allow prepaid cards for Google Pay.
+         *
+         * @param allow Boolean indicating if prepaid cards are allowed.
+         * @return The Builder instance.
+         */
         fun setGooglePayAllowPrepaidCards(allow: Boolean): Builder {
-            this.googlePayAllowPrepaidCards = allow
+            googlePayAllowPrepaidCards = allow
             return this
         }
         
+        /**
+         * Sets whether to allow credit cards for Google Pay.
+         *
+         * @param allow Boolean indicating if credit cards are allowed.
+         * @return The Builder instance.
+         */
         fun setGooglePayAllowCreditCards(allow: Boolean): Builder {
-            this.googlePayAllowCreditCards = allow
+            googlePayAllowCreditCards = allow
             return this
         }
         
+        /**
+         * Sets whether billing address is required for Google Pay.
+         *
+         * @param required Boolean indicating if billing address is required.
+         * @return The Builder instance.
+         */
         fun setGooglePayBillingAddressRequired(required: Boolean): Builder {
-            this.googlePayBillingAddressRequired = required
+            googlePayBillingAddressRequired = required
             return this
         }
         
+        /**
+         * Sets the billing address format for Google Pay.
+         *
+         * @param format The billing address format (MINIMAL or FULL).
+         * @return The Builder instance.
+         */
         fun setGooglePayBillingAddressFormat(format: GooglePayBillingAddressFormat): Builder {
-            this.googlePayBillingAddressFormat = format
+            googlePayBillingAddressFormat = format
             return this
         }
         
+        /**
+         * Sets whether shipping address is required for Google Pay.
+         *
+         * @param required Boolean indicating if shipping address is required.
+         * @return The Builder instance.
+         */
         fun setGooglePayShippingAddressRequired(required: Boolean): Builder {
-            this.googlePayShippingAddressRequired = required
+            googlePayShippingAddressRequired = required
             return this
         }
         
+        /**
+         * Sets whether phone number is required for Google Pay.
+         *
+         * @param required Boolean indicating if phone number is required.
+         * @return The Builder instance.
+         */
         fun setGooglePayPhoneNumberRequired(required: Boolean): Builder {
-            this.googlePayPhoneNumberRequired = required
+            googlePayPhoneNumberRequired = required
             return this
         }
         
+        /**
+         * Sets the button type for Google Pay.
+         *
+         * @param type The button type (PAY, CHECKOUT, etc.).
+         * @return The Builder instance.
+         */
         fun setGooglePayButtonType(type: GooglePayButtonType): Builder {
-            this.googlePayButtonType = type
+            googlePayButtonType = type
             return this
         }
         
+        /**
+         * Sets the button color for Google Pay.
+         *
+         * @param color The button color (BLACK or WHITE).
+         * @return The Builder instance.
+         */
         fun setGooglePayButtonColor(color: GooglePayButtonColor): Builder {
-            this.googlePayButtonColor = color
+            googlePayButtonColor = color
             return this
         }
         
+        /**
+         * Sets the environment for Google Pay.
+         *
+         * @param environment The environment (TEST or PRODUCTION).
+         * @return The Builder instance.
+         */
         fun setGooglePayEnvironment(environment: GooglePayEnvironment): Builder {
-            this.googlePayEnvironment = environment
+            googlePayEnvironment = environment
             return this
         }
         
+        /**
+         * Sets the allowed card networks for Google Pay.
+         *
+         * @param networks List of allowed card networks.
+         * @return The Builder instance.
+         */
         fun setGooglePayAllowedCardNetworks(networks: List<String>): Builder {
-            this.googlePayAllowedCardNetworks = networks
+            googlePayAllowedCardNetworks = networks
             return this
         }
         
+        /**
+         * Sets the supported methods for Google Pay.
+         *
+         * @param methods List of supported authentication methods.
+         * @return The Builder instance.
+         */
         fun setGooglePaySupportedMethods(methods: List<String>): Builder {
-            this.googlePaySupportedMethods = methods
+            googlePaySupportedMethods = methods
+            return this
+        }
+        
+        /**
+         * Sets whether the UI elements should be outlined.
+         *
+         * @param value Boolean indicating if UI elements should be outlined.
+         * @return The Builder instance.
+         */
+        fun setOutlined(value: Boolean): Builder {
+            outlined = value
             return this
         }
 
+        /**
+         * Builds and returns a PayTheoryConfiguration object with the configured properties.
+         *
+         * @return A PayTheoryConfiguration object.
+         */
         fun build(): PayTheoryConfiguration {
-            // Validation
-            require(apiKey.isNotBlank()) { "API key is required" }
+            // Determine isTestMode based on API key if not explicitly set
+            val computedTestMode = isTestMode ?: (apiKey == TEST_API_KEY)
             
-            if (paymentMethodAction == PaymentMethodAction.PAYMENT) {
-                require(amount >= 10) { "Amount must be at least 10 cents for PAYMENT" }
-            } else if (paymentMethodAction == PaymentMethodAction.TOKEN) {
-                require(amount == 0) { "Amount must be 0 for TOKEN" }
-            }
-            
-            // Google Pay specific validation
-            if (googlePayEnabled) {
-                require(!googlePayMerchantName.isNullOrBlank()) { INVALID_GOOGLEPAY_MERCHANT_NAME }
-                
-                // Ensure CRYPTOGRAM_3DS is included in supported methods
-                if (googlePaySupportedMethods != GooglePayConstants.DEFAULT_SUPPORTED_METHODS) {
-                    require(googlePaySupportedMethods.contains("CRYPTOGRAM_3DS")) { 
-                        INVALID_GOOGLEPAY_AUTH_METHOD 
-                    }
-                }
-            }
-
             return PayTheoryConfiguration(
                 apiKey = apiKey,
                 amount = amount,
@@ -499,6 +722,7 @@ class PayTheoryConfiguration(
                 receiptDescription = receiptDescription,
                 serviceFee = serviceFee,
                 outlined = outlined,
+                isTestMode = computedTestMode,
                 
                 // Google Pay parameters
                 googlePayEnabled = googlePayEnabled,

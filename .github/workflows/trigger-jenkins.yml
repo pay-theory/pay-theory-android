@@ -1,0 +1,24 @@
+name: Trigger Jenkins Pipeline
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+  schedule:
+    # Run nightly build at 2 AM UTC (Jenkins will handle the actual testing)
+    - cron: '0 2 * * *'
+
+jobs:
+  trigger-jenkins:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Jenkins Job
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            --user jenkins:${{ secrets.JENKINS_API_KEY }} \
+            "${{ secrets.JENKINS_URL }}/job/pay-theory-android-pipeline/buildWithParameters" \
+            --data-urlencode "NIGHTLY_BUILD=${{ github.event_name == 'schedule' }}" \
+            --data-urlencode "RELEASE_BUILD=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}" \
+            --data-urlencode "MIN_COVERAGE=80" 

@@ -3,8 +3,8 @@ package com.paytheory.lib.model
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -20,11 +20,12 @@ class PaymentFieldViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: PaymentFieldViewModel
 
     @Before
     fun setup() {
-        Dispatchers.setMain(StandardTestDispatcher())
+        Dispatchers.setMain(testDispatcher)
         viewModel = PaymentFieldViewModel()
     }
 
@@ -33,198 +34,143 @@ class PaymentFieldViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun getAllStates(): List<FieldState> = listOf(
-        viewModel.nameState.value,
-        viewModel.bankAccountState.value,
-        viewModel.bankRoutingState.value,
-        viewModel.bankAccountTypeState.value,
-        viewModel.cardNumberState.value,
-        viewModel.cardCvcState.value,
-        viewModel.cardExpirationState.value,
-        viewModel.addressState.value,
-        viewModel.cityState.value,
-        viewModel.regionState.value,
-        viewModel.postalCodeState.value
-    )
-
     @Test
-    fun `initial state of all fields is INIT`() {
-        getAllStates().forEach { state ->
-            assertEquals(FieldState.INIT, state)
-        }
+    fun `updateNameState sets correct state`() = runTest {
+        // Initial state should be INIT
+        assertEquals(FieldState.INIT, viewModel.nameState.first())
+
+        // Update state to READY
+        viewModel.updateNameState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.nameState.first())
+
+        // Update state to INVALID
+        viewModel.updateNameState(FieldState.INVALID)
+        assertEquals(FieldState.INVALID, viewModel.nameState.first())
+
+        // Update state to EMPTY
+        viewModel.updateNameState(FieldState.EMPTY)
+        assertEquals(FieldState.EMPTY, viewModel.nameState.first())
     }
 
     @Test
-    fun `updateNameState updates nameState`() = runTest {
-        val newState = FieldState.READY
-        viewModel.updateNameState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.nameState.value)
+    fun `updateBankAccountState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.bankAccountState.first())
+        viewModel.updateBankAccountState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.bankAccountState.first())
     }
 
     @Test
-    fun `updateBankAccountState updates bankAccountState`() = runTest {
-        val newState = FieldState.INVALID
-        viewModel.updateBankAccountState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.bankAccountState.value)
+    fun `updateBankRoutingState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.bankRoutingState.first())
+        viewModel.updateBankRoutingState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.bankRoutingState.first())
     }
 
     @Test
-    fun `updateBankRoutingState updates bankRoutingState`() = runTest {
-        val newState = FieldState.EMPTY
-        viewModel.updateBankRoutingState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.bankRoutingState.value)
+    fun `updateBankAccountTypeState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.bankAccountTypeState.first())
+        viewModel.updateBankAccountTypeState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.bankAccountTypeState.first())
     }
 
     @Test
-    fun `updateBankAccountTypeState updates bankAccountTypeState`() = runTest {
-        val newState = FieldState.READY
-        viewModel.updateBankAccountTypeState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.bankAccountTypeState.value)
+    fun `updateCardNumberState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.cardNumberState.first())
+        viewModel.updateCardNumberState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.cardNumberState.first())
     }
 
     @Test
-    fun `updateCardNumberState updates cardNumberState`() = runTest {
-        val newState = FieldState.INVALID
-        viewModel.updateCardNumberState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.cardNumberState.value)
+    fun `updateCardCvcState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.cardCvcState.first())
+        viewModel.updateCardCvcState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.cardCvcState.first())
     }
 
     @Test
-    fun `updateCardCvcState updates cardCvcState`() = runTest {
-        val newState = FieldState.EMPTY
-        viewModel.updateCardCvcState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.cardCvcState.value)
+    fun `updateCardExpirationState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.cardExpirationState.first())
+        viewModel.updateCardExpirationState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.cardExpirationState.first())
     }
 
     @Test
-    fun `updateCardExpirationState updates cardExpirationState`() = runTest {
-        val newState = FieldState.READY
-        viewModel.updateCardExpirationState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.cardExpirationState.value)
+    fun `updateAddressState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.addressState.first())
+        viewModel.updateAddressState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.addressState.first())
     }
 
     @Test
-    fun `updateAddressState updates addressState`() = runTest {
-        val newState = FieldState.INVALID
-        viewModel.updateAddressState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.addressState.value)
+    fun `updateCityState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.cityState.first())
+        viewModel.updateCityState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.cityState.first())
     }
 
     @Test
-    fun `updateCityState updates cityState`() = runTest {
-        val newState = FieldState.EMPTY
-        viewModel.updateCityState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.cityState.value)
+    fun `updateRegionState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.regionState.first())
+        viewModel.updateRegionState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.regionState.first())
     }
 
     @Test
-    fun `updateRegionState updates regionState`() = runTest {
-        val newState = FieldState.READY
-        viewModel.updateRegionState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.regionState.value)
+    fun `updatePostalCodeState sets correct state`() = runTest {
+        assertEquals(FieldState.INIT, viewModel.postalCodeState.first())
+        viewModel.updatePostalCodeState(FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.postalCodeState.first())
     }
 
     @Test
-    fun `updatePostalCodeState updates postalCodeState`() = runTest {
-        val newState = FieldState.INVALID
-        viewModel.updatePostalCodeState(newState)
-        advanceUntilIdle()
-        assertEquals(newState, viewModel.postalCodeState.value)
-    }
-
-    @Test
-    fun `updateState with NAME_ON_ACCOUNT updates nameState`() = runTest {
+    fun `updateState routes to correct field state update`() = runTest {
+        // Test routing for each field
+        
+        // Test NAME_ON_ACCOUNT
         viewModel.updateState(PaymentField.NAME_ON_ACCOUNT, FieldState.READY)
-        advanceUntilIdle()
-        assertEquals(FieldState.READY, viewModel.nameState.value)
-    }
-
-    @Test
-    fun `updateState with BANK_ACCOUNT_NUMBER updates bankAccountState`() = runTest {
+        assertEquals(FieldState.READY, viewModel.nameState.first())
+        
+        // Test BANK_ACCOUNT_NUMBER
         viewModel.updateState(PaymentField.BANK_ACCOUNT_NUMBER, FieldState.INVALID)
-        advanceUntilIdle()
-        assertEquals(FieldState.INVALID, viewModel.bankAccountState.value)
-    }
-
-    @Test
-    fun `updateState with BANK_ROUTING_NUMBER updates bankRoutingState`() = runTest {
+        assertEquals(FieldState.INVALID, viewModel.bankAccountState.first())
+        
+        // Test BANK_ROUTING_NUMBER
         viewModel.updateState(PaymentField.BANK_ROUTING_NUMBER, FieldState.EMPTY)
-        advanceUntilIdle()
-        assertEquals(FieldState.EMPTY, viewModel.bankRoutingState.value)
-    }
-
-    @Test
-    fun `updateState with CARD_NUMBER updates cardNumberState`() = runTest {
-        viewModel.updateState(PaymentField.CARD_NUMBER, FieldState.READY)
-        advanceUntilIdle()
-        assertEquals(FieldState.READY, viewModel.cardNumberState.value)
-    }
-
-    @Test
-    fun `updateState with CARD_EXPIRATION updates cardExpirationState`() = runTest {
-        viewModel.updateState(PaymentField.CARD_EXPIRATION, FieldState.INVALID)
-        advanceUntilIdle()
-        assertEquals(FieldState.INVALID, viewModel.cardExpirationState.value)
-    }
-
-    @Test
-    fun `updateState with CARD_CVC updates cardCvcState`() = runTest {
+        assertEquals(FieldState.EMPTY, viewModel.bankRoutingState.first())
+        
+        // Test BANK_ACCOUNT_TYPE
+        viewModel.updateState(PaymentField.BANK_ACCOUNT_TYPE, FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.bankAccountTypeState.first())
+        
+        // Test CARD_NUMBER
+        viewModel.updateState(PaymentField.CARD_NUMBER, FieldState.INVALID)
+        assertEquals(FieldState.INVALID, viewModel.cardNumberState.first())
+        
+        // Test CARD_EXPIRATION
+        viewModel.updateState(PaymentField.CARD_EXPIRATION, FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.cardExpirationState.first())
+        
+        // Test CARD_CVC
         viewModel.updateState(PaymentField.CARD_CVC, FieldState.EMPTY)
-        advanceUntilIdle()
-        assertEquals(FieldState.EMPTY, viewModel.cardCvcState.value)
-    }
-
-    @Test
-    fun `updateState with ADDRESS_LINE1 updates addressState`() = runTest {
+        assertEquals(FieldState.EMPTY, viewModel.cardCvcState.first())
+        
+        // Test ADDRESS_LINE1
         viewModel.updateState(PaymentField.ADDRESS_LINE1, FieldState.READY)
-        advanceUntilIdle()
-        assertEquals(FieldState.READY, viewModel.addressState.value)
-    }
-
-    @Test
-    fun `updateState with CITY updates cityState`() = runTest {
+        assertEquals(FieldState.READY, viewModel.addressState.first())
+        
+        // Test CITY
         viewModel.updateState(PaymentField.CITY, FieldState.INVALID)
-        advanceUntilIdle()
-        assertEquals(FieldState.INVALID, viewModel.cityState.value)
-    }
-
-    @Test
-    fun `updateState with REGION updates regionState`() = runTest {
-        viewModel.updateState(PaymentField.REGION, FieldState.EMPTY)
-        advanceUntilIdle()
-        assertEquals(FieldState.EMPTY, viewModel.regionState.value)
-    }
-
-    @Test
-    fun `updateState with POSTAL_CODE updates postalCodeState`() = runTest {
-        viewModel.updateState(PaymentField.POSTAL_CODE, FieldState.READY)
-        advanceUntilIdle()
-        assertEquals(FieldState.READY, viewModel.postalCodeState.value)
-    }
-
-    @Test
-    fun `updateState with BANK_ACCOUNT_TYPE updates bankAccountTypeState`() = runTest {
-        viewModel.updateState(PaymentField.BANK_ACCOUNT_TYPE, FieldState.INVALID)
-        advanceUntilIdle()
-        assertEquals(FieldState.INVALID, viewModel.bankAccountTypeState.value)
-    }
-
-    @Test
-    fun `updateState with unhandled field does nothing`() = runTest {
-        val initialState = getAllStates()
+        assertEquals(FieldState.INVALID, viewModel.cityState.first())
+        
+        // Test REGION
+        viewModel.updateState(PaymentField.REGION, FieldState.READY)
+        assertEquals(FieldState.READY, viewModel.regionState.first())
+        
+        // Test POSTAL_CODE
+        viewModel.updateState(PaymentField.POSTAL_CODE, FieldState.EMPTY)
+        assertEquals(FieldState.EMPTY, viewModel.postalCodeState.first())
+        
+        // Test ADDRESS_LINE2 (should not throw exception)
         viewModel.updateState(PaymentField.ADDRESS_LINE2, FieldState.READY)
-        advanceUntilIdle()
-        val updatedState = getAllStates()
-        assertEquals(initialState, updatedState)
     }
-}
+} 

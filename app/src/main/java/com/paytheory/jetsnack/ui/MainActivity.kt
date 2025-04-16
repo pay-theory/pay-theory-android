@@ -21,12 +21,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.paytheory.lib.BarcodeResult
-import com.paytheory.lib.FailedTransactionResult
-import com.paytheory.lib.PTError
+import com.paytheory.lib.data.payable.BarcodeResult
+import com.paytheory.lib.data.payable.FailedTransactionResult
+import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.Payable
-import com.paytheory.lib.PaymentMethodTokenResults
-import com.paytheory.lib.SuccessfulTransactionResult
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
+import com.paytheory.lib.model.PaymentField
+import com.paytheory.lib.model.FieldState
 import com.paytheory.lib.model.PaymentViewModel
 
 class MainActivity : ComponentActivity(), Payable {
@@ -66,7 +68,7 @@ class MainActivity : ComponentActivity(), Payable {
         Log.d("MainActivity", "handleTokenizeSuccess: $paymentMethodToken")
     }
 
-    override fun handleStateChange(fieldState: Pair<PaymentViewModel.PaymentField, PaymentViewModel.FieldState>) {
+    override fun handleStateChange(fieldState: Pair<PaymentField, FieldState>) {
         Log.d("MainActivity", "handleStateChange: $fieldState")
     }
 

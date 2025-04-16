@@ -33,15 +33,16 @@ import com.paytheory.lib.compose.string.SecureStringWrapper
  *
  * @return A Saver that can save and restore SecureStringWrapper objects.
  */
-fun createSecureStringWrapperSaver(): Saver<SecureStringWrapper, *> = listSaver(
+fun createSecureStringWrapperSaver(): Saver<SecureStringWrapper, *> = listSaver<SecureStringWrapper, Any>(
     save = { wrapper ->
+        val secureState = wrapper.secureState
         listOf(
             wrapper.secureValue.revealForUi(), // Save SecureString value
-            wrapper.secureState.text,          // Save text content
-            wrapper.secureState.selection.start,
-            wrapper.secureState.selection.end,
-            wrapper.secureState.composition?.start ?: -1,
-            wrapper.secureState.composition?.end ?: -1
+            secureState.text,                 // Save text content
+            secureState.selection.start,
+            secureState.selection.end,
+            secureState.composition?.start ?: -1,
+            secureState.composition?.end ?: -1
         )
     },
     restore = { list ->
@@ -78,15 +79,15 @@ fun createSecureStringWrapperSaver(): Saver<SecureStringWrapper, *> = listSaver(
  *
  * @return A [Saver] capable of saving and restoring [SecureString] objects.
  */
-fun createSecureStringSaver(): Saver<SecureString, *> = listSaver(
+fun createSecureStringSaver(): Saver<SecureString, *> = listSaver<SecureString, Any>(
     save = { secureString ->
         listOf(
-            secureString.revealForProcessing()
+            secureString.revealForUi() // Save as a string instead of byte array
         )
     },
     restore = { list ->
         SecureString(
-            list[0]
+            list[0] as String
         )
     }
 )

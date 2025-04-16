@@ -1,6 +1,8 @@
 package com.paytheory.lib.data
 
-import com.google.gson.annotations.SerializedName
+import com.paytheory.lib.data.responses.BarcodeMessage as ResponsesBarcodeMessage
+import com.paytheory.lib.data.responses.HostToken as ResponsesHostToken
+import com.paytheory.lib.data.responses.HostTokenMessage as ResponsesHostTokenMessage
 
 /**
  * Data class to store resulting barcode data
@@ -10,23 +12,16 @@ import com.google.gson.annotations.SerializedName
  * @param barcodeFee
  * @param merchant
  */
-data class BarcodeMessage (
-    @SerializedName("barcode_id") val barcodeId: String,
-    @SerializedName("barcode_url") val barcodeUrl: String,
-    @SerializedName("barcode") val barcode: String,
-    @SerializedName("fees") val barcodeFee: String,
-    @SerializedName("merchant_uid") val merchant: String,
-)
+@Deprecated("Use com.paytheory.lib.data.responses.BarcodeMessage instead", ReplaceWith("ResponsesBarcodeMessage"))
+typealias BarcodeMessage = ResponsesBarcodeMessage
 
 /**
  * Data class to store host token message details
  * @param type
  * @param body
  */
-data class HostTokenMessage (
-    @SerializedName("type") val type: String,
-    @SerializedName("body") val body: HostToken
-)
+@Deprecated("Use com.paytheory.lib.data.responses.HostTokenMessage instead", ReplaceWith("ResponsesHostTokenMessage"))
+typealias HostTokenMessage = ResponsesHostTokenMessage
 
 /**
  * Data class to store host token message details
@@ -34,8 +29,5 @@ data class HostTokenMessage (
  * @param publicKey encryption key to encode/decode messages
  * @param sessionKey encryption key to encode/decode messages
  */
-data class HostToken (
-    @SerializedName("hostToken") val hostToken: String,
-    @SerializedName("publicKey") val publicKey: String,
-    @SerializedName("sessionKey") val sessionKey: String
-)
+@Deprecated("Use com.paytheory.lib.data.responses.HostToken instead", ReplaceWith("ResponsesHostToken"))
+typealias HostToken = ResponsesHostToken

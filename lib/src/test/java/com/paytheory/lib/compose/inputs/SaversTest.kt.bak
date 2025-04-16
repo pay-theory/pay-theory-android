@@ -1,0 +1,190 @@
+package com.paytheory.lib.compose.inputs
+
+import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.ui.text.TextRange
+import com.paytheory.lib.compose.string.SecureString
+import com.paytheory.lib.compose.string.SecureStringWrapper
+import org.junit.Assert.*
+import org.junit.Test
+
+class SaversTest {
+
+    @Test
+    fun `SecureStringWrapper saver saves and restores correctly`() {
+        // Create test data
+        val originalText = "test123"
+        val originalSecureString = SecureString(originalText)
+        val originalSelection = TextRange(2, 5)
+        val originalWrapper = SecureStringWrapper(initialValue = originalSecureString, selection = originalSelection)
+        
+        // Get the saver
+        val saver = createSecureStringWrapperSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureStringWrapper, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalWrapper)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals(originalText, it.secureValue.revealForUi())
+            
+            // Note: According to the saver implementation, selection is reset to the entire text
+            assertEquals(TextRange(0, originalText.length), it._selection)
+        }
+    }
+    
+    @Test
+    fun `SecureStringWrapper saver handles empty string`() {
+        // Create test data with empty string
+        val originalSecureString = SecureString("")
+        val originalWrapper = SecureStringWrapper(initialValue = originalSecureString, selection = null)
+        
+        // Get the saver
+        val saver = createSecureStringWrapperSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureStringWrapper, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalWrapper)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals("", it.secureValue.revealForUi())
+            assertEquals(TextRange(0, 0), it._selection)
+        }
+    }
+    
+    @Test
+    fun `SecureString saver saves and restores correctly`() {
+        // Create test data
+        val originalText = "sensitive1234"
+        val originalSecureString = SecureString(originalText)
+        
+        // Get the saver
+        val saver = createSecureStringSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureString, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalSecureString)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals(originalText, it.revealForUi())
+            
+            // Check that the internal byte array is correct by comparing it with the original
+            assertTrue(it.revealForProcessing().contentEquals(originalSecureString.revealForProcessing()))
+        }
+    }
+    
+    @Test
+    fun `SecureString saver handles empty string`() {
+        // Create test data with empty string
+        val originalSecureString = SecureString("")
+        
+        // Get the saver
+        val saver = createSecureStringSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureString, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalSecureString)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals("", it.revealForUi())
+            
+            // Check that the internal byte array is correct (should be empty)
+            assertEquals(0, it.revealForProcessing().size)
+        }
+    }
+    
+    @Test
+    fun `SecureString saver preserves special characters`() {
+        // Create test data with special characters
+        val originalText = "!@#$%^&*()_+{}[]|\"<>,.?/~`"
+        val originalSecureString = SecureString(originalText)
+        
+        // Get the saver
+        val saver = createSecureStringSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureString, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalSecureString)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals(originalText, it.revealForUi())
+        }
+    }
+    
+    @Test
+    fun `SecureString saver preserves Unicode characters`() {
+        // Create test data with Unicode characters
+        val originalText = "こんにちは世界😊🌍"
+        val originalSecureString = SecureString(originalText)
+        
+        // Get the saver
+        val saver = createSecureStringSaver()
+        
+        // Create a simple scope implementation to test with
+        val saverScope = object : SaverScope {
+            override fun canBeSaved(value: Any): Boolean = true
+        }
+        
+        // Access the actual save and restore functions (which requires type casting)
+        val saveFunction = (saver as androidx.compose.runtime.saveable.Saver<SecureString, List<Any>>)
+        val saved = saveFunction.save(saverScope, originalSecureString)
+        
+        // Restore from saved data
+        val restored = saved?.let { saveFunction.restore(it) }
+        
+        // Verify restoration
+        assertNotNull(restored)
+        restored?.let {
+            assertEquals(originalText, it.revealForUi())
+        }
+    }
+} 

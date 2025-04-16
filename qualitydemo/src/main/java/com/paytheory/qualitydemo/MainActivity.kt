@@ -1,6 +1,7 @@
 package com.paytheory.qualitydemo
 
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,11 +35,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.paytheory.lib.Payable
-import com.paytheory.lib.data.BarcodeResult
-import com.paytheory.lib.data.FailedTransactionResult
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PaymentMethodTokenResults
-import com.paytheory.lib.data.SuccessfulTransactionResult
+import com.paytheory.lib.data.payable.BarcodeResult
+import com.paytheory.lib.data.payable.FailedTransactionResult
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
 import com.paytheory.lib.model.FieldState
 import com.paytheory.lib.model.PaymentField
 import com.paytheory.lib.model.PaymentFieldViewModel
@@ -254,6 +255,10 @@ class MainActivity : ComponentActivity(), Payable {
         Log.d("MainActivity", "handleError: $error")
     }
 
+    override fun clientContext(): Context {
+        return this.applicationContext
+    }
+
     /**
      * Called when the payment form is ready for input.
      * Updates the payment process ViewModel to the idle state.
@@ -295,6 +300,5 @@ class MainActivity : ComponentActivity(), Payable {
     override fun handleStateChange(fieldState: Pair<PaymentField, FieldState>) {
         paymentFieldModel.updateState(fieldState.first, fieldState.second)
     }
-
 }
 

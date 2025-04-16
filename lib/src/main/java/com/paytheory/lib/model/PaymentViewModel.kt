@@ -9,16 +9,16 @@ import com.paytheory.lib.Payable
 import com.paytheory.lib.Payment
 import com.paytheory.lib.PaymentMethodToken
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.compose.createPayTheoryData
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
+import com.paytheory.lib.compose.utility.PaymentFormUtils
 import com.paytheory.lib.configuration.PaymentMethodAction
 import com.paytheory.lib.configuration.PaymentMethodType
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PaymentDetail
-import com.paytheory.lib.data.PaymentMethodTokenResults
-import com.paytheory.lib.data.SuccessfulTransactionResult
+import com.paytheory.lib.data.payable.ErrorCode
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
+import com.paytheory.lib.data.requests.PaymentDetail
 import com.paytheory.lib.valid.Validator
 import com.paytheory.lib.websocket.WebServicesProvider
 import com.paytheory.lib.websocket.WebsocketInteractor
@@ -66,7 +66,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     private val webSocketRepository = WebsocketRepository(webServicesProvider)
     internal val interactor = WebsocketInteractor(webSocketRepository)
     val configuration = configurationIn
-    val payTheoryData = createPayTheoryData(configuration)
+    val payTheoryData = PaymentFormUtils.createPayTheoryData(configuration)
     val payTheoryProcessor = if (configuration.paymentMethodAction==PaymentMethodAction.TOKEN)
         PaymentMethodToken(
             packageName,
@@ -106,22 +106,15 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     var postalCode = mutableStateOf(SecureStringWrapper(SecureString(""),null))
 
     /**
-     * Disconnects the WebSocket connection and updates state.
-     * 
-     * This function should be called when cleaning up the payment form or when
-     * the connection needs to be explicitly terminated.
+     * Disconnects the payment session.
+     * Sets connected state to false and updates the payment state to Loading.
      */
-    @ExperimentalCoroutinesApi
     fun disconnect() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                interactor.stopSocket()
-            } catch (ex: Exception) {
-                onSocketError(ex,"Socket disconnect failed")
-            }
-            connected = false
-            _paymentState.value = PaymentState.Loading
-        }
+        connected = false
+        // First update isValidAndReady flag to maintain consistency
+        isValidAndReady = false
+        // Then update payment state
+        _paymentState.value = PaymentState.Loading
     }
 
     /**
@@ -154,8 +147,8 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
                 _paymentState.value = PaymentState.Loading
             }
         }
-//        connected = true
-//        _paymentState.value = PaymentState.Idle
+        connected = true
+        _paymentState.value = PaymentState.Idle
     }
 
     /**
@@ -264,56 +257,6 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
     }
 
     /**
-     * Submits the payment for processing.
-     * 
-     * This function performs pre-submission validation and handles various error cases:
-     * - Payment already in progress
-     * - Payment already completed
-     * - No connection available
-     * - Invalid amount with token action
-     *
-     * If validation passes, it constructs the appropriate payment detail object
-     * and submits it for processing.
-     */
-    fun submitPayment() {
-        var payment: PaymentDetail? = null
-        if (_paymentState.value == PaymentState.Processing) {
-            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
-            return
-        } else if (_paymentState.value is PaymentState.Success) {
-            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
-            return
-        } else if (_paymentState.value is PaymentState.Loading) {
-            payTheoryProcessor.payable.handleError(PTError(ErrorCode.InProgress,"No connection available"))
-        }
-
-        if (configuration.amount > 0 && configuration.paymentMethodAction == PaymentMethodAction.TOKEN) {
-            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Cannot have amount with token action"))
-        }
-        if (configuration.amount < 10 && configuration.paymentMethodAction == PaymentMethodAction.PAYMENT) {
-            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Must provide amount greater than 10"))
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            _paymentState.value = PaymentState.Processing
-        }
-        val paymentConfigured: PaymentDetail = if (configuration.paymentMethodType == PaymentMethodType.ACH) {
-            constructBankPayment()
-        } else {
-            constructCardPayment()
-        }
-        try {
-            payTheoryProcessor.process(paymentConfigured)
-        } catch (ex: Exception) {
-            onSocketError(ex,"Payment submission failed")
-            _paymentState.value = PaymentState.Error(ex.message!!)
-            return
-        }
-
-
-
-    }
-
-    /**
      * Validates all input fields based on the payment method type and configuration.
      *
      * For ACH payments, validates:
@@ -331,7 +274,7 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
      *
      * Updates the payment state and validity flags based on the validation results.
      */
-    private fun validateInputs() {
+    fun validateInputs() {
         var isReady = false
         if (configuration.paymentMethodType == PaymentMethodType.ACH) {
             val relevant = mutableListOf<Boolean>()
@@ -438,9 +381,9 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
         for (field in AddressFields.entries) {
             when (field) {
                 AddressFields.ADDRESS_LINE1 -> relevant.add(isValidStreetAddress())
-                AddressFields.CITY -> isValidCity()
-                AddressFields.REGION -> isValidState()
-                AddressFields.POSTAL_CODE -> isValidPostalCode()
+                AddressFields.CITY -> relevant.add(isValidCity())
+                AddressFields.REGION -> relevant.add(isValidState())
+                AddressFields.POSTAL_CODE -> relevant.add(isValidPostalCode())
             }
         }
         return relevant.all { it }
@@ -494,6 +437,80 @@ class PaymentViewModel @Inject constructor(packageName:String, configurationIn: 
 
         clearCount.intValue++
         isValidAndReady = false
+    }
+
+    /**
+     * Updates the payment state to the processing state.
+     * Called when a payment is being processed.
+     */
+    fun updateToProcessingState() {
+        _paymentState.value = PaymentState.Processing
+    }
+
+    /**
+     * Updates the payment state to the ready state.
+     * Called when a payment form is ready for user input.
+     */
+    fun updateToReadyState() {
+        _paymentState.value = PaymentState.Idle
+        validateInputs()
+    }
+
+    /**
+     * Submits the payment for processing.
+     * 
+     * This function performs pre-submission validation and handles various error cases:
+     * - Payment already in progress
+     * - Payment already completed
+     * - No connection available
+     * - Invalid amount with token action
+     *
+     * If validation passes, it constructs the appropriate payment detail object
+     * and submits it for processing.
+     */
+    fun submitPayment() {
+        var payment: PaymentDetail? = null
+        if (_paymentState.value == PaymentState.Processing) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionInProgress,"Payment already in progress"))
+            return
+        } else if (_paymentState.value is PaymentState.Success) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.ActionComplete,"Payment already completed"))
+            return
+        } else if (_paymentState.value == PaymentState.Loading) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.InProgress,"No connection available"))
+            return
+        }
+
+        if (configuration.amount > 0 && configuration.paymentMethodAction == PaymentMethodAction.TOKEN) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Cannot have amount with token action"))
+            return
+        }
+        if (configuration.amount < 10 && configuration.paymentMethodAction == PaymentMethodAction.PAYMENT) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Must provide amount greater than 10"))
+            return
+        }
+        
+        if (_paymentState.value != PaymentState.ValidAndReady) {
+            payTheoryProcessor.payable.handleError(PTError(ErrorCode.NotValid,"Payment not ready to be submitted"))
+            return
+        }
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            _paymentState.value = PaymentState.Processing
+        }
+        
+        try {
+            val paymentConfigured: PaymentDetail = if (configuration.paymentMethodType == PaymentMethodType.ACH) {
+                constructBankPayment()
+            } else {
+                constructCardPayment()
+            }
+            payTheoryProcessor.process(paymentConfigured)
+        } catch (ex: Exception) {
+            onSocketError(ex,"Payment submission failed")
+            _paymentState.value = PaymentState.Error(ex.message ?: "Unknown error")
+            return
+        }
     }
 
 }

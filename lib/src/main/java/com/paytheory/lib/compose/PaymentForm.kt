@@ -22,8 +22,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
 import com.paytheory.lib.configuration.PaymentMethodType
-import com.paytheory.lib.data.ErrorCode
-import com.paytheory.lib.data.PTError
+import com.paytheory.lib.compose.utility.NetworkUtils
+import com.paytheory.lib.compose.utility.PaymentFormUtils
+import com.paytheory.lib.data.payable.ErrorCode
+import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.model.PaymentViewModel.PaymentState
 import com.paytheory.lib.valid.Validator
@@ -46,8 +48,6 @@ import com.paytheory.lib.valid.Validator
  * @param configuration [PayTheoryConfiguration] instance that defines form behavior and requirements
  * @param fieldModifier Modifier applied to individual input fields for customization
  * @param buttonModifier Modifier applied to the submit button for customization
- *
- * @throws PTError with [ErrorCode.TokenFailed] if network connection is unavailable
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,187 +59,190 @@ fun PaymentForm(
 
 ) {
     val validator = Validator()
+    val context = LocalContext.current
 
-    if (!isNetworkAvailable(LocalContext.current)) {
-        payable.handleError(PTError(ErrorCode.TokenFailed,NO_NETWORK_CONNECTION))
-    } else {
-        val packageName = LocalContext.current.applicationContext.packageName
+    // Use utility to validate network connectivity
+    if (!PaymentFormUtils.validateNetworkConnectivity(context, payable)) {
+        return
+    }
+    
+    val packageName = context.applicationContext.packageName
 
-        // Initialize ViewModel with configuration
-        val viewModel: PaymentViewModel = viewModel {
-            PaymentViewModel(
-                packageName,
-                configuration,
-                payable
-            )
+    // Initialize ViewModel with configuration
+    val viewModel: PaymentViewModel = viewModel {
+        PaymentViewModel(
+            packageName,
+            configuration,
+            payable
+        )
+    }
+    val paymentViewState by viewModel.paymentState.collectAsState()
+    var clearFormTrigger by remember { mutableStateOf(false) }
+
+    // Handle form clearing
+    LaunchedEffect(key1 = clearFormTrigger) {
+        if (clearFormTrigger) {
+            viewModel.clearSensitiveData()
+            Log.d("PaymentForm", "clearFormTrigger")
+            clearFormTrigger = false
         }
-        val paymentViewState by viewModel.paymentState.collectAsState()
-        var clearFormTrigger by remember { mutableStateOf(false) }
+    }
 
-        // Handle form clearing
-        LaunchedEffect(key1 = clearFormTrigger) {
-            if (clearFormTrigger) {
-                viewModel.clearSensitiveData()
-                Log.d("PaymentForm", "clearFormTrigger")
-                clearFormTrigger = false
-            }
-        }
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            SelectionContainer {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Credit/Debit Card Payment Fields
-                    if (configuration.paymentMethodType == PaymentMethodType.CARD) {
-                        if (configuration.requireAccountName) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                NameOnAccountInput(fieldModifier, viewModel, validator)
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            if (!configuration.requireBillingAddress && (configuration.payorInfo == null)) {
-                                CardNumberInput(fieldModifier, viewModel, validator)
-                                ExpirationInput(fieldModifier, viewModel, validator)
-                            } else {
-                                CardNumberInput(fieldModifier, viewModel, validator)
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            if (!configuration.requireBillingAddress && (configuration.payorInfo == null)) {
-                                CvcInput(fieldModifier, viewModel, validator)
-                                PostalCodeInput(fieldModifier, viewModel, validator)
-                            } else {
-                                ExpirationInput(fieldModifier, viewModel, validator)
-                                CvcInput(fieldModifier, viewModel, validator)
-                            }
-                        }
-                    }
-                    // ACH Payment Fields
-                    else if (configuration.paymentMethodType == PaymentMethodType.ACH) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SelectionContainer {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Credit/Debit Card Payment Fields
+                if (configuration.paymentMethodType == PaymentMethodType.CARD) {
+                    if (configuration.requireAccountName) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Start
                         ) {
                             NameOnAccountInput(fieldModifier, viewModel, validator)
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            BankAccountNumber(fieldModifier, viewModel, validator)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            BankRoutingNumber(fieldModifier, viewModel, validator)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            BankAccountTypeChooser(
-                                fieldModifier,
-                                configuration,
-                                viewModel
-                            )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        if (!configuration.requireBillingAddress && (configuration.payorInfo == null)) {
+                            CardNumberInput(fieldModifier, viewModel, validator)
+                            ExpirationInput(fieldModifier, viewModel, validator)
+                        } else {
+                            CardNumberInput(fieldModifier, viewModel, validator)
                         }
                     }
-
-                    // Billing Address Fields (if required)
-                    if (configuration.requireBillingAddress) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            AddressLine1Input(fieldModifier, viewModel, validator)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            AddressLine2Input(fieldModifier, viewModel)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            CityInput(fieldModifier, viewModel, validator)
-                            RegionInput(fieldModifier, viewModel, validator)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        if (!configuration.requireBillingAddress && (configuration.payorInfo == null)) {
+                            CvcInput(fieldModifier, viewModel, validator)
                             PostalCodeInput(fieldModifier, viewModel, validator)
+                        } else {
+                            ExpirationInput(fieldModifier, viewModel, validator)
+                            CvcInput(fieldModifier, viewModel, validator)
                         }
                     }
                 }
-            }
+                // ACH Payment Fields
+                else if (configuration.paymentMethodType == PaymentMethodType.ACH) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        NameOnAccountInput(fieldModifier, viewModel, validator)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        BankAccountNumber(fieldModifier, viewModel, validator)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        BankRoutingNumber(fieldModifier, viewModel, validator)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        BankAccountTypeChooser(
+                            fieldModifier,
+                            configuration,
+                            viewModel
+                        )
+                    }
+                }
 
-            // Google Pay Button (if enabled)
-            if (configuration.googlePayEnabled) {
-                GooglePayForm(
-                    payable = payable,
-                    configuration = configuration,
-                    buttonModifier = buttonModifier
+                // Billing Address Fields (if required)
+                if (configuration.requireBillingAddress) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        AddressLine1Input(fieldModifier, viewModel, validator)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        AddressLine2Input(fieldModifier, viewModel)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        CityInput(fieldModifier, viewModel, validator)
+                        RegionInput(fieldModifier, viewModel, validator)
+                        PostalCodeInput(fieldModifier, viewModel, validator)
+                    }
+                }
+            }
+        }
+
+        // Google Pay Button (if enabled)
+        if (configuration.googlePayEnabled) {
+            GooglePayForm(
+                payable = payable,
+                configuration = configuration,
+                buttonModifier = buttonModifier
+            )
+        }
+
+        // Payment Button State Management
+        when (paymentViewState) {
+            is PaymentState.Loading -> {
+                PayTheoryButton(
+                    enabled = viewModel.isValidAndReady,
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    content = { Text("Loading") },
+                    modifier = buttonModifier
                 )
             }
-
-            // Payment Button State Management
-            when (paymentViewState) {
-                is PaymentState.Loading -> {
-                    PayTheoryButton(
-                        enabled = viewModel.isValidAndReady,
-                        onClick = viewModel::submitPayment,
-                        content = { Text("Loading") },
-                        modifier = buttonModifier
-                    )
-                }
-                is PaymentState.Success -> {
-                    PayTheoryButton(
-                        enabled = viewModel.isValidAndReady,
-                        onClick = viewModel::submitPayment,
-                        content = { Text("Success") },
-                        modifier = buttonModifier
-                    )
-                }
-                is PaymentState.Error -> {
-                    payable.handleError(PTError(ErrorCode.TokenFailed, viewModel.errorMessage))
-                    PayTheoryButton(
-                        enabled = viewModel.isValidAndReady,
-                        onClick = viewModel::submitPayment,
-                        content = { Text("Error") },
-                        modifier = buttonModifier
-                    )
-                }
-                is PaymentState.Idle -> {
-                    PayTheoryButton(
-                        enabled = viewModel.isValidAndReady,
-                        onClick = viewModel::submitPayment,
-                        content = { Text("Submit Payment") },
-                        modifier = buttonModifier
-                    )
-                }
-                is PaymentState.ValidAndReady -> {
-                    PayTheoryButton(
-                        enabled = viewModel.isValidAndReady,
-                        onClick = viewModel::submitPayment,
-                        modifier = buttonModifier,
-                        content = { Text("Submit Payment") }
-                    )
-                }
-                PaymentState.Processing -> {
-                    PayTheoryButton(
-                        onClick = viewModel::submitPayment,
-                        enabled = viewModel.isValidAndReady,
-                        modifier = buttonModifier,
-                        content = { Text("Processing") }
-                    )
-                }
+            is PaymentState.Success -> {
+                PayTheoryButton(
+                    enabled = viewModel.isValidAndReady,
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    content = { Text("Success") },
+                    modifier = buttonModifier
+                )
+            }
+            is PaymentState.Error -> {
+                val errorState = paymentViewState as PaymentState.Error
+                payable.handleError(PTError(ErrorCode.TokenFailed, errorState.errorMessage))
+                PayTheoryButton(
+                    enabled = viewModel.isValidAndReady,
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    content = { Text("Error") },
+                    modifier = buttonModifier
+                )
+            }
+            is PaymentState.Idle -> {
+                PayTheoryButton(
+                    enabled = viewModel.isValidAndReady,
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    content = { Text("Submit Payment") },
+                    modifier = buttonModifier
+                )
+            }
+            is PaymentState.ValidAndReady -> {
+                PayTheoryButton(
+                    enabled = viewModel.isValidAndReady,
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    modifier = buttonModifier,
+                    content = { Text("Submit Payment") }
+                )
+            }
+            PaymentState.Processing -> {
+                PayTheoryButton(
+                    onClick = { PaymentFormUtils.submitPaymentIfValid(viewModel) },
+                    enabled = viewModel.isValidAndReady,
+                    modifier = buttonModifier,
+                    content = { Text("Processing") }
+                )
             }
         }
     }

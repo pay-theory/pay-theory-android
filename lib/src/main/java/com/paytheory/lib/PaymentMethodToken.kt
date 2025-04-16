@@ -3,10 +3,10 @@ package com.paytheory.lib
 import com.google.gson.Gson
 import com.goterl.lazysodium.utils.Key
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.data.ActionRequest
-import com.paytheory.lib.data.PaymentDetail
-import com.paytheory.lib.data.PaymentMethodData
-import com.paytheory.lib.data.TokenizeRequest
+import com.paytheory.lib.data.payloads.PaymentMethodData
+import com.paytheory.lib.data.requests.ActionRequest
+import com.paytheory.lib.data.requests.PaymentDetail
+import com.paytheory.lib.data.requests.TokenizeRequest
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.nacl.encryptBox
 import com.paytheory.lib.nacl.generateLocalKeyPair
@@ -14,6 +14,7 @@ import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
 import com.paytheory.lib.websocket.WebsocketMessageHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 import java.util.Base64
 
 /**
@@ -33,10 +34,24 @@ import java.util.Base64
 class PaymentMethodToken(
     packageNamed: String,
     payable: Payable,
-    payTheoryDataIn: HashMap<Any, Any>? = hashMapOf(),
-    configurationIn : PayTheoryConfiguration,
+    payTheoryData: HashMap<Any, Any>? = hashMapOf(),
+    configuration : PayTheoryConfiguration,
     viewModel: PaymentViewModel
-) : PaymentMethodProcessor(payable,payTheoryDataIn, configurationIn,viewModel), WebsocketMessageHandler {
+) : PaymentMethodProcessor(payable,payTheoryData, configuration,viewModel), WebsocketMessageHandler {
+    init {
+        // This runs AFTER the base class init and AFTER constructor parameters are assigned.
+        Timber.tag("DEBUG_PAYTHEORY").d("PaymentMethodToken SUBCLASS init block started.")
+
+        // 'configuration' parameter should be valid here.
+        if (!configuration.isTestMode) {
+            Timber.tag("DEBUG_PAYTHEORY").d("Not in test mode, triggering integrity initialization via lazy property.")
+            // Access the 'integrity' property inherited from PaymentMethodProcessor.
+            // This executes the 'lazy' block defined in the base class.
+            val initializeAction = integrity // Just accessing the property triggers it.
+        } else {
+            Timber.tag("DEBUG_PAYTHEORY").d("In test mode, skipping integrity initialization trigger.")
+        }
+    }
     /**
      * The name of the package in which this class is being used.
      */

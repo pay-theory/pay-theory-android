@@ -22,7 +22,7 @@ class PasswordFilterTransformationTest {
     fun testFilter_nonEmptyString() {
         val testString = "password123"
         val result = transformation.filter(AnnotatedString(testString))
-        assertEquals("***********", result.text.text)
+        assertEquals("•••••••••••", result.text.text)
         assertEquals(OffsetMapping.Identity, result.offsetMapping)
         assertEquals(0, result.offsetMapping.originalToTransformed(0))
         assertEquals(0, result.offsetMapping.transformedToOriginal(0))
@@ -34,9 +34,9 @@ class PasswordFilterTransformationTest {
 
     @Test
     fun testFilter_specialCharacters() {
-        val testString = "!@#\$%^&*()"
+        val testString = "!@#$%^&*()"
         val result = transformation.filter(AnnotatedString(testString))
-        assertEquals("**********", result.text.text)
+        assertEquals("••••••••••", result.text.text)
         assertEquals(OffsetMapping.Identity, result.offsetMapping)
         assertEquals(testString.length, result.offsetMapping.originalToTransformed(testString.length))
         assertEquals(testString.length, result.offsetMapping.transformedToOriginal(testString.length))
@@ -50,9 +50,8 @@ class PasswordFilterTransformationTest {
         }.toAnnotatedString()
 
         val result = transformation.filter(annotatedString)
-        assertEquals("***********", result.text.text)
+        assertEquals("•••••••••••", result.text.text)
         assertEquals(0, result.text.spanStyles.size)
         assertEquals(0, result.text.getStringAnnotations(0, testString.length).size)
-
     }
 }

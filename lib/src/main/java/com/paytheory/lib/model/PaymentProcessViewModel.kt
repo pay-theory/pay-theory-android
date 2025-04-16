@@ -3,11 +3,11 @@ package com.paytheory.lib.model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paytheory.lib.data.BarcodeResult
-import com.paytheory.lib.data.FailedTransactionResult
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PaymentMethodTokenResults
-import com.paytheory.lib.data.SuccessfulTransactionResult
+import com.paytheory.lib.data.payable.BarcodeResult
+import com.paytheory.lib.data.payable.FailedTransactionResult
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

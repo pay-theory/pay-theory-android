@@ -1,20 +1,21 @@
+@file:Suppress("PropertyName")
+
 package com.paytheory.lib.data
 
-import com.google.gson.annotations.SerializedName
-import com.paytheory.lib.configuration.FeeMode
+import com.paytheory.lib.data.requests.ActionRequest as RequestsActionRequest
+import com.paytheory.lib.data.requests.CashRequest as RequestsCashRequest
+import com.paytheory.lib.data.requests.HostTokenRequest as RequestsHostTokenRequest
+import com.paytheory.lib.data.requests.PaymentDetail as RequestsPaymentDetail
+import com.paytheory.lib.data.requests.PaymentMethodTokenData as RequestsPaymentMethodTokenData
+import com.paytheory.lib.data.requests.TokenizeRequest as RequestsTokenizeRequest
+import com.paytheory.lib.data.requests.TransferPartOneRequest as RequestsTransferPartOneRequest
 
 /**
  * Data class to store host token request
  * for testing attestation outside of production set requireAttestation to true
  */
-data class HostTokenRequest(
-    @SerializedName("ptToken") val ptToken: String,
-    @SerializedName("attestation") val attestation: String,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("origin") val origin: String = "android",
-    @SerializedName("application_package_name") val applicationPackageName: String,
-    @SerializedName("require_attestation") val requireAttestation: Boolean = true,
-)
+@Deprecated("Use com.paytheory.lib.data.requests.HostTokenRequest instead", ReplaceWith("RequestsHostTokenRequest"))
+typealias HostTokenRequest = RequestsHostTokenRequest
 
 /**
  * Data class to store cash request
@@ -23,44 +24,21 @@ data class HostTokenRequest(
  * @param timing calculated timing
  * @param payorInfo optional buyer options data
  */
-data class CashRequest(
-    @SerializedName("hostToken") val hostToken: String?,
-    @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("payment") val paymentDetail: PaymentDetail,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
-    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?
-)
+@Deprecated("Use com.paytheory.lib.data.requests.CashRequest instead", ReplaceWith("RequestsCashRequest"))
+typealias CashRequest = RequestsCashRequest
 
 /**
  * Data class for tokenize request
  */
-data class TokenizeRequest(
-    @SerializedName("hostToken") val hostToken: String?,
-    @SerializedName("payment_method_data") val paymentMethodData: PaymentMethodData,
-    @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
-    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
-    @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("timing") val timing: Long
-)
-
+@Deprecated("Use com.paytheory.lib.data.requests.TokenizeRequest instead", ReplaceWith("RequestsTokenizeRequest"))
+typealias TokenizeRequest = RequestsTokenizeRequest
 
 /**
  * Data class for transfer part one request
  * @param hostToken token with transaction details
  */
-data class TransferPartOneRequest(
-    @SerializedName("hostToken") val hostToken: String?,
-    @SerializedName("payment_method_data") val paymentMethodData: PaymentMethodData,
-    @SerializedName("payment_data") val paymentData: PaymentData,
-    @SerializedName("payor_info") val payorInfo: PayorInfo? = null,
-    @SerializedName("pay_theory_data") val payTheoryData: HashMap<Any, Any>?,
-    @SerializedName("metadata") val metadata: HashMap<Any, Any>?,
-    @SerializedName("sessionKey") val sessionKey: String?,
-    @SerializedName("timing") val timing: Long
-)
+@Deprecated("Use com.paytheory.lib.data.requests.TransferPartOneRequest instead", ReplaceWith("RequestsTransferPartOneRequest"))
+typealias TransferPartOneRequest = RequestsTransferPartOneRequest
 
 /**
  * Data class to store action message data
@@ -68,13 +46,8 @@ data class TransferPartOneRequest(
  * @param encoded encoded message with transaction details
  * @param publicKey encryption key
  */
-data class ActionRequest (
-    @SerializedName("action") val action: String,
-    @SerializedName("encoded") val encoded: String,
-    @SerializedName("publicKey") val publicKey: String? = null,
-    @SerializedName("sessionKey") val sessionKey: String? = null
-)
-
+@Deprecated("Use com.paytheory.lib.data.requests.ActionRequest instead", ReplaceWith("RequestsActionRequest"))
+typealias ActionRequest = RequestsActionRequest
 
 /**
  * Data class to store payment method token details
@@ -90,22 +63,8 @@ data class ActionRequest (
  * @param expiration_month card expiration month
  * @param address billing address
  */
-data class PaymentMethodTokenData (
-    @SerializedName("type") val type: String,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("name") val name: String? = "",
-    @SerializedName("account_number") val accountNumber: String? = null,
-    @SerializedName("account_type") val account_type: String? = null,
-    @SerializedName("bank_code") val bank_code: String? = null,
-    @SerializedName("number") val number: String? = null,
-    @SerializedName("security_code") val security_code: String? = null,
-    @SerializedName("expiration_year") val expiration_year: String? = null,
-    @SerializedName("expiration_month") val expiration_month: String? = null,
-    @SerializedName("address") val address: Address? = null,
-    @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
-    @SerializedName("sessionKey") var sessionKey: String? = null,
-)
-
+@Deprecated("Use com.paytheory.lib.data.requests.PaymentMethodTokenData instead", ReplaceWith("RequestsPaymentMethodTokenData"))
+typealias PaymentMethodTokenData = RequestsPaymentMethodTokenData
 
 /**
  * Data class to store payment details
@@ -125,27 +84,5 @@ data class PaymentMethodTokenData (
  * @param walletType type of digital wallet (e.g., GOOGLE_PAY)
  * @param digitalWalletPayload encrypted digital wallet token
  */
-data class PaymentDetail (
-    @SerializedName("type") val type: String,
-    @SerializedName("timing") val timing: Long,
-    @SerializedName("amount") val amount: Int,
-    @SerializedName("currency") val currency: String = "USD",
-    @SerializedName("name") val name: String? = "",
-    @SerializedName("merchant") val merchant: String? = null,
-    @SerializedName("service_fee") val service_fee: String? = null,
-    @SerializedName("account_number") val account_number: String? = null,
-    @SerializedName("account_type") val account_type: String? = null,
-    @SerializedName("bank_code") val bank_code: String? = null,
-    @SerializedName("number") val number: String? = null,
-    @SerializedName("security_code") val security_code: String? = null,
-    @SerializedName("expiration_year") val expiration_year: String? = null,
-    @SerializedName("expiration_month") val expiration_month: String? = null,
-    @SerializedName("address") val address: Address? = null,
-    @SerializedName("fee_mode") var fee_mode: String? = FeeMode.MERCHANT_FEE,
-    @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
-    @SerializedName("buyer") val buyer: String? = null,
-    @SerializedName("buyer_contact") val buyerContact: String? = null,
-    @SerializedName("sessionKey") var sessionKey: String? = null,
-    @SerializedName("wallet_type") val walletType: String? = null,
-    @SerializedName("digital_wallet_payload") val digitalWalletPayload: String? = null
-)
+@Deprecated("Use com.paytheory.lib.data.requests.PaymentDetail instead", ReplaceWith("RequestsPaymentDetail"))
+typealias PaymentDetail = RequestsPaymentDetail

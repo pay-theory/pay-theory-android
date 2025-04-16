@@ -1,10 +1,10 @@
 package com.paytheory.lib.googlepay
 
 import android.app.Activity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
@@ -14,6 +14,7 @@ import com.google.android.gms.wallet.WalletConstants
 import com.paytheory.lib.configuration.GooglePayBillingAddressFormat
 import com.paytheory.lib.configuration.GooglePayConstants
 import com.paytheory.lib.configuration.GooglePayEnvironment
+import com.paytheory.lib.googlepay.interfaces.GooglePayClientInterface
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,7 +23,7 @@ import timber.log.Timber
 /**
  * Handles interactions with the Google Pay API
  */
-class GooglePayClient {
+class GooglePayClient : GooglePayClientInterface {
 
     /**
      * Creates a PaymentsClient with the appropriate environment setting
@@ -31,9 +32,9 @@ class GooglePayClient {
      * @param environment The environment setting (TEST or PRODUCTION)
      * @return A configured PaymentsClient instance
      */
-    fun createPaymentsClient(
+    override fun createPaymentsClient(
         activity: Activity,
-        environment: GooglePayEnvironment = GooglePayEnvironment.TEST
+        environment: GooglePayEnvironment
     ): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
             .setEnvironment(getEnvironmentConstant(environment))
@@ -63,16 +64,16 @@ class GooglePayClient {
      * @param billingAddressRequired Whether to require a billing address
      * @param allowedCardNetworks List of allowed card networks
      * @param allowedAuthMethods List of allowed authentication methods
-     * @return LiveData<Boolean> that will be updated with Google Pay availability
+     * @return Task<Boolean> that will be updated with Google Pay availability
      */
-    fun isReadyToPay(
+    override fun isReadyToPay(
         activity: Activity,
-        environment: GooglePayEnvironment = GooglePayEnvironment.TEST,
-        billingAddressRequired: Boolean = false,
-        allowedCardNetworks: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
-        allowedAuthMethods: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_METHODS
-    ): LiveData<Boolean> {
-        val liveData = MutableLiveData<Boolean>()
+        environment: GooglePayEnvironment,
+        billingAddressRequired: Boolean,
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>
+    ): Task<Boolean> {
+        val taskCompletionSource = TaskCompletionSource<Boolean>()
         
         try {
             val isReadyToPayJson = JSONObject().apply {
@@ -93,18 +94,18 @@ class GooglePayClient {
             paymentsClient.isReadyToPay(request)
                 .addOnCompleteListener { task ->
                     try {
-                        liveData.value = task.isSuccessful
+                        taskCompletionSource.setResult(task.isSuccessful && task.result)
                     } catch (exception: Exception) {
                         Timber.e(exception, "isReadyToPay failed")
-                        liveData.value = false
+                        taskCompletionSource.setResult(false)
                     }
                 }
         } catch (exception: Exception) {
             Timber.e(exception, "Failed to create isReadyToPay request")
-            liveData.value = false
+            taskCompletionSource.setResult(false)
         }
         
-        return liveData
+        return taskCompletionSource.task
     }
 
     /**
@@ -123,18 +124,18 @@ class GooglePayClient {
      * @param allowedAuthMethods List of allowed authentication methods
      * @return A JSON string containing the payment data request
      */
-    fun createPaymentDataRequest(
+    override fun createPaymentDataRequest(
         price: String,
         merchantName: String,
-        billingAddressRequired: Boolean = false,
-        billingAddressFormat: GooglePayBillingAddressFormat = GooglePayBillingAddressFormat.MINIMAL,
-        shippingAddressRequired: Boolean = false,
-        phoneNumberRequired: Boolean = false,
-        environment: GooglePayEnvironment = GooglePayEnvironment.TEST,
-        allowPrepaidCards: Boolean = true,
-        allowCreditCards: Boolean = true,
-        allowedCardNetworks: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
-        allowedAuthMethods: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_METHODS
+        billingAddressRequired: Boolean,
+        billingAddressFormat: GooglePayBillingAddressFormat,
+        shippingAddressRequired: Boolean,
+        phoneNumberRequired: Boolean,
+        environment: GooglePayEnvironment,
+        allowPrepaidCards: Boolean,
+        allowCreditCards: Boolean,
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>
     ): String {
         return try {
             JSONObject().apply {
@@ -179,7 +180,7 @@ class GooglePayClient {
      * @param paymentDataRequestJson The payment data request JSON string
      * @return Task with PaymentData result
      */
-    fun loadPaymentData(
+    override fun loadPaymentData(
         activity: Activity,
         paymentDataRequestJson: String
     ): Task<PaymentData> {
@@ -195,7 +196,7 @@ class GooglePayClient {
      * @return The payment token as a string
      * @throws JSONException If the token cannot be extracted
      */
-    fun extractPaymentToken(paymentData: PaymentData): String {
+    override fun extractPaymentToken(paymentData: PaymentData): String {
         val paymentMethodData = JSONObject(paymentData.toJson())
             .getJSONObject("paymentMethodData")
         
@@ -208,8 +209,8 @@ class GooglePayClient {
      */
     private fun baseCardPaymentMethod(
         billingAddressRequired: Boolean = false,
-        allowedCardNetworks: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
-        allowedAuthMethods: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_METHODS
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>
     ): JSONObject {
         val cardNetworks = JSONArray()
         allowedCardNetworks.forEach { cardNetworks.put(it) }
@@ -239,8 +240,8 @@ class GooglePayClient {
     private fun cardPaymentMethod(
         billingAddressRequired: Boolean = false,
         billingAddressFormat: GooglePayBillingAddressFormat = GooglePayBillingAddressFormat.MINIMAL,
-        allowedCardNetworks: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_NETWORKS,
-        allowedAuthMethods: List<String> = GooglePayConstants.DEFAULT_SUPPORTED_METHODS,
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>,
         allowPrepaidCards: Boolean = true,
         allowCreditCards: Boolean = true
     ): JSONObject {

@@ -8,6 +8,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("jacoco")
 }
 
 val localProperties = Properties().apply {
@@ -17,14 +18,6 @@ val localProperties = Properties().apply {
     }
 }
 
-//plugins {
-//    id("com.android.library")
-//    id("org.jetbrains.kotlin.android")
-//    id("kotlin-kapt")
-//    id("com.google.devtools.ksp")
-//    id("com.google.dagger.hilt.android")
-//}
-
 android {
     namespace = "com.paytheory.lib"
     compileSdk = 35
@@ -33,10 +26,17 @@ android {
         minSdk = 28
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
-
+    // Disable tests for now
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+        // Re-enable tests
+        // unitTests.all {
+        //     it.enabled = false
+        // }
+    }
 
     buildTypes {
         debug {
@@ -45,6 +45,8 @@ android {
                 "google_project_number",
                 "${localProperties.getProperty("GOOGLE_PROJECT_NUMBER")}"
             )
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
         }
         release {
             resValue(
@@ -52,21 +54,26 @@ android {
                 "google_project_number",
                 "${localProperties.getProperty("GOOGLE_PROJECT_NUMBER")}"
             )
-//            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "17"
     }
     packaging {
         resources {
             pickFirsts.add("META-INF/gradle/incremental.annotation.processors")
         }
+    }
+
+    // Enable explicit compilation of annotation processors
+    kapt {
+        correctErrorTypes = true
+        includeCompileClasspath = false
+        useBuildCache = true
     }
 }
 
@@ -77,7 +84,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
 
     // Google Pay Button for Jetpack Compose
-    implementation("com.google.pay.button:compose-pay-button:1.0.0")
+    implementation("com.google.pay.button:compose-pay-button:1.1.0")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
@@ -135,6 +142,9 @@ dependencies {
     //Lazy sodium
     implementation("com.goterl:lazysodium-android:5.1.0@aar") //5.1.0
     implementation("net.java.dev.jna:jna:5.16.0@aar")
+    
+    // Timber logging library
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 
@@ -147,16 +157,20 @@ dependencies {
     implementation("androidx.compose.material:material:1.7.8")
 
     testImplementation("junit:junit:4.13.2")
-
     testImplementation("io.mockk:mockk:1.13.17")
-    testImplementation ("org.mockito:mockito-core:4.8.1")
-    testImplementation( "org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("org.mockito:mockito-core:4.8.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("androidx.compose.ui:ui-test-junit4:1.7.8") // Or the latest version
-    testImplementation("org.mockito:mockito-core:4.8.1") // Or the latest version
-    testImplementation("org.mockito:mockito-inline:4.8.1") // Or the latest version
+    testImplementation("androidx.compose.ui:ui-test-junit4:1.7.8")
+    testImplementation("org.mockito:mockito-core:4.8.1")
+    testImplementation("org.mockito:mockito-inline:4.8.1")
     testImplementation("androidx.compose.ui:ui-test-manifest:1.7.8")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.robolectric:robolectric:4.11.1") // Re-enabled Robolectric
+    testImplementation("org.powermock:powermock-module-junit4:2.0.9")
+    testImplementation("org.powermock:powermock-api-mockito2:2.0.9")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+    
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:core:1.6.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
@@ -166,4 +180,96 @@ dependencies {
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
     androidTestImplementation("androidx.compose.ui:ui-test")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+}
+
+// JaCoCo configuration
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+// Configure the standard test task for coverage
+tasks.withType<Test> {
+    extensions.configure<JacocoTaskExtension> {
+        isEnabled = true
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+// Consolidated coverage report task for Android tests
+tasks.register<JacocoReport>("jacocoTestReport") {
+    description = "Generates JaCoCo coverage report for Android tests"
+    group = "Verification"
+    
+    dependsOn("testDebugUnitTest")
+    
+    executionData.from(fileTree(project.buildDir) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        include("jacoco/testDebugUnitTest.exec")
+    })
+    
+    classDirectories.setFrom(
+        fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+            // Include only specific packages
+            include("**/com/paytheory/lib/configuration/**")
+            include("**/com/paytheory/lib/googlepay/**")
+            include("**/com/paytheory/lib/utils/**")
+            include("**/com/paytheory/lib/valid/**")
+            include("**/com/paytheory/lib/model/**")
+            include("**/com/paytheory/lib/api/**")
+            include("**/com/paytheory/lib/data/**")
+            // Only include specific compose packages
+            include("**/com/paytheory/lib/compose/string/**")
+            include("**/com/paytheory/lib/compose/transformation/**")
+            include("**/com/paytheory/lib/compose/utility/**")
+            // Add reactors and websocket packages
+            include("**/com/paytheory/lib/reactors/**")
+            include("**/com/paytheory/lib/websocket/**")
+            // Add root lib package files
+            include("**/com/paytheory/lib/ContextProvider.class")
+            include("**/com/paytheory/lib/Payable.class")
+            include("**/com/paytheory/lib/PaymentMethodProcessor.class")
+            include("**/com/paytheory/lib/Payment.class")
+            include("**/com/paytheory/lib/PaymentMethodToken.class")
+            include("**/com/paytheory/lib/PayTheoryConfiguration.class")
+            
+            // Standard exclusions
+            exclude("**/R.class")
+            exclude("**/R$*.class")
+            exclude("**/BuildConfig.*")
+            exclude("**/Manifest*.*")
+            exclude("**/*Test*.*")
+            exclude("android/**")
+            exclude("**/Lambda*")
+            exclude("**/*Lambda.class")
+            exclude("**/*Lambda*.class")
+            exclude("**/*_MembersInjector.class")
+            exclude("**/Dagger*Component*.*")
+            exclude("**/Dagger*Subcomponent*.*")
+            exclude("**/*Module_*Factory.class")
+        }
+    )
+    
+    sourceDirectories.setFrom("${project.projectDir}/src/main/java")
+    
+    reports {
+        xml.required.set(true)
+        csv.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacoco/html"))
+    }
+}
+
+// Simple task that opens the coverage report in browser
+tasks.register("openJacocoReport") {
+    description = "Opens the JaCoCo coverage report in the default browser"
+    group = "Verification"
+    dependsOn("jacocoTestReport")
+    
+    doLast {
+        exec {
+            workingDir("${buildDir}/jacoco/html")
+            commandLine("open", "index.html")
+        }
+    }
 }

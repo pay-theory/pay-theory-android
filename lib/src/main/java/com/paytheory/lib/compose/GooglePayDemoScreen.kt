@@ -1,5 +1,6 @@
 package com.paytheory.lib.compose
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +20,13 @@ import com.paytheory.lib.Payable
 import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
 import com.paytheory.lib.configuration.GooglePayEnvironment
-import com.paytheory.lib.data.PTError
-import com.paytheory.lib.data.PTResult
+import com.paytheory.lib.data.payable.BarcodeResult
+import com.paytheory.lib.data.payable.FailedTransactionResult
+import com.paytheory.lib.data.payable.PTError
+import com.paytheory.lib.data.payable.PaymentMethodTokenResults
+import com.paytheory.lib.data.payable.SuccessfulTransactionResult
+import com.paytheory.lib.model.FieldState
+import com.paytheory.lib.model.PaymentField
 
 /**
  * A demonstration screen showing the Google Pay integration options.
@@ -44,7 +49,7 @@ fun GooglePayDemoScreen(
     // Create basic configuration for Google Pay
     val basicConfig = PayTheoryConfiguration.Builder()
         .setApiKey(apiKey)
-        .setAmount("10.99")
+        .setAmount(1099)
         .enableGooglePay("Pay Theory")
         .setGooglePayEnvironment(GooglePayEnvironment.TEST)
         .build()
@@ -52,7 +57,7 @@ fun GooglePayDemoScreen(
     // Create configuration with additional options
     val advancedConfig = PayTheoryConfiguration.Builder()
         .setApiKey(apiKey)
-        .setAmount("25.50")
+        .setAmount(2550)
         .enableGooglePay("Pay Theory Demo Store")
         .setGooglePayButtonType(GooglePayButtonType.CHECKOUT)
         .setGooglePayButtonColor(GooglePayButtonColor.WHITE)
@@ -239,11 +244,43 @@ fun GooglePayDemoScreen(
  * Simple implementation of Payable for the demo screen
  */
 class DemoPayable : Payable {
-    override fun handleSuccess(result: PTResult) {
+    override fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult) {
         // Handle successful payment
     }
     
     override fun handleError(error: PTError) {
         // Handle payment error
+    }
+
+    override fun clientContext(): Context {
+        TODO("Not yet implemented")
+    }
+
+    override fun handleReady(isReady: Boolean) {
+        // Handle SDK readiness
+    }
+
+    override fun handlePaymentStart(paymentType: String) {
+        // Handle payment start
+    }
+
+    override fun handleTokenStart(paymentType: String) {
+        // Handle tokenization start
+    }
+
+    override fun handleFailure(failedTransactionResult: FailedTransactionResult) {
+        // Handle payment failure
+    }
+
+    override fun handleBarcodeSuccess(barcodeResult: BarcodeResult) {
+        // Handle barcode success
+    }
+
+    override fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults) {
+        // Handle tokenization success
+    }
+
+    override fun handleStateChange(fieldState: Pair<PaymentField, FieldState>) {
+        // Handle field state changes
     }
 } 

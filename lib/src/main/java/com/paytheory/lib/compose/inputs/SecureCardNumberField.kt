@@ -14,6 +14,7 @@ import com.paytheory.lib.R
 import com.paytheory.lib.compose.string.SecureString
 import com.paytheory.lib.compose.string.SecureStringWrapper
 import com.paytheory.lib.compose.transformation.CreditCardNumberTransformation
+import com.paytheory.lib.compose.utility.CardFieldUtils
 
 /**
  * A composable function that provides a secure field for entering credit card numbers.
@@ -39,7 +40,10 @@ fun SecureCardNumberField(
     modifier: Modifier,
     value: SecureStringWrapper,
     onValueChange: (SecureStringWrapper) -> Unit,
-    isValid: (SecureStringWrapper) -> Boolean,
+    isValid: (SecureStringWrapper) -> Boolean = { wrapper -> 
+        val text = wrapper.secureValue.revealForUi()
+        CardFieldUtils.isValidCardNumber(text) && CardFieldUtils.passesLuhnCheck(text)
+    },
     isOutlined: Boolean = true,
     clearKey: Int = 0
 ) {
