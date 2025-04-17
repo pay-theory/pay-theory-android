@@ -66,16 +66,17 @@ fun GooglePayForm(
     val googlePayProcessor = remember {
         GooglePayFormUtils.createGooglePayProcessor(payable, activity!!, configuration, viewModel)
     }
-    
-    // We need to observe Google Pay availability with a state
-    var isGooglePayAvailable by remember { mutableStateOf(false) }
-    var isCheckingAvailability by remember { mutableStateOf(true) }
-    
-    // Update the state when availability check completes
-    GooglePayFormUtils.checkGooglePayAvailability(googlePayProcessor) { available ->
-        isGooglePayAvailable = available
-        isCheckingAvailability = false
-    }
+
+// This is not necessary when using GooglePayButton
+//    // We need to observe Google Pay availability with a state
+//    var isGooglePayAvailable by remember { mutableStateOf(false) }
+//    var isCheckingAvailability by remember { mutableStateOf(true) }
+//
+//    // Update the state when availability check completes
+//    GooglePayFormUtils.checkGooglePayAvailability(googlePayProcessor) { available ->
+//        isGooglePayAvailable = available
+//        isCheckingAvailability = false
+//    }
     
     Column(
         modifier = Modifier
@@ -83,25 +84,32 @@ fun GooglePayForm(
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when {
-            isCheckingAvailability -> {
-                // Checking availability state
-                Text("Checking Google Pay availability...")
-            }
-            isGooglePayAvailable -> {
-                // Google Pay is available, show button
-                GooglePayButton(
-                    onClick = { GooglePayFormUtils.initiateGooglePayPayment(googlePayProcessor) },
-                    enabled = true,
-                    modifier = buttonModifier,
-                    buttonType = buttonType,
-                    buttonColor = buttonColor
-                )
-            }
-            else -> {
-                // Google Pay is not available
-                Text("Google Pay is not available on this device")
-            }
-        }
+        GooglePayButton(
+            onClick = { GooglePayFormUtils.initiateGooglePayPayment(googlePayProcessor) },
+            enabled = true,
+            modifier = buttonModifier,
+            buttonType = buttonType,
+            buttonColor = buttonColor
+        )
+//        when {
+//            isCheckingAvailability -> {
+//                // Checking availability state
+//                Text("Checking Google Pay availability...")
+//            }
+//            isGooglePayAvailable -> {
+//                // Google Pay is available, show button
+//                GooglePayButton(
+//                    onClick = { GooglePayFormUtils.initiateGooglePayPayment(googlePayProcessor) },
+//                    enabled = true,
+//                    modifier = buttonModifier,
+//                    buttonType = buttonType,
+//                    buttonColor = buttonColor
+//                )
+//            }
+//            else -> {
+//                // Google Pay is not available
+//                Text("Google Pay is not available on this device")
+//            }
+//        }
     }
 } 

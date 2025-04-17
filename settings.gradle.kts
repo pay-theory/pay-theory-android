@@ -39,4 +39,4 @@ dependencyResolutionManagement {
 rootProject.name = "PayTheory"
 include(":lib")
 include(":qualitydemo")
-include(":app")
+//include(":app")
