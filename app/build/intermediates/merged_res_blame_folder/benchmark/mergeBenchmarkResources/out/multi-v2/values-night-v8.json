@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.paytheory.jetsnack.app-mergeBenchmarkResources-65:/values-night-v8/values-night-v8.xml",
+            "map": [
+                {
+                    "source": "/Users/aronprice/pay-theory-android/app/src/main/res/values-night/themes.xml",
+                    "from": {
+                        "startLines": "15",
+                        "startColumns": "4",
+                        "startOffsets": "650",
+                        "endColumns": "107",
+                        "endOffsets": "753"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "106",
+                        "endOffsets": "157"
+                    }
+                }
+            ]
+        }
+    ]
+}

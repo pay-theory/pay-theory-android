@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.paytheory.jetsnack.app-mergeDebugResources-67:/values-b+es+419/values-b+es+419.xml",
+            "map": [
+                {
+                    "source": "/Users/aronprice/.gradle/caches/8.12/transforms/c2f2aaa2580ad6c580d342978da6d103/transformed/jetified-play-services-wallet-19.4.0/res/values-b+es+419/values.xml",
+                    "from": {
+                        "startLines": "4,5",
+                        "startColumns": "0,0",
+                        "startOffsets": "208,265",
+                        "endColumns": "56,73",
+                        "endOffsets": "264,338"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,116",
+                        "endColumns": "60,77",
+                        "endOffsets": "111,189"
+                    }
+                }
+            ]
+        }
+    ]
+}

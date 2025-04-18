@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.paytheory.jetsnack.app-mergeReleaseResources-65:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/Users/aronprice/.gradle/caches/8.12/transforms/ea97f76c49311b847c3da3676b045c54/transformed/jetified-material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}

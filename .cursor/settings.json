@@ -8,15 +8,7 @@
   "language_server.java.enabled": false,
   "code_actions_on_save.enabled": false,
   "format_on_save": false,
-  "java.home": "C:\\Program Files\\Android\\Android Studio\\jbr",
-  "java.configuration.runtimes": [
-    {
-      "name": "JavaSE-17",
-      "path": "C:\\Program Files\\Android\\Android Studio\\jbr"
-    }
-  ],
-  "java.jdt.ls.java.home": "C:\\Program Files\\Android\\Android Studio\\jbr",
-  "kotlin.compiler.jvm.target": "17",
+
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.project.referencedLibraries": {
     "include": [

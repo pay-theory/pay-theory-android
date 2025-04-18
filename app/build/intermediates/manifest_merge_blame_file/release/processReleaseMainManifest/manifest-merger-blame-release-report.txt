@@ -1,0 +1,207 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  Copyright 2020 The Android Open Source Project
+4
+5  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+6  in compliance with the License. You may obtain a copy of the License at
+7
+8  http://www.apache.org/licenses/LICENSE-2.0
+9
+10  Unless required by applicable law or agreed to in writing, software distributed under the License
+11  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+12  or implied. See the License for the specific language governing permissions and limitations under
+13  the License.
+14-->
+15<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+16    package="com.paytheory.jetsnack"
+17    android:versionCode="1"
+18    android:versionName="1.0" >
+19
+20    <uses-sdk
+21        android:minSdkVersion="28"
+22        android:targetSdkVersion="28" />
+23
+24    <!-- Load images from Unsplash -->
+25    <uses-permission android:name="android.permission.INTERNET" />
+25-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:18:5-67
+25-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:18:22-64
+26    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Enabling this flag is required to use the Google Pay API -->
+26-->[:lib] /Users/aronprice/pay-theory-android/lib/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:8:5-79
+26-->[:lib] /Users/aronprice/pay-theory-android/lib/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:8:22-76
+27    <meta-data
+27-->[:lib] /Users/aronprice/pay-theory-android/lib/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:11:5-13:32
+28        android:name="com.google.android.gms.wallet.api.enabled"
+28-->[:lib] /Users/aronprice/pay-theory-android/lib/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:12:9-65
+29        android:value="true" />
+29-->[:lib] /Users/aronprice/pay-theory-android/lib/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:13:9-29
+30
+31    <uses-feature
+31-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:26:5-28:35
+32        android:glEsVersion="0x00020000"
+32-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:27:9-41
+33        android:required="true" />
+33-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:28:9-32
+34
+35    <queries>
+35-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:30:5-34:15
+36
+37        <!-- Needs to be explicitly declared on Android R+ -->
+38        <package android:name="com.google.android.apps.maps" />
+38-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:33:9-64
+38-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:33:18-61
+39    </queries>
+40
+41    <permission
+41-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+42        android:name="com.paytheory.jetsnack.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+42-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+43        android:protectionLevel="signature" />
+43-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+44
+45    <uses-permission android:name="com.paytheory.jetsnack.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+45-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+45-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+46
+47    <application
+47-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:20:5-44:19
+48        android:allowBackup="true"
+48-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:21:9-35
+49        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+49-->[androidx.core:core:1.15.0] /Users/aronprice/.gradle/caches/8.12/transforms/d65188db2d36a32764d0e0e8f65a9750/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+50        android:extractNativeLibs="false"
+51        android:icon="@mipmap/ic_launcher"
+51-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:22:9-43
+52        android:label="@string/app_name"
+52-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:23:9-41
+53        android:supportsRtl="true"
+53-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:24:9-35
+54        android:theme="@style/Theme.Jetsnack" >
+54-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:25:9-46
+55        <profileable android:shell="true" />
+55-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:29:9-31:35
+55-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:30:13-33
+56
+57        <activity
+57-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:33:9-42:20
+58            android:name="com.paytheory.jetsnack.ui.MainActivity"
+58-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:34:13-44
+59            android:exported="true"
+59-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:35:13-36
+60            android:theme="@style/Theme.Jetsnack"
+60-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:36:13-50
+61            android:windowSoftInputMode="adjustResize" >
+61-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:37:13-55
+62            <intent-filter>
+62-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:38:13-41:29
+63                <action android:name="android.intent.action.MAIN" />
+63-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:39:17-69
+63-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:39:25-66
+64
+65                <category android:name="android.intent.category.LAUNCHER" />
+65-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:40:17-77
+65-->/Users/aronprice/pay-theory-android/app/src/main/AndroidManifest.xml:40:27-74
+66            </intent-filter>
+67        </activity>
+68
+69        <!-- Needs to be explicitly declared on P+ -->
+70        <uses-library
+70-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:39:9-41:40
+71            android:name="org.apache.http.legacy"
+71-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:40:13-50
+72            android:required="false" />
+72-->[com.google.android.gms:play-services-maps:18.0.2] /Users/aronprice/.gradle/caches/8.12/transforms/f946cec80ab3c4079870357bcc7e9bf7/transformed/jetified-play-services-maps-18.0.2/AndroidManifest.xml:41:13-37
+73
+74        <activity
+74-->[com.google.android.gms:play-services-base:18.5.0] /Users/aronprice/.gradle/caches/8.12/transforms/a1442f1059492ed9ba27ee0a094515ce/transformed/jetified-play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+75            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+75-->[com.google.android.gms:play-services-base:18.5.0] /Users/aronprice/.gradle/caches/8.12/transforms/a1442f1059492ed9ba27ee0a094515ce/transformed/jetified-play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+76            android:exported="false"
+76-->[com.google.android.gms:play-services-base:18.5.0] /Users/aronprice/.gradle/caches/8.12/transforms/a1442f1059492ed9ba27ee0a094515ce/transformed/jetified-play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+77            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+77-->[com.google.android.gms:play-services-base:18.5.0] /Users/aronprice/.gradle/caches/8.12/transforms/a1442f1059492ed9ba27ee0a094515ce/transformed/jetified-play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+78
+79        <meta-data
+79-->[com.google.android.gms:play-services-basement:18.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/635ea8b152c1ce8fe0cb727ba6b30903/transformed/jetified-play-services-basement-18.4.0/AndroidManifest.xml:6:9-122
+80            android:name="com.google.android.gms.version"
+80-->[com.google.android.gms:play-services-basement:18.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/635ea8b152c1ce8fe0cb727ba6b30903/transformed/jetified-play-services-basement-18.4.0/AndroidManifest.xml:6:20-65
+81            android:value="@integer/google_play_services_version" />
+81-->[com.google.android.gms:play-services-basement:18.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/635ea8b152c1ce8fe0cb727ba6b30903/transformed/jetified-play-services-basement-18.4.0/AndroidManifest.xml:6:66-119
+82
+83        <provider
+83-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+84            android:name="androidx.startup.InitializationProvider"
+84-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:25:13-67
+85            android:authorities="com.paytheory.jetsnack.androidx-startup"
+85-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:26:13-68
+86            android:exported="false" >
+86-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:27:13-37
+87            <meta-data
+87-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+88                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+88-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:30:17-75
+89                android:value="androidx.startup" />
+89-->[androidx.emoji2:emoji2:1.3.0] /Users/aronprice/.gradle/caches/8.12/transforms/8cf87b8c792d990b60b2cca5728e4eb2/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:31:17-49
+90            <meta-data
+90-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/aronprice/.gradle/caches/8.12/transforms/6b7fce4b5d232b5ebda27a5041cf4796/transformed/jetified-lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+91                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+91-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/aronprice/.gradle/caches/8.12/transforms/6b7fce4b5d232b5ebda27a5041cf4796/transformed/jetified-lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+92                android:value="androidx.startup" />
+92-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/aronprice/.gradle/caches/8.12/transforms/6b7fce4b5d232b5ebda27a5041cf4796/transformed/jetified-lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+93            <meta-data
+93-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+94                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+94-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+95                android:value="androidx.startup" />
+95-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+96        </provider>
+97
+98        <receiver
+98-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+99            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+99-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+100            android:directBootAware="false"
+100-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+101            android:enabled="true"
+101-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+102            android:exported="true"
+102-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+103            android:permission="android.permission.DUMP" >
+103-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+104            <intent-filter>
+104-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+105                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+106            </intent-filter>
+107            <intent-filter>
+107-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+108                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+109            </intent-filter>
+110            <intent-filter>
+110-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+111                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+112            </intent-filter>
+113            <intent-filter>
+113-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+114                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/aronprice/.gradle/caches/8.12/transforms/2fb9d9de83fe2d835f640bce2a0db77b/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+115            </intent-filter>
+116        </receiver> <!-- The activities will be merged into the manifest of the hosting app. -->
+117        <activity
+117-->[com.google.android.play:core-common:2.0.4] /Users/aronprice/.gradle/caches/8.12/transforms/18b259ca6b1de243d801447fe5483759/transformed/jetified-core-common-2.0.4/AndroidManifest.xml:14:9-18:65
+118            android:name="com.google.android.play.core.common.PlayCoreDialogWrapperActivity"
+118-->[com.google.android.play:core-common:2.0.4] /Users/aronprice/.gradle/caches/8.12/transforms/18b259ca6b1de243d801447fe5483759/transformed/jetified-core-common-2.0.4/AndroidManifest.xml:15:13-93
+119            android:exported="false"
+119-->[com.google.android.play:core-common:2.0.4] /Users/aronprice/.gradle/caches/8.12/transforms/18b259ca6b1de243d801447fe5483759/transformed/jetified-core-common-2.0.4/AndroidManifest.xml:16:13-37
+120            android:stateNotNeeded="true"
+120-->[com.google.android.play:core-common:2.0.4] /Users/aronprice/.gradle/caches/8.12/transforms/18b259ca6b1de243d801447fe5483759/transformed/jetified-core-common-2.0.4/AndroidManifest.xml:17:13-42
+121            android:theme="@style/Theme.PlayCore.Transparent" />
+121-->[com.google.android.play:core-common:2.0.4] /Users/aronprice/.gradle/caches/8.12/transforms/18b259ca6b1de243d801447fe5483759/transformed/jetified-core-common-2.0.4/AndroidManifest.xml:18:13-62
+122    </application>
+123
+124</manifest>

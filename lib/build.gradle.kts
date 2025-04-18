@@ -26,16 +26,29 @@ android {
         minSdk = 28
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Add this to help with native library loading in tests
+        ndk {
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("x86")
+            abiFilters.add("x86_64")
+        }
     }
 
-    // Disable tests for now
+    // Configure tests
     testOptions {
-        unitTests.isReturnDefaultValues = true
-        unitTests.isIncludeAndroidResources = true
-        // Re-enable tests
-        // unitTests.all {
-        //     it.enabled = false
-        // }
+        unitTests {
+            isReturnDefaultValues = true
+            isIncludeAndroidResources = true
+            all { 
+                it.systemProperty("robolectric.dependency.repo.url", "https://repo1.maven.org/maven2")
+                it.systemProperty("robolectric.dependency.repo.id", "mavenCentral")
+                it.systemProperty("javax.net.ssl.trustStoreType", "JKS")
+                // Disable native library validation for tests that need it
+                it.systemProperty("jna.nosys", "true") 
+            }
+        }
     }
 
     buildTypes {
@@ -206,6 +219,9 @@ tasks.withType<Test> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
     }
+    
+    // Force tests to run every time
+    outputs.upToDateWhen { false }
 }
 
 // Consolidated coverage report task for Android tests
@@ -215,60 +231,70 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     
     dependsOn("testDebugUnitTest")
     
-    executionData.from(fileTree(getLayout().buildDirectory) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("jacoco/testDebugUnitTest.exec")
-    })
+    // Don't require execution data to exist - helps with first-time runs
+    val execFile = layout.buildDirectory.file("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec").get().asFile
     
-    classDirectories.setFrom(
-        fileTree("${getLayout().buildDirectory}/tmp/kotlin-classes/debug") {
-            // Include only specific packages
-            include("**/com/paytheory/lib/configuration/**")
-            include("**/com/paytheory/lib/googlepay/**")
-            include("**/com/paytheory/lib/utils/**")
-            include("**/com/paytheory/lib/valid/**")
-            include("**/com/paytheory/lib/model/**")
-            include("**/com/paytheory/lib/api/**")
-            include("**/com/paytheory/lib/data/**")
-            // Only include specific compose packages
-            include("**/com/paytheory/lib/compose/string/**")
-            include("**/com/paytheory/lib/compose/transformation/**")
-            include("**/com/paytheory/lib/compose/utility/**")
-            // Add reactors and websocket packages
-            include("**/com/paytheory/lib/reactors/**")
-            include("**/com/paytheory/lib/websocket/**")
-            // Add root lib package files
-            include("**/com/paytheory/lib/ContextProvider.class")
-            include("**/com/paytheory/lib/Payable.class")
-            include("**/com/paytheory/lib/PaymentMethodProcessor.class")
-            include("**/com/paytheory/lib/Payment.class")
-            include("**/com/paytheory/lib/PaymentMethodToken.class")
-            include("**/com/paytheory/lib/PayTheoryConfiguration.class")
-            
+    // Always generate the report, even if no exec file
+    executionData.setFrom(files(execFile).filter { it.exists() })
+    
+    val mainSrc = "${project.projectDir}/src/main/java"
+    
+    // Use more reliable approach to find class files
+    // This searches all potential class output directories
+    val javaClasses = fileTree(layout.buildDirectory) {
+        include(
+            "intermediates/javac/debug/classes/**/*.class",
+            "intermediates/classes/debug/**/*.class",
+            "tmp/kotlin-classes/debug/**/*.class"
+        )
+        exclude(
             // Standard exclusions
-            exclude("**/R.class")
-            exclude("**/R$*.class")
-            exclude("**/BuildConfig.*")
-            exclude("**/Manifest*.*")
-            exclude("**/*Test*.*")
-            exclude("android/**")
-            exclude("**/Lambda*")
-            exclude("**/*Lambda.class")
-            exclude("**/*Lambda*.class")
-            exclude("**/*_MembersInjector.class")
-            exclude("**/Dagger*Component*.*")
-            exclude("**/Dagger*Subcomponent*.*")
-            exclude("**/*Module_*Factory.class")
-        }
-    )
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**",
+            "**/Lambda*",
+            "**/*Lambda.class",
+            "**/*Lambda*.class",
+            "**/generated/**",
+            "**/dagger/**",
+            "**/hilt/**",
+            
+            // Excluded packages as requested
+            "**/com/paytheory/lib/nacl/**",
+            "**/com/paytheory/lib/compose/**",
+            "**/com/paytheory/lib/compose/inputs/**"
+        )
+    }
     
-    sourceDirectories.setFrom("${project.projectDir}/src/main/java")
+    classDirectories.setFrom(javaClasses)
+    sourceDirectories.setFrom(mainSrc)
     
     reports {
         xml.required.set(true)
         csv.required.set(true)
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacoco/html"))
+    }
+    
+    doFirst {
+        // Create empty file to ensure report generation
+        if (!execFile.exists()) {
+            project.mkdir(execFile.parentFile)
+            execFile.createNewFile()
+        }
+        logger.lifecycle("JaCoCo execution data file: ${execFile.absolutePath}, exists: ${execFile.exists()}")
+        
+        // Print out class directories for debugging
+        logger.lifecycle("Class files found: ${classDirectories.files.size}")
+        classDirectories.files.forEach { 
+            logger.lifecycle("Searching for classes in: ${it}")
+            if (it.exists()) {
+                logger.lifecycle("Directory exists: ${it.absolutePath} with ${it.walk().filter { f -> f.isFile && f.name.endsWith(".class") }.count()} class files")
+            }
+        }
     }
 }
 

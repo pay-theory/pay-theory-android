@@ -1,9 +1,0 @@
-build/
-.gradle/
-**/*.class
-**/*.jar
-**/gen/
-**/tmp/
-**/.idea/workspace.xml
-**/.idea/libraries/
-**/.hprof 

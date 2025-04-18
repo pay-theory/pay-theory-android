@@ -1,0 +1,190 @@
+[
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_chips.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/chips.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_montserrat_semibold.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/montserrat_semibold.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_jelly_bean.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/jelly_bean.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_fruit.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/fruit.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_montserrat_regular.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/montserrat_regular.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_pretzels.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/pretzels.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable_empty_state_search.xml.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable/empty_state_search.xml"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-v26_ic_launcher_foreground.xml.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-v26/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_apple_sauce.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/apple_sauce.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_grapes.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/grapes.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_gingerbread.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/gingerbread.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-night_empty_state_search.xml.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-night/empty_state_search.xml"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_nougat.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/nougat.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_karla_regular.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/karla_regular.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_apple_pie.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/apple_pie.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_eclair.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/eclair.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_paleo.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/paleo.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_pie.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/pie.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_montserrat_medium.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/montserrat_medium.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_kiwi.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/kiwi.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_froyo.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/froyo.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_apple_juice.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/apple_juice.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_mango.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/mango.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_ice_cream_sandwich.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/ice_cream_sandwich.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_apple_chips.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/apple_chips.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_donut.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/donut.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_honeycomb.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/honeycomb.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_oreo.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/oreo.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_gluten_free.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/gluten_free.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_karla_bold.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/karla_bold.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_cheese.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/cheese.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_almonds.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/almonds.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_popcorn.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/popcorn.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_apples.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/apples.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_nuts.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/nuts.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_marshmallow.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/marshmallow.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_cupcake.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/cupcake.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_placeholder.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/placeholder.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_organic.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/organic.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_vegan.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/vegan.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_kitkat.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/kitkat.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_smoothies.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/smoothies.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_lollipop.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/lollipop.jpg"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/font_montserrat_light.ttf.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/font/montserrat_light.ttf"
+    },
+    {
+        "merged": "com.paytheory.jetsnack.app-debug-69:/drawable-nodpi_desserts.jpg.flat",
+        "source": "com.paytheory.jetsnack.app-main-71:/drawable-nodpi/desserts.jpg"
+    }
+]
