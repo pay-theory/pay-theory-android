@@ -55,8 +55,7 @@ fun TokenizeCard(
         requireBillingAddress = false,
         requireAccountName = false,
         paymentMethodAction = PaymentMethodAction.TOKEN,
-//        googlePayEnabled = true,
-//        googlePayMerchantName = "Pay Theory"
+
     )
 
     //collecting the payment state for results

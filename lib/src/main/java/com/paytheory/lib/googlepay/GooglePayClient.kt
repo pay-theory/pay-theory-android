@@ -93,15 +93,18 @@ class GooglePayClient : GooglePayClientInterface {
             
             paymentsClient.isReadyToPay(request)
                 .addOnCompleteListener { task ->
-                    try {
-                        taskCompletionSource.setResult(task.isSuccessful && task.result)
-                    } catch (exception: Exception) {
-                        Timber.e(exception, "isReadyToPay failed")
+                    Log.d("GPC_LISTENER_CALLED", "isReadyToPay addOnCompleteListener invoked. Success: ${task.isSuccessful}")
+                    if (task.isSuccessful) {
+                        taskCompletionSource.setResult(task.result)
+                    } else {
+                        Log.e("GPC_ISREADY_FAIL", "isReadyToPay task failed", task.exception)
+                        Timber.e(task.exception, "isReadyToPay failed")
                         taskCompletionSource.setResult(false)
                     }
                 }
         } catch (exception: Exception) {
             Timber.e(exception, "Failed to create isReadyToPay request")
+            Log.e("GooglePayClient", "Failed to create isReadyToPay request", exception)
             taskCompletionSource.setResult(false)
         }
         
@@ -190,18 +193,33 @@ class GooglePayClient : GooglePayClientInterface {
     }
 
     /**
-     * Extracts the payment token from the Google Pay response
+     * Extracts the payment token from the Google Pay PaymentData object.
      *
-     * @param paymentData The PaymentData returned from the Google Pay payment sheet
-     * @return The payment token as a string
-     * @throws JSONException If the token cannot be extracted
+     * @param paymentData The PaymentData object received from Google Pay.
+     * @return The payment token string.
+     * @throws IllegalArgumentException If the PaymentData JSON is null.
+     * @throws RuntimeException If there's an error parsing the JSON or the token is missing.
      */
     override fun extractPaymentToken(paymentData: PaymentData): String {
-        val paymentMethodData = JSONObject(paymentData.toJson())
-            .getJSONObject("paymentMethodData")
-        
-        return paymentMethodData.getJSONObject("tokenizationData")
-            .getString("token")
+        val paymentDataJsonString = paymentData.toJson() ?: throw IllegalArgumentException("PaymentData JSON is null")
+        Log.d("GooglePayClient", "PaymentData JSON: $paymentDataJsonString") // Log for debugging
+
+        try {
+            val paymentDataJson = JSONObject(paymentDataJsonString)
+            val paymentMethodData = paymentDataJson.getJSONObject("paymentMethodData")
+            val tokenizationData = paymentMethodData.getJSONObject("tokenizationData")
+            val token = tokenizationData.getString("token")
+            if (token.isBlank()) {
+                throw RuntimeException("Extracted payment token is blank")
+            }
+            return token
+        } catch (e: JSONException) {
+            Log.e("GooglePayClient", "Error parsing payment data JSON", e)
+            throw RuntimeException("Failed to extract payment token from PaymentData due to JSON parsing error", e)
+        } catch (e: Exception) { // Catch other potential errors
+            Log.e("GooglePayClient", "Unexpected error extracting payment token", e)
+            throw RuntimeException("Failed to extract payment token from PaymentData", e)
+        }
     }
 
     /**

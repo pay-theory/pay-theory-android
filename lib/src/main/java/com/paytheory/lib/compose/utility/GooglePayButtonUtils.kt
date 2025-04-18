@@ -6,40 +6,37 @@ import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
 
 /**
- * Utility functions for Google Pay Button components
- * 
- * These functions handle the mapping between Pay Theory's internal types
- * and the Google Pay SDK types.
+ * Utility class for mapping our Google Pay button enums to Google's official
+ * compose-pay-button library button types and themes.
  */
 object GooglePayButtonUtils {
-    
     /**
-     * Maps our internal GooglePayButtonType to the library's ButtonType
-     * 
-     * @param buttonType Our internal button type enum
-     * @return The corresponding Google Pay SDK ButtonType
+     * Maps our GooglePayButtonType to Google's ButtonType enum.
+     *
+     * @param type The button type from our configuration
+     * @return The corresponding ButtonType from Google's library
      */
-    fun mapButtonType(buttonType: GooglePayButtonType): ButtonType {
-        return when (buttonType) {
-            GooglePayButtonType.PAY -> ButtonType.Pay
+    fun mapButtonType(type: GooglePayButtonType): ButtonType {
+        return when (type) {
+            GooglePayButtonType.BUY -> ButtonType.Buy
             GooglePayButtonType.CHECKOUT -> ButtonType.Checkout
             GooglePayButtonType.ORDER -> ButtonType.Order
-            GooglePayButtonType.SUBSCRIBE -> ButtonType.Subscribe
             GooglePayButtonType.BOOK -> ButtonType.Book
-            GooglePayButtonType.BUY -> ButtonType.Buy
+            GooglePayButtonType.SUBSCRIBE -> ButtonType.Subscribe
+            GooglePayButtonType.PAY -> ButtonType.Pay
         }
     }
 
     /**
-     * Maps our internal GooglePayButtonColor to the library's ButtonTheme
-     * 
-     * @param buttonColor Our internal button color enum
-     * @return The corresponding Google Pay SDK ButtonTheme
+     * Maps our GooglePayButtonColor to Google's ButtonTheme enum.
+     *
+     * @param color The button color from our configuration
+     * @return The corresponding ButtonTheme from Google's library
      */
-    fun mapButtonTheme(buttonColor: GooglePayButtonColor): ButtonTheme {
-        return when (buttonColor) {
+    fun mapButtonTheme(color: GooglePayButtonColor): ButtonTheme {
+        return when (color) {
             GooglePayButtonColor.BLACK -> ButtonTheme.Dark
             GooglePayButtonColor.WHITE -> ButtonTheme.Light
         }
     }
-} 
+}

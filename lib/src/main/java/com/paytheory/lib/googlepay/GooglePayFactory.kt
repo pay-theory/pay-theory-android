@@ -39,8 +39,7 @@ object GooglePayFactory {
             configuration = configuration,
             activity = activity,
             payable = payable,
-            viewModel = viewModel,
-            googlePayUtil = googlePayUtil
+            viewModel = viewModel
         )
     }
     

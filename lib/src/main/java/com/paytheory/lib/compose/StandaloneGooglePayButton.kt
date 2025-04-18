@@ -14,12 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
+import com.paytheory.lib.compose.utility.GooglePayFormUtils
 import com.paytheory.lib.configuration.GooglePayButtonColor
 import com.paytheory.lib.configuration.GooglePayButtonType
-import com.paytheory.lib.compose.utility.GooglePayFormUtils
-import com.paytheory.lib.data.payable.ErrorCode
-import com.paytheory.lib.data.payable.PTError
-import com.paytheory.lib.googlepay.GooglePayProcessor
 import com.paytheory.lib.model.PaymentViewModel
 
 /**

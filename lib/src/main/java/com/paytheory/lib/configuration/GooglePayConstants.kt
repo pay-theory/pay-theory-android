@@ -21,6 +21,7 @@ object GooglePayConstants {
     
     // Only support CRYPTOGRAM_3DS initially as required by backend
     val DEFAULT_SUPPORTED_METHODS = listOf(
+        "PAN_ONLY",
         "CRYPTOGRAM_3DS"
     )
     

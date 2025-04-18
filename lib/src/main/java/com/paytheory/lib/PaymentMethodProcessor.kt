@@ -20,6 +20,7 @@ import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
 import com.paytheory.lib.websocket.WebsocketMessageHandler
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
@@ -44,9 +45,11 @@ abstract class PaymentMethodProcessor (
     open val configuration : PayTheoryConfiguration,
     open val viewModel: PaymentViewModel
 ) : WebsocketMessageHandler {
-    init {
-        Timber.tag("DEBUG_PAYTHEORY").d("PaymentMethodProcessor constructor (init block) started")
-    }
+    // We no longer initialize here, this is moved into the ptTokenApiCall
+    var isWarm: Boolean = false
+    var resetCounter = 0
+    var ptResetCounter = 0
+    var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     val integrity by lazy {
         Timber.tag("DEBUG_PAYTHEORY").d("Integrity lazy initializer started. isWarm: %s", isWarm)
@@ -67,22 +70,66 @@ abstract class PaymentMethodProcessor (
         Timber.tag("DEBUG_PAYTHEORY").d("Integrity lazy initializer finished.")
         Unit // Return Unit as the value of the lazy property isn't the focus
     }
-
-    var isWarm: Boolean = false
-    var integrityTokenProvider: StandardIntegrityTokenProvider? = null
-    var resetCounter = 0
-    var ptResetCounter = 0
-
     val headerMap: MutableMap<String, String> by lazy {
-    if (configuration.isTestMode) {
-        mutableMapOf("Content-Type" to "application/json")
-    } else {
-        mutableMapOf("Content-Type" to "application/json", "X-API-Key" to configuration.apiKey)
+        if (configuration.isTestMode) {
+            mutableMapOf("Content-Type" to "application/json")
+        } else {
+            mutableMapOf("Content-Type" to "application/json", "X-API-Key" to configuration.apiKey)
+        }
     }
-}
     var publicKey: String? = null
     var sessionKey: String? = null
     var hostToken: String? = null
+    private val disposables = CompositeDisposable()
+    /**
+     * Initializes and prefetches the Google Play Integrity token, storing the token provider for later use.
+     */
+    private fun initializeAndPrefetchIntegrityToken() {
+        if (configuration.isTestMode != true) {
+            val googleProjectNumber: Long = getGoogleProjectNumber()
+
+
+            val context = payable.getContext()
+                ?: throw IllegalStateException("Context is required for non-test environments")
+            val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
+
+            // Prepare integrity token. Can be called once in a while to keep internal
+            // state fresh.
+            standardIntegrityManager.prepareIntegrityToken(
+                PrepareIntegrityTokenRequest.builder()
+                    .setCloudProjectNumber(googleProjectNumber)
+                    .build()
+            )
+                .addOnSuccessListener { tokenProvider ->
+                    integrityTokenProvider = tokenProvider
+                    ptTokenApiCall(payable)
+                }
+                .addOnFailureListener { exception ->
+                    Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
+                }
+        }
+//        if (!configuration.isTestMode) {
+//            Timber.tag("DEBUG_PAYTHEORY").d("Initializing and prefetching integrity token.")
+//            val standardIntegrityManager = IntegrityManagerFactory.createStandard(payable.getContext())
+//            val googleProjectNumber = getGoogleProjectNumber()
+//
+//            val prepareIntegrityTokenTask = standardIntegrityManager.prepareIntegrityToken(
+//                PrepareIntegrityTokenRequest.builder().setCloudProjectNumber(googleProjectNumber).build()
+//            )
+//
+//            prepareIntegrityTokenTask.addOnSuccessListener { tokenProvider ->
+//                Timber.tag("DEBUG_PAYTHEORY").d("Integrity token preparation successful.")
+//                integrityTokenProvider = tokenProvider // Store the provider
+//            }.addOnFailureListener { exception ->
+//                Timber.tag("DEBUG_PAYTHEORY").e(exception, "Integrity token preparation failed.")
+//                Logger.getLogger("warmUpPlayIntegrity").log(
+//                    Level.WARNING,
+//                    exception.message.toString()
+//                )
+//                handleApiError(exception,payable)
+//            }
+//        }
+    }
 
     /**
      * Companion object to hold shared properties and constants.
@@ -135,7 +182,7 @@ abstract class PaymentMethodProcessor (
          * Constant representing the action for a wallet transaction (e.g., Google Pay).
          */
         const val WALLET_TRANSACTION_ACTION = "host:wallet_transaction"
-        
+
         /**
          * Constant representing the result of a wallet transaction.
          */
@@ -159,20 +206,6 @@ abstract class PaymentMethodProcessor (
          */
         const val CASH = "cash"
     }
-    /**
-     * Initializes the `Payment` instance, including warming up the Play Integrity API.
-     */
-
-
-//    private val integrity by lazy {
-//        if (!isWarm) {
-//            initializeAndPrefetchIntegrityToken()
-//            isWarm = true
-//        }
-//        updatePayableReadyState(false)
-//    }
-
-
 
 
     /**
@@ -212,86 +245,108 @@ abstract class PaymentMethodProcessor (
     @SuppressLint("CheckResult")
     fun ptTokenApiCall(context: Payable) {
         if (sessionIsDirty) {
-            headerMap.put("x-session-key",UUID.randomUUID().toString())
+            headerMap["x-session-key"] = UUID.randomUUID().toString()
             sessionIsDirty = false
         }
 
-        if (configuration.isTestMode != true) {
+        if (!configuration.isTestMode) {
+//            if(integrityTokenProvider == null)
+//            {
+//                initializeAndPrefetchIntegrityToken()
+//            }
+            // Now that the token provider is ready, make the API call
             val observable =
                 ApiService(configuration.apiBasePath).ptTokenApiCall().doToken(headerMap)
-            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                // handle success pt-token request
-                .subscribe({ ptTokenResponse: PTTokenResponse ->
+            val disposable = observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ ptTokenResponse ->
                     ptResetCounter = 0
-                    initiateGooglePlayIntegrityCheck(ptTokenResponse)
-                    // handle failed pt-token request
+                    initiateGooglePlayIntegrityCheck(ptTokenResponse, integrityTokenProvider) // Pass the tokenProvider
                 }, { error ->
+                    handleApiError(error, context)
+                })
+            disposables.add(disposable)
 
-
-                    if (error.message.toString().contains("Unable to resolve host")) {
-
-                        disconnect()
-                        attemptReconnectToPtToken()
-                    } else if (error.message.toString().contains("HTTP 500")) {
-
-                        disconnect()
-                        resetSocket()
-                    } else if (error.message == "HTTP 404 ") {
-                        context.handleError(PTError(ErrorCode.InvalidAPIKey, "Access Denied"))
-                    } else {
-                        println("ptTokenApiCall " + error.message)
-                        context.handleError(
-                            PTError(
-                                ErrorCode.InvalidAPIKey,
-                                error.message.toString()
-                            )
-                        )
-                    }
-
-                }
-                )
+        } else {
+            val observable =
+                ApiService(configuration.apiBasePath).ptTokenApiCall().doToken(headerMap)
+            val disposable = observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ ptTokenResponse ->
+                    ptResetCounter = 0
+                    initiateGooglePlayIntegrityCheck(ptTokenResponse, integrityTokenProvider)
+                }, { error ->
+                    handleApiError(error, context)
+                })
+            disposables.add(disposable)
         }
     }
 
     /**
-     * Prepares the Google Play Integrity API by initializing and potentially pre-fetching an integrity token.
-     * This is done to reduce latency when requesting an integrity token later during the payment process.
-     * It initializes the IntegrityManager and prepares an integrity token.
+     * Helper method to handle API errors and report them to the Payable interface.
+     *
+     * @param error The error that occurred.
+     * @param context The Payable interface for reporting errors.
      */
-    private fun initializeAndPrefetchIntegrityToken() {
-        if (configuration.isTestMode != true) {
-            val googleProjectNumber: Long = getGoogleProjectNumber()
-
-        
-            ptTokenApiCall(payable)
-        
-            val context = payable.getContext() 
-                ?: throw IllegalStateException("Context is required for non-test environments")
-            val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
-
-            // Prepare integrity token. Can be called once in a while to keep internal
-            // state fresh.
-            standardIntegrityManager.prepareIntegrityToken(
-                PrepareIntegrityTokenRequest.builder()
-                    .setCloudProjectNumber(googleProjectNumber)
-                    .build()
+    private fun handleApiError(error: Throwable, context: Payable) {
+        if (error.message.toString().contains("Unable to resolve host")) {
+            disconnect()
+            attemptReconnectToPtToken()
+        } else if (error.message.toString().contains("HTTP 500")) {
+            disconnect()
+            resetSocket()
+        } else if (error.message == "HTTP 404 ") {
+            context.handleError(PTError(ErrorCode.InvalidAPIKey, "Access Denied"))
+        } else {
+            println("ptTokenApiCall " + error.message)
+            context.handleError(
+                PTError(
+                    ErrorCode.AttestationFailed,
+                    error.message.toString()
+                )
             )
-                .addOnSuccessListener { tokenProvider ->
-                    integrityTokenProvider = tokenProvider
-                    ptTokenApiCall(payable)
-                }
-                .addOnFailureListener { exception ->
-                    Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
-                }
         }
     }
+
+//    /**
+//     * Prepares the Google Play Integrity API by initializing and potentially pre-fetching an integrity token.
+//     * This is done to reduce latency when requesting an integrity token later during the payment process.
+//     * It initializes the IntegrityManager and prepares an integrity token.
+//     */
+//    private fun initializeAndPrefetchIntegrityToken() {
+//        if (configuration.isTestMode != true) {
+//            val googleProjectNumber: Long = getGoogleProjectNumber()
+//
+//
+//            ptTokenApiCall(payable)
+//
+//            val context = payable.getContext()
+//                ?: throw IllegalStateException("Context is required for non-test environments")
+//            val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
+//
+//            // Prepare integrity token. Can be called once in a while to keep internal
+//            // state fresh.
+//            standardIntegrityManager.prepareIntegrityToken(
+//                PrepareIntegrityTokenRequest.builder()
+//                    .setCloudProjectNumber(googleProjectNumber)
+//                    .build()
+//            )
+//                .addOnSuccessListener { tokenProvider ->
+//                    integrityTokenProvider = tokenProvider
+//                    ptTokenApiCall(payable)
+//                }
+//                .addOnFailureListener { exception ->
+//                    Logger.getLogger("warmUpPlayIntegrity").log(Level.WARNING,exception.message.toString())
+//                }
+//        }
+//    }
 
     /**
      * Initiates the Google Play Integrity check and proceeds to establish the websocket connection
      * if the integrity check is successful.
      * @param ptTokenResponse The response containing the Pay Theory token.
      */
-    private fun initiateGooglePlayIntegrityCheck(ptTokenResponse: PTTokenResponse) {
+    private fun initiateGooglePlayIntegrityCheck(ptTokenResponse: PTTokenResponse, integrityTokenProvider: StandardIntegrityTokenProvider?) {
         if (configuration.isTestMode == true) {
             establishViewModel(ptTokenResponse)
         } else {
@@ -370,7 +425,7 @@ abstract class PaymentMethodProcessor (
 
     /**
      * Checks if the connection credentials are set.
-     * 
+     *
      * @return true if all credentials are set, false otherwise
      */
     fun hasCredentials(): Boolean {
@@ -378,6 +433,13 @@ abstract class PaymentMethodProcessor (
     }
 
     abstract fun createInitialActionRequest(payment: PaymentDetail): ActionRequest
+
+    /**
+     * Disposes of any active RxJava subscriptions to prevent memory leaks.
+     */
+    override fun disconnect() {
+        disposables.clear()
+    }
 }
 
 private fun PaymentMethodProcessor.getGoogleProjectNumber(): Long
@@ -386,7 +448,7 @@ private fun PaymentMethodProcessor.getGoogleProjectNumber(): Long
     if (configuration.isTestMode == true) {
         googleProjectNumber = 12345678L
     } else {
-        val context = payable.getContext() 
+        val context = payable.getContext()
             ?: throw IllegalStateException("Context is required for non-test environments")
         googleProjectNumber = context.resources.getString(R.string.google_project_number).toLong()
     }

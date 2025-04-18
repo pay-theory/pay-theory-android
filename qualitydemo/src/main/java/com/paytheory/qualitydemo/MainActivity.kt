@@ -1,10 +1,8 @@
 package com.paytheory.qualitydemo
 
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -34,6 +32,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.paytheory.lib.PayableActivity
 import com.paytheory.lib.Payable
 import com.paytheory.lib.data.payable.BarcodeResult
 import com.paytheory.lib.data.payable.FailedTransactionResult
@@ -58,7 +57,7 @@ import com.paytheory.qualitydemo.ui.theme.JetsnacksampleTheme
  * This activity demonstrates how to integrate the PayTheory payment library into a Compose application.
  * It implements the [Payable] interface to handle payment events and uses ViewModels to manage payment state.
  */
-class MainActivity : ComponentActivity(), Payable {
+class MainActivity : PayableActivity() {
     /**
      * ViewModel for managing the payment process state.
      */
@@ -253,10 +252,6 @@ class MainActivity : ComponentActivity(), Payable {
     override fun handleError(error: PTError) {
         paymentProcessModel.updateState(PaymentResultState.Error(error))
         Log.d("MainActivity", "handleError: $error")
-    }
-
-    override fun clientContext(): Context {
-        return this.applicationContext
     }
 
     /**

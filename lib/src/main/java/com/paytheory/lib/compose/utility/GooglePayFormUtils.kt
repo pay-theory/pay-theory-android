@@ -1,9 +1,8 @@
 package com.paytheory.lib.compose.utility
 
 import android.app.Activity
+import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.PaymentsClient
 import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
 import com.paytheory.lib.data.payable.ErrorCode
@@ -20,21 +19,6 @@ import com.paytheory.lib.model.PaymentViewModel
 object GooglePayFormUtils {
     
     /**
-     * Validates if the current context can support Google Pay operations
-     * 
-     * @param activity The current activity context
-     * @param payable The Payable implementation for callbacks
-     * @return True if the context is valid, false otherwise
-     */
-    fun validateGooglePayContext(activity: Activity?, payable: Payable): Boolean {
-        if (activity == null) {
-            payable.handleError(PTError(ErrorCode.GooglePayUnavailable, "Google Pay requires an Activity context"))
-            return false
-        }
-        return true
-    }
-    
-    /**
      * Validates if the configuration has Google Pay enabled
      * 
      * @param configuration The PayTheory configuration to check
@@ -45,15 +29,35 @@ object GooglePayFormUtils {
             throw IllegalStateException("Google Pay must be enabled in PayTheoryConfiguration")
         }
     }
-    
+
     /**
-     * Creates a Google Pay processor from the given parameters
-     * 
-     * @param payable The Payable implementation for callbacks
-     * @param activity The current activity
-     * @param configuration The PayTheory configuration
-     * @param viewModel The payment view model
-     * @return A configured GooglePayProcessor instance
+     * Validates the context for Google Pay processing.
+     *
+     * @param activity The activity being used for Google Pay
+     * @param payable The Payable interface implementation
+     * @return True if the context is valid, false otherwise
+     */
+    fun validateGooglePayContext(activity: Activity?, payable: Payable): Boolean {
+        if (activity == null) {
+            payable.handleError(
+                PTError(
+                    ErrorCode.GooglePayError,
+                    "Context is invalid"
+                )
+            )
+            return false
+        }
+        return true
+    }
+
+    /**
+     * Creates a Google Pay processor instance.
+     *
+     * @param payable The Payable interface implementation
+     * @param activity The activity being used for Google Pay
+     * @param configuration Pay Theory configuration with Google Pay settings
+     * @param viewModel The PaymentViewModel for managing payment data
+     * @return A GooglePayProcessor instance
      */
     fun createGooglePayProcessor(
         payable: Payable,
@@ -63,29 +67,40 @@ object GooglePayFormUtils {
     ): GooglePayProcessor {
         return GooglePayProcessor(payable, activity, configuration, viewModel)
     }
-    
+
     /**
-     * Initiates a Google Pay availability check
-     * 
-     * @param googlePayProcessor The Google Pay processor to use
-     * @param onAvailabilityResult Callback for availability result
+     * Checks if Google Pay is available on the device.
+     *
+     * @param googlePayProcessor The GooglePayProcessor instance
+     * @param onAvailabilityChecked Callback to handle the result of availability check
      */
     fun checkGooglePayAvailability(
         googlePayProcessor: GooglePayProcessor,
-        onAvailabilityResult: (Boolean) -> Unit
+        onAvailabilityChecked: (Boolean) -> Unit
     ) {
-        googlePayProcessor.isGooglePayAvailable().addOnCompleteListener { task ->
-            val isAvailable = task.isSuccessful && task.result
-            onAvailabilityResult(isAvailable)
+        val isAvailableTask: Task<Boolean> = googlePayProcessor.isGooglePayAvailable()
+
+        isAvailableTask.addOnCompleteListener { task ->
+            Log.d("GPFormUtils", "Availability check task completed. Success: ${task.isSuccessful}")
+            if (task.isSuccessful) {
+                val isReady = task.result
+                Log.d("GPFormUtils", "Reporting availability to callback: $isReady")
+                onAvailabilityChecked(isReady)
+            } else {
+                Log.e("GPFormUtils", "Availability check task failed.", task.exception)
+                Log.d("GPFormUtils", "Reporting availability to callback: false (due to error)")
+                onAvailabilityChecked(false)
+            }
         }
     }
-    
+
     /**
-     * Initiates a Google Pay payment
-     * 
-     * @param googlePayProcessor The Google Pay processor to use
+     * Initiates the Google Pay payment flow.
+     *
+     * @param googlePayProcessor The GooglePayProcessor instance
      */
     fun initiateGooglePayPayment(googlePayProcessor: GooglePayProcessor) {
+        Log.d("initiateGooglePayPayment", "Calling requestGooglePayment")
         googlePayProcessor.initiateGooglePayPayment()
     }
 } 

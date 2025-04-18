@@ -81,6 +81,7 @@ dependencies {
 
 //Compose bom
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    implementation("androidx.appcompat:appcompat:1.7.0")
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
 
     // Google Pay Button for Jetpack Compose

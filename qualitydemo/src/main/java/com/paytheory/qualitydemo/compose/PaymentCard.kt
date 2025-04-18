@@ -55,7 +55,9 @@ fun PaymentCard(
         paymentMethodType = PaymentMethodType.CARD,
         requireBillingAddress = false,
         requireAccountName = false,
-        paymentMethodAction = PaymentMethodAction.PAYMENT
+        paymentMethodAction = PaymentMethodAction.PAYMENT,
+        googlePayEnabled = true,
+        googlePayMerchantName = "Pay Theory"
     )
 
     //collecting the payment state for results

@@ -16,6 +16,7 @@ import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
 import com.paytheory.lib.websocket.WebsocketMessageHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 import java.util.Base64
 
 /**
@@ -39,7 +40,20 @@ class Payment(
     viewModel: PaymentViewModel
 ) : PaymentMethodProcessor(contextIn, payTheoryDataIn, configurationIn, viewModel),
     WebsocketMessageHandler {
+    init {
+        // This runs AFTER the base class init and AFTER constructor parameters are assigned.
+        Timber.tag("DEBUG_PAYTHEORY").d("PaymentMethodToken SUBCLASS init block started.")
 
+        // 'configuration' parameter should be valid here.
+        if (!configuration.isTestMode) {
+            Timber.tag("DEBUG_PAYTHEORY").d("Not in test mode, triggering integrity initialization via lazy property.")
+            // Access the 'integrity' property inherited from PaymentMethodProcessor.
+            // This executes the 'lazy' block defined in the base class.
+            val initializeAction = integrity // Just accessing the property triggers it.
+        } else {
+            Timber.tag("DEBUG_PAYTHEORY").d("In test mode, skipping integrity initialization trigger.")
+        }
+    }
     /**
      * The package name of the calling application.
      */
