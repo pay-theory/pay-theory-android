@@ -1,6 +1,5 @@
 package com.paytheory.lib.model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paytheory.lib.data.payable.BarcodeResult
@@ -11,6 +10,7 @@ import com.paytheory.lib.data.payable.SuccessfulTransactionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 /**
  * Represents the possible states of a payment transaction process.
@@ -75,7 +75,7 @@ class PaymentProcessViewModel : ViewModel() {
     fun updateState(newState: PaymentResultState) {
         viewModelScope.launch {
             _paymentState.emit(newState)
-            Log.d("PaymentProcessViewModel", "updateState: $newState")
+            Timber.d("updateState: $newState")
         }
     }
 }

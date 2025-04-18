@@ -9,38 +9,52 @@ import org.json.JSONArray
 import java.math.BigDecimal
 
 /**
- * Interface for Google Pay utility operations
- * This interface enables easier testing by allowing mock implementations
+ * Defines the contract for a utility class that simplifies common Google Pay operations.
+ *
+ * This interface provides a higher-level abstraction over the potentially more complex interactions
+ * handled by [GooglePayClientInterface]. It offers convenience methods for checking readiness,
+ * initiating the payment flow with configuration parameters, extracting the payment token from the result,
+ * and generating configuration needed for UI components like the Google Pay button.
+ *
+ * Implementations (like [GooglePayUtil]) typically delegate the core API calls to an instance
+ * of [GooglePayClientInterface]. This interface is useful for dependency injection and testing,
+ * allowing mock utilities to be provided (e.g., via [GooglePayFactory]).
  */
 interface GooglePayUtilInterface {
     /**
-     * Checks if Google Pay is available on the device
-     * 
-     * @param activity Host activity
-     * @param environment Google Pay environment (TEST or PRODUCTION)
-     * @param billingAddressRequired Whether billing address is required
-     * @return Task<Boolean> with Google Pay availability result
+     * Checks if the user's device is ready to make Google Pay payments with the specified configuration.
+     *
+     * @param activity The host [Activity].
+     * @param environment The target Google Pay environment. Defaults to TEST.
+     * @param billingAddressRequired Whether billing address is required. Defaults to false.
+     * @param allowedCardNetworks A list of allowed card networks for the transaction.
+     * @param allowedAuthMethods A list of allowed authentication methods for the transaction.
+     * @return A [Task<Boolean>] indicating readiness. Handle the result asynchronously.
      */
     fun isGooglePayAvailable(
         activity: Activity,
         environment: GooglePayEnvironment = GooglePayEnvironment.TEST,
-        billingAddressRequired: Boolean = false
+        billingAddressRequired: Boolean = false,
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>
     ): Task<Boolean>
     
     /**
-     * Initiates Google Pay payment flow
-     * 
-     * @param activity Host activity
-     * @param amount Payment amount (in dollars)
-     * @param merchantName Merchant name to display in payment sheet
-     * @param environment Google Pay environment (TEST or PRODUCTION)
-     * @param billingAddressRequired Whether billing address is required
-     * @param billingAddressFormat Format of billing address (MINIMAL or FULL)
-     * @param shippingAddressRequired Whether shipping address is required
-     * @param phoneNumberRequired Whether phone number is required
-     * @param allowPrepaidCards Whether prepaid cards are allowed
-     * @param allowCreditCards Whether credit cards are allowed
-     * @return Task<PaymentData> Google Pay payment result
+     * Initiates the Google Pay payment flow by requesting payment data from the Google Pay API.
+     *
+     * @param activity The host [Activity] required to launch the Google Pay sheet.
+     * @param amount The transaction amount as a [BigDecimal].
+     * @param merchantName The merchant name to display in the payment sheet.
+     * @param environment The target Google Pay environment. Defaults to TEST.
+     * @param billingAddressRequired Whether billing address is required. Defaults to false.
+     * @param billingAddressFormat The required format for the billing address if required. Defaults to MINIMAL.
+     * @param shippingAddressRequired Whether shipping address is required. Defaults to false.
+     * @param phoneNumberRequired Whether phone number is required (usually linked to shipping). Defaults to false.
+     * @param allowPrepaidCards Whether prepaid cards are allowed. Defaults to true.
+     * @param allowCreditCards Whether credit cards are allowed. Defaults to true.
+     * @param allowedCardNetworks A list of allowed card networks for the transaction.
+     * @param allowedAuthMethods A list of allowed authentication methods for the transaction.
+     * @return A [Task<PaymentData>] that will resolve with the payment data on success, or fail with an exception.
      */
     fun requestGooglePayment(
         activity: Activity,
@@ -52,22 +66,25 @@ interface GooglePayUtilInterface {
         shippingAddressRequired: Boolean = false,
         phoneNumberRequired: Boolean = false,
         allowPrepaidCards: Boolean = true,
-        allowCreditCards: Boolean = true
+        allowCreditCards: Boolean = true,
+        allowedCardNetworks: List<String>,
+        allowedAuthMethods: List<String>
     ): Task<PaymentData>
     
     /**
-     * Extracts payment token from Google Pay response
-     * 
-     * @param paymentData PaymentData from Google Pay response
-     * @return Token string for payment processing
+     * Extracts the encrypted payment token from the [PaymentData] object returned by Google Pay.
+     *
+     * @param paymentData The [PaymentData] object received from a successful Google Pay transaction.
+     * @return The extracted payment token string.
+     * @throws RuntimeException or [IllegalArgumentException] if extraction fails.
      */
     fun extractPaymentToken(paymentData: PaymentData): String
     
     /**
-     * Gets the allowed payment methods JSON array for Google Pay
-     * This is needed for the Google Pay button component
-     * 
-     * @return JSONArray containing the allowed payment methods
+     * Generates a JSON array describing the allowed payment methods (specifically CARD),
+     * suitable for configuring the Google Pay Button view based on default SDK settings.
+     *
+     * @return A [JSONArray] containing a CARD payment method object with default network/auth parameters.
      */
     fun getAllowedPaymentMethodsJson(): JSONArray
 } 

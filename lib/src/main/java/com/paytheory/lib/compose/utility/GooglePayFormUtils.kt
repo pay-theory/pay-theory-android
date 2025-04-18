@@ -1,7 +1,6 @@
 package com.paytheory.lib.compose.utility
 
 import android.app.Activity
-import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.paytheory.lib.PayTheoryConfiguration
 import com.paytheory.lib.Payable
@@ -9,6 +8,7 @@ import com.paytheory.lib.data.payable.ErrorCode
 import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.googlepay.GooglePayProcessor
 import com.paytheory.lib.model.PaymentViewModel
+import timber.log.Timber
 
 /**
  * Utility class for Google Pay form operations
@@ -81,14 +81,14 @@ object GooglePayFormUtils {
         val isAvailableTask: Task<Boolean> = googlePayProcessor.isGooglePayAvailable()
 
         isAvailableTask.addOnCompleteListener { task ->
-            Log.d("GPFormUtils", "Availability check task completed. Success: ${task.isSuccessful}")
+            Timber.d("Availability check task completed. Success: ${task.isSuccessful}")
             if (task.isSuccessful) {
                 val isReady = task.result
-                Log.d("GPFormUtils", "Reporting availability to callback: $isReady")
+                Timber.d("Reporting availability to callback: $isReady")
                 onAvailabilityChecked(isReady)
             } else {
-                Log.e("GPFormUtils", "Availability check task failed.", task.exception)
-                Log.d("GPFormUtils", "Reporting availability to callback: false (due to error)")
+                Timber.e(task.exception, "Availability check task failed.")
+                Timber.d("Reporting availability to callback: false (due to error)")
                 onAvailabilityChecked(false)
             }
         }
@@ -100,7 +100,7 @@ object GooglePayFormUtils {
      * @param googlePayProcessor The GooglePayProcessor instance
      */
     fun initiateGooglePayPayment(googlePayProcessor: GooglePayProcessor) {
-        Log.d("initiateGooglePayPayment", "Calling requestGooglePayment")
+        Timber.d("Calling requestGooglePayment")
         googlePayProcessor.initiateGooglePayPayment()
     }
 } 

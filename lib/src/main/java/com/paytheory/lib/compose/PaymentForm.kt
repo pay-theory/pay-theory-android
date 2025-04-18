@@ -1,7 +1,6 @@
 package com.paytheory.lib.compose
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.model.PaymentViewModel.PaymentState
 import com.paytheory.lib.valid.Validator
+import timber.log.Timber
 
 /**
  * A composable function that renders a complete payment form with dynamic fields based on configuration.
@@ -83,7 +83,7 @@ fun PaymentForm(
     LaunchedEffect(key1 = clearFormTrigger) {
         if (clearFormTrigger) {
             viewModel.clearSensitiveData()
-            Log.d("PaymentForm", "clearFormTrigger")
+            Timber.d("clearFormTrigger")
             clearFormTrigger = false
         }
     }

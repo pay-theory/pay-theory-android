@@ -11,123 +11,135 @@ import com.paytheory.lib.model.PaymentField
 
 
 /**
- * Interface that defines the contract for handling payment and tokenization events.
+ * Interface that defines the contract for handling payment and tokenization events within the Pay Theory SDK.
  *
- * This interface is designed to be implemented by the consuming application's Activity or Fragment,
- * providing access to the application context for the SDK. It acts as a callback mechanism for
- * the SDK to communicate the status and results of various operations.
- *
- * The `Payable` interface provides methods to handle:
- * - SDK readiness status
- * - Start of payment and tokenization processes
- * - Results of successful and failed transactions
- * - Results of barcode requests
- * - Results of tokenization requests
- * - State changes of payment fields
- * - Errors encountered during the process
+ * This interface must be implemented by the Activity or Fragment that hosts the Pay Theory UI components.
+ * It provides the necessary callbacks for the SDK to communicate the status and results of various operations,
+ * such as payment transactions, tokenization, and field state changes. The implementation also grants the SDK
+ * access to the application context via the [ContextProvider] interface.
  *
  * Implementing this interface allows your application to react to these events and manage the
- * payment flow accordingly.
+ * payment flow accordingly, updating the UI or triggering other application logic based on the results.
+ *
+ * Key responsibilities include handling:
+ * - SDK readiness status ([handleReady])
+ * - Start indications for payment and tokenization processes ([handlePaymentStart], [handleTokenStart])
+ * - Results of successful and failed transactions ([handleSuccess], [handleFailure])
+ * - Results of successful barcode generation ([handleBarcodeSuccess])
+ * - Results of successful payment method tokenization ([handleTokenizeSuccess])
+ * - State changes of individual payment input fields ([handleStateChange])
+ * - Errors encountered during SDK operations ([handleError])
  */
 interface Payable : ContextProvider {
     /**
-     * Handles changes to the SDK readiness status.
+     * Called when the SDK's initialization status changes.
      *
-     * This function is called by the SDK to notify the consuming application whether the SDK
-     * is ready to interact. When the SDK is ready, it can accept payment and tokenization
-     * requests.
+     * This function notifies the host application whether the Pay Theory SDK components are ready
+     * to accept user input and initiate operations like payments or tokenization. It's typically
+     * used to enable/disable UI elements related to payment actions.
      *
-     * @param isReady `true` if the SDK is ready to interact; `false` otherwise.
+     * @param isReady `true` if the SDK components are initialized and ready; `false` otherwise.
      */
     fun handleReady(isReady: Boolean)
 
     /**
-     * Indicates the start of a payment process.
+     * Called immediately before the SDK initiates a payment transaction (e.g., charging a card or bank account).
      *
-     * This function is called by the SDK when a payment process is initiated. It provides
-     * information about the type of payment being started.
+     * This callback signals that a payment attempt is about to start. It can be used to display
+     * loading indicators or disable further user interaction until the transaction completes.
      *
-     * @param paymentType A string indicating the type of payment started (e.g., "CARD", "ACH", "CASH").
+     * @param paymentType A string identifier for the type of payment being initiated (e.g., "CARD", "ACH", "CASH", "GOOGLE_PAY").
      */
     fun handlePaymentStart(paymentType: String)
 
     /**
-     * Indicates the start of a tokenization process.
+     * Called immediately before the SDK initiates a payment method tokenization process.
      *
-     * This function is called by the SDK when a tokenization process is initiated for a
-     * payment method.
+     * This callback signals that a request to tokenize a payment method (like a card or bank account)
+     * is about to start. It can be used similarly to [handlePaymentStart] for UI feedback.
      *
-     * @param paymentType A string indicating the type of payment method being tokenized (e.g., "CARD", "ACH").
+     * @param paymentType A string identifier for the type of payment method being tokenized (e.g., "CARD", "ACH").
      */
     fun handleTokenStart(paymentType: String)
 
     /**
-     * Handles successful payment results.
+     * Called when a payment transaction completes successfully.
      *
-     * This function is called by the SDK when a payment transaction has completed successfully.
-     * It provides detailed results about the successful transaction.
+     * This function delivers the results of a successful payment, including transaction details.
+     * The host application should use this callback to confirm the payment to the user and proceed
+     * with the next steps in their flow (e.g., showing an order confirmation).
      *
-     * @param successfulTransactionResult The result object containing data for a successful transaction.
+     * @param successfulTransactionResult An object containing detailed information about the successful transaction.
      */
     fun handleSuccess(successfulTransactionResult: SuccessfulTransactionResult)
 
     /**
-     * Handles declined payment results.
+     * Called when a payment transaction fails or is declined.
      *
-     * This function is called by the SDK when a payment transaction has failed or been declined.
-     * It provides information about the failed transaction.
+     * This function delivers the results of a failed payment attempt. The host application should
+     * use this callback to inform the user about the failure and potentially allow them to retry
+     * or use a different payment method.
      *
-     * @param failedTransactionResult The result object containing data for a failed transaction.
+     * @param failedTransactionResult An object containing details about the failed transaction, including error messages or decline reasons.
      */
     fun handleFailure(failedTransactionResult: FailedTransactionResult)
 
     /**
-     * Handles successful barcode results.
+     * Called when a cash barcode generation request completes successfully.
      *
-     * This function is called by the SDK when a barcode request has completed successfully.
-     * It provides the results of the barcode request.
+     * This function delivers the barcode details necessary for the user to complete a cash payment
+     * at a physical location.
      *
-     * @param barcodeResult The result object containing data for a successful barcode request.
+     * @param barcodeResult An object containing the generated barcode information.
      */
     fun handleBarcodeSuccess(barcodeResult: BarcodeResult)
 
     /**
-     * Handles successful tokenization results.
+     * Called when a payment method tokenization request completes successfully.
      *
-     * This function is called by the SDK when a tokenization request has completed successfully.
-     * It provides the results of the tokenization process.
+     * This function delivers the tokenized payment method details. The host application can store
+     * this token securely for future transactions or other purposes.
      *
-     * @param paymentMethodToken The result object containing data for a payment method token request.
+     * @param paymentMethodToken An object containing the results of the tokenization, including the payment method token.
      */
     fun handleTokenizeSuccess(paymentMethodToken: PaymentMethodTokenResults)
 
     /**
-     * Handles state changes of payment fields.
+     * Called whenever the input state (validity, focus, etc.) of a Pay Theory payment field changes.
      *
-     * This function is called by the SDK when the state of a payment field changes.
-     * It provides information about the specific field and its new state.
+     * This allows the host application to react to changes in individual fields, for example,
+     * by displaying validation errors or updating UI elements based on field focus.
      *
-     * @param fieldState A pair where the first element is the `PaymentField` that changed, and the second element is the `FieldState` of the field.
+     * @param fieldState A [Pair] containing the specific [PaymentField] that changed and its new [FieldState].
      */
     fun handleStateChange(fieldState: Pair<PaymentField, FieldState>)
 
     /**
-     * Handles errors encountered by the SDK.
+     * Called when an unexpected error occurs within the SDK.
      *
-     * This function is called by the SDK to communicate any system errors that have occurred,
-     * either from the user's device or from the Pay Theory platform.
+     * This function is used to report errors that are not related to specific transaction failures
+     * (handled by [handleFailure]) but rather to issues like network problems, configuration errors,
+     * or internal SDK exceptions.
      *
-     * @param error The `PTError` object containing the reason for the failure.
+     * @param error A [PTError] object describing the error condition.
      */
     fun handleError(error: PTError)
 
-    fun clientContext(): Context
-    
     /**
-     * Returns the Android Context from the implementing class.
-     * Default implementation returns null for test environments.
+     * Provides the Android [Context] to the SDK.
      *
-     * @return The Android Context or null
+     * This method must be implemented to return the application or activity context.
+     * It is used internally by the SDK for various Android-specific operations.
+     *
+     * @return The Android [Context] of the host application component.
+     */
+    fun clientContext(): Context
+
+    /**
+     * Implementation of the [ContextProvider] interface.
+     * Retrieves the Android [Context] via [clientContext].
+     *
+     * @return The Android [Context] provided by [clientContext], or null if unavailable (e.g., in certain test environments).
      */
     override fun getContext(): Context? = clientContext()
 }

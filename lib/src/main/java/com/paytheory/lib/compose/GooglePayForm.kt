@@ -1,7 +1,6 @@
 package com.paytheory.lib.compose
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -30,19 +29,48 @@ import com.paytheory.lib.data.payable.ErrorCode
 import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.googlepay.GooglePayUtil
 import com.paytheory.lib.model.PaymentViewModel
+import timber.log.Timber
 
 /**
- * A Google Pay payment form that provides a Google Pay button and handles payment processing.
+ * A composable function that displays a Google Pay button and manages the Google Pay payment flow.
  *
- * This composable checks for Google Pay availability on the device and displays a Google Pay
- * button if available. It manages the entire Google Pay payment flow, from availability checking
- * to payment processing.
+ * This composable function is responsible for:
+ * 1.  **Context Validation:** Ensuring the provided context is a valid Activity, which is required
+ *     for launching Google Pay UI elements. If not, it reports an error via the [payable] interface
+ *     and terminates early.
+ * 2.  **ViewModel Initialization:** Obtaining or creating a [PaymentViewModel] instance associated
+ *     with the current composition scope, providing necessary configuration and callbacks.
+ * 3.  **Activity Result Handling:** Registering an ActivityResultLauncher to handle the result
+ *     returned by the Google Pay payment sheet activity. It processes success (extracting the token),
+ *     cancellation, and error scenarios, reporting outcomes via the [payable] interface.
+ * 4.  **Google Pay Processor Initialization:** Creating an instance of [GooglePayProcessor] using
+ *     [GooglePayFormUtils.createGooglePayProcessor], which encapsulates the logic for interacting
+ *     with the Google Pay API. The processor is remembered across recompositions.
+ * 5.  **Google Pay Availability Check:** Asynchronously checking if Google Pay is available and
+ *     configured correctly on the user's device using [GooglePayFormUtils.checkGooglePayAvailability].
+ *     It manages the UI state (`isCheckingAvailability`, `isGooglePayAvailable`) to display appropriate
+ *     content (loading indicator, button, or unavailability message).
+ * 6.  **Launcher Configuration:** Setting the previously registered ActivityResultLauncher on the
+ *     [GooglePayProcessor] instance using a [LaunchedEffect] to ensure it's done after composition.
+ * 7.  **UI Rendering:** Displaying UI elements based on the availability check state:
+ *     - A loading message while checking.
+ *     - The [GooglePayButton] if available, configured with the provided parameters and triggering
+ *       the payment flow via [GooglePayFormUtils.initiateGooglePayPayment] on click.
+ *     - An informative message if Google Pay is unavailable.
  *
- * @param payable The Payable interface implementation for payment callbacks
- * @param configuration Pay Theory configuration with Google Pay settings
- * @param buttonModifier Modifier to apply to the Google Pay button
- * @param buttonType The type of Google Pay button to display
- * @param buttonColor The color scheme of the Google Pay button
+ * This composable integrates tightly with [GooglePayUtil], [GooglePayProcessor], [GooglePayFormUtils],
+ * and the [Payable] interface to provide a complete Google Pay experience within a Compose UI.
+ *
+ * @param payable The [Payable] interface implementation used for reporting payment outcomes (success, failure, errors)
+ *                and handling payment start notifications.
+ * @param configuration The [PayTheoryConfiguration] object containing essential settings for Pay Theory and
+ *                      Google Pay, such as API key, amount, merchant details, button style, and allowed payment methods.
+ * @param buttonModifier An optional [Modifier] to customize the layout and appearance of the underlying [GooglePayButton].
+ *                       Defaults to an empty [Modifier].
+ * @param buttonType The visual style of the Google Pay button (e.g., `PLAIN`, `BUY`). Defaults to the value specified
+ *                   in the [configuration].
+ * @param buttonColor The color theme of the Google Pay button (e.g., `DARK`, `LIGHT`). Defaults to the value specified
+ *                    in the [configuration].
  */
 @Composable
 fun GooglePayForm(
@@ -79,34 +107,34 @@ fun GooglePayForm(
         // 2. Implement the callback logic here
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                Log.d("GooglePayResult", "Payment data received successfully")
+                Timber.d("Payment data received successfully")
                 result.data?.let { intent ->
                     PaymentData.getFromIntent(intent)?.let { paymentData ->
-                        Log.d("PaymentData", paymentData.toString())
+                        Timber.d(paymentData.toString())
                         val token = googlePayUtil.extractPaymentToken(paymentData)
-                        Log.d("PaymentToken", token)
+                        Timber.d(token)
                         // TODO: Send token to your backend
                         // TODO: Call payable.handleSuccess(...) or payable.handleError(...)
                     } ?: run {
-                        Log.e("GooglePayResult", "PaymentData.getFromIntent returned null")
+                        Timber.e("PaymentData.getFromIntent returned null")
                         payable.handleError(PTError(ErrorCode.GooglePayError, "Failed to retrieve payment data"))
                     }
                 } ?: run {
-                    Log.e("GooglePayResult", "Result data intent is null")
+                    Timber.e("Result data intent is null")
                     payable.handleError(PTError(ErrorCode.GooglePayError, "Failed to retrieve payment data"))
                 }
             }
             Activity.RESULT_CANCELED -> {
-                Log.d("GooglePayResult", "User cancelled the Google Pay flow.")
+                Timber.d("User cancelled the Google Pay flow.")
                 // payable.handleError(...) // Optional: Handle cancellation
             }
             AutoResolveHelper.RESULT_ERROR -> {
                 val status = AutoResolveHelper.getStatusFromIntent(result.data)
-                Log.e("GooglePayResult", "Google Pay returned an error. Status: ${status?.statusMessage} Code: ${status?.statusCode}")
+                Timber.e("Google Pay returned an error. Status: ${status?.statusMessage} Code: ${status?.statusCode}")
                 payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay returned an error: ${status?.statusMessage}"))
             }
             else -> {
-                Log.w("GooglePayResult", "Unhandled result code: ${result.resultCode}")
+                Timber.w("Unhandled result code: ${result.resultCode}")
                 payable.handleError(PTError(ErrorCode.GooglePayError, "Unknown Google Pay result"))
             }
         }
