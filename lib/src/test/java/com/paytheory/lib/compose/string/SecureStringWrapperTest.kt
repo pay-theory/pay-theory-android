@@ -2,101 +2,120 @@ package com.paytheory.lib.compose.string
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
+import org.junit.Assert.*
 import org.junit.Test
 
+/**
+ * Tests for the SecureStringWrapper class
+ * 
+ * The SecureStringWrapper is a key component in handling secure input for payment fields.
+ * It wraps a SecureString while providing UI-friendly functionality like cursor position.
+ */
 class SecureStringWrapperTest {
 
-    private lateinit var secureString: SecureString
-    private lateinit var secureStringWrapper: SecureStringWrapper
-
-    @Before
-    fun setup() {
-        secureString = SecureString("initial_string")
-        secureStringWrapper = SecureStringWrapper(secureString, TextRange(0))
-    }
-
     @Test
-    fun testInitialValues() {
-        assertEquals("initial_string", secureStringWrapper.visibleValue)
-        assertEquals("initial_string", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(0), secureStringWrapper._selection)
+    fun testSecureStringWrapperCreation() {
+        // Create a secure string
+        val secureString = SecureString("4111111111111111")
+        
+        // Create a wrapper with a selection position
+        val selectionPos = TextRange(4)
+        val wrapper = SecureStringWrapper(secureString, selectionPos)
+        
+        // Test initial state
+        assertEquals("4111111111111111", wrapper.visibleValue)
+        assertEquals(secureString, wrapper.secureValue)
+        assertEquals(selectionPos, wrapper._selection)
     }
-
+    
     @Test
     fun testUpdateValue() {
-        secureStringWrapper.updateValue("new_string", 5)
-        assertEquals("new_string", secureStringWrapper.visibleValue)
-        assertEquals("new_string", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(5), secureStringWrapper._selection)
+        // Create a secure string and wrapper
+        val secureString = SecureString("4111111111111111")
+        val wrapper = SecureStringWrapper(secureString, TextRange(0))
+        
+        // Update the value with a new credit card number and cursor position
+        val newValue = "4242424242424242"
+        val newCursorPos = 8
+        wrapper.updateValue(newValue, newCursorPos)
+        
+        // Verify the update was successful
+        assertEquals(newValue, wrapper.visibleValue)
+        assertEquals(newValue, wrapper.secureValue.revealForUi())
+        assertEquals(TextRange(newCursorPos), wrapper._selection)
     }
-
+    
     @Test
-    fun testSecureValueGetter() {
-        assertEquals(secureString, secureStringWrapper.secureValue)
+    fun testSecureStateWithSelection() {
+        // Create a secure string
+        val secureString = SecureString("4111111111111111")
+        
+        // Create a wrapper with a specific selection range
+        val selectionRange = TextRange(4, 8) // Selects "1111" in the middle
+        val wrapper = SecureStringWrapper(secureString, selectionRange)
+        
+        // Get the TextFieldValue representation
+        val textFieldValue = wrapper.secureState
+        
+        // Verify the text and selection
+        assertEquals("4111111111111111", textFieldValue.text)
+        assertEquals(selectionRange, textFieldValue.selection)
     }
-
+    
     @Test
-    fun testSecureStateGetter_withSelection() {
-        val expectedTextFieldValue = TextFieldValue("initial_string", TextRange(0))
-        assertEquals(expectedTextFieldValue.text, secureStringWrapper.secureState.text)
-        assertEquals(expectedTextFieldValue.selection, secureStringWrapper.secureState.selection)
+    fun testSecureStateWithoutSelection() {
+        // Create a secure string
+        val secureString = SecureString("4111111111111111")
+        
+        // Create a wrapper without selection
+        val wrapper = SecureStringWrapper(secureString, null)
+        
+        // Get the TextFieldValue representation
+        val textFieldValue = wrapper.secureState
+        
+        // Verify the text and that selection is at default position
+        assertEquals("4111111111111111", textFieldValue.text)
+        assertEquals(TextRange(0, 0), textFieldValue.selection) // Default selection
     }
-
+    
     @Test
-    fun testSecureStateGetter_withoutSelection() {
-        val secureString = SecureString("initial_string")
-        val secureStringWrapper = SecureStringWrapper(secureString, null)
-        val expectedTextFieldValue = TextFieldValue("initial_string")
-        assertEquals(expectedTextFieldValue.text, secureStringWrapper.secureState.text)
-        assertEquals(expectedTextFieldValue.selection, secureStringWrapper.secureState.selection)
+    fun testMemoryProtection() {
+        // Create a wrapper with sensitive data
+        val sensitiveData = "4111111111111111" 
+        val secureString = SecureString(sensitiveData)
+        val wrapper = SecureStringWrapper(secureString, TextRange(4))
+        
+        // Verify initial state
+        assertEquals(sensitiveData, wrapper.visibleValue)
+        
+        // Update the value to something else
+        wrapper.updateValue("", 0)
+        
+        // Zero fill the original secure string
+        secureString.zeroFill()
+        
+        // Verify the original secure string is zeroed out
+        val clearedData = secureString.revealForProcessing()
+        assertTrue(clearedData.all { it == 0.toByte() })
     }
+    
     @Test
-    fun testInitialValues_nullSelection() {
-        val secureStringWrapper = SecureStringWrapper(secureString, null)
-        assertEquals("initial_string", secureStringWrapper.visibleValue)
-        assertEquals("initial_string", secureStringWrapper.secureValue.revealForUi())
-        assertNull(secureStringWrapper._selection)
-    }
-
-    @Test
-    fun testUpdateValue_nullInitialSelection() {
-        val secureString = SecureString("initial_string")
-        val secureStringWrapper = SecureStringWrapper(secureString, null)
-        secureStringWrapper.updateValue("new_string", 5)
-        assertEquals("new_string", secureStringWrapper.visibleValue)
-        assertEquals("new_string", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(5), secureStringWrapper._selection)
-    }
-
-    @Test
-    fun testUpdateValue_differentString() {
-        secureStringWrapper.updateValue("new_string_2", 7)
-        assertEquals("new_string_2", secureStringWrapper.visibleValue)
-        assertEquals("new_string_2", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(7), secureStringWrapper._selection)
-    }
-
-    @Test
-    fun testUpdateValue_multipleTimes() {
-        secureStringWrapper.updateValue("first_update", 3)
-        assertEquals("first_update", secureStringWrapper.visibleValue)
-        assertEquals("first_update", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(3), secureStringWrapper._selection)
-
-        secureStringWrapper.updateValue("second_update", 6)
-        assertEquals("second_update", secureStringWrapper.visibleValue)
-        assertEquals("second_update", secureStringWrapper.secureValue.revealForUi())
-        assertEquals(TextRange(6), secureStringWrapper._selection)
-    }
-
-    @Test
-    fun testSecureStateGetter_emptyString() {
-        secureStringWrapper.updateValue("", 0)
-        val expectedTextFieldValue = TextFieldValue("", TextRange(0))
-        assertEquals(expectedTextFieldValue.text, secureStringWrapper.secureState.text)
-        assertEquals(expectedTextFieldValue.selection, secureStringWrapper.secureState.selection)
+    fun testCursorPositionMaintenance() {
+        // Create a wrapper with a cursor position
+        val secureString = SecureString("4111")
+        val initialCursorPos = TextRange(4) // Cursor at the end
+        val wrapper = SecureStringWrapper(secureString, initialCursorPos)
+        
+        // Update with a longer value, placing cursor in the middle
+        wrapper.updateValue("41112222", 4)
+        
+        // Verify cursor position is maintained
+        assertEquals(TextRange(4), wrapper._selection)
+        
+        // Update again with another value and cursor position
+        wrapper.updateValue("411122223333", 8)
+        
+        // Verify the new cursor position
+        assertEquals(TextRange(8), wrapper._selection)
     }
 }

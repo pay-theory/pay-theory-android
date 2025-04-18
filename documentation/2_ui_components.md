@@ -27,6 +27,73 @@ This composable automatically:
 - Provides a payment button
 - Manages the entire payment flow
 
+### Google Pay Components
+
+#### GooglePayForm
+
+The `GooglePayForm` provides a complete Google Pay button with availability checking:
+
+```kotlin
+@Composable
+fun GooglePayForm(
+    payable: Payable,
+    configuration: PayTheoryConfiguration,
+    buttonModifier: Modifier = Modifier,
+    buttonType: GooglePayButtonType = configuration.googlePayButtonType,
+    buttonColor: GooglePayButtonColor = configuration.googlePayButtonColor
+)
+```
+
+This composable:
+- Checks if Google Pay is available on the device
+- Shows a Google Pay button when available
+- Handles the entire Google Pay payment flow
+- Provides feedback when Google Pay is unavailable
+
+#### StandaloneGooglePayButton
+
+For more customized implementations, the `StandaloneGooglePayButton` provides greater control:
+
+```kotlin
+@Composable
+fun StandaloneGooglePayButton(
+    payable: Payable,
+    configuration: PayTheoryConfiguration,
+    modifier: Modifier = Modifier,
+    hideWhenUnavailable: Boolean = false,
+    onUnavailable: (() -> Unit)? = null,
+    buttonType: GooglePayButtonType = configuration.googlePayButtonType,
+    buttonColor: GooglePayButtonColor = configuration.googlePayButtonColor
+)
+```
+
+This composable:
+- Allows controlling visibility when Google Pay is unavailable
+- Provides callback when Google Pay is unavailable
+- Supports custom button styling
+- Handles the entire Google Pay payment flow
+
+#### GooglePayButton
+
+The base button component that follows Google Pay branding guidelines:
+
+```kotlin
+@Composable
+fun GooglePayButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
+    buttonType: GooglePayButtonType = GooglePayButtonType.Pay,
+    buttonColor: GooglePayButtonColor = GooglePayButtonColor.Black
+)
+```
+
+This composable:
+- Provides the styled Google Pay button according to branding guidelines
+- Supports different button types (Pay, Buy, Checkout, etc.)
+- Supports different color schemes (Black, White)
+- Handles enabling/disabling with appropriate visual feedback
+
 ### Payment Field Components
 
 #### Card Payment Fields
@@ -166,6 +233,20 @@ The UI components are built with Material 3 and respect the application's theme:
    }
    ```
 
+4. **Google Pay Button Styling**: Customize Google Pay button appearance
+   ```kotlin
+   // In configuration
+   .setGooglePayButtonType(GooglePayButtonType.Buy)
+   .setGooglePayButtonColor(GooglePayButtonColor.Black)
+   
+   // Or directly in composable
+   GooglePayButton(
+       onClick = { /* ... */ },
+       buttonType = GooglePayButtonType.Checkout,
+       buttonColor = GooglePayButtonColor.White
+   )
+   ```
+
 ## Accessibility
 
 The UI components adhere to accessibility best practices:
@@ -207,6 +288,14 @@ The UI components include built-in security features:
 └────────────────────────────────┘
 ```
 
+### Google Pay Form
+
+```
+┌────────────────────────────────┐
+│    [ Buy with G Pay $10.00 ]   │
+└────────────────────────────────┘
+```
+
 ### ACH Payment Form with Billing Address
 
 ```
@@ -240,6 +329,8 @@ The UI components include built-in security features:
 ```
 
 ## Implementation Example
+
+### Traditional Payment Form
 
 ```kotlin
 @Composable
@@ -289,6 +380,61 @@ fun PaymentScreen(
                 )
             }
             else -> { /* Handle other states */ }
+        }
+    }
+}
+```
+
+### Google Pay Implementation
+
+```kotlin
+@Composable
+fun GooglePayScreen(payable: Payable) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Complete your purchase",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
+        // Display Google Pay form
+        GooglePayForm(
+            payable = payable,
+            configuration = PayTheoryConfiguration.Builder()
+                .apiKey(BuildConfig.PAY_THEORY_API_KEY)
+                .amount(1999) // $19.99
+                .enableGooglePay(
+                    merchantName = "Your Store Name",
+                    allowPrepaidCards = true,
+                    allowCreditCards = true
+                )
+                .setGooglePayButtonType(GooglePayButtonType.Buy)
+                .setGooglePayButtonColor(GooglePayButtonColor.Black)
+                .setGooglePayEnvironment(GooglePayEnvironment.TEST)
+                .build(),
+            buttonModifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        )
+        
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        
+        Text(
+            text = "Or pay another way",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        Button(
+            onClick = { /* Navigate to traditional payment form */ },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Card or Bank Payment")
         }
     }
 } 

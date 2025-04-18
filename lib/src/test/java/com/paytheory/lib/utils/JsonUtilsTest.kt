@@ -2,321 +2,356 @@ package com.paytheory.lib.utils
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.junit.Test
 import org.junit.Assert.*
+import org.junit.Test
 
 /**
- * Tests for JsonUtils helper class.
- * These tests verify JSON parsing, formatting and error handling capabilities.
+ * Tests for JsonUtils
+ * 
+ * The JsonUtils class handles sensitive payment data in JSON format, so thorough testing
+ * is essential for security and PCI compliance.
  */
 class JsonUtilsTest {
-    
+
     @Test
-    fun `parseSafeJson should parse valid JSON strings`() {
-        // Given
-        val validJson = """{"key": "value", "nested": {"nestedKey": "nestedValue"}}"""
+    fun testParseSafeJson_validJson() {
+        // Valid JSON with payment data
+        val jsonStr = """{"card_number":"4111111111111111","expiration":"1225","cvv":"123"}"""
         
-        // When
-        val result = JsonUtils.parseSafeJson(validJson)
+        // Parse JSON safely
+        val jsonObject = JsonUtils.parseSafeJson(jsonStr)
         
-        // Then
-        assertNotNull(result)
-        assertEquals("value", result.get("key").asString)
-        assertTrue(result.has("nested"))
-        assertEquals("nestedValue", result.getAsJsonObject("nested").get("nestedKey").asString)
+        // Verify parsing
+        assertNotNull(jsonObject)
+        assertEquals("4111111111111111", jsonObject.get("card_number").asString)
+        assertEquals("1225", jsonObject.get("expiration").asString)
+        assertEquals("123", jsonObject.get("cvv").asString)
     }
     
     @Test
-    fun `parseSafeJson should return empty JsonObject for invalid JSON`() {
-        // Given
-        val invalidJson = """{"key": "value"""  // Missing closing brace
+    fun testParseSafeJson_emptyJson() {
+        // Empty JSON
+        val jsonStr = "{}"
         
-        // When
-        val result = JsonUtils.parseSafeJson(invalidJson)
+        // Parse JSON safely
+        val jsonObject = JsonUtils.parseSafeJson(jsonStr)
         
-        // Then
-        assertNotNull(result)
-        assertEquals(0, result.size())
+        // Verify parsing
+        assertNotNull(jsonObject)
+        assertEquals(0, jsonObject.size())
     }
     
     @Test
-    fun `parseSafeJson should return empty JsonObject for empty string`() {
-        // Given
-        val emptyJson = ""
+    fun testParseSafeJson_invalidJson() {
+        // Invalid JSON
+        val jsonStr = "{invalid_json"
         
-        // When
-        val result = JsonUtils.parseSafeJson(emptyJson)
+        // Parse JSON safely - should return empty object
+        val jsonObject = JsonUtils.parseSafeJson(jsonStr)
         
-        // Then
-        assertNotNull(result)
-        assertEquals(0, result.size())
+        // Verify parsing
+        assertNotNull(jsonObject)
+        assertEquals(0, jsonObject.size())
     }
     
     @Test
-    fun `parseSafeJson should return empty JsonObject for null input`() {
-        // Given
-        val nullJson: String? = null
+    fun testParseSafeJson_nullInput() {
+        // Null input
+        val jsonObject = JsonUtils.parseSafeJson(null)
         
-        // When
-        val result = JsonUtils.parseSafeJson(nullJson)
-        
-        // Then
-        assertNotNull(result)
-        assertEquals(0, result.size())
+        // Verify parsing
+        assertNotNull(jsonObject)
+        assertEquals(0, jsonObject.size())
     }
     
     @Test
-    fun `getStringOrDefault should return value when present`() {
-        // Given
-        val json = JsonParser.parseString("""{"key": "value"}""").asJsonObject
+    fun testGetStringOrDefault_existingKey() {
+        // Create a JSON object with payment data
+        val jsonObject = JsonParser.parseString("""{"card_number":"4111111111111111","cvv":"123"}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getStringOrDefault(json, "key", "default")
+        // Get existing string value
+        val cardNumber = JsonUtils.getStringOrDefault(jsonObject, "card_number", "default")
         
-        // Then
-        assertEquals("value", result)
+        // Verify value
+        assertEquals("4111111111111111", cardNumber)
     }
     
     @Test
-    fun `getStringOrDefault should return default when key is missing`() {
-        // Given
-        val json = JsonParser.parseString("""{"otherKey": "value"}""").asJsonObject
+    fun testGetStringOrDefault_missingKey() {
+        // Create a JSON object
+        val jsonObject = JsonParser.parseString("""{"card_number":"4111111111111111"}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getStringOrDefault(json, "key", "default")
+        // Get non-existent value, should return default
+        val cvv = JsonUtils.getStringOrDefault(jsonObject, "cvv", "default")
         
-        // Then
-        assertEquals("default", result)
+        // Verify default is returned
+        assertEquals("default", cvv)
     }
     
     @Test
-    fun `getStringOrDefault should return default when value is not a string`() {
-        // Given
-        val json = JsonParser.parseString("""{"key": 123}""").asJsonObject
+    fun testGetStringOrDefault_wrongType() {
+        // Create a JSON object with mixed types
+        val jsonObject = JsonParser.parseString("""{"card_number":"4111111111111111","amount":1000}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getStringOrDefault(json, "key", "default")
+        // Try to get number as string, should return default
+        val amount = JsonUtils.getStringOrDefault(jsonObject, "amount", "default")
         
-        // Then
-        assertEquals("default", result)
+        // Verify default is returned
+        assertEquals("default", amount)
     }
     
     @Test
-    fun `getIntOrDefault should return value when present`() {
-        // Given
-        val json = JsonParser.parseString("""{"key": 123}""").asJsonObject
+    fun testGetIntOrDefault_existingKey() {
+        // Create a JSON object with payment data
+        val jsonObject = JsonParser.parseString("""{"amount":1000,"fee":25}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getIntOrDefault(json, "key", 456)
+        // Get existing int value
+        val amount = JsonUtils.getIntOrDefault(jsonObject, "amount", 0)
         
-        // Then
-        assertEquals(123, result)
+        // Verify value
+        assertEquals(1000, amount)
     }
     
     @Test
-    fun `getIntOrDefault should return default when key is missing`() {
-        // Given
-        val json = JsonParser.parseString("""{"otherKey": 123}""").asJsonObject
+    fun testGetIntOrDefault_missingKey() {
+        // Create a JSON object
+        val jsonObject = JsonParser.parseString("""{"amount":1000}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getIntOrDefault(json, "key", 456)
+        // Get non-existent value, should return default
+        val fee = JsonUtils.getIntOrDefault(jsonObject, "fee", 50)
         
-        // Then
-        assertEquals(456, result)
+        // Verify default is returned
+        assertEquals(50, fee)
     }
     
     @Test
-    fun `getIntOrDefault should return default when value is not a number`() {
-        // Given
-        val json = JsonParser.parseString("""{"key": "not a number"}""").asJsonObject
+    fun testGetIntOrDefault_wrongType() {
+        // Create a JSON object with mixed types
+        val jsonObject = JsonParser.parseString("""{"amount":1000,"card_number":"4111111111111111"}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getIntOrDefault(json, "key", 456)
+        // Try to get string as int, should return default
+        val cardNumber = JsonUtils.getIntOrDefault(jsonObject, "card_number", 0)
         
-        // Then
-        assertEquals(456, result)
+        // Verify default is returned
+        assertEquals(0, cardNumber)
     }
     
     @Test
-    fun `getBooleanOrDefault should return value when present`() {
-        // Given
-        val json = JsonParser.parseString("""{"key": true}""").asJsonObject
+    fun testGetBooleanOrDefault_existingKey() {
+        // Create a JSON object with payment data
+        val jsonObject = JsonParser.parseString("""{"tokenize":true,"save_card":false}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getBooleanOrDefault(json, "key", false)
+        // Get existing boolean value
+        val tokenize = JsonUtils.getBooleanOrDefault(jsonObject, "tokenize", false)
         
-        // Then
-        assertTrue(result)
+        // Verify value
+        assertTrue(tokenize)
     }
     
     @Test
-    fun `getBooleanOrDefault should return default when key is missing`() {
-        // Given
-        val json = JsonParser.parseString("""{"otherKey": true}""").asJsonObject
+    fun testGetBooleanOrDefault_missingKey() {
+        // Create a JSON object
+        val jsonObject = JsonParser.parseString("""{"tokenize":true}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getBooleanOrDefault(json, "key", false)
+        // Get non-existent value, should return default
+        val saveCard = JsonUtils.getBooleanOrDefault(jsonObject, "save_card", true)
         
-        // Then
-        assertFalse(result)
+        // Verify default is returned
+        assertTrue(saveCard)
     }
     
     @Test
-    fun `getNestedObjectOrEmpty should return nested object when present`() {
-        // Given
-        val json = JsonParser.parseString("""{"nested": {"key": "value"}}""").asJsonObject
+    fun testGetBooleanOrDefault_wrongType() {
+        // Create a JSON object with mixed types
+        val jsonObject = JsonParser.parseString("""{"tokenize":true,"amount":1000}""").asJsonObject
         
-        // When
-        val result = JsonUtils.getNestedObjectOrEmpty(json, "nested")
+        // Try to get number as boolean, should return default
+        val amount = JsonUtils.getBooleanOrDefault(jsonObject, "amount", true)
         
-        // Then
-        assertTrue(result.has("key"))
-        assertEquals("value", result.get("key").asString)
+        // Verify default is returned
+        assertTrue(amount)
     }
     
     @Test
-    fun `getNestedObjectOrEmpty should return empty object when key is missing`() {
-        // Given
-        val json = JsonParser.parseString("""{"other": {"key": "value"}}""").asJsonObject
+    fun testGetNestedObjectOrEmpty_existingKey() {
+        // Create a JSON object with nested objects
+        val jsonObject = JsonParser.parseString(
+            """{"billing_address":{"street":"123 Main St","city":"Anytown"}}"""
+        ).asJsonObject
         
-        // When
-        val result = JsonUtils.getNestedObjectOrEmpty(json, "nested")
+        // Get existing nested object
+        val address = JsonUtils.getNestedObjectOrEmpty(jsonObject, "billing_address")
         
-        // Then
-        assertEquals(0, result.size())
+        // Verify nested object
+        assertNotNull(address)
+        assertEquals("123 Main St", address.get("street").asString)
+        assertEquals("Anytown", address.get("city").asString)
     }
     
     @Test
-    fun `toJsonString should convert object to JSON string`() {
-        // Given
-        val testObject = TestModel("test", 123)
+    fun testGetNestedObjectOrEmpty_missingKey() {
+        // Create a JSON object
+        val jsonObject = JsonParser.parseString("""{"billing_address":{"street":"123 Main St"}}""").asJsonObject
         
-        // When
-        val result = JsonUtils.toJsonString(testObject)
+        // Get non-existent nested object, should return empty object
+        val shippingAddress = JsonUtils.getNestedObjectOrEmpty(jsonObject, "shipping_address")
         
-        // Then
-        val expected = """{"name":"test","value":123}"""
-        assertEquals(expected, result)
+        // Verify empty object is returned
+        assertNotNull(shippingAddress)
+        assertEquals(0, shippingAddress.size())
     }
     
     @Test
-    fun `fromJsonString should convert JSON string to object`() {
-        // Given
-        val jsonString = """{"name":"test","value":123}"""
+    fun testGetNestedObjectOrEmpty_wrongType() {
+        // Create a JSON object with mixed types
+        val jsonObject = JsonParser.parseString("""{"billing_address":{"street":"123 Main St"},"amount":1000}""").asJsonObject
         
-        // When
-        val result = JsonUtils.fromJsonString(jsonString, TestModel::class.java)
+        // Try to get non-object as object, should return empty object
+        val amount = JsonUtils.getNestedObjectOrEmpty(jsonObject, "amount")
         
-        // Then
-        assertNotNull(result)
-        assertEquals("test", result?.name)
-        assertEquals(123, result?.value)
+        // Verify empty object is returned
+        assertNotNull(amount)
+        assertEquals(0, amount.size())
     }
     
     @Test
-    fun `fromJsonString should return null for invalid JSON`() {
-        // Given
-        val invalidJson = """{"name":"test" "value":123}"""  // Missing comma
+    fun testToJsonString() {
+        // Create a test data class and instance
+        data class PaymentInfo(val card_number: String, val expiration: String, val cvv: String)
+        val paymentInfo = PaymentInfo("4111111111111111", "1225", "123")
         
-        // When
-        val result = JsonUtils.fromJsonString(invalidJson, TestModel::class.java)
+        // Convert to JSON string
+        val jsonStr = JsonUtils.toJsonString(paymentInfo)
         
-        // Then
-        assertNull(result)
+        // Verify conversion
+        assertTrue(jsonStr.contains("\"card_number\":\"4111111111111111\""))
+        assertTrue(jsonStr.contains("\"expiration\":\"1225\""))
+        assertTrue(jsonStr.contains("\"cvv\":\"123\""))
     }
     
     @Test
-    fun `fromJsonStringToList should convert JSON array to list of objects`() {
-        // Given
-        val jsonArray = """[{"name":"test1","value":123},{"name":"test2","value":456}]"""
+    fun testFromJsonString() {
+        // Create a test data class
+        data class PaymentInfo(val card_number: String, val expiration: String, val cvv: String)
         
-        // When
-        val result = JsonUtils.fromJsonStringToList(jsonArray, TestModel::class.java)
+        // Create a JSON string
+        val jsonStr = """{"card_number":"4111111111111111","expiration":"1225","cvv":"123"}"""
         
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("test1", result[0].name)
-        assertEquals(123, result[0].value)
-        assertEquals("test2", result[1].name)
-        assertEquals(456, result[1].value)
+        // Convert to object
+        val paymentInfo = JsonUtils.fromJsonString(jsonStr, PaymentInfo::class.java)
+        
+        // Verify conversion
+        assertNotNull(paymentInfo)
+        assertEquals("4111111111111111", paymentInfo?.card_number)
+        assertEquals("1225", paymentInfo?.expiration)
+        assertEquals("123", paymentInfo?.cvv)
     }
     
     @Test
-    fun `fromJsonStringToList should return empty list for invalid JSON`() {
-        // Given
-        val invalidJson = """[{"name":"test1","value":123},{"name":"test2"]"""
+    fun testFromJsonString_invalidJson() {
+        // Create a test data class
+        data class PaymentInfo(val card_number: String, val expiration: String, val cvv: String)
         
-        // When
-        val result = JsonUtils.fromJsonStringToList(invalidJson, TestModel::class.java)
+        // Create an invalid JSON string
+        val jsonStr = "{invalid_json"
         
-        // Then
-        assertTrue(result.isEmpty())
+        // Convert to object - should return null
+        val paymentInfo = JsonUtils.fromJsonString(jsonStr, PaymentInfo::class.java)
+        
+        // Verify conversion
+        assertNull(paymentInfo)
     }
     
     @Test
-    fun `isValidJson should return true for valid JSON`() {
-        // Given
-        val validJson = """{"key": "value"}"""
+    fun testFromJsonStringToList() {
+        // Create a test data class
+        data class CardInfo(val brand: String, val last4: String)
         
-        // When
-        val result = JsonUtils.isValidJson(validJson)
+        // Create a JSON array string
+        val jsonStr = """[{"brand":"visa","last4":"1111"},{"brand":"mastercard","last4":"2222"}]"""
         
-        // Then
-        assertTrue(result)
+        // Convert to list
+        val cardList = JsonUtils.fromJsonStringToList(jsonStr, CardInfo::class.java)
+        
+        // Verify conversion
+        assertNotNull(cardList)
+        assertEquals(2, cardList.size)
+        assertEquals("visa", cardList[0].brand)
+        assertEquals("1111", cardList[0].last4)
+        assertEquals("mastercard", cardList[1].brand)
+        assertEquals("2222", cardList[1].last4)
     }
     
     @Test
-    fun `isValidJson should return false for invalid JSON`() {
-        // Given
-        val invalidJson = """{"key": "value"""  // Missing closing brace
+    fun testFromJsonStringToList_invalidJson() {
+        // Create a test data class
+        data class CardInfo(val brand: String, val last4: String)
         
-        // When
-        val result = JsonUtils.isValidJson(invalidJson)
+        // Create an invalid JSON string
+        val jsonStr = "[invalid_json"
         
-        // Then
-        assertFalse(result)
+        // Convert to list - should return empty list
+        val cardList = JsonUtils.fromJsonStringToList(jsonStr, CardInfo::class.java)
+        
+        // Verify conversion
+        assertTrue(cardList.isEmpty())
     }
     
     @Test
-    fun `isValidJson should return false for null or empty string`() {
-        // Given
-        val nullJson: String? = null
-        val emptyJson = ""
+    fun testIsValidJson_validJson() {
+        // Valid JSON
+        val jsonStr = """{"card_number":"4111111111111111"}"""
         
-        // When
-        val nullResult = JsonUtils.isValidJson(nullJson)
-        val emptyResult = JsonUtils.isValidJson(emptyJson)
+        // Validate JSON
+        val isValid = JsonUtils.isValidJson(jsonStr)
         
-        // Then
-        assertFalse(nullResult)
-        assertFalse(emptyResult)
+        // Verify validation
+        assertTrue(isValid)
     }
     
     @Test
-    fun `createJsonObject should convert map to JsonObject`() {
-        // Given
+    fun testIsValidJson_invalidJson() {
+        // Invalid JSON
+        val jsonStr = "{invalid_json"
+        
+        // Validate JSON
+        val isValid = JsonUtils.isValidJson(jsonStr)
+        
+        // Verify validation
+        assertFalse(isValid)
+    }
+    
+    @Test
+    fun testIsValidJson_nullInput() {
+        // Null input
+        val isValid = JsonUtils.isValidJson(null)
+        
+        // Verify validation
+        assertFalse(isValid)
+    }
+    
+    @Test
+    fun testCreateJsonObject() {
+        // Create a map with payment data
         val map = mapOf(
-            "stringKey" to "stringValue",
-            "numberKey" to 123,
-            "booleanKey" to true,
-            "nullKey" to null
+            "card_number" to "4111111111111111",
+            "expiration" to "1225",
+            "cvv" to "123",
+            "amount" to 1000,
+            "tokenize" to true,
+            "null_value" to null
         )
         
-        // When
-        val result = JsonUtils.createJsonObject(map)
+        // Convert to JSON object
+        val jsonObject = JsonUtils.createJsonObject(map)
         
-        // Then
-        assertEquals("stringValue", result.get("stringKey").asString)
-        assertEquals(123, result.get("numberKey").asInt)
-        assertTrue(result.get("booleanKey").asBoolean)
-        assertTrue(result.has("nullKey") && result.get("nullKey").isJsonNull)
+        // Verify conversion
+        assertEquals("4111111111111111", jsonObject.get("card_number").asString)
+        assertEquals("1225", jsonObject.get("expiration").asString)
+        assertEquals("123", jsonObject.get("cvv").asString)
+        assertEquals(1000, jsonObject.get("amount").asInt)
+        assertTrue(jsonObject.get("tokenize").asBoolean)
+        assertTrue(jsonObject.has("null_value"))
+        assertTrue(jsonObject.get("null_value").isJsonNull)
     }
-    
-    /**
-     * Simple data class for testing JSON conversion.
-     */
-    private data class TestModel(
-        val name: String,
-        val value: Int
-    )
 } 

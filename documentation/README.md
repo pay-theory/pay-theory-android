@@ -1,16 +1,42 @@
 # Pay Theory Android SDK Documentation
 
-## Introduction
+This directory contains comprehensive documentation for the Pay Theory Android SDK. The documentation is structured as follows:
 
-This directory contains comprehensive documentation on the Pay Theory Android SDK. The SDK provides a secure, flexible way to integrate payment processing into Android applications using Jetpack Compose.
+## Core Documentation
 
-## Documentation Files
+1. [**Architecture Overview**](1_architecture_overview.md) - High-level architectural overview of the SDK, including core components and data flow
 
-1. [**Architecture Overview**](1_architecture_overview.md) - Core components and high-level architecture
-2. [**UI Components**](2_ui_components.md) - Detailed documentation of all UI elements and composables
-3. [**Payment Processing**](3_payment_processing.md) - In-depth explanation of the payment processing flow
-4. [**WebSocket Implementation**](4_websocket_implementation.md) - Details of the WebSocket communication layer
-5. [**Security Features**](5_security_features.md) - Security mechanisms and PCI compliance measures
+2. [**UI Components**](2_ui_components.md) - Details of the Jetpack Compose UI components, including forms, fields, and buttons
+
+3. [**Payment Processing**](3_payment_processing.md) - Payment flow, processing mechanisms, and security measures
+
+4. [**WebSocket Implementation**](4_websocket_implementation.md) - Communication channel details and message handling
+
+5. [**Security Features**](5_security_features.md) - Security aspects of the SDK, including encryption and integrity checks
+
+6. [**Google Pay Integration**](6_google_pay_integration.md) - Implementation guide and features for Google Pay integration
+
+## Supporting Documents
+
+- [**Story Points**](Story-Points.md) - Information about story point estimation for development tasks
+
+- [**Wallet Transactions**](wallet_transaction.md) - Details on wallet-based payment processing
+
+- [**Google Pay Release Checklist**](google_pay_release_checklist.md) - Release preparation checklist for Google Pay integration
+
+## Getting Started
+
+For new users, we recommend starting with the [Architecture Overview](1_architecture_overview.md) to understand the SDK's general structure, followed by the [UI Components](2_ui_components.md) and [Payment Processing](3_payment_processing.md) documentation to learn about implementation details.
+
+For Google Pay integration specifically, refer to the [Google Pay Integration](6_google_pay_integration.md) guide.
+
+## Maintenance
+
+These documentation files are updated regularly as features are added or modified. If you find any inconsistencies or have suggestions for improvements, please submit an issue or pull request to the repository.
+
+---
+
+Copyright © Pay Theory, Inc. All rights reserved.
 
 ## SDK Features
 

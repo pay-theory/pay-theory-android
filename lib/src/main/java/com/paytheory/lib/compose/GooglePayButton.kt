@@ -2,6 +2,7 @@ package com.paytheory.lib.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.google.pay.button.PayButton
 import com.paytheory.lib.configuration.GooglePayButtonColor
@@ -36,7 +37,7 @@ fun GooglePayButton(
     PayButton(
         onClick = onClick,
         allowedPaymentMethods = allowedPaymentMethods,
-        modifier = modifier,
+        modifier = modifier.testTag("google_pay_button"),
         type = GooglePayButtonUtils.mapButtonType(buttonType),
         radius = 4.dp,  // Match corner radius to our design system
         enabled = enabled,

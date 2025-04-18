@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Pay Theory Android SDK implements a secure, robust payment processing flow that handles various payment methods (card, ACH) while ensuring data security and compliance with payment industry standards. This document outlines the payment processing architecture and flow.
+The Pay Theory Android SDK implements a secure, robust payment processing flow that handles various payment methods (card, ACH, Google Pay) while ensuring data security and compliance with payment industry standards. This document outlines the payment processing architecture and flow.
 
 ## Payment Processing Components
 
@@ -22,7 +22,12 @@ The Pay Theory Android SDK implements a secure, robust payment processing flow t
    - Stores payment credentials securely for future use
    - Does not process an actual payment
 
-4. **PaymentViewModel**: Manages the payment state and user interface
+4. **GooglePayProcessor**: Concrete implementation for Google Pay payments
+   - Interfaces with Google Pay API
+   - Handles Google Pay token processing
+   - Manages the Google Pay payment flow
+
+5. **PaymentViewModel**: Manages the payment state and user interface
    - Coordinates form validation
    - Manages the websocket connection
    - Handles payment submission and response
@@ -105,6 +110,19 @@ private fun constructBankPayment(): PaymentDetail {
         fee_mode = configuration.feeMode,
         address = constructAddress(),
         name = nameOnAccount.value.secureValue.toString(),
+        payorInfo = configuration.payorInfo,
+        // Additional configuration data
+    )
+}
+
+// For Google Pay payments
+private fun constructGooglePayPayment(token: String): PaymentDetail {
+    return PaymentDetail(
+        digitalWalletToken = token,
+        currency = "USD",
+        amount = configuration.amount,
+        type = "google_pay",
+        fee_mode = configuration.feeMode,
         payorInfo = configuration.payorInfo,
         // Additional configuration data
     )
@@ -239,6 +257,84 @@ When a transaction is completed:
 - The ViewModel updates its state
 - Sensitive data is cleared from memory
 
+## Google Pay Flow
+
+The Google Pay payment flow has some specific differences:
+
+```
+┌────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
+│ Google Pay     │────▶│ Google Pay         │────▶│ Google Pay API      │
+│ Button Click   │     │ Availability Check │     │ IsReadyToPay Request│
+└────────────────┘     └────────────────────┘     └─────────────────────┘
+                                                             │
+                                                             ▼
+┌────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
+│ Payment Token  │◀────┤ User Selects       │◀────┤ Google Pay Payment  │
+│ Processing     │     │ Payment Method     │     │ Sheet Appears       │
+└────────────────┘     └────────────────────┘     └─────────────────────┘
+        │
+        ▼
+┌────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
+│ WebSocket      │────▶│ Pay Theory Backend │────▶│ Transaction Result  │
+│ Transmission   │     │ Processing         │     │ Callbacks           │
+└────────────────┘     └────────────────────┘     └─────────────────────┘
+```
+
+Key Google Pay implementation components:
+
+1. **GooglePayClient**: Interacts with Google's PaymentsClient
+   ```kotlin
+   fun isReadyToPay(
+       activity: Activity,
+       environment: GooglePayEnvironment,
+       existingPaymentMethodRequired: Boolean,
+       allowedCardNetworks: List<String>,
+       allowedAuthMethods: List<String>
+   ): Task<Boolean>
+   
+   fun loadPaymentData(
+       activity: Activity,
+       request: PaymentDataRequest
+   ): Task<PaymentData>
+   ```
+
+2. **GooglePayUtil**: Helper utilities for Google Pay operations
+   ```kotlin
+   fun isGooglePayAvailable(
+       activity: Activity,
+       environment: GooglePayEnvironment,
+       existingPaymentMethodRequired: Boolean,
+       allowedCardNetworks: List<String>,
+       allowedAuthMethods: List<String>
+   ): Task<Boolean>
+   
+   fun requestGooglePayment(
+       activity: Activity,
+       amount: BigDecimal,
+       merchantName: String,
+       environment: GooglePayEnvironment,
+       billingAddressRequired: Boolean,
+       billingAddressFormat: GooglePayBillingAddressFormat,
+       shippingAddressRequired: Boolean,
+       phoneNumberRequired: Boolean,
+       allowPrepaidCards: Boolean,
+       allowCreditCards: Boolean,
+       allowedCardNetworks: List<String>,
+       allowedAuthMethods: List<String>
+   ): Task<PaymentData>
+   
+   fun extractPaymentToken(paymentData: PaymentData): String
+   ```
+
+3. **GooglePayProcessor**: Orchestrates the Google Pay payment flow
+   ```kotlin
+   override fun isGooglePayAvailable(): Task<Boolean>
+   
+   override fun initiateGooglePayPayment()
+   
+   fun processGooglePayToken(paymentData: PaymentData)
+   ```
+
 ## Security Features
 
 ### Google Play Integrity API
@@ -317,6 +413,16 @@ ACH payment processing involves:
 4. Processing through `transfer_part1` action
 5. Handling of transaction completion
 
+### Google Pay Payments
+
+Google Pay payment processing involves:
+1. Checking if Google Pay is available on the device
+2. Preparing payment request with appropriate parameters
+3. Launching Google Pay payment sheet
+4. Receiving and processing the Google Pay payment token
+5. Sending token to Pay Theory backend for processing
+6. Handling of transaction completion
+
 ### Payment Tokenization
 
 Instead of processing a payment, tokenization:
@@ -349,12 +455,33 @@ The SDK implements comprehensive error handling:
    - Specific error codes via PTError class
    - Detailed error messages through Payable interface
 
+4. **Google Pay Errors**: Special handling for Google Pay-specific issues
+   ```kotlin
+   // In GooglePayProcessor
+   override fun handleGooglePayError(exception: Exception) {
+       when (exception) {
+           is ResolvableApiException -> {
+               // User canceled or needs resolution
+               payable.handleError(PTError(ErrorCode.GooglePayCancelled, "Google Pay process was canceled"))
+           }
+           is ApiException -> {
+               // API error
+               payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay API error: ${exception.statusCode}"))
+           }
+           else -> {
+               // Other error
+               payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay error: ${exception.message}"))
+           }
+       }
+   }
+   ```
+
 ## Conclusion
 
 The Pay Theory Android SDK implements a robust, secure payment processing flow that:
 - Ensures data security through encryption and secure handling
 - Validates device integrity through Google Play Integrity API
 - Provides real-time validation and feedback
-- Offers multiple payment options (card, ACH)
+- Offers multiple payment options (card, ACH, Google Pay)
 - Maintains PCI compliance
 - Delivers a seamless user experience with detailed error handling 
