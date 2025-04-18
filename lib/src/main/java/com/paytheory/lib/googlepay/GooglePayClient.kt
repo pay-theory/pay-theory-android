@@ -17,7 +17,6 @@ import com.paytheory.lib.googlepay.interfaces.GooglePayClientInterface
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import timber.log.Timber
 
 /**
  * A client class responsible for direct interaction with the Google Pay API via Google's [PaymentsClient].
@@ -106,24 +105,21 @@ class GooglePayClient : GooglePayClientInterface {
             
             paymentsClient.isReadyToPay(request)
                 .addOnCompleteListener { task ->
-                    Timber.d("isReadyToPay addOnCompleteListener invoked. Success: ${task.isSuccessful}")
                     if (task.isSuccessful) {
                         taskCompletionSource.setResult(task.result ?: false)
                     } else {
                         val exception = task.exception
                         if (exception is ApiException) {
-                             Timber.e(exception, "isReadyToPay failed with status: ${exception.status}")
+                            // Optional: Handle or log the ApiException specifically if needed for non-Timber logging
                         } else {
-                             Timber.e(exception, "isReadyToPay failed")
+                            // Optional: Handle or log other exceptions if needed
                         }
                         taskCompletionSource.setResult(false)
                     }
                 }
         } catch (exception: JSONException) {
-            Timber.e(exception, "Failed to create isReadyToPay JSON request")
             taskCompletionSource.setResult(false)
         } catch (exception: Exception) {
-            Timber.e(exception, "Unexpected error during isReadyToPay setup")
             taskCompletionSource.setResult(false)
         }
         
@@ -179,7 +175,6 @@ class GooglePayClient : GooglePayClientInterface {
                 ))
                 put("transactionInfo", JSONObject().apply {
                     put("totalPrice", price)
-                    put("totalPriceStatus", GooglePayConstants.TOTAL_PRICE_STATUS_FINAL)
                     put("currencyCode", GooglePayConstants.CURRENCY_CODE)
                     put("countryCode", GooglePayConstants.COUNTRY_CODE)
                 })
@@ -194,8 +189,7 @@ class GooglePayClient : GooglePayClientInterface {
                 }
             }.toString()
         } catch (e: JSONException) {
-            Timber.e(e, "Failed to create PaymentDataRequest JSON")
-            "{}"
+            "{}" // Return empty JSON on error
         }
     }
 
@@ -233,10 +227,8 @@ class GooglePayClient : GooglePayClientInterface {
      */
     override fun extractPaymentToken(paymentData: PaymentData): String {
         val paymentDataJsonString = paymentData.toJson() ?: run {
-            Timber.e("PaymentData.toJson() returned null")
             throw IllegalArgumentException("PaymentData JSON is null")
         }
-        Timber.d("PaymentData JSON: $paymentDataJsonString")
 
         try {
             val paymentDataJson = JSONObject(paymentDataJsonString)
@@ -257,10 +249,8 @@ class GooglePayClient : GooglePayClientInterface {
             }
             return token
         } catch (e: JSONException) {
-            Timber.e(e, "Error parsing payment data JSON")
             throw RuntimeException("Failed to extract payment token from PaymentData due to JSON parsing error", e)
         } catch (e: Exception) {
-            Timber.e(e, "Unexpected error extracting payment token")
             throw RuntimeException("Failed to extract payment token from PaymentData", e)
         }
     }
@@ -293,11 +283,11 @@ class GooglePayClient : GooglePayClientInterface {
                 put("allowedCardNetworks", cardNetworksJson)
                 put("billingAddressRequired", billingAddressRequired)
                 
-                if (billingAddressRequired) {
-                    put("billingAddressParameters", JSONObject().apply {
-                        put("format", GooglePayConstants.BILLING_ADDRESS_FORMAT_MIN)
-                    })
-                }
+//                if (billingAddressRequired) {
+//                    put("billingAddressParameters", JSONObject().apply {
+//                        put("format", GooglePayConstants.BILLING_ADDRESS_FORMAT_MIN)
+//                    })
+//                }
             })
         }
     }
@@ -332,17 +322,17 @@ class GooglePayClient : GooglePayClientInterface {
         val paymentMethod = baseCardPaymentMethod(billingAddressRequired, allowedCardNetworks, allowedAuthMethods)
         val parameters = paymentMethod.getJSONObject("parameters")
         
-        if (billingAddressRequired) {
-            val formatString = when (billingAddressFormat) {
-                GooglePayBillingAddressFormat.MINIMAL -> GooglePayConstants.BILLING_ADDRESS_FORMAT_MIN
-                GooglePayBillingAddressFormat.FULL -> GooglePayConstants.BILLING_ADDRESS_FORMAT_FULL
-            }
-            
-            if (!parameters.has("billingAddressParameters")) {
-                 parameters.put("billingAddressParameters", JSONObject())
-            }
-            parameters.getJSONObject("billingAddressParameters").put("format", formatString)
-        }
+//        if (billingAddressRequired) {
+//            val formatString = when (billingAddressFormat) {
+//                GooglePayBillingAddressFormat.MINIMAL -> GooglePayConstants.BILLING_ADDRESS_FORMAT_MIN
+//                GooglePayBillingAddressFormat.FULL -> GooglePayConstants.BILLING_ADDRESS_FORMAT_FULL
+//            }
+//
+//            if (!parameters.has("billingAddressParameters")) {
+//                 parameters.put("billingAddressParameters", JSONObject())
+//            }
+//            parameters.getJSONObject("billingAddressParameters").put("format", formatString)
+//        }
         
         parameters.put("allowPrepaidCards", allowPrepaidCards)
         parameters.put("allowCreditCards", allowCreditCards)

@@ -82,6 +82,10 @@ class GooglePayUtilTest {
         taskSource.setResult(true)
         val mockTask: Task<Boolean> = taskSource.task
         
+        // Define the allowed card networks and auth methods
+        val allowedCardNetworks = listOf("VISA", "MASTERCARD")
+        val allowedAuthMethods = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
+        
         every { 
             mockClient.isReadyToPay(
                 activity = mockActivity,
@@ -96,7 +100,9 @@ class GooglePayUtilTest {
         val result = googlePayUtil.isGooglePayAvailable(
             activity = mockActivity,
             environment = GooglePayEnvironment.TEST,
-            billingAddressRequired = false
+            billingAddressRequired = false,
+            allowedCardNetworks = allowedCardNetworks,
+            allowedAuthMethods = allowedAuthMethods
         )
         
         // Verify the client was called with correct parameters
@@ -105,8 +111,8 @@ class GooglePayUtilTest {
                 activity = mockActivity,
                 environment = GooglePayEnvironment.TEST,
                 billingAddressRequired = false,
-                allowedCardNetworks = any(),
-                allowedAuthMethods = any()
+                allowedCardNetworks = allowedCardNetworks,
+                allowedAuthMethods = allowedAuthMethods
             ) 
         }
         
@@ -124,6 +130,10 @@ class GooglePayUtilTest {
         val taskSource = TaskCompletionSource<PaymentData>()
         taskSource.setResult(mockPaymentData)
         val mockTask: Task<PaymentData> = taskSource.task
+        
+        // Define allowed card networks and auth methods
+        val allowedCardNetworks = listOf("VISA", "MASTERCARD")
+        val allowedAuthMethods = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
         
         // Mock client behavior
         every { 
@@ -143,7 +153,7 @@ class GooglePayUtilTest {
         } returns requestJson
         
         every { 
-            mockClient.loadPaymentData(mockActivity, capture(requestSlot))
+            mockClient.loadPaymentData(mockActivity, any(), capture(requestSlot))
         } returns mockTask
         
         // Execute the real method
@@ -157,7 +167,9 @@ class GooglePayUtilTest {
             shippingAddressRequired = false,
             phoneNumberRequired = false,
             allowPrepaidCards = true,
-            allowCreditCards = true
+            allowCreditCards = true,
+            allowedCardNetworks = allowedCardNetworks,
+            allowedAuthMethods = allowedAuthMethods
         )
         
         // Verify client methods were called
@@ -172,13 +184,13 @@ class GooglePayUtilTest {
                 environment = GooglePayEnvironment.TEST,
                 allowPrepaidCards = true,
                 allowCreditCards = true,
-                any(),
-                any()
+                allowedCardNetworks = allowedCardNetworks,
+                allowedAuthMethods = allowedAuthMethods
             ) 
         }
         
         verify { 
-            mockClient.loadPaymentData(mockActivity, requestJson)
+            mockClient.loadPaymentData(mockActivity, GooglePayEnvironment.TEST, requestJson)
         }
         
         // Verify the captured request parameter

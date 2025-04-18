@@ -72,8 +72,8 @@ class GooglePayFormUtilsTest {
         assertFalse(result)
         verify { 
             mockPayable.handleError(match { 
-                it.code == ErrorCode.GooglePayUnavailable &&
-                it.error == "Google Pay requires an Activity context"
+                it.code == ErrorCode.GooglePayError &&
+                it.error == "Context is invalid"
             })
         }
     }

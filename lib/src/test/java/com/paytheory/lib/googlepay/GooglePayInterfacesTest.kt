@@ -47,6 +47,30 @@ class GooglePayInterfacesTest {
     }
 
     /**
+     * Configure mock with all required Google Pay parameters
+     */
+    private fun configureGooglePayMock(configuration: PayTheoryConfiguration) {
+        // Add the required card networks and auth methods to the configuration
+        val allowedCardNetworks = listOf("VISA", "MASTERCARD")
+        val allowedAuthMethods = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
+        
+        // Basic configuration
+        every { configuration.googlePayAllowedCardNetworks } returns allowedCardNetworks
+        every { configuration.googlePaySupportedMethods } returns allowedAuthMethods
+        every { configuration.googlePayEnvironment } returns GooglePayEnvironment.TEST
+        every { configuration.googlePayBillingAddressRequired } returns false
+        
+        // Additional required configurations
+        every { configuration.googlePayBillingAddressFormat } returns GooglePayBillingAddressFormat.MINIMAL
+        every { configuration.googlePayShippingAddressRequired } returns false
+        every { configuration.googlePayPhoneNumberRequired } returns false
+        every { configuration.googlePayAllowPrepaidCards } returns true
+        every { configuration.googlePayAllowCreditCards } returns true
+        every { configuration.googlePayMerchantName } returns "Test Merchant"
+        every { configuration.amount } returns 1099
+    }
+
+    /**
      * Test that GooglePayClient properly implements GooglePayClientInterface
      */
     @Test
@@ -81,6 +105,9 @@ class GooglePayInterfacesTest {
         val configuration = mockk<PayTheoryConfiguration>()
         val viewModel = mockk<PaymentViewModel>()
         
+        // Configure the mock with all required Google Pay parameters
+        configureGooglePayMock(configuration)
+        
         // When
         val processor = GooglePayProcessor(
             payable = payable,
@@ -103,6 +130,9 @@ class GooglePayInterfacesTest {
         val payable = mockk<Payable>()
         val configuration = mockk<PayTheoryConfiguration>()
         val viewModel = mockk<PaymentViewModel>()
+        
+        // Configure the mock with all required Google Pay parameters
+        configureGooglePayMock(configuration)
         
         // When
         val client = GooglePayFactory.getGooglePayClient()
@@ -129,7 +159,13 @@ class GooglePayInterfacesTest {
         val activity = mockk<Activity>()
         val payable = mockk<Payable>()
         val configuration = mockk<PayTheoryConfiguration>()
-        val viewModel = mockk<PaymentViewModel>()
+        val viewModel = mockk<PaymentViewModel>(relaxed = true)
+        
+        // Configure the mock with all required Google Pay parameters
+        configureGooglePayMock(configuration)
+        
+        // Configure payable
+        every { payable.getContext() } returns null
         
         // When - set test implementations
         val mockClient = mockk<GooglePayClientInterface>(relaxed = true)

@@ -6,9 +6,12 @@ import com.google.android.gms.wallet.WalletConstants
  * Constants class for Google Pay integration
  */
 object GooglePayConstants {
+
     // Environment constants
     const val ENVIRONMENT_TEST = WalletConstants.ENVIRONMENT_TEST
     const val ENVIRONMENT_PRODUCTION = WalletConstants.ENVIRONMENT_PRODUCTION
+
+    const val TOKENIZATION_TYPE_PAYMENT_GATEWAY = "PAYMENT_GATEWAY"
     
     // Default supported card networks
     val DEFAULT_SUPPORTED_NETWORKS = listOf(
@@ -28,6 +31,10 @@ object GooglePayConstants {
     // Gateway information used in tokenization parameters
     const val GATEWAY_NAME = "paytheory"
     const val GATEWAY_MERCHANT_ID = "BCR2DN4TZ342R7QF"
+
+
+    const val API_VERSION = 2
+    const val API_VERSION_MINOR = 0
     
     // Country and currency codes
     const val COUNTRY_CODE = "US"

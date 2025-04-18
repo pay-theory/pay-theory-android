@@ -39,9 +39,10 @@ class GooglePayConstantsTest {
         
         // CRYPTOGRAM_3DS is required by the PayTheory backend
         assertTrue(methods.contains("CRYPTOGRAM_3DS"))
+        assertTrue(methods.contains("PAN_ONLY"))
         
-        // Verify we have exactly the expected number (only CRYPTOGRAM_3DS initially)
-        assertEquals(1, methods.size)
+        // Verify we have exactly the expected number (now includes both methods)
+        assertEquals(2, methods.size)
     }
     
     @Test

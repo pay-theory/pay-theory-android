@@ -5,22 +5,16 @@ import android.content.res.Resources
 import com.google.android.play.core.integrity.IntegrityManager
 import com.paytheory.lib.api.ApiService
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.data.payable.ErrorCode
-import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.data.requests.ActionRequest
 import com.paytheory.lib.data.requests.PaymentDetail
 import com.paytheory.lib.googlepay.TestReflectionUtils
 import com.paytheory.lib.model.PaymentViewModel
 import com.paytheory.lib.reactors.ConnectionReactors
 import com.paytheory.lib.reactors.MessageReactors
-import com.paytheory.lib.websocket.WebsocketMessageHandler
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +24,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.lang.reflect.Field
-import java.lang.reflect.Method
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -295,7 +288,7 @@ class PaymentMethodProcessorTest {
     @Test
     fun `creating the processor should initialize properties correctly`() {
         // Then
-        assertEquals(mockConfig, processor.config)
+        assertEquals(mockConfig, processor.configuration)
         assertEquals(false, processor.isWarm)
         assertEquals(0, processor.resetCounter)
         assertEquals(0, processor.ptResetCounter)

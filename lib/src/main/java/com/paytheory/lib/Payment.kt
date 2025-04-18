@@ -72,11 +72,11 @@ class Payment(
      */
     private fun getWebSocketMessageType(message: String): String {
         return when {
-            message.indexOf(COMPLETED_TRANSFER) > -1 -> COMPLETED_TRANSFER
-            message.indexOf(BARCODE_RESULT) > -1 -> BARCODE_RESULT
-            message.indexOf(TRANSFER_PART_ONE_RESULT) > -1 -> TRANSFER_PART_ONE_RESULT
-            message.indexOf(HOST_TOKEN_RESULT) > -1 -> HOST_TOKEN_RESULT
-            message.indexOf(WALLET_TRANSACTION_RESULT) > -1 -> WALLET_TRANSACTION_RESULT
+            message.contains("\"message\":\\s*\"complete_transfer\"") || message.contains("\"message\": \"complete_transfer\"") -> COMPLETED_TRANSFER
+            message.contains("\"message\":\\s*\"barcode_result\"") || message.contains("\"message\": \"barcode_result\"") -> BARCODE_RESULT
+            message.contains("\"message\":\\s*\"transfer_part1_result\"") || message.contains("\"message\": \"transfer_part1_result\"") -> TRANSFER_PART_ONE_RESULT
+            message.contains("\"message\":\\s*\"host_token\"") || message.contains("\"message\": \"host_token\"") -> HOST_TOKEN_RESULT
+            message.contains("\"message\":\\s*\"wallet_transaction_complete\"") || message.contains("\"message\": \"wallet_transaction_complete\"") -> WALLET_TRANSACTION_RESULT
             else -> UNKNOWN
         }
     }

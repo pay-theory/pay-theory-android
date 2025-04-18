@@ -203,7 +203,7 @@ class PayTheoryConfiguration(
         if (configuration.paymentMethodAction == PaymentMethodAction.PAYMENT && configuration.amount < 10) {
             throw IllegalArgumentException(INVALID_AMOUNT + ": Minimum amount is 10 cents for payments.")
         }
-        if (configuration.paymentMethodAction == PaymentMethodAction.TOKENIZE && configuration.amount != 0) {
+        if (configuration.paymentMethodAction == PaymentMethodAction.TOKEN && configuration.amount != 0) {
             throw IllegalArgumentException(INVALID_AMOUNT + ": Amount must be 0 for tokenization.")
         }
 
@@ -214,7 +214,7 @@ class PayTheoryConfiguration(
             }
 
             // Ensure CRYPTOGRAM_3DS is included in supported methods for Google Pay card payments
-            if (!configuration.googlePaySupportedMethods.contains(GooglePayConstants.CRYPTOGRAM_3DS)) {
+            if (!configuration.googlePaySupportedMethods.contains(GooglePayConstants.DEFAULT_SUPPORTED_METHODS[1])) {
                 throw IllegalArgumentException(INVALID_GOOGLEPAY_AUTH_METHOD)
             }
         }

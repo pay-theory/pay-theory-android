@@ -1,25 +1,22 @@
 package com.paytheory.lib.googlepay
 
 import android.app.Activity
-import android.content.Intent
 import android.content.IntentSender
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
-import com.paytheory.lib.Payable
 import com.paytheory.lib.PayTheoryConfiguration
-import com.paytheory.lib.PayableActivity
+import com.paytheory.lib.Payable
 import com.paytheory.lib.api.PTTokenResponse
-import com.paytheory.lib.configuration.GooglePayConstants
 import com.paytheory.lib.data.payable.ErrorCode
 import com.paytheory.lib.data.payable.PTError
 import com.paytheory.lib.data.requests.PaymentDetail
 import com.paytheory.lib.googlepay.interfaces.GooglePayProcessorInterface
 import com.paytheory.lib.model.PaymentViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.google.android.gms.common.api.ResolvableApiException
 import timber.log.Timber
 
 
@@ -117,14 +114,14 @@ class GooglePayProcessor(
         // Ensure merchantName is not null, as it's required by requestGooglePayment
         if (merchantName.isNullOrBlank()) {
             Timber.e("Google Pay merchant name is missing in configuration.")
-            payable.handleError(PTError(ErrorCode.ConfigurationError, "Google Pay merchant name not configured"))
+            payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay merchant name not configured"))
             return
         }
 
         // Ensure the launcher has been set
         if (!::activityLauncher.isInitialized) {
             Timber.e("ActivityResultLauncher was not set before calling initiateGooglePayPayment.")
-            payable.handleError(PTError(ErrorCode.ConfigurationError, "Google Pay ActivityResultLauncher not set"))
+            payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay ActivityResultLauncher not set"))
             return
         }
 
@@ -206,7 +203,7 @@ class GooglePayProcessor(
             // payable.handleFailure(...) / payable.handleError(...) if backend processing fails.
             println("Google Pay Token (for demo): $token") // Replace with actual processing
             // Example placeholder for error:
-             payable.handleError(PTError(ErrorCode.NotImplemented, "Google Pay token processing not yet implemented."))
+             payable.handleError(PTError(ErrorCode.GooglePayError, "Google Pay token processing not yet implemented."))
 
         } catch (e: Exception) {
             Timber.e(e, "Failed to process successful Google Pay PaymentData.")
@@ -270,11 +267,36 @@ class GooglePayProcessor(
         // TODO: Confirm the exact structure expected by the backend/standard flow.
         // This is a plausible implementation, but might need adjustment.
         return PaymentDetail(
-            payment_method_token = null, // Standard token is null
-            google_pay_token = token, // Place the Google Pay token here
-            payment_type = "GOOGLE_PAY"
-            // Add other relevant fields if necessary (e.g., amount, metadata from viewModel/configuration)
+            digitalWalletPayload = token, // Place the Google Pay token here
+            type = "GOOGLE_PAY",
+            timing = 1234567890L,
+            amount = 1000,
+            currency = "USD"
         )
-        // TODO("Not yet fully implemented/verified")
+
     }
+//    data class PaymentDetail (
+//        @SerializedName("type") val type: String,
+//        @SerializedName("timing") val timing: Long,
+//        @SerializedName("amount") val amount: Int,
+//        @SerializedName("currency") val currency: String = "USD",
+//        @SerializedName("name") val name: String? = "",
+//        @SerializedName("merchant") val merchant: String? = null,
+//        @SerializedName("service_fee") val service_fee: String? = null,
+//        @SerializedName("account_number") val account_number: String? = null,
+//        @SerializedName("account_type") val account_type: String? = null,
+//        @SerializedName("bank_code") val bank_code: String? = null,
+//        @SerializedName("number") val number: String? = null,
+//        @SerializedName("security_code") val security_code: String? = null,
+//        @SerializedName("expiration_year") val expiration_year: String? = null,
+//        @SerializedName("expiration_month") val expiration_month: String? = null,
+//        @SerializedName("address") val address: Address? = null,
+//        @SerializedName("fee_mode") var fee_mode: String? = FeeMode.MERCHANT_FEE,
+//        @SerializedName("payor_info") var payorInfo: PayorInfo? = null,
+//        @SerializedName("buyer") val buyer: String? = null,
+//        @SerializedName("buyer_contact") val buyerContact: String? = null,
+//        @SerializedName("sessionKey") var sessionKey: String? = null,
+//        @SerializedName("wallet_type") val walletType: String? = null,
+//        @SerializedName("digital_wallet_payload") val digitalWalletPayload: String? = null
+//    )
 }

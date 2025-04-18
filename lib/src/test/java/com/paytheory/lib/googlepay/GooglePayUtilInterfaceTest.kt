@@ -69,7 +69,7 @@ class GooglePayUtilInterfaceTest {
         } returns TaskCompletionSource<Boolean>().apply { setResult(true) }.task
         
         every {
-            mockGooglePayClient.loadPaymentData(any(), any())
+            mockGooglePayClient.loadPaymentData(any(), any(), any())
         } returns TaskCompletionSource<PaymentData>().apply { setResult(mockPaymentData) }.task
         
         every { mockGooglePayClient.extractPaymentToken(any()) } returns "test-payment-token"
@@ -90,7 +90,9 @@ class GooglePayUtilInterfaceTest {
         val result = googlePayUtil.isGooglePayAvailable(
             activity = mockActivity,
             environment = GooglePayEnvironment.TEST,
-            billingAddressRequired = false
+            billingAddressRequired = false,
+            allowedCardNetworks = defaultCardNetworks,
+            allowedAuthMethods = defaultAuthMethods
         )
         
         // Then
@@ -99,8 +101,8 @@ class GooglePayUtilInterfaceTest {
                 mockActivity, 
                 GooglePayEnvironment.TEST,
                 false,
-                any(),
-                any()
+                defaultCardNetworks,
+                defaultAuthMethods
             ) 
         }
         
@@ -124,12 +126,14 @@ class GooglePayUtilInterfaceTest {
             shippingAddressRequired = false,
             phoneNumberRequired = false,
             allowPrepaidCards = true,
-            allowCreditCards = true
+            allowCreditCards = true,
+            allowedCardNetworks = defaultCardNetworks,
+            allowedAuthMethods = defaultAuthMethods
         )
         
         // Then
         // Only verify that loadPaymentData was called with the activity
-        verify { mockGooglePayClient.loadPaymentData(mockActivity, any()) }
+        verify { mockGooglePayClient.loadPaymentData(mockActivity, GooglePayEnvironment.TEST, any()) }
         
         // Verify the task is returned
         assertNotNull(result)

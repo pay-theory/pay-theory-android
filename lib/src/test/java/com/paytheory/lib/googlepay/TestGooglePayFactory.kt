@@ -75,6 +75,7 @@ object TestGooglePayFactory {
             
             override fun loadPaymentData(
                 activity: Activity,
+                environment: GooglePayEnvironment,
                 paymentDataRequestJson: String
             ): Task<PaymentData> {
                 val source = TaskCompletionSource<PaymentData>()
@@ -101,7 +102,9 @@ object TestGooglePayFactory {
             override fun isGooglePayAvailable(
                 activity: Activity,
                 environment: GooglePayEnvironment,
-                billingAddressRequired: Boolean
+                billingAddressRequired: Boolean,
+                allowedCardNetworks: List<String>,
+                allowedAuthMethods: List<String>
             ): Task<Boolean> {
                 val source = TaskCompletionSource<Boolean>()
                 source.setResult(isGooglePayAvailable)
@@ -118,7 +121,9 @@ object TestGooglePayFactory {
                 shippingAddressRequired: Boolean,
                 phoneNumberRequired: Boolean,
                 allowPrepaidCards: Boolean,
-                allowCreditCards: Boolean
+                allowCreditCards: Boolean,
+                allowedCardNetworks: List<String>,
+                allowedAuthMethods: List<String>
             ): Task<PaymentData> {
                 val source = TaskCompletionSource<PaymentData>()
                 source.setResult(mockk(relaxed = true))
@@ -173,6 +178,10 @@ object TestGooglePayFactory {
         io.mockk.every { config.googlePayAllowPrepaidCards } returns true
         io.mockk.every { config.googlePayAllowCreditCards } returns true
         io.mockk.every { config.feeMode } returns "MERCHANT_FEE" 
+        
+        // Add required card networks and auth methods
+        io.mockk.every { config.googlePayAllowedCardNetworks } returns listOf("VISA", "MASTERCARD", "AMEX", "DISCOVER", "JCB")
+        io.mockk.every { config.googlePaySupportedMethods } returns listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
         
         return config
     }
