@@ -2,6 +2,7 @@ package com.paytheory.lib.websocket
 
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
@@ -45,12 +46,14 @@ class WebServicesProviderTest {
     @MockK
     private lateinit var mockExecutorService: ExecutorService
     
+    @OptIn(DelicateCoroutinesApi::class)
     @MockK
     private lateinit var mockWebSocketListener: PTWebSocketListener
     
     @MockK
     private lateinit var mockSocketEventChannel: Channel<SocketUpdate>
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Before
     fun setup() {
         MockKAnnotations.init(this)
@@ -83,6 +86,7 @@ class WebServicesProviderTest {
         every { mockWebSocketListener.socketEventChannel } returns mockSocketEventChannel
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `startSocket should create websocket with correct URL and return channel`() {
         // Set up test parameters
@@ -114,6 +118,7 @@ class WebServicesProviderTest {
         assertEquals(mockChannel, resultChannel)
     }
     
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `startSocket with listener should create websocket with correct URL`() {
         // Set up test parameters
@@ -157,6 +162,7 @@ class WebServicesProviderTest {
         assertTrue(exceptionThrown)
     }
     
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `sendMessage should call send on websocket`() {
         // Setup - first create a websocket
@@ -182,6 +188,7 @@ class WebServicesProviderTest {
         verify { mockWebSocket.send(testMessage) }
     }
     
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `sendMessage should throw SocketMessageException when an error occurs`() {
         // Setup - first create a websocket
@@ -210,6 +217,7 @@ class WebServicesProviderTest {
         assertTrue(exceptionThrown)
     }
     
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `stopSocket should close websocket with normal closure status`() {
         // Setup - first create a websocket
@@ -236,6 +244,7 @@ class WebServicesProviderTest {
         verify { mockChannel.close() }
     }
     
+    @OptIn(DelicateCoroutinesApi::class)
     @Test
     fun `stopSocket should handle IllegalArgumentException and throw SocketClosureException`() {
         // Setup - first create a websocket

@@ -9,6 +9,7 @@ import com.paytheory.lib.data.payable.SuccessfulTransactionResult
 import com.paytheory.lib.model.FieldState
 import com.paytheory.lib.model.PaymentField
 import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.Before
@@ -29,6 +30,8 @@ class PayableContextProviderTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this)
+        // Ensure mockContext is properly set up
+        every { mockContext.applicationContext } returns mockContext
     }
     
     // Test implementation of the Payable interface
@@ -131,6 +134,7 @@ class PayableContextProviderTest {
     fun `Payable implementation should handle callback methods correctly`() {
         // Create an instance of our test implementation
         val testPayable = TestPayable()
+        testPayable.mockContext = mockContext
         
         // Prepare test data
         val isReady = true
@@ -170,7 +174,7 @@ class PayableContextProviderTest {
     fun `ContextProvider implementation should return context`() {
         // Create a test implementation of ContextProvider
         val contextProvider = object : ContextProvider {
-            override fun getContext(): Context? {
+            override fun getContext(): Context {
                 return mockContext
             }
         }

@@ -13,13 +13,13 @@ plugins {
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "21"
         }
     }
-    
+
     tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_17.toString()
-        targetCompatibility = JavaVersion.VERSION_17.toString()
+        sourceCompatibility = JavaVersion.VERSION_21.toString()
+        targetCompatibility = JavaVersion.VERSION_21.toString()
     }
 }
 
@@ -33,7 +33,7 @@ buildscript {
 // Apply JaCoCo version to all subprojects
 allprojects {
     apply(plugin = "jacoco")
-    
+
     jacoco {
         toolVersion = "0.8.8"
     }

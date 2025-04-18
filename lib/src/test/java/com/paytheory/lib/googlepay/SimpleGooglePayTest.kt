@@ -72,7 +72,7 @@ class SimpleGooglePayTest {
     @Test
     fun `verify GooglePayClient exists`() {
         val client = GooglePayClient()
-        assertTrue(client is GooglePayClient, "GooglePayClient should be instantiable")
+        assertTrue(true, "GooglePayClient should be instantiable")
     }
     
     @Test
@@ -118,7 +118,7 @@ class SimpleGooglePayTest {
         // Create a task that returns true
         val taskSource = TaskCompletionSource<Boolean>()
         taskSource.setResult(true)
-        val mockTask = taskSource.task
+        taskSource.task
         
         // When - execute real code
         val result = googlePayClient.isReadyToPay(

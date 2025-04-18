@@ -43,7 +43,7 @@ android {
             resValue(
                 "string",
                 "google_project_number",
-                "${localProperties.getProperty("GOOGLE_PROJECT_NUMBER")}"
+                localProperties.getProperty("GOOGLE_PROJECT_NUMBER")
             )
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
@@ -52,16 +52,16 @@ android {
             resValue(
                 "string",
                 "google_project_number",
-                "${localProperties.getProperty("GOOGLE_PROJECT_NUMBER")}"
+                localProperties.getProperty("GOOGLE_PROJECT_NUMBER")
             )
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
     packaging {
         resources {
@@ -80,41 +80,41 @@ android {
 dependencies {
 
 //Compose bom
-    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    implementation(platform("androidx.compose:compose-bom:2025.04.00"))
     implementation("androidx.appcompat:appcompat:1.7.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.04.00"))
 
     // Google Pay Button for Jetpack Compose
     implementation("com.google.pay.button:compose-pay-button:1.1.0")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-    implementation("org.jetbrains.kotlin:kotlin-script-runtime:2.1.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlin:kotlin-script-runtime:2.1.20")
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
-    implementation("androidx.navigation:navigation-compose:2.8.8")
+    implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.foundation:foundation-layout")
     implementation("androidx.compose.ui:ui-util")
-    implementation("androidx.compose.material3:material3:1.4.0-alpha09")
+    implementation("androidx.compose.material3:material3:1.4.0-alpha12")
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui-tooling-preview")
 
-    implementation("com.google.dagger:hilt-android:2.55")
-    kapt("com.google.dagger:hilt-compiler:2.55")
+    implementation("com.google.dagger:hilt-android:2.56.2")
+    kapt("com.google.dagger:hilt-compiler:2.56.2")
 
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
-    implementation("io.reactivex.rxjava3:rxjava:3.1.9")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.10")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
     //Retrofit
@@ -124,7 +124,7 @@ dependencies {
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.11.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
 
-    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("com.google.code.gson:gson:2.13.0")
 
     //Google Play services
     implementation("com.google.android.gms:play-services-location:21.3.0")
@@ -135,14 +135,14 @@ dependencies {
     implementation("com.google.android.play:integrity:1.4.0")
 
     //Google Pay API
-    implementation("com.google.android.gms:play-services-wallet:19.2.1")
+    implementation("com.google.android.gms:play-services-wallet:19.4.0")
 
     //Okhttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     //Lazy sodium
     implementation("com.goterl:lazysodium-android:5.1.0@aar") //5.1.0
-    implementation("net.java.dev.jna:jna:5.16.0@aar")
+    implementation("net.java.dev.jna:jna:5.17.0@aar")
     
     // Timber logging library
     implementation("com.jakewharton.timber:timber:5.0.1")
@@ -154,23 +154,23 @@ dependencies {
     // https://mvnrepository.com/artifact/androidx.hilt/hilt-navigation-compose
     runtimeOnly("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-    implementation("androidx.compose.material3:material3:1.3.1") //or the latest version
+    implementation("androidx.compose.material3:material3:1.3.2") //or the latest version
     implementation("androidx.compose.material:material:1.7.8")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.17")
-    testImplementation("org.mockito:mockito-core:4.8.1")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("io.mockk:mockk:1.14.0")
+    testImplementation("org.mockito:mockito-core:5.17.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("androidx.compose.ui:ui-test-junit4:1.7.8")
-    testImplementation("org.mockito:mockito-core:4.8.1")
-    testImplementation("org.mockito:mockito-inline:4.8.1")
+    testImplementation("org.mockito:mockito-core:5.17.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
     testImplementation("androidx.compose.ui:ui-test-manifest:1.7.8")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-    testImplementation("org.robolectric:robolectric:4.11.1") // Re-enabled Robolectric
+    testImplementation("org.robolectric:robolectric:4.14.1") // Re-enabled Robolectric
     testImplementation("org.powermock:powermock-module-junit4:2.0.9")
     testImplementation("org.powermock:powermock-api-mockito2:2.0.9")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("app.cash.turbine:turbine:1.1.0")
     
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -179,18 +179,18 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation("androidx.compose.ui:ui-test")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
     // Test dependencies
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
-    testImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.test.ext:junit-ktx:1.2.1")
+    testImplementation("androidx.test.espresso:espresso-core:3.6.1")
     testImplementation("io.mockk:mockk-android:1.13.8")
-    testImplementation("io.mockk:mockk-agent:1.13.8")
+//    testImplementation("io.mockk:mockk-agent:1.14.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.powermock:powermock-api-mockito2:2.0.9")
 }
 
@@ -215,13 +215,13 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     
     dependsOn("testDebugUnitTest")
     
-    executionData.from(fileTree(project.buildDir) {
+    executionData.from(fileTree(getLayout().buildDirectory) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("jacoco/testDebugUnitTest.exec")
     })
     
     classDirectories.setFrom(
-        fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+        fileTree("${getLayout().buildDirectory}/tmp/kotlin-classes/debug") {
             // Include only specific packages
             include("**/com/paytheory/lib/configuration/**")
             include("**/com/paytheory/lib/googlepay/**")
@@ -279,8 +279,8 @@ tasks.register("openJacocoReport") {
     dependsOn("jacocoTestReport")
     
     doLast {
-        exec {
-            workingDir("${buildDir}/jacoco/html")
+        providers.exec {
+            workingDir("${getLayout().buildDirectory}/jacoco/html")
             commandLine("open", "index.html")
         }
     }

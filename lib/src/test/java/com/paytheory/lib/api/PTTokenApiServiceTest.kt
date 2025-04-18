@@ -1,5 +1,6 @@
 package com.paytheory.lib.api
 
+import android.annotation.SuppressLint
 import com.google.gson.Gson
 import io.mockk.every
 import io.mockk.mockk
@@ -49,6 +50,7 @@ class PTTokenApiServiceTest {
         mockWebServer.shutdown()
     }
 
+    @SuppressLint("CheckResult")
     @Test
     fun `doToken should include headers in the request`() {
         // Given

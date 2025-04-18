@@ -1,0 +1,8 @@
+**/*.gradle
+**/*.kts
+**/*.java
+**/*.kt
+**/*.jar
+**/*.aar
+build/
+.gradle/ 

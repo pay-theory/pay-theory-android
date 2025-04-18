@@ -1,5 +1,6 @@
 package com.paytheory.lib.utils
 
+import android.annotation.SuppressLint
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -174,6 +175,7 @@ object JsonUtils {
      * @param jsonString The JSON string to validate
      * @return True if the string is valid JSON, false otherwise
      */
+    @SuppressLint("CheckResult")
     fun isValidJson(jsonString: String?): Boolean {
         if (jsonString.isNullOrEmpty()) {
             return false
